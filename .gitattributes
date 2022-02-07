@@ -1,0 +1,4 @@
+* text=auto
+*.db binary
+*.png binary
+*.atlas text

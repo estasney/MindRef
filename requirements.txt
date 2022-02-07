@@ -1,0 +1,10 @@
+python-dotenv
+sqlalchemy
+toolz
+Kivy[base]
+Pygments
+Pillow
+requests
+sqlalchemy-utils
+click
+pyperclip

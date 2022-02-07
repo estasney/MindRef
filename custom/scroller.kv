@@ -1,0 +1,86 @@
+
+<ScrollingListView>:
+    do_scroll_x: False
+    do_scroll_y: True
+
+
+<ListView>:
+    cols: 1
+
+<ListItem>:
+    padding: [5, 5, 5, 5]
+    canvas:
+        Color:
+            rgba: 1, 1, 1, 0.8
+        Line:
+            width: 1
+            rectangle: (self.x, self.y, self.width, self.height)
+    cols: 2
+    Label:
+        text: root.title_text
+        size_hint_x: 0.8
+        mipmap: True
+        font_size: 36
+        text_size: self.size
+        valign: 'middle'
+        halign: 'center'
+    Button:
+        canvas:
+            Color:
+                rgba: 1, 1, 1, 1
+            Line:
+                width: 2
+                points: [(self.x + self.width * 0.75), (self.y + self.height * 0.65), (self.x + self.width * 0.90), (self.y + self.height * 0.5), (self.x + self.width * 0.75), (self.y + self.height * 0.35)]
+        background_color: [*app.colors['Dark'], 1]
+        background_normal: ''
+        opacity: 1 if self.state == 'normal' else 0.6
+        size_hint_x: 0.2
+        text: str(root.index)
+        mipmap: True
+        on_release: app.select_index(root.index)
+
+<ListItemKeyboard>:
+    keyboard_container: kbd
+    padding: [5, 5, 5, 5]
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 0.8
+        Line:
+            width: 1
+            rectangle: (self.x, self.y, self.width, self.height)
+    cols: 3
+    Label:
+        text: root.title_text
+        size_hint_x: 0.3
+        mipmap: True
+        text_size: self.size
+        font_size: 24
+        valign: 'middle'
+        halign: 'center'
+    ListItemKeyboardContainer:
+        id: kbd
+        size_hint_x: 0.3
+    Button:
+        canvas:
+            Color:
+                rgba: 1, 1, 1, 1
+            Line:
+                width: 2
+                points: [(self.x + self.width * 0.75), (self.y + self.height * 0.65), (self.x + self.width * 0.90), (self.y + self.height * 0.5), (self.x + self.width * 0.75), (self.y + self.height * 0.35)]
+        background_color: [*app.colors['Dark'], 1]
+        background_normal: ''
+        opacity: 1 if self.state == 'normal' else 0.6
+        size_hint_x: 0.1
+        text: str(root.index)
+        mipmap: True
+        on_release: app.select_index(root.index)
+
+
+<ListItemKeyboardContainer>:
+    orientation: 'horizontal'
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 0.8
+
+
+

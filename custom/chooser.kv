@@ -1,0 +1,29 @@
+<NoteCategoryChooser>:
+    cols: 4
+    padding: 10
+    spacing: 10
+
+<NoteCategoryButton>:
+    orientation: 'vertical'
+    canvas.before:
+        Color:
+            rgb: app.colors['Primary'] if self.state == 'normal' else app.colors['Dark']
+        Rectangle:
+            pos: self.pos
+            size: self.size
+        Line:
+            width: 4
+            rectangle: self.x, self.y, self.width, self.height
+    Image:
+        source: root.source
+        mipmap: True
+
+    Label:
+        text: root.text
+        size_hint_x: 1
+        size_hint_y: 0.4
+
+
+
+
+

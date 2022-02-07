@@ -1,0 +1,40 @@
+<ContentKeyboard>:
+    orientation: 'vertical'
+    key_container: key_container
+
+    Label:
+        id: note_content_label
+        color: hex('#ffffff')
+        text: root.note_text
+        font_size: 36
+        size_hint: (1, 0.7)
+        text_size: root.width, self.height
+        size: self.texture_size
+        valign: 'middle'
+        halign: 'center'
+        mipmap: True
+
+    KeyboardRow:
+        id: key_container
+        orientation: 'horizontal'
+        size_hint: (1, 0.3)
+
+
+<KeyboardRow@BoxLayout>:
+
+    canvas:
+        Color:
+            rgb: app.colors['Dark']
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+
+<KeyboardLabel>:
+    background_color: 0,0,0,0
+    canvas.before:
+
+<KeyboardImage>:
+
+<KeyboardLabelSeparatorOuter>:
+    background_color: 0,0,0,0
