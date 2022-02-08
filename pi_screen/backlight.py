@@ -113,7 +113,7 @@ class ScreenButton(object):
 
 if __name__ == "__main__":
     md = ScreenButton(
-        channel=17, gpio=GPIO, brightness_steps=3, debug=False, toggle_duration_secs=1
+        channel=17, gpio=GPIO, brightness_steps=5, debug=False, toggle_duration_secs=1
     )
     atexit.register(GPIO.cleanup)
     while True:
