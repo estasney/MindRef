@@ -84,7 +84,7 @@ class ScreenButton(object):
     def _setup_pin(self):
         self.gpio.setup(self.channel, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         self.gpio.add_event_detect(
-            self.channel, self.gpio.BOTH, callback=self.button_event, bouncetime=250
+            self.channel, self.gpio.BOTH, callback=self.button_event, bouncetime=25
         )
 
     def button_event(self, *args, **kwargs):
@@ -111,7 +111,7 @@ class ScreenButton(object):
 
 if __name__ == "__main__":
     md = ScreenButton(
-        channel=17, gpio=GPIO, brightness_steps=3, debug=False, toggle_duration_secs=3
+        channel=17, gpio=GPIO, brightness_steps=3, debug=False, toggle_duration_secs=1
     )
     atexit.register(GPIO.cleanup)
     while True:
