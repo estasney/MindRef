@@ -8,7 +8,7 @@ from subprocess import Popen, PIPE
 
 from pygments.util import ClassNotFound
 
-from kvnoteafly.db.models import create_session, Note, NoteCategory, NoteType
+from db.models import create_session, Note, NoteCategory, NoteType
 
 LAST_CATEGORY = None
 LAST_NOTE_TYPE = None
