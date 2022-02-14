@@ -43,6 +43,7 @@ def create():
             click.echo("Goodbye")
             return
 
+
 def commit_notes():
     db_path = "../noteafly.db"
 
@@ -62,15 +63,9 @@ def commit_notes():
         print(result)
 
 
-
-
-
-
 def get_available_keys() -> Set[str]:
-    from kvnoteafly import __file__ as package_file
     import json
-    package_dir = os.path.dirname(package_file)
-    key_atlas_fp = os.path.join(package_dir, "static", "keys", "keys.atlas")
+    key_atlas_fp = os.path.join("..", "..", "static", "keys", "keys.atlas")
     with open(key_atlas_fp, "r") as kp:
         key_atlas = json.load(kp)
     key_chars = set([])
@@ -112,14 +107,11 @@ def create_note(session):
     note_type = params['note_type']
     note_category = params['category']
 
-
-
     def validate_key(char) -> bool:
         global KEYCHARS
         if KEYCHARS is None:
             KEYCHARS = get_available_keys()
         return char.lower() in KEYCHARS
-
 
     def handle_key_note():
         keys = []
