@@ -101,7 +101,7 @@ class NoteCategory(IntEnum):
     Pandas = 6
     Git = 7
     Regex = 8
-    CSS = 9
+    SQL = 9
     Rst = 10
     Excel = 11
     Docker = 12
@@ -154,6 +154,3 @@ class Note(Base, DictMixin):
     @code_lexer.setter
     def code_lexer(self, value):
         self._code_lexer = value
-
-
-
