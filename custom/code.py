@@ -15,6 +15,3 @@ class ContentCode(AnchorLayout):
         if cl:
             self.code_lexer = content_data.get('code_lexer')
         super(ContentCode, self).__init__(**kwargs)
-
-    def handle_move(self, event):
-        print(event)
