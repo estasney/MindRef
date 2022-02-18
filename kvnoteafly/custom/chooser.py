@@ -1,10 +1,9 @@
 from kivy.core.window import Window
-from kivy.properties import ObjectProperty, ListProperty, StringProperty
+from kivy.properties import ListProperty, ObjectProperty, StringProperty
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
-from kivy.uix.stacklayout import StackLayout
 from kivy.vector import Vector
 
 from utils import import_kv

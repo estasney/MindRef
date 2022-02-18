@@ -1,8 +1,8 @@
 from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.boxlayout import BoxLayout
 
-from custom.keyboard import ContentKeyboard
 from custom.code import ContentCode
+from custom.keyboard import ContentKeyboard
 from custom.rst import ContentRST
 from db import NoteType
 from utils import import_kv

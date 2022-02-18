@@ -101,6 +101,7 @@ class NoteAFly(App):
     def _setup_data(self):
         """Initial load of data"""
         self.db_session = create_session()
+
         category_query = select(Note.category.label("category")).distinct().order_by(Note.category)
 
         self.note_categories = [row.category.name for row in self.db_session.execute(category_query).all()]

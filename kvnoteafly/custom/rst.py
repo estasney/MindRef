@@ -1,9 +1,9 @@
-from kivy.properties import ColorProperty, StringProperty, ObjectProperty, BooleanProperty
+import re
+
+from kivy.properties import BooleanProperty, ObjectProperty, StringProperty
 from kivy.uix.anchorlayout import AnchorLayout
-from kivy.uix.rst import RstDocument
 
 from utils import import_kv
-import re
 
 import_kv(__file__)
 

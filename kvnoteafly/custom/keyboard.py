@@ -1,17 +1,13 @@
-import os
 from functools import partial
 
+from kivy.animation import Animation
 from kivy.clock import Clock
-from kivy.properties import BooleanProperty, StringProperty, ListProperty, ObjectProperty
+from kivy.properties import BooleanProperty, ListProperty, ObjectProperty, StringProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivy.uix.widget import Widget
-
 from kivy.utils import get_color_from_hex
-
-
-from kivy.animation import Animation
 
 from utils import import_kv
 

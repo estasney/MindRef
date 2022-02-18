@@ -1,10 +1,6 @@
-import os
-
 from kivy.app import App
-from kivy.properties import (BooleanProperty, Clock, ColorProperty, ListProperty, StringProperty, DictProperty,
-                             ObjectProperty)
+from kivy.properties import (BooleanProperty, Clock, ColorProperty, ListProperty, StringProperty)
 from kivy.uix.behaviors import ButtonBehavior
-from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.image import Image
 from kivy.utils import get_color_from_hex
@@ -47,7 +43,7 @@ class ImageButton(ButtonBehavior, Image):
 class DynamicImageButton(ButtonBehavior, Image):
     sources = ListProperty([])
 
-    def __init__(self, sources: list[str], **kwargs):
+    def __init__(self, sources: "list[str]", **kwargs):
         super().__init__(**kwargs)
         self.sources = sources
         if 'source' in kwargs:
@@ -85,7 +81,6 @@ class PlayStateButton(DynamicImageButton):
     def on_playing(self, old, new):
         self.source = self.sources[0] if new else self.sources[1]
         self.color = [1, 1, 1, 1] if new else [0.86666, 0.247, 0.0627, 1]
-
 
 
 class BackButton(ImageButton):
