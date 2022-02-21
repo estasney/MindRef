@@ -1,0 +1,19 @@
+#:import parse_color kivy.parser.parse_color
+
+<MarkdownHeading>:
+    markup: True
+    valign: 'top'
+    font_size:
+        sp(self.document.base_font_size - self.level * (
+        self.document.base_font_size / 31.0 * 2))
+    size_hint_y: None
+    height: self.texture_size[1] + dp(20)
+    text_size: self.width, None
+    bold: True
+
+    canvas:
+        Color:
+            rgba: parse_color(self.document.underline_color)
+        Rectangle:
+            pos: self.x, self.y + 5
+            size: self.width, 1

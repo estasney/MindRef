@@ -3,6 +3,7 @@ from kivy.uix.boxlayout import BoxLayout
 
 from custom.code import ContentCode
 from custom.keyboard import ContentKeyboard
+from custom.markdown.markdown_document import MarkdownDocument
 from custom.rst import ContentRST
 from db import NoteType
 from utils import import_kv
@@ -43,6 +44,8 @@ class NoteContent(BoxLayout):
             self._set_keyboard(content_data)
         elif content_data['note_type'] == NoteType.CODE_NOTE.name:
             self._set_rst(content_data)
+        elif content_data['note_type'] == NoteType.MARKDOWN_NOTE.name:
+            self._set_markdown(content_data)
 
     def _set_text(self, content_data: dict):
         self.add_widget(
@@ -57,6 +60,11 @@ class NoteContent(BoxLayout):
     def _set_rst(self, content_data: dict):
         self.add_widget(
                 ContentCode(content_data=content_data)
+                )
+
+    def _set_markdown(self, content_data: dict):
+        self.add_widget(
+                MarkdownDocument(content_data=content_data)
                 )
 
 

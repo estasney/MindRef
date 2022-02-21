@@ -8,3 +8,4 @@ requests
 sqlalchemy-utils
 click
 pyperclip
+marko[codehilite]
