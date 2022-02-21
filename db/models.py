@@ -90,6 +90,7 @@ class NoteType(IntEnum):
     TEXT_NOTE = 0
     KEYBOARD_NOTE = 1
     CODE_NOTE = 2
+    MARKDOWN_NOTE = 3
 
 class NoteCategory(IntEnum):
     Windows = 0
