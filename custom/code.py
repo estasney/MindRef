@@ -5,6 +5,7 @@ from utils import import_kv
 
 import_kv(__file__)
 
+
 class ContentCode(AnchorLayout):
     note_text = StringProperty()
     code_lexer = ObjectProperty()
