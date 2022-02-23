@@ -12,6 +12,7 @@ from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 from kivy.utils import get_color_from_hex, get_hex_from_color
 
+from custom.markdown.code.markdown_code import MarkdownCode
 from custom.markdown.list.markdown_list import MarkdownList
 
 from custom.markdown.list.markdown_list_item import MarkdownListItem
@@ -36,6 +37,7 @@ class MarkdownDocument(ScrollView):
     colors = DictProperty(
         {
             "background": "37474fff",
+            "code": "2b2b2bff",
             "link": "ce5c00ff",
             "paragraph": "202020ff",
             "title": "204a87ff",
@@ -51,6 +53,8 @@ class MarkdownDocument(ScrollView):
         self.text = content_data["text"]
         self.current = None
         self.current_params = None
+        self.do_scroll_x = False
+        self.do_scroll_y = True
 
     def on_text(self, instance, value):
         self._load_from_text()
@@ -62,9 +66,9 @@ class MarkdownDocument(ScrollView):
         if isinstance(node.children, str):
             return node.children
         if len(node.children) > 1:
-            raise AttributeError(f"Multiple {len(node.children)}")
-        return self._get_node_text(node.children[0])
+            return " ".join([self._get_node_text(c) for c in node.children])
 
+        return self._get_node_text(node.children[0])
 
     def _load_list_node(self, node: "marko.block.List"):
         list_widget = MarkdownList()
@@ -72,13 +76,17 @@ class MarkdownDocument(ScrollView):
         self.current = list_widget
         for child in node.children:
             self._load_list_item(child, node.start)
+        self.current = self.content
 
     def _load_list_item(self, node: "marko.block.ListItem", level: int):
 
         list_item = MarkdownListItem(text=self._get_node_text(node), level=level)
         self.current.add_widget(list_item)
 
-
+    def _load_code_node(self, node: "marko.block.FencedCode"):
+        item = MarkdownCode(lexer=node.lang)
+        item.text_content = self._get_node_text(node)
+        self.current.add_widget(item)
 
 
     def _load_node(self, node: "marko.block"):
@@ -93,6 +101,10 @@ class MarkdownDocument(ScrollView):
 
         elif cls is marko.block.List:
             self._load_list_node(node)
+
+        elif cls is marko.block.FencedCode:
+            self._load_code_node(node)
+
 
     def _load_from_text(self, *args):
         self.content.clear_widgets()

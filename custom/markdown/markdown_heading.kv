@@ -4,8 +4,8 @@
     markup: True
     valign: 'top'
     font_size:
-        sp(self.document.base_font_size - self.level * (
-        self.document.base_font_size / 31.0 * 2))
+        sp(self.document.base_font_size  * (
+        self.document.base_font_size / (31.0 + (self.level * 8))))
     size_hint_y: None
     height: self.texture_size[1] + dp(20)
     text_size: self.width, None
