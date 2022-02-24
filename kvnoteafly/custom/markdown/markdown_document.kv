@@ -1,0 +1,18 @@
+#:import parse_color kivy.parser.parse_color
+
+<MarkdownDocument>:
+    content: content
+    do_scroll_x: False
+    canvas.before:
+        Color:
+            rgba: parse_color(root.colors['background'])
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    GridLayout:
+        id: content
+        cols: 1
+        height: self.minimum_height
+        width: root.width
+        padding: 10

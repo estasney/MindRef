@@ -1,22 +1,18 @@
 import marko
-
+from custom.markdown.code.markdown_code import MarkdownCode
+from custom.markdown.list.markdown_list import MarkdownList
+from custom.markdown.list.markdown_list_item import MarkdownListItem
+from custom.markdown.markdown_heading import MarkdownHeading
 from kivy.properties import (
     AliasProperty,
-    Clock,
     DictProperty,
     NumericProperty,
     ObjectProperty,
     StringProperty,
-)
-from kivy.uix.label import Label
+    )
 from kivy.uix.scrollview import ScrollView
 from kivy.utils import get_color_from_hex, get_hex_from_color
 
-from custom.markdown.code.markdown_code import MarkdownCode
-from custom.markdown.list.markdown_list import MarkdownList
-
-from custom.markdown.list.markdown_list_item import MarkdownListItem
-from custom.markdown.markdown_heading import MarkdownHeading
 from utils import import_kv
 
 import_kv(__file__)
