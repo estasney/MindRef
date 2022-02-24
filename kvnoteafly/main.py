@@ -4,7 +4,7 @@ import requests
 
 
 def handle_android():
-    url = "https://raw.githubusercontent.com/estasney/KVNoteAFly/master/db/noteafly.db"
+    url = "https://github.com/estasney/KVNoteAFly/blob/master/kvnoteafly/db/noteafly.db?raw=true"
     r = requests.get(url)
     with open("./db/noteafly.db", "wb") as fp:
         fp.write(r.content)
