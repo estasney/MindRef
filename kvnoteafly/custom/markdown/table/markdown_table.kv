@@ -1,0 +1,25 @@
+#:import parse_color kivy.parser.parse_color
+
+<MarkdownTable>:
+    size_hint_y: None
+    height: self.minimum_height
+
+<MarkdownCellContent>:
+    markup: True
+    valign: 'top'
+    halign: 'center'
+    size_hint_y: None
+    height: self.texture_size[1] + self.my
+    text_size: self.width - self.mx, None
+    font_size: sp(self.document.base_font_size / 2.0)
+
+<MarkdownCell>:
+    cols: 1
+    size_hint_y: None
+    height: self.minimum_height
+    canvas.before:
+        Color:
+            rgb: parse_color('ffffff')
+        Line:
+            width: 1
+            rectangle: self.x, self.y, self.width, self.height

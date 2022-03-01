@@ -1,8 +1,6 @@
+from functools import partial
+
 import marko
-from custom.markdown.code.markdown_code import MarkdownCode
-from custom.markdown.list.markdown_list import MarkdownList
-from custom.markdown.list.markdown_list_item import MarkdownListItem
-from custom.markdown.markdown_heading import MarkdownHeading
 from kivy.properties import (
     AliasProperty,
     DictProperty,
@@ -12,7 +10,13 @@ from kivy.properties import (
     )
 from kivy.uix.scrollview import ScrollView
 from kivy.utils import get_color_from_hex, get_hex_from_color
+from marko.ext.gfm import gfm
 
+from custom.markdown.code.markdown_code import MarkdownCode
+from custom.markdown.list.markdown_list import MarkdownList
+from custom.markdown.list.markdown_list_item import MarkdownListItem
+from custom.markdown.markdown_heading import MarkdownHeading
+from custom.markdown.table.markdown_table import MarkdownCell, MarkdownCellContent, MarkdownTable
 from utils import import_kv
 
 import_kv(__file__)
@@ -45,7 +49,7 @@ class MarkdownDocument(ScrollView):
 
     def __init__(self, content_data: dict, **kwargs):
         super(MarkdownDocument, self).__init__(**kwargs)
-        self._parser = marko.Parser()
+        self._parser = gfm
         self.text = content_data["text"]
         self.current = None
         self.current_params = None
@@ -84,6 +88,39 @@ class MarkdownDocument(ScrollView):
         item.text_content = self._get_node_text(node)
         self.current.add_widget(item)
 
+    def _load_table(self, node: "marko.ext.gfm.elements.Table"):
+        n_cols = max((len(row.children) for row in node.children))
+        table = MarkdownTable(cols=n_cols)
+        self.current.add_widget(table)
+        self.current = table
+
+        def _format_cell_text(text, bold: bool):
+            if bold:
+                return f"[b]{text}[/b]"
+            else:
+                return text
+
+        apply_bold = partial(_format_cell_text, bold=True)
+        noop_text = lambda x: x
+
+        for row_idx, row in enumerate(node.children):
+            f_text = apply_bold if row_idx == 0 else noop_text
+            for cell in row.children:
+                try:
+                    cell_text = self._get_node_text(cell)
+                    cell_text = " " if not cell_text else cell_text
+                except IndexError:
+                    cell_text = " "
+                cell_text = f_text(cell_text)
+                cell_widget = MarkdownCell()
+                cell_label = MarkdownCellContent(text=cell_text, document=self)
+                cell_widget.add_widget(cell_label)
+                self.current.add_widget(cell_widget)
+        self.current = self.content
+
+
+
+
 
     def _load_node(self, node: "marko.block"):
         cls = node.__class__
@@ -100,6 +137,9 @@ class MarkdownDocument(ScrollView):
 
         elif cls is marko.block.FencedCode:
             self._load_code_node(node)
+
+        elif cls is marko.ext.gfm.elements.Table:
+            self._load_table(node)
 
 
     def _load_from_text(self, *args):

@@ -1,6 +1,5 @@
 import os
 from itertools import cycle
-
 from kivy.properties import ListProperty, ObjectProperty, StringProperty
 from kivy.uix.screenmanager import Screen, ScreenManager
 from toolz import sliding_window
@@ -56,7 +55,6 @@ class NoteAppScreenManager(ScreenManager):
         target_screen = next(screen for screen in self.screens if screen.name == target)
         target_screen.set_note_content(self.app.note_data)
         self.last_note_screen = next_active
-
         self.current = target
 
     def handle_notes_list_view(self, *args, **kwargs):

@@ -179,6 +179,7 @@ class NoteAFly(App):
         self._setup_data()
         sm = NoteAppScreenManager(self, transition=NoTransition() if os.environ.get("NO_TRANSITION", False) else SlideTransition())
         self.screen_manager = sm
+
         return sm
 
 
