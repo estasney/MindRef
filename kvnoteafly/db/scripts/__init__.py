@@ -83,9 +83,9 @@ def get_params():
         if use_same == "y":
             return {"category": LAST_CATEGORY, "note_type": LAST_NOTE_TYPE}
     # category
-    categories = {i: NoteCategory(i) for i in range(len(NoteCategory))}
+    categories = {category.value: category.name for category in NoteCategory}
     for k, v in categories.items():
-        print(f"{k} : {v.name}")
+        print(f"{k} : {v}")
 
     user_cat = int(input(f"Select category [{min(categories)}-{max(categories)}]: "))
 

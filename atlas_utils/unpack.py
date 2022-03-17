@@ -27,7 +27,7 @@ def unpack_atlas_imgs(img_fp: str, imgs: Dict[str, Tuple[int, int, int, int]], o
         cc = cropbox(img_coords, im)
         cropped_im = im.crop((cc.x, cc.y, cc.w, cc.h))
         cropped_im_fp = os.path.join(output_dir, f"{img_name}{img_ext}")
-        cropped_im.save(cropped_im_fp)
+        cropped_im.save(cropped_im_fp, format="png")
 
 
 @click.command()

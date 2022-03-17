@@ -1,7 +1,7 @@
 import logging
 import os
 from datetime import datetime
-from enum import Enum, IntEnum
+from enum import Enum, IntEnum, auto
 from pathlib import Path
 from typing import Optional, List
 from pygments.lexers import get_lexer_by_name
@@ -93,22 +93,22 @@ class NoteType(IntEnum):
     MARKDOWN_NOTE = 3
 
 class NoteCategory(IntEnum):
-    Windows = 0
-    Python = 1
-    Chrome = 2
-    SQLAlchemy = 3
-    PyCharm = 4
-    Jinja = 5
-    Pandas = 6
-    Git = 7
-    Regex = 8
-    SQL = 9
-    Rst = 10
-    Excel = 11
-    Docker = 12
-    Bash = 13
-    React = 15
-    Blender = 16
+    Windows = auto()
+    Python =auto()
+    Chrome =auto()
+    SQLAlchemy =auto()
+    PyCharm =auto()
+    Jinja =auto()
+    Pandas =auto()
+    Git =auto()
+    Regex =auto()
+    SQL =auto()
+    Rst =auto()
+    Excel =auto()
+    Docker =auto()
+    Bash =auto()
+    React =auto()
+    Blender =auto()
 
 
 class Note(Base, DictMixin):
