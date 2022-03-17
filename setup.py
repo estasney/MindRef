@@ -28,6 +28,8 @@ REQUIRED = [
     "requests",
     "sqlalchemy-utils",
     "click",
+    "pyperclip",
+    "marko[codehilite]"
     ]
 
 here = os.path.abspath(os.path.dirname(__file__))
