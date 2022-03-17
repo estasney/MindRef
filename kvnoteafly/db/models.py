@@ -107,8 +107,8 @@ class NoteCategory(IntEnum):
     Excel = 11
     Docker = 12
     Bash = 13
-    Linux = 14
     React = 15
+    Blender = 16
 
 
 class Note(Base, DictMixin):
