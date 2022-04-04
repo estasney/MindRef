@@ -1,3 +1,4 @@
+from collections import UserList
 from typing import Any, Optional, Callable
 
 
@@ -14,22 +15,38 @@ class Topic:
         self.listeners.append(cb)
 
 
+class DottedList(UserList):
+
+    def __init__(self, initlist=None, key_name: str = "name"):
+        super().__init__(initlist)
+        self.key_name = key_name
+
+    def __getattr__(self, name: str):
+        try:
+            return next((item for item in self.data if getattr(item, self.key_name) == name))
+        except StopIteration:
+            raise AttributeError(f"{name} does not exist")
+
+
 class TopicCollection:
+
     def __set_name__(self, owner, name):
         self.private_name = f"_{name}"
+        self.wrapper_name = f"{self.private_name}_wrapper"
+        setattr(owner, f"_{name}_wrapper", DottedList())
 
     def __get__(self, obj, objtype=None) -> list:
-        return getattr(obj, self.private_name, [])
+        result = getattr(obj, self.wrapper_name)
+        return result
 
     def __set__(self, obj, value):
-        if not value and value != []:
-            setattr(obj, self.private_name, [])
+        if not value:
+            setattr(obj, self.wrapper_name, DottedList())
         else:
-            setattr(obj, self.private_name, value)
+            setattr(obj, self.wrapper_name, DottedList(value))
 
 
 class Registry:
-
     topics = TopicCollection()
 
     def __init__(self, namespace: str):
@@ -47,8 +64,6 @@ class Registry:
 
     def add_topic(self, topic_name: str):
         self.topics = [*self.topics, Topic(topic_name)]
-
-
 
 #
 # class Registry:

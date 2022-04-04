@@ -11,3 +11,5 @@ def test_registry_init():
     reg.add_topic("testtopic")
     assert reg.topic_names == ["testtopic"]
     assert "testtopic" in reg.topic_names
+
+    assert reg.topics.testtopic.__class__ == Topic
