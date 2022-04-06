@@ -1,3 +1,4 @@
+import json
 import os
 from glob import glob
 from pathlib import Path
@@ -15,8 +16,16 @@ from PIL import Image
 def make_atlas(image_glob, atlas_output, padding, remove):
     """Creates an atlas"""
     atlas_fp = Path(atlas_output)
-    if atlas_fp.suffix:
-        atlas_fp = atlas_fp.with_suffix("")
+    if not atlas_fp.suffix:
+        atlas_fp = atlas_fp.with_suffix(".atlas")
+
+    if atlas_fp.exists():
+        with open(atlas_fp, "r", encoding='utf-8') as fp:
+            atlas_file = json.load(fp)
+            atlas_keys = list(atlas_file.keys())
+        atlas_fp.unlink()
+        for key_file in atlas_keys:
+            (Path(atlas_fp.parent) / key_file).unlink(missing_ok=True)
 
     img_files = glob(image_glob)
 
@@ -34,7 +43,7 @@ def make_atlas(image_glob, atlas_output, padding, remove):
     atlas_size = max(max_w, max_h)
     os.environ["KIVY_NO_ARGS"] = "1"
     from kivy.atlas import Atlas
-    Atlas.create(str(atlas_fp), img_files, atlas_size)
+    Atlas.create(str(atlas_fp.with_suffix("")), img_files, atlas_size)
     if remove:
         for f in img_files:
             click.echo(f"Removing {f}")
