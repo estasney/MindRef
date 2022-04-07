@@ -1,15 +1,51 @@
 import pytest
 
+
 @pytest.mark.registry
-def test_registry_init():
-    from kvnoteafly.registry import Registry, Topic
+def test_registry_init(base_registry):
+    assert base_registry.topic_names == []
+    assert base_registry.topics == []
 
-    reg = Registry("testapp")
-    assert reg.topic_names == []
-    assert reg.topics == []
 
-    reg.add_topic("testtopic")
-    assert reg.topic_names == ["testtopic"]
-    assert "testtopic" in reg.topic_names
+@pytest.mark.registry
+def test_registry_topics(registry_topic):
+    registry, topic = registry_topic
 
-    assert reg.topics.testtopic.__class__ == Topic
+    g_object = None
+
+    def emitter(listeners, result):
+        nonlocal g_object
+        for listener_f in listeners:
+            g_object = listener_f(result)
+
+    def listener(x):
+        return x
+
+    topic.set_emitter(emitter)
+    topic.add_listener(listener)
+    topic.notify(5)
+    assert g_object == 5
+
+
+@pytest.mark.registry
+def test_registry_decorators(wrapped_func):
+    g_object = None
+
+    def emitter(listeners, result):
+        nonlocal g_object
+        for listener_f in listeners:
+            g_object = listener_f(result)
+
+    def listener(x):
+        return x
+
+    def decorated_function():
+        return 1
+
+    wrapped_func(decorated_function, emitter, listener)()
+    assert g_object == 1
+
+
+def test_get_topic(registry_topic):
+    registry, topic = registry_topic
+    assert registry.get_topic(top=topic.name) == topic
