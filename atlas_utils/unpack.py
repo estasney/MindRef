@@ -20,7 +20,9 @@ def cropbox(coords, im):
     return CropC(x1, y1, w1, h1)
 
 
-def unpack_atlas_imgs(img_fp: str, imgs: Dict[str, Tuple[int, int, int, int]], output_dir: str):
+def unpack_atlas_imgs(
+    img_fp: str, imgs: Dict[str, Tuple[int, int, int, int]], output_dir: str
+):
     im = Image.open(img_fp)
     _, img_ext = os.path.splitext(img_fp)
     for img_name, img_coords in imgs.items():
@@ -48,5 +50,5 @@ def unpack_atlas(atlas_fp):
         unpack_atlas_imgs(atlas_img_fp, imgs, atlas_dir)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unpack_atlas()

@@ -11,7 +11,7 @@ def handle_android():
     print("Updated DB")
 
 
-if __name__ == '__main__':
-    if os.environ.get('ANDROID_ENTRYPOINT', None):
+if __name__ == "__main__":
+    if os.environ.get("ANDROID_ENTRYPOINT", None):
         handle_android()
     NoteAFly().run()

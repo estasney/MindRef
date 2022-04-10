@@ -31,7 +31,6 @@ def create_session(db_path=db_path, base=Base):
 
 
 class DictMixin:
-
     def to_dict(self, recurse_relations: Optional[List[Base]] = None, **kwargs) -> dict:
         """
         Convert values to dict
@@ -48,9 +47,12 @@ class DictMixin:
         def handle_nested_list(x: InstrumentedList):
             output = []
             for item in x:
-                if hasattr(item, 'to_dict'):
+                if hasattr(item, "to_dict"):
                     item: DictMixin
-                    if recurse_relations is not None and item.__class__ in recurse_relations:
+                    if (
+                        recurse_relations is not None
+                        and item.__class__ in recurse_relations
+                    ):
                         output.append(item.to_dict(recurse_relations=recurse_relations))
                 else:
                     output.append(str(item))
@@ -59,10 +61,10 @@ class DictMixin:
         def route_type(x):
             if isinstance(x, Enum):
                 return handle_enums
-            elif hasattr(x, 'to_dict'):
-                return getattr(x, 'to_dict')
+            elif hasattr(x, "to_dict"):
+                return getattr(x, "to_dict")
             elif isinstance(x, datetime):
-                return lambda y: getattr(y, 'isoformat')()
+                return lambda y: getattr(y, "isoformat")()
             elif isinstance(x, InstrumentedList):
                 return handle_nested_list
             else:
@@ -73,7 +75,9 @@ class DictMixin:
             return f(x)
 
         raw_data = {k: v for k, v in vars(self).items()}
-        properties = [k for k, v in vars(self.__class__).items() if isinstance(v, property)]
+        properties = [
+            k for k, v in vars(self.__class__).items() if isinstance(v, property)
+        ]
         data = {k: handle(v) for k, v in raw_data.items() if self._filter_key(k)}
         for k in properties:
             if self._filter_key(k):
@@ -92,27 +96,28 @@ class NoteType(IntEnum):
     CODE_NOTE = 2
     MARKDOWN_NOTE = 3
 
+
 class NoteCategory(IntEnum):
     Windows = auto()
-    Python =auto()
-    Chrome =auto()
-    SQLAlchemy =auto()
-    PyCharm =auto()
-    Jinja =auto()
-    Pandas =auto()
-    Git =auto()
-    Regex =auto()
-    SQL =auto()
-    Rst =auto()
-    Excel =auto()
-    Docker =auto()
-    Bash =auto()
-    React =auto()
-    Blender =auto()
+    Python = auto()
+    Chrome = auto()
+    SQLAlchemy = auto()
+    PyCharm = auto()
+    Jinja = auto()
+    Pandas = auto()
+    Git = auto()
+    Regex = auto()
+    SQL = auto()
+    Rst = auto()
+    Excel = auto()
+    Docker = auto()
+    Bash = auto()
+    React = auto()
+    Blender = auto()
 
 
 class Note(Base, DictMixin):
-    __tablename__ = 'notes'
+    __tablename__ = "notes"
 
     id = Column(Integer, primary_key=True)
     title = Column(String(128))

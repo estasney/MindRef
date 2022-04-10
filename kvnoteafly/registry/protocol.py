@@ -57,14 +57,15 @@ class Publisher(ABC):
 
 
 class DottedList(UserList):
-
     def __init__(self, key_name: str, initlist=None):
         super().__init__(initlist)
         self.key_name = key_name
 
     def __getattr__(self, name: str):
         try:
-            return next((item for item in self.data if getattr(item, self.key_name) == name))
+            return next(
+                (item for item in self.data if getattr(item, self.key_name) == name)
+            )
         except StopIteration:
             raise AttributeError(f"{name} does not exist")
 

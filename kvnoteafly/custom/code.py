@@ -11,8 +11,8 @@ class ContentCode(AnchorLayout):
     code_lexer = ObjectProperty()
 
     def __init__(self, content_data, **kwargs):
-        self.note_text = content_data['text']
-        cl = content_data.get('code_lexer')
+        self.note_text = content_data["text"]
+        cl = content_data.get("code_lexer")
         if cl:
-            self.code_lexer = content_data.get('code_lexer')
+            self.code_lexer = content_data.get("code_lexer")
         super(ContentCode, self).__init__(**kwargs)

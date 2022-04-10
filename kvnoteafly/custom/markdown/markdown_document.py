@@ -7,7 +7,7 @@ from kivy.properties import (
     NumericProperty,
     ObjectProperty,
     StringProperty,
-    )
+)
 from kivy.uix.scrollview import ScrollView
 from kivy.utils import get_color_from_hex, get_hex_from_color
 from marko.ext.gfm import gfm
@@ -16,7 +16,11 @@ from custom.markdown.code.markdown_code import MarkdownCode
 from custom.markdown.list.markdown_list import MarkdownList
 from custom.markdown.list.markdown_list_item import MarkdownListItem
 from custom.markdown.markdown_heading import MarkdownHeading
-from custom.markdown.table.markdown_table import MarkdownCell, MarkdownCellContent, MarkdownTable
+from custom.markdown.table.markdown_table import (
+    MarkdownCell,
+    MarkdownCellContent,
+    MarkdownTable,
+)
 from utils import import_kv
 
 import_kv(__file__)
@@ -118,10 +122,6 @@ class MarkdownDocument(ScrollView):
                 self.current.add_widget(cell_widget)
         self.current = self.content
 
-
-
-
-
     def _load_node(self, node: "marko.block"):
         cls = node.__class__
         if cls is marko.block.Heading:
@@ -140,7 +140,6 @@ class MarkdownDocument(ScrollView):
 
         elif cls is marko.ext.gfm.elements.Table:
             self._load_table(node)
-
 
     def _load_from_text(self, *args):
         self.content.clear_widgets()

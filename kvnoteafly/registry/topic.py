@@ -18,7 +18,6 @@ class Topic(Publisher):
 
 
 class TopicCollection:
-
     def __set_name__(self, owner, name):
         self.private_name = f"_{name}"
         self.wrapper_name = f"{self.private_name}_wrapper"

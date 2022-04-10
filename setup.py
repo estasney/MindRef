@@ -29,8 +29,8 @@ REQUIRED = [
     "sqlalchemy-utils",
     "click",
     "pyperclip",
-    "marko[codehilite]"
-    ]
+    "marko[codehilite]",
+]
 
 here = os.path.abspath(os.path.dirname(__file__))
 long_description = DESCRIPTION
@@ -39,34 +39,29 @@ about = {}
 about["__version__"] = VERSION
 
 setup(
-        name=NAME,
-        version=about["__version__"],
-        description=DESCRIPTION,
-        long_description=long_description,
-        author=AUTHOR,
-        author_email=EMAIL,
-        python_requires=REQUIRES_PYTHON,
-        url=URL,
-        packages=find_packages(exclude=("tests",)),
-        install_requires=REQUIRED,
-        include_package_data=True,
-        data_files=[
-            (
-                "data",
-                [
-                    "kvnoteafly/db/noteafly.db",
-                    "kvnoteafly/static/category_icons/*"
-                    ],
-                )
-            ],
-
-        license="MIT",
-        classifiers=[
-            # Trove classifiers
-            # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
-            "License :: OSI Approved :: MIT License",
-            "Programming Language :: Python",
-            "Programming Language :: Python :: 3",
-            ],
-
+    name=NAME,
+    version=about["__version__"],
+    description=DESCRIPTION,
+    long_description=long_description,
+    author=AUTHOR,
+    author_email=EMAIL,
+    python_requires=REQUIRES_PYTHON,
+    url=URL,
+    packages=find_packages(exclude=("tests",)),
+    install_requires=REQUIRED,
+    include_package_data=True,
+    data_files=[
+        (
+            "data",
+            ["kvnoteafly/db/noteafly.db", "kvnoteafly/static/category_icons/*"],
         )
+    ],
+    license="MIT",
+    classifiers=[
+        # Trove classifiers
+        # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
+    ],
+)

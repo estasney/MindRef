@@ -15,7 +15,7 @@ class NoteAppScreenManager(ScreenManager):
 
     def __init__(self, app, **kwargs):
         super().__init__(**kwargs)
-        self.current = 'chooser_screen'
+        self.current = "chooser_screen"
         self.note_screen_cycler = self.make_note_cycler()
         self.last_note_screen = None
         self.app = app
@@ -46,8 +46,9 @@ class NoteAppScreenManager(ScreenManager):
         self.play_state = value
         for screen in self.screens:
             if screen.name.startswith("note_screen"):
-                screen.current_note.note_title.button_bar.play_button.playing = value == "play"
-
+                screen.current_note.note_title.button_bar.play_button.playing = (
+                    value == "play"
+                )
 
     def handle_notes(self, *args, **kwargs):
         last_active, next_active = next(self.note_screen_cycler)
@@ -58,8 +59,8 @@ class NoteAppScreenManager(ScreenManager):
         self.current = target
 
     def handle_notes_list_view(self, *args, **kwargs):
-        self.ids['list_view_screen'].set_note_list_view()
-        self.current = 'list_view_screen'
+        self.ids["list_view_screen"].set_note_list_view()
+        self.current = "list_view_screen"
 
 
 class NoteCategoryChooserScreen(Screen):
@@ -85,4 +86,4 @@ class NoteListViewScreen(Screen):
     notes = ListProperty()
 
     def set_note_list_view(self, *args, **kwargs):
-        self.ids['scroller'].set(self.notes)
+        self.ids["scroller"].set(self.notes)

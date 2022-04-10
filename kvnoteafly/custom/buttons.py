@@ -1,5 +1,11 @@
 from kivy.app import App
-from kivy.properties import (BooleanProperty, Clock, ColorProperty, ListProperty, StringProperty)
+from kivy.properties import (
+    BooleanProperty,
+    Clock,
+    ColorProperty,
+    ListProperty,
+    StringProperty,
+)
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.button import Button
 from kivy.uix.image import Image
@@ -46,8 +52,8 @@ class DynamicImageButton(ButtonBehavior, Image):
     def __init__(self, sources: "list[str]", **kwargs):
         super().__init__(**kwargs)
         self.sources = sources
-        if 'source' in kwargs:
-            self.source = kwargs.pop('source')
+        if "source" in kwargs:
+            self.source = kwargs.pop("source")
         else:
             self.source = self.sources[0]
 
@@ -63,10 +69,13 @@ class PlayStateButton(DynamicImageButton):
 
     def __init__(self, **kwargs):
         super().__init__(
-                source="atlas://static/icons/button_bar/play",
-                sources=["atlas://static/icons/button_bar/play", "atlas://static/icons/button_bar/pause"],
-                **kwargs
-                )
+            source="atlas://static/icons/button_bar/play",
+            sources=[
+                "atlas://static/icons/button_bar/play",
+                "atlas://static/icons/button_bar/pause",
+            ],
+            **kwargs
+        )
         App.get_running_app().bind()
 
     def toggle_play_state(self):

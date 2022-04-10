@@ -1,7 +1,12 @@
 from typing import List
 
 from kivy.core.window import Window
-from kivy.properties import ObjectProperty, StringProperty, NumericProperty, ListProperty
+from kivy.properties import (
+    ObjectProperty,
+    StringProperty,
+    NumericProperty,
+    ListProperty,
+)
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
@@ -19,7 +24,7 @@ class ScrollingListView(ScrollView):
     def set(self, notes: List[dict], *args, **kwargs):
         if not self.children:
             layout = ListView(cols=1, size_hint=(None, None), width=Window.width)
-            layout.bind(minimum_height=layout.setter('height'))
+            layout.bind(minimum_height=layout.setter("height"))
             self.add_widget(layout)
             self.child_object = layout
         self.children[0].set(notes)
@@ -30,8 +35,8 @@ class ListItem(GridLayout):
     index = NumericProperty()
 
     def __init__(self, content_data: dict, *args, **kwargs):
-        self.title_text = content_data['title']
-        self.index = content_data['idx']
+        self.title_text = content_data["title"]
+        self.index = content_data["idx"]
         super().__init__(**kwargs)
 
 
@@ -42,16 +47,14 @@ class ListItemKeyboard(GridLayout):
     keyboard_container = ObjectProperty()
 
     def __init__(self, content_data: dict, **kwargs):
-        self.title_text = content_data['title']
-        self.index = content_data['idx']
-        self.keyboard_buttons = content_data['keys_str'].split(",")
+        self.title_text = content_data["title"]
+        self.index = content_data["idx"]
+        self.keyboard_buttons = content_data["keys_str"].split(",")
         super().__init__(**kwargs)
         self.keyboard_container.set(self.keyboard_buttons)
 
 
-
 class ListItemKeyboardContainer(BoxLayout):
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -62,18 +65,25 @@ class ListItemKeyboardContainer(BoxLayout):
 
 
 class ListView(GridLayout):
-
     def set(self, notes: List[dict]):
         self.clear_widgets()
         for note in notes:
 
-            if note['note_type'] == NoteType.KEYBOARD_NOTE.name:
+            if note["note_type"] == NoteType.KEYBOARD_NOTE.name:
                 self.add_widget(
-                        ListItemKeyboard(content_data=note, width=Window.width, height=(Window.height / 6),
-                                         size_hint=(None, None))
-                        )
+                    ListItemKeyboard(
+                        content_data=note,
+                        width=Window.width,
+                        height=(Window.height / 6),
+                        size_hint=(None, None),
+                    )
+                )
             else:
                 self.add_widget(
-                        ListItem(content_data=note, width=Window.width, height=(Window.height / 6),
-                                 size_hint=(None, None))
-                        )
+                    ListItem(
+                        content_data=note,
+                        width=Window.width,
+                        height=(Window.height / 6),
+                        size_hint=(None, None),
+                    )
+                )

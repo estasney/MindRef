@@ -14,9 +14,9 @@ class ContentRST(AnchorLayout):
     note_text = StringProperty()
     rst_doc = ObjectProperty()
     is_table = BooleanProperty(False)
-    bg_color = StringProperty('#000000')
-    paragraph_color = StringProperty('#ffffff')
+    bg_color = StringProperty("#000000")
+    paragraph_color = StringProperty("#ffffff")
 
     def __init__(self, content_data, **kwargs):
         super(ContentRST, self).__init__(**kwargs)
-        self.note_text = content_data['text']
+        self.note_text = content_data["text"]

@@ -47,17 +47,17 @@ def create():
 def commit_notes():
     db_path = "../noteafly.db"
 
-    with Popen(['git', 'add', db_path], stdout=PIPE, stderr=PIPE) as p:
+    with Popen(["git", "add", db_path], stdout=PIPE, stderr=PIPE) as p:
         result, _ = p.communicate()
         result = result.decode().strip()
         print(result)
 
-    with Popen(['git', 'commit', '-m', 'add note'], stdout=PIPE, stderr=PIPE) as p:
+    with Popen(["git", "commit", "-m", "add note"], stdout=PIPE, stderr=PIPE) as p:
         result, _ = p.communicate()
         result = result.decode().strip()
         print(result)
 
-    with Popen(['git', 'push'], stdout=PIPE, stderr=PIPE) as p:
+    with Popen(["git", "push"], stdout=PIPE, stderr=PIPE) as p:
         result, _ = p.communicate()
         result = result.decode().strip()
         print(result)
@@ -65,6 +65,7 @@ def commit_notes():
 
 def get_available_keys() -> Set[str]:
     import json
+
     key_atlas_fp = os.path.join("..", "..", "static", "keys", "keys.atlas")
     with open(key_atlas_fp, "r") as kp:
         key_atlas = json.load(kp)
@@ -104,8 +105,8 @@ def get_params():
 def create_note(session):
     global KEYCHARS
     params = get_params()
-    note_type = params['note_type']
-    note_category = params['category']
+    note_type = params["note_type"]
+    note_category = params["category"]
 
     def validate_key(char) -> bool:
         global KEYCHARS
@@ -120,7 +121,7 @@ def create_note(session):
                 if keys:
                     print(",".join(keys))
                 key = input("Enter a key, type 'done' when finished : ")
-                if key == 'done':
+                if key == "done":
                     note = Note()
                     note.keys = keys
                     note.category = NoteCategory(note_category)
@@ -133,11 +134,13 @@ def create_note(session):
                         keys.append(key)
                     else:
                         print(f"No Key image found for {key.lower()}")
-                        print("""Choose an option:
+                        print(
+                            """Choose an option:
                         y : Accept
                         n : Discard (default)
                         ? : Discard and show available keys
-                        """)
+                        """
+                        )
                         decision = input(f"Enter option : ")
                         if decision == "y":
                             keys.append(key)
@@ -156,7 +159,7 @@ def create_note(session):
         while True:
             cl = input(f"Lexer ? [{LAST_LEXER if LAST_LEXER else 'Python'}]")
             if not cl:
-                cl = LAST_LEXER if LAST_LEXER else 'Python'
+                cl = LAST_LEXER if LAST_LEXER else "Python"
             try:
                 pygments.lexers.get_lexer_by_name(cl)
                 LAST_LEXER = cl
@@ -172,8 +175,8 @@ def create_note(session):
 
         note = Note()
         note.text = pyperclip.paste()
-        note.category = NoteCategory(params['category'])
-        note.note_type = NoteType(params['note_type'])
+        note.category = NoteCategory(params["category"])
+        note.note_type = NoteType(params["note_type"])
         note.code_lexer = code_lexer
         return note
 
@@ -184,8 +187,8 @@ def create_note(session):
 
         note = Note()
         note.text = pyperclip.paste()
-        note.category = NoteCategory(params['category'])
-        note.note_type = NoteType(params['note_type'])
+        note.category = NoteCategory(params["category"])
+        note.note_type = NoteType(params["note_type"])
         return note
 
     if note_type == NoteType.KEYBOARD_NOTE.value:
@@ -200,5 +203,5 @@ def create_note(session):
         session.commit()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     create()

@@ -6,10 +6,17 @@ from pathlib import Path
 import click
 from PIL import Image
 
-@click.option("-i", "--image-glob", type=click.STRING, prompt=True,
-              help="Glob pattern of images to pack")
-@click.option("-o", "--atlas-output", type=click.STRING, prompt=True,
-              help="Path to save atlas")
+
+@click.option(
+    "-i",
+    "--image-glob",
+    type=click.STRING,
+    prompt=True,
+    help="Glob pattern of images to pack",
+)
+@click.option(
+    "-o", "--atlas-output", type=click.STRING, prompt=True, help="Path to save atlas"
+)
 @click.option("-p", "--padding", type=click.INT, default=2)
 @click.option("-rm", "--remove", type=click.BOOL, default=False)
 @click.command()
@@ -20,7 +27,7 @@ def make_atlas(image_glob, atlas_output, padding, remove):
         atlas_fp = atlas_fp.with_suffix(".atlas")
 
     if atlas_fp.exists():
-        with open(atlas_fp, "r", encoding='utf-8') as fp:
+        with open(atlas_fp, "r", encoding="utf-8") as fp:
             atlas_file = json.load(fp)
             atlas_keys = list(atlas_file.keys())
         atlas_fp.unlink()
@@ -43,6 +50,7 @@ def make_atlas(image_glob, atlas_output, padding, remove):
     atlas_size = max(max_w, max_h)
     os.environ["KIVY_NO_ARGS"] = "1"
     from kivy.atlas import Atlas
+
     Atlas.create(str(atlas_fp.with_suffix("")), img_files, atlas_size)
     if remove:
         for f in img_files:
@@ -50,5 +58,5 @@ def make_atlas(image_glob, atlas_output, padding, remove):
             os.unlink(f)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     make_atlas()

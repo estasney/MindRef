@@ -22,7 +22,7 @@ class NoteCategoryChooserScrollWrapper(ScrollView):
     def on_categories(self, instance, value):
         if not self.children:
             layout = NoteCategoryChooser(size_hint=(1, None), width=Window.width)
-            layout.bind(minimum_height=layout.setter('height'))
+            layout.bind(minimum_height=layout.setter("height"))
             self.add_widget(layout)
             self.child_object = layout
             self.children[0].set(value)
@@ -41,7 +41,9 @@ class NoteCategoryChooser(GridLayout):
         self.manager.category_selected(instance)
 
     def set(self, value):
-        category_widgets = [NoteCategoryButton(text=cat, size_hint=(0.25, None)) for cat in value]
+        category_widgets = [
+            NoteCategoryButton(text=cat, size_hint=(0.25, None)) for cat in value
+        ]
         for cat in category_widgets:
             cat.bind(on_release=self.category_callback)
             self.add_widget(cat)

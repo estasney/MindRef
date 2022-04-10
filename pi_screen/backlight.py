@@ -63,7 +63,9 @@ class Backlight(object):
         if self.power_state == self.SCREEN_OFF:
             self.power_state = self.write_state(self.BL_POWER, self.SCREEN_ON)
             if self.brightness_state == 0:
-                self.brightness_state = self.write_state(self.BL_BRIGHTNESS, next(self.brightness_step))
+                self.brightness_state = self.write_state(
+                    self.BL_BRIGHTNESS, next(self.brightness_step)
+                )
         else:
             self.power_state = self.write_state(self.BL_POWER, self.SCREEN_OFF)
 
