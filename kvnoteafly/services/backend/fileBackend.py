@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Generator, Optional, TypeGuard, TypeAlias, NewType, Union
+from typing import Generator, Optional, Union
+
+from marko.block import BlankLine, Document, Heading
 from marko.ext.gfm import gfm
-from marko.block import BlankLine, Document, Heading, FencedCode
+
 from . import BackendProtocol
-from ..domain import CodeNote, MarkdownNote, ShortcutNote, get_note_type
+from ..domain import CodeNote, MarkdownNote, ShortcutNote, make_note
 
 
 class FileSystemBackend(BackendProtocol):
@@ -37,7 +39,7 @@ class FileSystemBackend(BackendProtocol):
             file_valid, msg = self._note_path_valid(file, True)
             if not file_valid:
                 raise Exception(msg)
-            yield file.name
+            yield file.stem
 
     @property
     def current_category(self):
@@ -76,7 +78,7 @@ class FileSystemBackend(BackendProtocol):
                 note_text = note_doc.read()
             md_doc = gfm.parse(note_text)
             for idx, note in enumerate(self._note_generator(md_doc)):
-                notes.append(get_note_type(idx=idx, category=file.name, blocks=note))
+                notes.append(make_note(idx=idx, category=file.stem, blocks=note))
         return notes
 
     def next_note(self):

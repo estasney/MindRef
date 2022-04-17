@@ -1,7 +1,9 @@
-from dataclasses import dataclass, field, fields
-from typing import Literal, Optional, Union
+from dataclasses import dataclass, field
+from typing import Literal, Union
+
 from marko.block import BlockElement, FencedCode, Heading
-from kvnoteafly.custom.markdown.markdown_document import MarkdownDocument
+
+from services.backend.utils import get_md_node_text
 
 
 @dataclass
@@ -32,16 +34,16 @@ class MarkdownNote(BaseNote):
 
 
 def _get_node_text(blocks: list[BlockElement]) -> str:
-    return "\n".join(MarkdownDocument.get_node_text(block).strip() for block in blocks)
+    return "\n".join(get_md_node_text(block).strip() for block in blocks)
 
 
-def get_note_type(
+def make_note(
     idx: int, category: str, blocks: list[BlockElement]
 ) -> Union[ShortcutNote, CodeNote, MarkdownNote]:
     header_block = next((b for b in blocks if isinstance(b, Heading)), None)
     if not header_block:
         raise Exception("No Title Found")
-    title = MarkdownDocument.get_node_text(header_block)
+    title = get_md_node_text(header_block)
     fenced_block = next((b for b in blocks if isinstance(b, FencedCode)), None)
     if not fenced_block:
         return MarkdownNote(

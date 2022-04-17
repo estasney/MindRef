@@ -4,13 +4,13 @@ from typing import Optional
 
 
 class BackendProtocol(ABC):
-    @abc.abstractmethod
     @property
+    @abc.abstractmethod
     def categories(self) -> list[str]:
         raise NotImplementedError
 
-    @abc.abstractmethod
     @property
+    @abc.abstractmethod
     def current_category(self):
         raise NotImplementedError
 
