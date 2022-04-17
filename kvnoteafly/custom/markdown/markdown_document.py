@@ -21,6 +21,7 @@ from custom.markdown.table.markdown_table import (
     MarkdownCellContent,
     MarkdownTable,
 )
+from services.backend.utils import get_md_node_text
 from utils import import_kv
 
 import_kv(__file__)
@@ -68,12 +69,7 @@ class MarkdownDocument(ScrollView):
 
     @classmethod
     def get_node_text(cls, node):
-        if isinstance(node.children, str):
-            return node.children
-        if len(node.children) > 1:
-            return " ".join([cls.get_node_text(c) for c in node.children])
-
-        return cls.get_node_text(node.children[0])
+        return get_md_node_text(node)
 
     def _load_list_node(self, node: "marko.block.List"):
         list_widget = MarkdownList()
