@@ -66,13 +66,14 @@ class MarkdownDocument(ScrollView):
     def render(self):
         self._load_from_text()
 
-    def _get_node_text(self, node):
+    @classmethod
+    def get_node_text(cls, node):
         if isinstance(node.children, str):
             return node.children
         if len(node.children) > 1:
-            return " ".join([self._get_node_text(c) for c in node.children])
+            return " ".join([cls.get_node_text(c) for c in node.children])
 
-        return self._get_node_text(node.children[0])
+        return cls.get_node_text(node.children[0])
 
     def _load_list_node(self, node: "marko.block.List"):
         list_widget = MarkdownList()
@@ -84,12 +85,12 @@ class MarkdownDocument(ScrollView):
 
     def _load_list_item(self, node: "marko.block.ListItem", level: int):
 
-        list_item = MarkdownListItem(text=self._get_node_text(node), level=level)
+        list_item = MarkdownListItem(text=self.get_node_text(node), level=level)
         self.current.add_widget(list_item)
 
     def _load_code_node(self, node: "marko.block.FencedCode"):
         item = MarkdownCode(lexer=node.lang)
-        item.text_content = self._get_node_text(node)
+        item.text_content = self.get_node_text(node)
         self.current.add_widget(item)
 
     def _load_table(self, node: "marko.ext.gfm.elements.Table"):
@@ -111,7 +112,7 @@ class MarkdownDocument(ScrollView):
             f_text = apply_bold if row_idx == 0 else noop_text
             for cell in row.children:
                 try:
-                    cell_text = self._get_node_text(cell)
+                    cell_text = self.get_node_text(cell)
                     cell_text = " " if not cell_text else cell_text
                 except IndexError:
                     cell_text = " "
