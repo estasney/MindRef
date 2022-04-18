@@ -7,6 +7,10 @@ from custom.markdown.markdown_document import MarkdownDocument
 from custom.rst import ContentRST
 from db import NoteType
 from utils import import_kv
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from kvnoteafly.services.domain import NotesDict
 
 import_kv(__file__)
 
@@ -21,9 +25,9 @@ class Note(BoxLayout):
 
         content_data = {
             "text": note_data["text"],
-            "keys_str": note_data["keys_str"],
+            "keys_str": note_data.get("keys_str"),
             "note_type": note_data["note_type"],
-            "code_lexer": note_data.get("code_lexer"),
+            "lexer": note_data.get("lexer"),
         }
 
         self.note_title.set(title_data)
@@ -31,18 +35,24 @@ class Note(BoxLayout):
 
 
 class NoteContent(BoxLayout):
-    def set(self, content_data: dict):
+    def set(self, content_data: "NotesDict"):
 
         self.clear_widgets()
-
-        if content_data["note_type"] == NoteType.TEXT_NOTE.name:
-            self._set_text(content_data)
-        elif content_data["note_type"] == NoteType.KEYBOARD_NOTE.name:
+        note_type = content_data["note_type"]
+        if note_type == "shortcut":
             self._set_keyboard(content_data)
-        elif content_data["note_type"] == NoteType.CODE_NOTE.name:
-            self._set_rst(content_data)
-        elif content_data["note_type"] == NoteType.MARKDOWN_NOTE.name:
+        elif note_type == "code":
+            self._set_code(content_data)
+        elif note_type == "markdown":
+            # if not content_data['text'].strip().startswith('#'):
+            #     # Wrap as markdown
+            #     content_data_text = content_data['text']
+            #     content_data_text = f"###\n{content_data_text}"
+            #     content_data['text'] = content_data_text
+
             self._set_markdown(content_data)
+        else:
+            raise ValueError(f"Unsupported note_type {note_type}")
 
     def _set_text(self, content_data: dict):
         self.add_widget(ContentRST(content_data=content_data))
@@ -50,7 +60,7 @@ class NoteContent(BoxLayout):
     def _set_keyboard(self, content_data: dict):
         self.add_widget(ContentKeyboard(content_data=content_data))
 
-    def _set_rst(self, content_data: dict):
+    def _set_code(self, content_data: dict):
         self.add_widget(ContentCode(content_data=content_data))
 
     def _set_markdown(self, content_data: dict):

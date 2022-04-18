@@ -16,7 +16,7 @@ class NoteCategoryChooserScrollWrapper(ScrollView):
     child_object = ObjectProperty()
     categories = ListProperty()
 
-    def category_selected(self, instance):
+    def category_selected(self, instance: "NoteCategoryButton"):
         self.manager.category_selected(instance)
 
     def on_categories(self, instance, value):
@@ -37,7 +37,7 @@ class NoteCategoryChooser(GridLayout):
     def on_parent(self, *args, **kwargs):
         self.manager = args[1]
 
-    def category_callback(self, instance):
+    def category_callback(self, instance: "NoteCategoryButton"):
         self.manager.category_selected(instance)
 
     def set(self, value):

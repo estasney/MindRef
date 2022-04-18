@@ -1,9 +1,15 @@
-from dataclasses import dataclass, field
-from typing import Literal, Union
+from dataclasses import dataclass, field, asdict
+from typing import Literal, TypedDict, Union, TYPE_CHECKING
 
 from marko.block import BlockElement, FencedCode, Heading
 
 from services.backend.utils import get_md_node_text
+
+
+class BaseNoteDict(TypedDict):
+    idx: int
+    title: str
+    category: str
 
 
 @dataclass
@@ -14,10 +20,24 @@ class BaseNote:
     category: str
 
 
+class ShortcutNoteDict(BaseNoteDict):
+    note_type: Literal["shortcut"]
+    keys_str: str
+
+
 @dataclass
 class ShortcutNote(BaseNote):
     keys_str: str
     note_type: Literal["shortcut"] = field(default="shortcut", init=False)
+
+    def to_dict(self) -> ShortcutNoteDict:
+        return asdict(self, dict_factory=ShortcutNoteDict)
+
+
+class CodeNoteDict(BaseNoteDict):
+    text: str
+    lexer: str
+    note_type: Literal["code"]
 
 
 @dataclass
@@ -26,11 +46,22 @@ class CodeNote(BaseNote):
     lexer: str
     note_type: Literal["code"] = field(default="code", init=False)
 
+    def to_dict(self) -> CodeNoteDict:
+        return asdict(self, dict_factory=CodeNoteDict)
+
+
+class MarkdownNoteDict(BaseNoteDict):
+    text: str
+    note_type: Literal["markdown"]
+
 
 @dataclass
 class MarkdownNote(BaseNote):
     text: str
     note_type: Literal["markdown"] = field(default="markdown", init=False)
+
+    def to_dict(self) -> MarkdownNoteDict:
+        return asdict(self, dict_factory=MarkdownNoteDict)
 
 
 def _get_node_text(blocks: list[BlockElement]) -> str:
@@ -64,3 +95,7 @@ def make_note(
             text=_get_node_text([fenced_block]),
             lexer=fenced_block.lang,
         )
+
+
+if TYPE_CHECKING:
+    NotesDict = Union[ShortcutNoteDict, CodeNoteDict, MarkdownNoteDict]

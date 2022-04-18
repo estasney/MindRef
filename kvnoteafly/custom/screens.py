@@ -3,8 +3,11 @@ from itertools import cycle
 from kivy.properties import ListProperty, ObjectProperty, StringProperty
 from kivy.uix.screenmanager import Screen, ScreenManager
 from toolz import sliding_window
-
 from utils import import_kv
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from custom.chooser import NoteCategoryButton
 
 import_kv(__file__)
 
@@ -29,7 +32,7 @@ class NoteAppScreenManager(ScreenManager):
             self.add_widget(note_screen)
         return sliding_window(2, cycle(range(n_screens)))
 
-    def category_selected(self, category):
+    def category_selected(self, category: "NoteCategoryButton"):
         self.app.note_category = category.text
 
     def handle_app_display_state(self, instance, new):
@@ -70,8 +73,8 @@ class NoteCategoryChooserScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def category_selected(self, category):
-        self.manager.category_selected(category)
+    def category_selected(self, category_btn: "NoteCategoryButton"):
+        self.manager.category_selected(category_btn)
 
 
 class NoteCategoryScreen(Screen):

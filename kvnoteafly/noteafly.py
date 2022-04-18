@@ -1,5 +1,6 @@
 import os
 from functools import partial
+from pathlib import Path
 
 from dotenv import load_dotenv
 from kivy.app import App
@@ -17,77 +18,43 @@ from sqlalchemy import desc, select
 
 from custom.screens import NoteAppScreenManager
 from db import Note, create_session
-
-
-class NoteIndex:
-    """
-    Handles indexing notes so that we can always call `next` or `previous`
-
-    As with `range`, `end` is not inclusive
-    """
-
-    def __init__(self, size: int, current=0):
-        self.size = size
-        self.start = 0
-        self.end = max([0, (size - 1)])
-        self.current = current
-
-    def next(self) -> int:
-        if self.end == 0:
-            return 0
-        elif self.current == self.end:
-            self.current = 0
-            return self.current
-        else:
-            self.current += 1
-            return self.current
-
-    def previous(self) -> int:
-        if self.end == 0:
-            return 0
-        elif self.current == 0:
-            self.current = self.end
-            return self.current
-        else:
-            self.current -= 1
-            return self.current
+from services.backend import NoteIndex
+from services.backend.fileBackend import FileSystemBackend
 
 
 class NoteAFly(App):
     """
     Attributes
     ----------
-    db_session
-        session used for database
-    note_idx
-        Uses itertools `cycle` so that calling `next` will yield the next valid index
-    notes_data_categorical
-        All notes as dict() that have a Category == `self.note_category`
+    APP_NAME: str
+    note_service: BackendProtocol
     note_categories: ListProperty
-        List of str of all note categories
+        All known note categories
+    note_category: StringProperty
+        The active Category. If no active category, value is empty string
     note_data: DictProperty
-        Data regarding the currently displayed note
+        The active Note belonging to active Category
+    next_note_scheduler: ObjectProperty
     display_state: OptionProperty
         One of [Display, Choose]
         Choose:: Display all known categories
         Display:: Iterate through notes matching `self.note_category`
+    play:state: OptionProperty
+        One of [play, pause]
+        play:: schedule pagination through notes
+        pause:: stop pagination through notes
     screen_manager: ObjectProperty
         Holds the reference to ScreenManager
     colors: DictProperty
         Color scheme
-
     """
 
     APP_NAME = "NoteAFly"
-
-    db_session = None
-
-    note_idx = None
-    notes_data_categorical = ListProperty()
-    note_categories = ListProperty()
+    note_service = FileSystemBackend(storage_path=Path(__file__).parent / "notes")
+    note_categories = ListProperty(note_service.categories)
     note_category = StringProperty("")
     note_data = DictProperty(rebind=True)
-
+    notes_data_categorical = ListProperty()
     next_note_scheduler = ObjectProperty()
 
     display_state = OptionProperty("choose", options=["choose", "display", "list"])
@@ -106,28 +73,14 @@ class NoteAFly(App):
         }
     )
 
-    def _setup_data(self):
-        """Initial load of data"""
-        self.db_session = create_session()
-
-        category_query = (
-            select(Note.category.label("category")).distinct().order_by(Note.category)
-        )
-
-        self.note_categories = [
-            row.category.name for row in self.db_session.execute(category_query).all()
-        ]
-
     def on_display_state(self, instance, new):
         if new != "list":
             return
-        self.note_idx = None
         if self.next_note_scheduler:
             self.next_note_scheduler.cancel()
 
     def select_index(self, value):
-        self.note_data = self.notes_data_categorical[value]
-        self.note_idx = NoteIndex(len(self.notes_data_categorical), current=value)
+        self.note_data = self.note_service.current_note()
         self.play_state = "pause"
         self.display_state = "display"
 
@@ -148,13 +101,12 @@ class NoteAFly(App):
         is_initial = kwargs.get("initial", False)
         """Update `self.note_data` from `self.notes_data`"""
         if is_initial:
-            self.note_data = self.notes_data_categorical[0]
+            self.note_data = self.note_service.current_note()
         else:
             if direction > 0:
-                note = self.notes_data_categorical[self.note_idx.next()]
+                self.note_data = self.note_service.next_note()
             else:
-                note = self.notes_data_categorical[self.note_idx.previous()]
-            self.note_data = note
+                self.note_data = self.note_service.previous_note()
 
     def on_play_state(self, instance, value):
         if value == "pause":
@@ -162,22 +114,19 @@ class NoteAFly(App):
         else:
             self.next_note_scheduler()
 
-    def on_note_category(self, instance, value):
+    def on_note_category(self, instance, value: str):
+        """
+        Category button pressed
+        """
+        self.note_service.current_category = value
         if not value:
             self.notes_data_categorical = []
-            self.note_idx = None
             if self.next_note_scheduler:
                 self.next_note_scheduler.cancel()
             self.display_state = "choose"
         else:
-            category_stmt = (
-                select(Note).filter(Note.category == value).order_by(desc(Note.id))
-            )
-            self.notes_data_categorical = [
-                {"idx": i, **row.Note.to_dict()}
-                for i, row in enumerate(self.db_session.execute(category_stmt).all())
-            ]
-            self.note_idx = NoteIndex(len(self.notes_data_categorical))
+
+            self.notes_data_categorical = self.note_service.notes[value]
             if not self.next_note_scheduler:
                 self.next_note_scheduler = Clock.schedule_interval(
                     self.paginate_note, self.paginate_interval
@@ -194,7 +143,7 @@ class NoteAFly(App):
         self.screen_manager.handle_notes(self)
 
     def build(self):
-        self._setup_data()
+
         sm = NoteAppScreenManager(
             self,
             transition=NoTransition()

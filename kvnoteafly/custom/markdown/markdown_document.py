@@ -1,4 +1,5 @@
 from functools import partial
+from typing import Union
 
 import marko
 from kivy.properties import (
@@ -16,6 +17,7 @@ from custom.markdown.code.markdown_code import MarkdownCode
 from custom.markdown.list.markdown_list import MarkdownList
 from custom.markdown.list.markdown_list_item import MarkdownListItem
 from custom.markdown.markdown_heading import MarkdownHeading
+from custom.markdown.paragraph.markdown_paragraph import MarkdownParagraph
 from custom.markdown.table.markdown_table import (
     MarkdownCell,
     MarkdownCellContent,
@@ -70,6 +72,15 @@ class MarkdownDocument(ScrollView):
     @classmethod
     def get_node_text(cls, node):
         return get_md_node_text(node)
+
+    def _load_paragraph_node(
+        self, node: Union["marko.block.Paragraph", "marko.ext.gfm.elements.Paragraph"]
+    ):
+        para_widget = MarkdownParagraph(text_content=self.get_node_text(node))
+        if not hasattr(self, "current"):
+            self.content.add_widget(para_widget)
+        else:
+            self.current.add_widget(para_widget)
 
     def _load_list_node(self, node: "marko.block.List"):
         list_widget = MarkdownList()
@@ -137,6 +148,9 @@ class MarkdownDocument(ScrollView):
 
         elif cls is marko.ext.gfm.elements.Table:
             self._load_table(node)
+
+        elif cls is marko.ext.gfm.elements.Paragraph or cls is marko.block.Paragraph:
+            self._load_paragraph_node(node)
 
     def _load_from_text(self, *args):
         self.content.clear_widgets()

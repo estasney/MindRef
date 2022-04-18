@@ -1,0 +1,24 @@
+#:import parse_color kivy.parser.parse_color
+<MarkdownParagraph>:
+    cols: 1
+    content: content
+    id: parent
+    size_hint_y: None
+    height: content.texture_size[1] + dp(20)
+    canvas:
+        Color:
+            rgb: parse_color(root.background_color)
+        Rectangle:
+            pos: self.x - 1, self.y - 1
+            size: self.width + 2, self.height + 2
+        Color:
+            rgb: parse_color(root.background_color)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    Label:
+        id: content
+        markup: False
+        valign: 'top'
+        text_size: self.width, None
+        text: parent.text_content
