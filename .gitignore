@@ -4,3 +4,4 @@
 .buildozer
 bin
 .idea
+**/.env
