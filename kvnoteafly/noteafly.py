@@ -12,7 +12,7 @@ from kivy.properties import (
     ObjectProperty,
     OptionProperty,
     StringProperty,
-)
+    )
 from kivy.uix.screenmanager import NoTransition, SlideTransition
 from sqlalchemy import desc, select
 
@@ -20,6 +20,8 @@ from custom.screens import NoteAppScreenManager
 from db import Note, create_session
 from services.backend import NoteIndex
 from services.backend.fileBackend import FileSystemBackend
+
+load_dotenv()
 
 
 class NoteAFly(App):
@@ -50,7 +52,7 @@ class NoteAFly(App):
     """
 
     APP_NAME = "NoteAFly"
-    note_service = FileSystemBackend(storage_path=Path(__file__).parent / "notes")
+    note_service = FileSystemBackend(storage_path=Path(os.environ.get("NOTES_PATH")).expanduser().resolve())
     note_categories = ListProperty(note_service.categories)
     note_category = StringProperty("")
     note_data = DictProperty(rebind=True)
@@ -64,14 +66,14 @@ class NoteAFly(App):
     screen_manager = ObjectProperty()
 
     colors = DictProperty(
-        {
-            "Light": (0.3843137254901961, 0.4470588235294118, 0.4823529411764706),
-            "Primary": (0.21568627450980393, 0.2784313725490195, 0.30980392156862746),
-            "Dark": (0.06274509803921569, 0.1254901960784313, 0.15294117647058825),
-            "Accent1": (0.8588235294117648, 0.227450980392157, 0.20392156862745092),
-            "Accent2": (0.02352941176470591, 0.8392156862745098, 0.6274509803921572),
-        }
-    )
+            {
+                "Light":   (0.3843137254901961, 0.4470588235294118, 0.4823529411764706),
+                "Primary": (0.21568627450980393, 0.2784313725490195, 0.30980392156862746),
+                "Dark":    (0.06274509803921569, 0.1254901960784313, 0.15294117647058825),
+                "Accent1": (0.8588235294117648, 0.227450980392157, 0.20392156862745092),
+                "Accent2": (0.02352941176470591, 0.8392156862745098, 0.6274509803921572),
+                }
+            )
 
     def on_display_state(self, instance, new):
         if new != "list":
@@ -101,12 +103,12 @@ class NoteAFly(App):
         is_initial = kwargs.get("initial", False)
         """Update `self.note_data` from `self.notes_data`"""
         if is_initial:
-            self.note_data = self.note_service.current_note()
+            self.note_data = self.note_service.current_note().to_dict()
         else:
             if direction > 0:
-                self.note_data = self.note_service.next_note()
+                self.note_data = self.note_service.next_note().to_dict()
             else:
-                self.note_data = self.note_service.previous_note()
+                self.note_data = self.note_service.previous_note().to_dict()
 
     def on_play_state(self, instance, value):
         if value == "pause":
@@ -129,8 +131,8 @@ class NoteAFly(App):
             self.notes_data_categorical = self.note_service.notes[value]
             if not self.next_note_scheduler:
                 self.next_note_scheduler = Clock.schedule_interval(
-                    self.paginate_note, self.paginate_interval
-                )
+                        self.paginate_note, self.paginate_interval
+                        )
                 if self.play_state == "pause":
                     self.next_note_scheduler.cancel()
             else:
@@ -145,16 +147,15 @@ class NoteAFly(App):
     def build(self):
 
         sm = NoteAppScreenManager(
-            self,
-            transition=NoTransition()
-            if os.environ.get("NO_TRANSITION", False)
-            else SlideTransition(),
-        )
+                self,
+                transition=NoTransition()
+                if os.environ.get("NO_TRANSITION", False)
+                else SlideTransition(),
+                )
         self.screen_manager = sm
 
         return sm
 
 
 if __name__ == "__main__":
-    load_dotenv()
     NoteAFly().run()

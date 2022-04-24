@@ -1,19 +1,19 @@
 from __future__ import annotations
 
+import logging
 from collections import defaultdict
 from pathlib import Path
-from typing import Mapping, Optional, TYPE_CHECKING, Union
+from typing import Mapping, Optional, TYPE_CHECKING
 
-from marko.block import BlankLine, Document, Heading
 from marko.ext.gfm import gfm
 
 from . import BackendProtocol, NoteIndex
-from ..domain import make_note
+from ..domain import MarkdownNote
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from ..domain import NotesDict
-
-    NotesMapping = Mapping[str, list[NotesDict]]
+    NotesMapping = Mapping[str, list[Path]]
 
 
 class FileSystemBackend(BackendProtocol):
@@ -23,8 +23,8 @@ class FileSystemBackend(BackendProtocol):
     storage_path: Path
 
     """
-    Categories are defined in a single Markdown Document
-    Individual notes are delimited by section
+    Categories are defined with directories
+    Individual notes defined as markdown files within their respective categories
     """
 
     def __init__(self, storage_path: str | Path):
@@ -35,18 +35,10 @@ class FileSystemBackend(BackendProtocol):
         self._discover_notes()
 
     def _discover_notes(self):
+        categories, folders = zip(*[(f.name, f) for f in self.storage_path.iterdir() if f.is_dir()])
         notes = defaultdict(lambda: list())
-        for file in self.storage_path.iterdir():
-            file_valid, msg = self._note_path_valid(file, True)
-            if not file_valid:
-                raise Exception(msg)
-            with file.open(mode="r", encoding="utf-8") as note_doc:
-                note_text = note_doc.read()
-            md_doc = gfm.parse(note_text)
-            for idx, note in enumerate(self._note_generator(md_doc)):
-                notes[file.stem].append(
-                    make_note(idx=idx, category=file.stem, blocks=note).to_dict()
-                )
+        for folder in folders:
+            notes[folder.name] = [f for f in folder.iterdir() if f.is_file()]
         self._notes = notes
 
     @property
@@ -54,16 +46,6 @@ class FileSystemBackend(BackendProtocol):
         if not self._notes:
             self._discover_notes()
         return self._notes
-
-    @classmethod
-    def _note_path_valid(cls, fp: Path, existing: bool) -> tuple[bool, Optional[str]]:
-        if fp.suffix.lower() == ".md":
-            if existing:
-                if fp.is_file():
-                    return True, None
-                return False, f"{fp} does not exist"
-            return True, None
-        return False, f"{fp} has unsupported suffix : {fp.suffix}"
 
     @property
     def categories(self) -> list[str]:
@@ -84,56 +66,33 @@ class FileSystemBackend(BackendProtocol):
         self._current_category = value
         self._index = NoteIndex(size=len(self.notes[value]))
 
-    @classmethod
-    def _note_generator(cls, doc: Document):
-        """Heading indicates start of new note. Yield Heading and everything else up to another Heading"""
-        store = []
-        for child in doc.children:
-            if isinstance(child, Heading):
-                if store:
-                    yield store
-                    store.clear()
-                else:
-                    store.append(child)
-            if isinstance(child, BlankLine):
-                continue
-            store.append(child)
-        if store:
-            yield store
-
     def set_index(self, n: int):
         if not self._index:
             raise Exception("No Index")
         self._index.set_current(n)
 
-    def parse_category_notes(self) -> list[NotesDict]:
-        notes = []
-        for file in self.storage_path.iterdir():
-            file_valid, msg = self._note_path_valid(file, True)
-            if not file_valid:
-                raise Exception(msg)
-            with file.open(mode="r", encoding="utf-8") as note_doc:
-                note_text = note_doc.read()
-            md_doc = gfm.parse(note_text)
-            for idx, note in enumerate(self._note_generator(md_doc)):
-                notes.append(
-                    make_note(idx=idx, category=file.stem, blocks=note).to_dict()
-                )
-        return notes
+    def read_note(self, category=None, index=None) -> MarkdownNote:
+        category = category if category else self.current_category
+        index = index if index is not None else self._index.current
+        note_file = self.notes[category][index]
+        with open(note_file, mode="r", encoding="utf-8") as fp:
+            note_text = fp.read()
+        md_doc = gfm.parse(note_text)
+        return MarkdownNote(text=note_text, category=category, idx=index, document=md_doc, file=note_file)
 
-    def next_note(self) -> NotesDict:
+    def next_note(self) -> MarkdownNote:
         if not self._index:
             raise Exception(f"No Index")
         self._index.next()
-        return self.notes[self.current_category][self._index.current]
+        return self.read_note()
 
-    def previous_note(self) -> NotesDict:
+    def previous_note(self) -> MarkdownNote:
         if not self._index:
             raise Exception("No Index")
         self._index.previous()
-        return self.notes[self.current_category][self._index.current]
+        return self.read_note()
 
-    def current_note(self) -> NotesDict:
+    def current_note(self) -> MarkdownNote:
         if not self._index:
             raise Exception("No Index")
-        return self.notes[self.current_category][self._index.current]
+        return self.read_note()

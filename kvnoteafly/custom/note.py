@@ -25,9 +25,8 @@ class Note(BoxLayout):
 
         content_data = {
             "text": note_data["text"],
-            "keys_str": note_data.get("keys_str"),
-            "note_type": note_data["note_type"],
-            "lexer": note_data.get("lexer"),
+            "document": note_data["document"],
+            "title": note_data["title"],
         }
 
         self.note_title.set(title_data)
@@ -38,21 +37,7 @@ class NoteContent(BoxLayout):
     def set(self, content_data: "NotesDict"):
 
         self.clear_widgets()
-        note_type = content_data["note_type"]
-        if note_type == "shortcut":
-            self._set_keyboard(content_data)
-        elif note_type == "code":
-            self._set_code(content_data)
-        elif note_type == "markdown":
-            # if not content_data['text'].strip().startswith('#'):
-            #     # Wrap as markdown
-            #     content_data_text = content_data['text']
-            #     content_data_text = f"###\n{content_data_text}"
-            #     content_data['text'] = content_data_text
-
-            self._set_markdown(content_data)
-        else:
-            raise ValueError(f"Unsupported note_type {note_type}")
+        self._set_markdown(content_data)
 
     def _set_text(self, content_data: dict):
         self.add_widget(ContentRST(content_data=content_data))

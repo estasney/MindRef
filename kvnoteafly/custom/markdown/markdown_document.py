@@ -31,6 +31,8 @@ import_kv(__file__)
 
 class MarkdownDocument(ScrollView):
     text = StringProperty(None)
+    title = StringProperty(None)
+    document = ObjectProperty()
     base_font_size = NumericProperty(31)
 
     def _get_bgc(self):
@@ -56,8 +58,9 @@ class MarkdownDocument(ScrollView):
 
     def __init__(self, content_data: dict, **kwargs):
         super(MarkdownDocument, self).__init__(**kwargs)
-        self._parser = gfm
+        self.document = content_data['document']
         self.text = content_data["text"]
+        self.title = content_data["title"]
         self.current = None
         self.current_params = None
         self.do_scroll_x = False
@@ -98,7 +101,7 @@ class MarkdownDocument(ScrollView):
     def _load_code_node(self, node: "marko.block.FencedCode"):
         item = MarkdownCode(lexer=node.lang)
         item.text_content = self.get_node_text(node)
-        self.current.add_widget(item)
+        self.content.add_widget(item)
 
     def _load_table(self, node: "marko.ext.gfm.elements.Table"):
         n_cols = max((len(row.children) for row in node.children))
@@ -133,6 +136,9 @@ class MarkdownDocument(ScrollView):
     def _load_node(self, node: "marko.block"):
         cls = node.__class__
         if cls is marko.block.Heading:
+            label_text = node.children[0].children
+            if label_text == self.title:
+                return
             label = MarkdownHeading(
                 document=self,
                 level=node.level,
@@ -154,6 +160,5 @@ class MarkdownDocument(ScrollView):
 
     def _load_from_text(self, *args):
         self.content.clear_widgets()
-        document = self._parser.parse(self.text)
-        for child in document.children:
+        for child in self.document.children:
             self._load_node(child)
