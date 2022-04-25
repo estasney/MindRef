@@ -4,7 +4,7 @@
     content: content
     id: parent
     size_hint_y: None
-    height: content.texture_size[1] + dp(20)
+    height: content.minimum_height
     canvas:
         Color:
             rgb: parse_color(root.background_color)
@@ -16,9 +16,16 @@
         Rectangle:
             pos: self.pos
             size: self.size
-    Label:
+    CodeInput:
         id: content
-        markup: True
-        valign: 'top'
-        text_size: self.width, None
-        text: parent.code_content
+        background_color: parse_color(parent.background_color)
+        size_hint: 0.99, 0.95
+        anchor_x: "center"
+        anchor_y: "center"
+        text: parent.text_content
+        readonly: True
+        style_name: "paraiso-dark"
+        lexer: parent.lexer
+        use_bubble: False
+        use_handles: False
+        on_touch_up: self.cancel_selection()

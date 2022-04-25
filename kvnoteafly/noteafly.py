@@ -1,7 +1,8 @@
+import logging
 import os
 from functools import partial
 from pathlib import Path
-
+from kivy.logger import Logger, LOG_LEVELS
 from dotenv import load_dotenv
 from kivy.app import App
 from kivy.clock import Clock
@@ -49,6 +50,7 @@ class NoteAFly(App):
         Holds the reference to ScreenManager
     colors: DictProperty
         Color scheme
+    log_level: NumericProperty
     """
 
     APP_NAME = "NoteAFly"
@@ -62,6 +64,7 @@ class NoteAFly(App):
     display_state = OptionProperty("choose", options=["choose", "display", "list"])
     play_state = OptionProperty("play", options=["play", "pause"])
     paginate_interval = NumericProperty(15)
+    log_level = NumericProperty(logging.ERROR)
 
     screen_manager = ObjectProperty()
 
@@ -110,9 +113,13 @@ class NoteAFly(App):
             else:
                 self.note_data = self.note_service.previous_note().to_dict()
 
+    def on_log_level(self, instance, value):
+        Logger.setLevel(int(value))
+
     def on_play_state(self, instance, value):
         if value == "pause":
-            self.next_note_scheduler.cancel()
+            if self.next_note_scheduler:
+                self.next_note_scheduler.cancel()
         else:
             self.next_note_scheduler()
 
@@ -153,6 +160,10 @@ class NoteAFly(App):
                 else SlideTransition(),
                 )
         self.screen_manager = sm
+        self.play_state = os.environ.get('PLAY_STATE', 'play')
+        self.note_category = os.environ.get('CATEGORY_SELECTED', '')
+        self.log_level = int(os.environ.get('LOG_LEVEL', logging.ERROR))
+
 
         return sm
 

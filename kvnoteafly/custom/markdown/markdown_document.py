@@ -1,6 +1,6 @@
 from functools import partial
 from typing import Union
-
+from kivy.logger import Logger
 import marko
 from kivy.properties import (
     AliasProperty,
@@ -12,6 +12,7 @@ from kivy.properties import (
 from kivy.uix.scrollview import ScrollView
 from kivy.utils import get_color_from_hex, get_hex_from_color
 from marko.ext.gfm import gfm
+
 
 from custom.markdown.code.markdown_code import MarkdownCode
 from custom.markdown.list.markdown_list import MarkdownList
@@ -27,7 +28,6 @@ from services.backend.utils import get_md_node_text
 from utils import import_kv
 
 import_kv(__file__)
-
 
 class MarkdownDocument(ScrollView):
     text = StringProperty(None)
@@ -67,6 +67,7 @@ class MarkdownDocument(ScrollView):
         self.do_scroll_y = True
 
     def on_text(self, instance, value):
+
         self._load_from_text()
 
     def render(self):
@@ -74,11 +75,13 @@ class MarkdownDocument(ScrollView):
 
     @classmethod
     def get_node_text(cls, node):
+        Logger.debug(f"Get Node Text: {node}")
         return get_md_node_text(node)
 
     def _load_paragraph_node(
         self, node: Union["marko.block.Paragraph", "marko.ext.gfm.elements.Paragraph"]
     ):
+        Logger.debug(f"Paragraph Node : {node}")
         para_widget = MarkdownParagraph(text_content=self.get_node_text(node))
         if not hasattr(self, "current"):
             self.content.add_widget(para_widget)
@@ -100,7 +103,7 @@ class MarkdownDocument(ScrollView):
 
     def _load_code_node(self, node: "marko.block.FencedCode"):
         item = MarkdownCode(lexer=node.lang)
-        item.text_content = self.get_node_text(node)
+        item.text_content = self.get_node_text(node).removesuffix("```")
         self.content.add_widget(item)
 
     def _load_table(self, node: "marko.ext.gfm.elements.Table"):
