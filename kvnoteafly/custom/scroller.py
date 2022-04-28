@@ -1,10 +1,12 @@
+from pathlib import Path
+
 from kivy.core.window import Window
 from kivy.properties import (
     ObjectProperty,
     StringProperty,
     NumericProperty,
     ListProperty,
-)
+    )
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
@@ -12,16 +14,9 @@ from kivy.uix.scrollview import ScrollView
 from custom.keyboard import KeyboardImage
 from db import NoteType
 from utils import import_kv
-from typing import TYPE_CHECKING, Sequence, Union
+from typing import TYPE_CHECKING, Sequence, Union, cast
 
-if TYPE_CHECKING:
-    from kvnoteafly.services.domain import (
-        CodeNoteDict,
-        MarkdownNoteDict,
-        ShortcutNoteDict,
-    )
-
-    NoteDict = Union[CodeNoteDict, MarkdownNoteDict, ShortcutNoteDict]
+from kvnoteafly.services.domain import MarkdownNote, MarkdownNoteDict
 
 import_kv(__file__)
 
@@ -43,8 +38,8 @@ class ListItem(GridLayout):
     index = NumericProperty()
 
     def __init__(
-        self, content_data: Union["CodeNoteDict", "MarkdownNoteDict"], *args, **kwargs
-    ):
+            self, content_data: Union["CodeNoteDict", "MarkdownNoteDict"], *args, **kwargs
+            ):
         self.title_text = content_data["title"]
         self.index = content_data["idx"]
         super().__init__(**kwargs)
@@ -75,24 +70,25 @@ class ListItemKeyboardContainer(BoxLayout):
 
 
 class ListView(GridLayout):
-    def set(self, notes: Sequence["NoteDict"]):
+    def set(self, note_path: Sequence[Path]):
         self.clear_widgets()
-        for note in notes:
-            if note["note_type"] == "shortcut":
+        for note_file in note_path:
+
+            if note["has_shortcut"]:
                 self.add_widget(
-                    ListItemKeyboard(
-                        content_data=note,
-                        width=Window.width,
-                        height=(Window.height / 6),
-                        size_hint=(None, None),
-                    )
-                )
+                        ListItemKeyboard(
+                                content_data=note,
+                                width=Window.width,
+                                height=(Window.height / 6),
+                                size_hint=(None, None),
+                                )
+                        )
             else:
                 self.add_widget(
-                    ListItem(
-                        content_data=note,
-                        width=Window.width,
-                        height=(Window.height / 6),
-                        size_hint=(None, None),
-                    )
-                )
+                        ListItem(
+                                content_data=note,
+                                width=Window.width,
+                                height=(Window.height / 6),
+                                size_hint=(None, None),
+                                )
+                        )
