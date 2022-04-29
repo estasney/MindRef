@@ -4,13 +4,13 @@ import asyncio
 import logging
 from collections import defaultdict
 from pathlib import Path
-from typing import Mapping, Optional, TYPE_CHECKING, cast
+from typing import Any, Awaitable, Coroutine, Mapping, Optional, TYPE_CHECKING, cast
 from operator import attrgetter, itemgetter
 
 from marko.ext.gfm import gfm
 
 from . import BackendProtocol, NoteIndex
-from ..domain import MarkdownNote, MarkdownNoteDict, MarkdownNoteMeta, NoteMetaData
+from ..domain import MarkdownNote, MarkdownNoteDict, MarkdownNoteMeta, NoteMetaDataDict
 
 logger = logging.getLogger(__name__)
 
@@ -18,8 +18,10 @@ if TYPE_CHECKING:
     CategoryFiles = Mapping[str, list[Path]]
     CategoryNoteMeta = list["NoteMetaData"]
 
+
 async def _fetch_fp_mtime(f: Path) -> tuple[Path, int]:
     return f, f.lstat().st_mtime_ns
+
 
 async def _sort_fp_mtimes(files: list[Path]) -> list[Path]:
     """Fetch and sort file modified times"""
@@ -27,17 +29,29 @@ async def _sort_fp_mtimes(files: list[Path]) -> list[Path]:
     fetched = sorted(fetched, key=itemgetter(1), reverse=True)
     return [f for f, _ in fetched]
 
+
 async def _load_category_meta(i: int, note_path: Path) -> tuple[int, str, Path]:
     with note_path.open(mode="r", encoding="utf-8") as fp:
         note_text = fp.read()
     return i, note_text, note_path
 
 
-async def _load_category_metas(note_paths: list[Path]) -> list[tuple[int, str]]:
-    note_paths_ordered = await asyncio.run(_sort_fp_mtimes(note_paths))
+async def _load_category_metas(note_paths: list[Path]):
+    note_paths_ordered = await _sort_fp_mtimes(note_paths)
     meta_texts = await asyncio.gather(*[_load_category_meta(i, f) for i, f in enumerate(note_paths_ordered)])
-    meta_texts = cast(meta_texts, list[tuple[int, str]])
     return meta_texts
+
+
+async def _discover_folder_notes(folder: Path):
+    notes = [f for f in folder.iterdir() if f.is_file()]
+    ordered_notes = await _sort_fp_mtimes(notes)
+    return folder, ordered_notes
+
+
+async def _discover_storage(folder: Path):
+    categories, folders = zip(*[(f.name, f) for f in folder.iterdir() if f.is_dir()])
+    folder_notes = await asyncio.gather(*[_discover_folder_notes(f) for f in folders])
+    return {folder.name: items for folder, items in folder_notes}
 
 
 class FileSystemBackend(BackendProtocol):
@@ -70,34 +84,27 @@ class FileSystemBackend(BackendProtocol):
         -----
         Does not read the notes, only gathers a listing of them
         """
-        categories, folders = zip(*[(f.name, f) for f in self.storage_path.iterdir() if f.is_dir()])
-        notes = defaultdict(lambda: list())
-        for folder in folders:
-            notes[folder.name] = [f for f in folder.iterdir() if f.is_file()]
-        self._category_files = notes
+        note_files = asyncio.run(_discover_storage(self.storage_path))
+        self._category_files = note_files
 
     def _load_category_meta(self, category: str):
         category_files = self.category_files[category]
-        meta_texts: list[tuple[int, str]] = asyncio.run(_load_category_metas(category_files))
+        # meta_texts: list[tuple[int, str]] = asyncio.run(_load_category_metas(category_files))
+        meta_texts = asyncio.run(_load_category_metas(category_files))
+        meta_texts = cast(list[tuple[int, str]], meta_texts)
         self._category_meta = [MarkdownNoteMeta(idx=i, text=text, file=f).to_dict() for i, text, f in meta_texts]
-
 
     @property
     def category_files(self):
         if not self._category_files:
             self._discover_notes()
-        return self.category_files
+        return self._category_files
 
     @property
     def category_meta(self):
         if not self._category_meta:
             self._load_category_meta(self.current_category)
-        return self._category_meta
-
-    def _read_category_notes(self, category: str):
-        ...
-
-
+        return self._category_meta if self._category_meta else []
 
     @property
     def notes(self) -> "CategoryFiles":
@@ -107,7 +114,7 @@ class FileSystemBackend(BackendProtocol):
 
     @property
     def categories(self) -> list[str]:
-        return list(self._category_files.keys())
+        return list(self.category_files.keys())
 
     @property
     def current_category(self) -> Optional[str]:
@@ -119,10 +126,12 @@ class FileSystemBackend(BackendProtocol):
             self._current_category = None
             self._notes = None
             self._index = None
+            self._category_meta = None
             return
         if value not in self.categories:
             raise KeyError(f"{value} not found in Categories")
         self._current_category = value
+        self._load_category_meta(self.current_category)
         self._index = NoteIndex(size=len(self.notes[value]))
 
     def set_index(self, n: int):

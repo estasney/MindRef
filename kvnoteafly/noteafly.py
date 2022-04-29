@@ -2,10 +2,11 @@ import logging
 import os
 from functools import partial
 from pathlib import Path
-from kivy.logger import Logger, LOG_LEVELS
+
 from dotenv import load_dotenv
 from kivy.app import App
 from kivy.clock import Clock
+from kivy.logger import Logger
 from kivy.properties import (
     DictProperty,
     ListProperty,
@@ -15,11 +16,8 @@ from kivy.properties import (
     StringProperty,
     )
 from kivy.uix.screenmanager import NoTransition, SlideTransition
-from sqlalchemy import desc, select
 
 from custom.screens import NoteAppScreenManager
-from db import Note, create_session
-from services.backend import NoteIndex
 from services.backend.fileBackend import FileSystemBackend
 
 load_dotenv()
@@ -37,12 +35,14 @@ class NoteAFly(App):
         The active Category. If no active category, value is empty string
     note_data: DictProperty
         The active Note belonging to active Category
+    note_category_meta: ListProperty
+        Metadata for notes associated with active Category. Info such as Title, and Shortcuts
     next_note_scheduler: ObjectProperty
     display_state: OptionProperty
         One of [Display, Choose]
         Choose:: Display all known categories
         Display:: Iterate through notes matching `self.note_category`
-    play:state: OptionProperty
+    play_state: OptionProperty
         One of [play, pause]
         play:: schedule pagination through notes
         pause:: stop pagination through notes
@@ -58,7 +58,7 @@ class NoteAFly(App):
     note_categories = ListProperty(note_service.categories)
     note_category = StringProperty("")
     note_data = DictProperty(rebind=True)
-    notes_data_categorical = ListProperty()
+    note_category_meta = ListProperty()
     next_note_scheduler = ObjectProperty()
 
     display_state = OptionProperty("choose", options=["choose", "display", "list"])
@@ -85,7 +85,8 @@ class NoteAFly(App):
             self.next_note_scheduler.cancel()
 
     def select_index(self, value):
-        self.note_data = self.note_service.current_note()
+        self.note_service.set_index(value)
+        self.note_data = self.note_service.current_note().to_dict()
         self.play_state = "pause"
         self.display_state = "display"
 
@@ -129,13 +130,12 @@ class NoteAFly(App):
         """
         self.note_service.current_category = value
         if not value:
-            self.notes_data_categorical = []
+            self.note_category_meta = []
             if self.next_note_scheduler:
                 self.next_note_scheduler.cancel()
             self.display_state = "choose"
         else:
-
-            self.notes_data_categorical = self.note_service.notes[value]
+            self.note_category_meta = self.note_service.category_meta
             if not self.next_note_scheduler:
                 self.next_note_scheduler = Clock.schedule_interval(
                         self.paginate_note, self.paginate_interval

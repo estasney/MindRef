@@ -86,7 +86,7 @@ class NoteCategoryScreen(Screen):
 
 class NoteListViewScreen(Screen):
     child_object = ObjectProperty()
-    notes = ListProperty()
+    meta_notes = ListProperty()
 
     def set_note_list_view(self, *args, **kwargs):
-        self.ids["scroller"].set(self.notes)
+        self.ids["scroller"].set(self.meta_notes)

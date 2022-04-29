@@ -18,7 +18,7 @@ class MarkdownNoteDict(TypedDict):
     shortcut_keys: Optional[tuple[str, ...]]
 
 
-class NoteMetaData(TypedDict):
+class NoteMetaDataDict(TypedDict):
     title: str
     idx: int
     has_shortcut: bool
@@ -37,8 +37,8 @@ class MarkdownNoteMeta:
     SHORTCUT_PATTERN = re.compile(r"(?:`{3}shortcut\s+)([^`\n]+)")
     TITLE_PATTERN = re.compile(r"(?:#+ +)([\w ]+)", flags=re.MULTILINE)
 
-    def to_dict(self) -> NoteMetaData:
-        return asdict(self, dict_factory=NoteMetaData)
+    def to_dict(self) -> NoteMetaDataDict:
+        return asdict(self, dict_factory=NoteMetaDataDict)
 
     def __post_init__(self):
         if title_match := self.TITLE_PATTERN.search(self.text):

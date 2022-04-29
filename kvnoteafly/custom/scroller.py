@@ -18,6 +18,9 @@ from typing import TYPE_CHECKING, Sequence, Union, cast
 
 from kvnoteafly.services.domain import MarkdownNote, MarkdownNoteDict
 
+if TYPE_CHECKING:
+    from kvnoteafly.services.domain import NoteMetaDataDict
+
 import_kv(__file__)
 
 
@@ -70,10 +73,9 @@ class ListItemKeyboardContainer(BoxLayout):
 
 
 class ListView(GridLayout):
-    def set(self, note_path: Sequence[Path]):
+    def set(self, meta_notes: Sequence["NoteMetaDataDict"]):
         self.clear_widgets()
-        for note_file in note_path:
-
+        for note in meta_notes:
             if note["has_shortcut"]:
                 self.add_widget(
                         ListItemKeyboard(
