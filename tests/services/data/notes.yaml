@@ -1,7 +1,5 @@
 Python:
-  - note_type: code
-    title: pass
+  - title: pass
     text: pass
-  - note_type: shortcut
-    title: Test
+  - title: Test
     text: a,b

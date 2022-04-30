@@ -18,22 +18,11 @@ def stored_categories(storage_directory):
     with data_path.open(mode="r", encoding="utf-8") as fp:
         data = yaml.load(fp, Loader=yaml.FullLoader)
     for category, notes in data.items():
-        category_file = (storage_directory / category).with_suffix(".md")
-        with category_file.open(mode="w", encoding="utf-8") as note_doc:
-            for note in notes:
-                note_type = note["note_type"]
-                note_text = note["text"]
-                note_title = note["title"]
-                note_doc.write(f"# {note_title}\n")
-                if note_type == "code":
-                    note_doc.write(f"```{category.lower()}\n")
-                    note_doc.write(f"{note_text}\n")
-                    note_doc.write("```")
-                elif note_type == "shortcut":
-                    note_doc.write(f"```shortcut\n")
-                    note_doc.write(f"{note_text}\n")
-                    note_doc.write("```")
-                else:
-                    note_doc.write(f"{note_text}\n")
-                note_doc.write("\n")
+        category_folder = storage_directory / category
+        category_folder.mkdir()
+        for note in notes:
+            note_file = (category_folder / category).with_suffix(".md")
+            with note_file.open(mode="w", encoding="utf-8") as note_doc:
+                note_doc.write(f"# {note['text']}\n{note['title']}\n")
+
     return storage_directory, data
