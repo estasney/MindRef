@@ -35,13 +35,16 @@ class MarkdownNoteMeta:
     shortcut_keys: Optional[tuple[str, ...]] = field(init=False, default=None)
 
     SHORTCUT_PATTERN = re.compile(r"(?:`{3}shortcut\s+)([^`\n]+)")
+    FENCED_PATTERN = re.compile(r"^(?: *`{3}[a-z\s]*$)(?:[\w\s.\W]+)(?:`{3})", flags=re.MULTILINE)
     TITLE_PATTERN = re.compile(r"(?:#+ +)([\w ]+)", flags=re.MULTILINE)
 
     def to_dict(self) -> NoteMetaDataDict:
         return asdict(self, dict_factory=NoteMetaDataDict)
 
     def __post_init__(self):
-        if title_match := self.TITLE_PATTERN.search(self.text):
+        # For title search, remove fenced code blocks from consideration (comments can be mistaken for headers)
+        title_haystack = self.FENCED_PATTERN.sub("", self.text)
+        if title_match := self.TITLE_PATTERN.search(title_haystack):
             self.title = title_match.group(1)
         if shortcut_match := self.SHORTCUT_PATTERN.search(self.text):
             self.shortcut_keys = tuple((t.strip() for t in shortcut_match.group(1).split(",")))
@@ -74,5 +77,10 @@ class MarkdownNote:
                 code_txt = block.children[0].children.strip()
                 key_chars = [t.strip() for t in code_txt.split(",")]
                 self.shortcut_keys = tuple(key_chars)
+                # Strip out shortcut from text
+
+                head, _, rest = self.text.split("```")
+                self.text = "\n".join((head.strip(), rest.strip())).replace("#", "")
+
         if not hasattr(self, 'title'):
             self.title = self.file.stem.title()

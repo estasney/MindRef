@@ -41,7 +41,7 @@ class ListItem(GridLayout):
     index = NumericProperty()
 
     def __init__(
-            self, content_data: Union["CodeNoteDict", "MarkdownNoteDict"], *args, **kwargs
+            self, content_data: "NoteMetaDataDict", *args, **kwargs
             ):
         self.title_text = content_data["title"]
         self.index = content_data["idx"]
@@ -54,10 +54,10 @@ class ListItemKeyboard(GridLayout):
     keyboard_buttons = ListProperty()
     keyboard_container = ObjectProperty()
 
-    def __init__(self, content_data: "ShortcutNoteDict", **kwargs):
+    def __init__(self, content_data: "NoteMetaDataDict", **kwargs):
         self.title_text = content_data["title"]
         self.index = content_data["idx"]
-        self.keyboard_buttons = content_data["keys_str"].split(",")
+        self.keyboard_buttons = content_data["shortcut_keys"]
         super().__init__(**kwargs)
         self.keyboard_container.set(self.keyboard_buttons)
 

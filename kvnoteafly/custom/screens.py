@@ -1,13 +1,16 @@
 import os
 from itertools import cycle
-from kivy.properties import ListProperty, ObjectProperty, StringProperty
+from kivy.properties import ListProperty, Logger, ObjectProperty, StringProperty
 from kivy.uix.screenmanager import Screen, ScreenManager
 from toolz import sliding_window
+
+
 from utils import import_kv
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from custom.chooser import NoteCategoryButton
+    from services.domain import MarkdownNoteDict
 
 import_kv(__file__)
 
@@ -36,6 +39,7 @@ class NoteAppScreenManager(ScreenManager):
         self.app.note_category = category.text
 
     def handle_app_display_state(self, instance, new):
+        Logger.debug(f"ScreenManager: app_display_state : {new}")
         if new == "choose":  # Show the Category Selection Screen
             self.current = "chooser_screen"
         elif new == "display":
@@ -80,7 +84,7 @@ class NoteCategoryChooserScreen(Screen):
 class NoteCategoryScreen(Screen):
     current_note = ObjectProperty()
 
-    def set_note_content(self, note_data: dict):
+    def set_note_content(self, note_data: "MarkdownNoteDict"):
         self.current_note.set_note_content(note_data)
 
 

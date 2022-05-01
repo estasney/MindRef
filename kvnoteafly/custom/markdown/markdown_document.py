@@ -8,11 +8,10 @@ from kivy.properties import (
     NumericProperty,
     ObjectProperty,
     StringProperty,
-)
+    )
 from kivy.uix.scrollview import ScrollView
 from kivy.utils import get_color_from_hex, get_hex_from_color
 from marko.ext.gfm import gfm
-
 
 from custom.markdown.code.markdown_code import MarkdownCode
 from custom.markdown.list.markdown_list import MarkdownList
@@ -23,11 +22,12 @@ from custom.markdown.table.markdown_table import (
     MarkdownCell,
     MarkdownCellContent,
     MarkdownTable,
-)
+    )
 from services.backend.utils import get_md_node_text
 from utils import import_kv
 
 import_kv(__file__)
+
 
 class MarkdownDocument(ScrollView):
     text = StringProperty(None)
@@ -44,15 +44,15 @@ class MarkdownDocument(ScrollView):
     background_color = AliasProperty(_get_bgc, _set_bgc, bind=("colors",), cache=True)
 
     colors = DictProperty(
-        {
-            "background": "37474fff",
-            "code": "2b2b2bff",
-            "link": "ce5c00ff",
-            "paragraph": "202020ff",
-            "title": "204a87ff",
-            "bullet": "000000ff",
-        }
-    )
+            {
+                "background": "37474fff",
+                "code":       "2b2b2bff",
+                "link":       "ce5c00ff",
+                "paragraph":  "202020ff",
+                "title":      "204a87ff",
+                "bullet":     "000000ff",
+                }
+            )
     underline_color = StringProperty("000000ff")
     content = ObjectProperty(None)
 
@@ -79,8 +79,8 @@ class MarkdownDocument(ScrollView):
         return get_md_node_text(node)
 
     def _load_paragraph_node(
-        self, node: Union["marko.block.Paragraph", "marko.ext.gfm.elements.Paragraph"]
-    ):
+            self, node: Union["marko.block.Paragraph", "marko.ext.gfm.elements.Paragraph"]
+            ):
         Logger.debug(f"Paragraph Node : {node}")
         para_widget = MarkdownParagraph(text_content=self.get_node_text(node))
         if not hasattr(self, "current"):
@@ -109,7 +109,7 @@ class MarkdownDocument(ScrollView):
     def _load_table(self, node: "marko.ext.gfm.elements.Table"):
         n_cols = max((len(row.children) for row in node.children))
         table = MarkdownTable(cols=n_cols)
-        self.current.add_widget(table)
+        self.content.add_widget(table)
         self.current = table
 
         def _format_cell_text(text, bold: bool):
@@ -143,10 +143,10 @@ class MarkdownDocument(ScrollView):
             if label_text == self.title:
                 return
             label = MarkdownHeading(
-                document=self,
-                level=node.level,
-                content=node.children[0].children,
-            )
+                    document=self,
+                    level=node.level,
+                    content=node.children[0].children,
+                    )
             self.content.add_widget(label)
 
         elif cls is marko.block.List:

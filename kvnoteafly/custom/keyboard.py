@@ -13,6 +13,9 @@ from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivy.uix.widget import Widget
 from kivy.utils import get_color_from_hex
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from services.domain import MarkdownNoteDict
 
 from utils import import_kv
 
@@ -75,9 +78,9 @@ class ContentKeyboard(BoxLayout):
     HSPACE_SINGLE = 0.2
     ANIMATION_WINDOW = 2
 
-    def __init__(self, content_data, **kwargs):
+    def __init__(self, content_data: "MarkdownNoteDict", **kwargs):
         self.note_text = content_data["text"] if content_data["text"] else ""
-        self.keyboard_buttons = content_data["keys_str"].split(",")
+        self.keyboard_buttons = content_data["shortcut_keys"]
         super(ContentKeyboard, self).__init__(**kwargs)
         self.on_keyboard_buttons()
 

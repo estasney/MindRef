@@ -64,7 +64,7 @@ class FileSystemBackend(BackendProtocol):
         if not value:
             self._current_category = None
             self._index = None
-            self._category_meta = None
+            self.category_meta = []
             return
         if value not in self.categories:
             raise KeyError(f"{value} not found in Categories")
