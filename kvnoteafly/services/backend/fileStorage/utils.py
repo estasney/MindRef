@@ -31,7 +31,9 @@ async def _load_category_meta(i: int, note_path: Path) -> tuple[int, str, Path]:
 
 async def _load_category_metas(note_paths: list[Path]):
     note_paths_ordered = await _sort_fp_mtimes(note_paths)
-    meta_texts = await asyncio.gather(*[_load_category_meta(i, f) for i, f in enumerate(note_paths_ordered)])
+    meta_texts = await asyncio.gather(
+        *[_load_category_meta(i, f) for i, f in enumerate(note_paths_ordered)]
+    )
     return meta_texts
 
 

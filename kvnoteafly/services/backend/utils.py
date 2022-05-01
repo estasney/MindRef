@@ -20,7 +20,6 @@ def get_md_node_text(node: "BlockElement"):
 
 
 class LazyLoaded:
-
     def __init__(self, default: Optional[Callable] = None):
         self.default = default if default is None else default()
 

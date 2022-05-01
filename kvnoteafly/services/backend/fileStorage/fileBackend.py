@@ -7,7 +7,12 @@ from typing import Optional, cast
 from marko.ext.gfm import gfm
 
 from services.backend import BackendProtocol, NoteIndex
-from services.backend.fileStorage.utils import CategoryFiles, CategoryNoteMeta, _get_folder_files, _load_category_metas
+from services.backend.fileStorage.utils import (
+    CategoryFiles,
+    CategoryNoteMeta,
+    _get_folder_files,
+    _load_category_metas,
+)
 from services.backend.utils import LazyLoaded
 from services.domain import MarkdownNote, MarkdownNoteMeta
 
@@ -49,7 +54,10 @@ class FileSystemBackend(BackendProtocol):
         category_files = self.category_files[self.current_category]
         meta_texts = asyncio.run(_load_category_metas(category_files))
         meta_texts = cast(list[tuple[int, str]], meta_texts)
-        return [MarkdownNoteMeta(idx=i, text=text, file=f).to_dict() for i, text, f in meta_texts]
+        return [
+            MarkdownNoteMeta(idx=i, text=text, file=f).to_dict()
+            for i, text, f in meta_texts
+        ]
 
     @property
     def categories(self) -> list[str]:
@@ -84,7 +92,13 @@ class FileSystemBackend(BackendProtocol):
         with open(note_file, mode="r", encoding="utf-8") as fp:
             note_text = fp.read()
         md_doc = gfm.parse(note_text)
-        return MarkdownNote(text=note_text, category=category, idx=index, document=md_doc, file=note_file)
+        return MarkdownNote(
+            text=note_text,
+            category=category,
+            idx=index,
+            document=md_doc,
+            file=note_file,
+        )
 
     def next_note(self) -> MarkdownNote:
         if not self._index:

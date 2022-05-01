@@ -29,7 +29,7 @@ class NoteContent(BoxLayout):
     def set(self, content_data: "MarkdownNoteDict"):
         self.clear_widgets()
         Logger.debug(f"NoteContent: {content_data}")
-        if content_data.get('has_shortcut', False):
+        if content_data.get("has_shortcut", False):
             self._set_keyboard(content_data)
         else:
             self._set_markdown(content_data)

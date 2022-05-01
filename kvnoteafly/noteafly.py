@@ -14,7 +14,7 @@ from kivy.properties import (
     ObjectProperty,
     OptionProperty,
     StringProperty,
-    )
+)
 from kivy.uix.screenmanager import NoTransition, SlideTransition
 
 from custom.screens import NoteAppScreenManager
@@ -54,7 +54,9 @@ class NoteAFly(App):
     """
 
     APP_NAME = "NoteAFly"
-    note_service = FileSystemBackend(storage_path=Path(os.environ.get("NOTES_PATH")).expanduser().resolve())
+    note_service = FileSystemBackend(
+        storage_path=Path(os.environ.get("NOTES_PATH")).expanduser().resolve()
+    )
     note_categories = ListProperty(note_service.categories)
     note_category = StringProperty("")
     note_data = DictProperty(rebind=True)
@@ -69,14 +71,14 @@ class NoteAFly(App):
     screen_manager = ObjectProperty()
 
     colors = DictProperty(
-            {
-                "Light":   (0.3843137254901961, 0.4470588235294118, 0.4823529411764706),
-                "Primary": (0.21568627450980393, 0.2784313725490195, 0.30980392156862746),
-                "Dark":    (0.06274509803921569, 0.1254901960784313, 0.15294117647058825),
-                "Accent1": (0.8588235294117648, 0.227450980392157, 0.20392156862745092),
-                "Accent2": (0.02352941176470591, 0.8392156862745098, 0.6274509803921572),
-                }
-            )
+        {
+            "Light": (0.3843137254901961, 0.4470588235294118, 0.4823529411764706),
+            "Primary": (0.21568627450980393, 0.2784313725490195, 0.30980392156862746),
+            "Dark": (0.06274509803921569, 0.1254901960784313, 0.15294117647058825),
+            "Accent1": (0.8588235294117648, 0.227450980392157, 0.20392156862745092),
+            "Accent2": (0.02352941176470591, 0.8392156862745098, 0.6274509803921572),
+        }
+    )
 
     def on_display_state(self, instance, new):
         if new != "list":
@@ -138,8 +140,8 @@ class NoteAFly(App):
             self.note_category_meta = self.note_service.category_meta
             if not self.next_note_scheduler:
                 self.next_note_scheduler = Clock.schedule_interval(
-                        self.paginate_note, self.paginate_interval
-                        )
+                    self.paginate_note, self.paginate_interval
+                )
                 if self.play_state == "pause":
                     self.next_note_scheduler.cancel()
             else:
@@ -154,16 +156,15 @@ class NoteAFly(App):
     def build(self):
 
         sm = NoteAppScreenManager(
-                self,
-                transition=NoTransition()
-                if os.environ.get("NO_TRANSITION", False)
-                else SlideTransition(),
-                )
+            self,
+            transition=NoTransition()
+            if os.environ.get("NO_TRANSITION", False)
+            else SlideTransition(),
+        )
         self.screen_manager = sm
-        self.play_state = os.environ.get('PLAY_STATE', 'play')
-        self.note_category = os.environ.get('CATEGORY_SELECTED', '')
-        self.log_level = int(os.environ.get('LOG_LEVEL', logging.ERROR))
-
+        self.play_state = os.environ.get("PLAY_STATE", "play")
+        self.note_category = os.environ.get("CATEGORY_SELECTED", "")
+        self.log_level = int(os.environ.get("LOG_LEVEL", logging.ERROR))
 
         return sm
 

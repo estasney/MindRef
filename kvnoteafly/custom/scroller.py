@@ -6,7 +6,7 @@ from kivy.properties import (
     StringProperty,
     NumericProperty,
     ListProperty,
-    )
+)
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
@@ -40,9 +40,7 @@ class ListItem(GridLayout):
     title_text = StringProperty()
     index = NumericProperty()
 
-    def __init__(
-            self, content_data: "NoteMetaDataDict", *args, **kwargs
-            ):
+    def __init__(self, content_data: "NoteMetaDataDict", *args, **kwargs):
         self.title_text = content_data["title"]
         self.index = content_data["idx"]
         super().__init__(**kwargs)
@@ -78,19 +76,19 @@ class ListView(GridLayout):
         for note in meta_notes:
             if note["has_shortcut"]:
                 self.add_widget(
-                        ListItemKeyboard(
-                                content_data=note,
-                                width=Window.width,
-                                height=(Window.height / 6),
-                                size_hint=(None, None),
-                                )
-                        )
+                    ListItemKeyboard(
+                        content_data=note,
+                        width=Window.width,
+                        height=(Window.height / 6),
+                        size_hint=(None, None),
+                    )
+                )
             else:
                 self.add_widget(
-                        ListItem(
-                                content_data=note,
-                                width=Window.width,
-                                height=(Window.height / 6),
-                                size_hint=(None, None),
-                                )
-                        )
+                    ListItem(
+                        content_data=note,
+                        width=Window.width,
+                        height=(Window.height / 6),
+                        size_hint=(None, None),
+                    )
+                )

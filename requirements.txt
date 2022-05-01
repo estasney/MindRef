@@ -7,9 +7,9 @@ Pygments~=2.10.0
 pyperclip~=1.8.2
 pytest~=7.1.1
 python-dotenv~=0.19.1
+PyYAML
 requests~=2.26.0
 setuptools~=57.0.0
 sqlalchemy~=1.4.25
 sqlalchemy-utils
 toolz~=0.11.1
-PyYAML

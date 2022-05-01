@@ -35,7 +35,9 @@ class MarkdownNoteMeta:
     shortcut_keys: Optional[tuple[str, ...]] = field(init=False, default=None)
 
     SHORTCUT_PATTERN = re.compile(r"(?:`{3}shortcut\s+)([^`\n]+)")
-    FENCED_PATTERN = re.compile(r"^(?: *`{3}[a-z\s]*$)(?:[\w\s.\W]+)(?:`{3})", flags=re.MULTILINE)
+    FENCED_PATTERN = re.compile(
+        r"^(?: *`{3}[a-z\s]*$)(?:[\w\s.\W]+)(?:`{3})", flags=re.MULTILINE
+    )
     TITLE_PATTERN = re.compile(r"(?:#+ +)([\w ]+)", flags=re.MULTILINE)
 
     def to_dict(self) -> NoteMetaDataDict:
@@ -47,9 +49,11 @@ class MarkdownNoteMeta:
         if title_match := self.TITLE_PATTERN.search(title_haystack):
             self.title = title_match.group(1)
         if shortcut_match := self.SHORTCUT_PATTERN.search(self.text):
-            self.shortcut_keys = tuple((t.strip() for t in shortcut_match.group(1).split(",")))
+            self.shortcut_keys = tuple(
+                (t.strip() for t in shortcut_match.group(1).split(","))
+            )
             self.has_shortcut = True
-        if not hasattr(self, 'title'):
+        if not hasattr(self, "title"):
             self.title = self.file.stem.title()
 
 
@@ -72,7 +76,7 @@ class MarkdownNote:
             if isinstance(block, Heading):
                 if block.children and block.children[0].children:
                     self.title = block.children[0].children
-            if isinstance(block, FencedCode) and block.lang == 'shortcut':
+            if isinstance(block, FencedCode) and block.lang == "shortcut":
                 self.has_shortcut = True
                 code_txt = block.children[0].children.strip()
                 key_chars = [t.strip() for t in code_txt.split(",")]
@@ -82,5 +86,5 @@ class MarkdownNote:
                 head, _, rest = self.text.split("```")
                 self.text = "\n".join((head.strip(), rest.strip())).replace("#", "")
 
-        if not hasattr(self, 'title'):
+        if not hasattr(self, "title"):
             self.title = self.file.stem.title()

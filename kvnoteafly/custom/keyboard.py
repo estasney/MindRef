@@ -14,6 +14,7 @@ from kivy.uix.label import Label
 from kivy.uix.widget import Widget
 from kivy.utils import get_color_from_hex
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from services.domain import MarkdownNoteDict
 
