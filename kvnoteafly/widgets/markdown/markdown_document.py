@@ -13,12 +13,12 @@ from kivy.uix.scrollview import ScrollView
 from kivy.utils import get_color_from_hex, get_hex_from_color
 from marko.ext.gfm import gfm
 
-from custom.markdown.code.markdown_code import MarkdownCode
-from custom.markdown.list.markdown_list import MarkdownList
-from custom.markdown.list.markdown_list_item import MarkdownListItem
-from custom.markdown.markdown_heading import MarkdownHeading
-from custom.markdown.paragraph.markdown_paragraph import MarkdownParagraph
-from custom.markdown.table.markdown_table import (
+from widgets.markdown.code.markdown_code import MarkdownCode
+from widgets.markdown.list.markdown_list import MarkdownList
+from widgets.markdown.list.markdown_list_item import MarkdownListItem
+from widgets.markdown.markdown_heading import MarkdownHeading
+from widgets.markdown.paragraph.markdown_paragraph import MarkdownParagraph
+from widgets.markdown.table.markdown_table import (
     MarkdownCell,
     MarkdownCellContent,
     MarkdownTable,
@@ -75,7 +75,6 @@ class MarkdownDocument(ScrollView):
 
     @classmethod
     def get_node_text(cls, node):
-        Logger.debug(f"Get Node Text: {node}")
         return get_md_node_text(node)
 
     def _load_paragraph_node(

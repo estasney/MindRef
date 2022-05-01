@@ -11,7 +11,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
 
-from custom.keyboard import KeyboardImage
+from widgets.keyboard import KeyboardImage
 from utils import import_kv
 
 if TYPE_CHECKING:

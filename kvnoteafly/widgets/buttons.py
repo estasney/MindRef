@@ -1,7 +1,6 @@
 from kivy.app import App
 from kivy.properties import (
     BooleanProperty,
-    Clock,
     ColorProperty,
     ListProperty,
     StringProperty,
@@ -38,7 +37,7 @@ class GreenButton(RoundedButton):
 
 class ImageButton(ButtonBehavior, Image):
     def __init__(self, src, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__()
         self.source = src
 
     def collide_point(self, x, y):
@@ -49,7 +48,7 @@ class ImageButton(ButtonBehavior, Image):
 class DynamicImageButton(ButtonBehavior, Image):
     sources = ListProperty([])
 
-    def __init__(self, sources: "list[str]", **kwargs):
+    def __init__(self, sources: list[str], **kwargs):
         super().__init__(**kwargs)
         self.sources = sources
         if "source" in kwargs:
@@ -80,14 +79,9 @@ class PlayStateButton(DynamicImageButton):
 
     def toggle_play_state(self):
         app = App.get_running_app()
-        is_playing = app.play_state == "play"
-        if is_playing:
-            task = lambda x: setattr(App.get_running_app(), "play_state", "pause")
-        else:
-            task = lambda x: setattr(App.get_running_app(), "play_state", "play")
-        Clock.schedule_once(task, 0.1)
+        app.play_state = "pause" if app.play_state == "play" else "play"
 
-    def on_playing(self, old, new):
+    def on_playing(self, _old, new):
         self.source = self.sources[0] if new else self.sources[1]
         self.color = [1, 1, 1, 1] if new else [0.86666, 0.247, 0.0627, 1]
 

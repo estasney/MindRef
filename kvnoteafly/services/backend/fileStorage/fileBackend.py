@@ -2,19 +2,20 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
-from typing import Optional, cast
+from typing import Optional, cast, TYPE_CHECKING
 
 from marko.ext.gfm import gfm
 
 from services.backend import BackendProtocol, NoteIndex
 from services.backend.fileStorage.utils import (
-    CategoryFiles,
-    CategoryNoteMeta,
     _get_folder_files,
     _load_category_metas,
 )
 from services.backend.utils import LazyLoaded
 from services.domain import MarkdownNote, MarkdownNoteMeta
+
+if TYPE_CHECKING:
+    from services.backend.fileStorage.utils import CategoryNoteMeta, CategoryFiles
 
 
 class FileSystemBackend(BackendProtocol):

@@ -1,9 +1,8 @@
-from kivy.properties import Logger, ObjectProperty, StringProperty
+from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.gridlayout import GridLayout
-from kivy.utils import escape_markup
-from pygments import highlight, lexers, styles
+from pygments import lexers, styles
 from pygments.formatters.bbcode import BBCodeFormatter
-from pygments.lexers.python import PythonLexer
+
 from utils import import_kv
 
 import_kv(__file__)
@@ -21,6 +20,3 @@ class MarkdownCode(GridLayout):
         self.formatter = BBCodeFormatter(style=self.styler)
         self.lexer = lexers.get_lexer_by_name(lexer)
         self.background_color = self.styler.background_color
-
-    def on_lexer(self, instance, value):
-        Logger.debug(f"Lexer set to {value}")

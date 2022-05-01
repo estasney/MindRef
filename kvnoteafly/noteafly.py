@@ -18,7 +18,7 @@ from kivy.properties import (
 from kivy.uix.screenmanager import NoTransition, SlideTransition
 
 from services.backend.fileStorage.fileBackend import FileSystemBackend
-from custom.screens import NoteAppScreenManager
+from widgets.screens import NoteAppScreenManager
 
 load_dotenv()
 

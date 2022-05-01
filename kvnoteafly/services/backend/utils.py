@@ -24,7 +24,6 @@ class LazyLoaded:
         self.default = default if default is None else default()
 
     def __set_name__(self, owner, name):
-        self.public_name = name
         self.private_name = f"_{name}"
         setattr(owner, self.private_name, self.default)
 

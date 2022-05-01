@@ -3,10 +3,10 @@ from typing import TYPE_CHECKING
 from kivy.properties import Logger, ObjectProperty, StringProperty
 from kivy.uix.boxlayout import BoxLayout
 
-from custom.code import ContentCode
-from custom.keyboard import ContentKeyboard
-from custom.markdown.markdown_document import MarkdownDocument
-from custom.rst import ContentRST
+
+from widgets.keyboard import ContentKeyboard
+from widgets.markdown.markdown_document import MarkdownDocument
+
 from utils import import_kv
 
 if TYPE_CHECKING:

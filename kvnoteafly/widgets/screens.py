@@ -9,7 +9,7 @@ from utils import import_kv
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from custom.chooser import NoteCategoryButton
+    from widgets.chooser import NoteCategoryButton
     from services.domain import MarkdownNoteDict
 
 import_kv(__file__)
