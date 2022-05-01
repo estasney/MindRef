@@ -1,22 +1,18 @@
-from pathlib import Path
+from typing import Sequence, TYPE_CHECKING
 
 from kivy.core.window import Window
 from kivy.properties import (
+    ListProperty,
+    NumericProperty,
     ObjectProperty,
     StringProperty,
-    NumericProperty,
-    ListProperty,
 )
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
 
 from custom.keyboard import KeyboardImage
-from db import NoteType
 from utils import import_kv
-from typing import TYPE_CHECKING, Sequence, Union, cast
-
-from kvnoteafly.services.domain import MarkdownNote, MarkdownNoteDict
 
 if TYPE_CHECKING:
     from kvnoteafly.services.domain import NoteMetaDataDict
