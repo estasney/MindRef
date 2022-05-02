@@ -27,7 +27,7 @@ class NoteAFly(App):
     """
     Attributes
     ----------
-    APP_NAME: str
+
     note_service: BackendProtocol
     note_categories: ListProperty
         All known note categories
@@ -55,7 +55,8 @@ class NoteAFly(App):
 
     APP_NAME = "NoteAFly"
     note_service = FileSystemBackend(
-        storage_path=Path(os.environ.get("NOTES_PATH")).expanduser().resolve()
+        new_first=True,
+        storage_path=Path(os.environ.get("NOTES_PATH")).expanduser().resolve(),
     )
     note_categories = ListProperty(note_service.categories)
     note_category = StringProperty("")

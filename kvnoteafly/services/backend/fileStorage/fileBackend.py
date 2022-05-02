@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
-from typing import Optional, cast, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, cast
 
 from marko.ext.gfm import gfm
 
@@ -19,7 +19,6 @@ if TYPE_CHECKING:
 
 
 class FileSystemBackend(BackendProtocol):
-
     _index: Optional[NoteIndex]
     _current_category: Optional[str]
     storage_path: Path
@@ -31,8 +30,9 @@ class FileSystemBackend(BackendProtocol):
     Individual notes defined as markdown files within their respective categories
     """
 
-    def __init__(self, storage_path: str | Path):
+    def __init__(self, storage_path: str | Path, new_first):
         self.storage_path = Path(storage_path)
+        self.new_first = new_first
         self._category_files = None
         self._category_meta = []
         self._current_category = None
@@ -53,7 +53,9 @@ class FileSystemBackend(BackendProtocol):
     @category_meta
     def _load_category_meta(self):
         category_files = self.category_files[self.current_category]
-        meta_texts = asyncio.run(_load_category_metas(category_files))
+        meta_texts = asyncio.run(
+            _load_category_metas(category_files, new_first=self.new_first)
+        )
         meta_texts = cast(list[tuple[int, str]], meta_texts)
         return [
             MarkdownNoteMeta(idx=i, text=text, file=f).to_dict()

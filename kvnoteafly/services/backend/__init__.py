@@ -14,6 +14,16 @@ class BackendProtocol(ABC):
     def current_category(self):
         raise NotImplementedError
 
+    @current_category.setter
+    @abc.abstractmethod
+    def current_category(self, value):
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
+    def category_meta(self):
+        raise NotImplementedError
+
     @abc.abstractmethod
     def _discover_notes(self):
         raise NotImplementedError

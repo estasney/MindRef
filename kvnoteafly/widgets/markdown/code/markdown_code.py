@@ -2,6 +2,7 @@ from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.gridlayout import GridLayout
 from pygments import lexers, styles
 from pygments.formatters.bbcode import BBCodeFormatter
+from pygments.lexers import PythonLexer
 
 from utils import import_kv
 
