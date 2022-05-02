@@ -36,7 +36,7 @@ version = 0.1
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy,sqlalchemy==1.4.25,sqlalchemy_utils,python-dotenv,sqlite3,toolz,pygments,docutils,requests,urllib3,chardet,idna,marko[codehilite]
+requirements = python3,kivy,sqlalchemy==1.4.25,sqlalchemy_utils,python-dotenv,sqlite3,toolz,pygments,docutils,urllib3,chardet,idna,marko[codehilite]
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
