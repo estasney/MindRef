@@ -47,7 +47,7 @@ class FileSystemBackend(BackendProtocol):
         -----
         Does not read the notes, only gathers a listing of them
         """
-        note_files = asyncio.run(_get_folder_files(self.storage_path))
+        note_files = asyncio.run(_get_folder_files(self.storage_path, self.new_first))
         return note_files
 
     @category_meta
