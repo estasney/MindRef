@@ -1,19 +1,60 @@
+from operator import itemgetter
+
 from kivy.app import App
 from kivy.properties import (
     BooleanProperty,
     ColorProperty,
     ListProperty,
+    ObjectProperty,
     StringProperty,
 )
 from kivy.uix.behaviors import ButtonBehavior
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.image import Image
 from kivy.utils import get_color_from_hex
 from kivy.vector import Vector
-
+from kivy import Logger
 from utils import import_kv
 
 import_kv(__file__)
+
+
+class ButtonBar(BoxLayout):
+
+    last_touched = ObjectProperty()
+
+    def on_touch_down(self, touch):
+        """
+        These buttons tend to overlap. To avoid pressing multiple, we dispatch the event to the 'closest' button
+        """
+        if not self.collide_point(*touch.pos):
+            Logger.debug("Touch outside")
+            return
+        if touch.is_double_tap:
+            Logger.debug("Double Tap")
+        collides = [
+            (child, child.touch_offset(*touch.pos))
+            for child in self.children[:]
+            if hasattr(child, "touch_offset")
+        ]
+        if not any(collides):
+            # Shouldn't happen
+            Logger.debug("No Collides Found")
+            return
+
+        # Find closest
+        child = min(collides, key=itemgetter(1))[0]
+        child.dispatch("on_touch_down", touch)
+        Logger.debug(f"Found Closest, {child}")
+        self.last_touched = child
+        return True
+
+    def on_touch_up(self, touch):
+        if self.last_touched:
+            Logger.debug(f"Calling Last Touched {self.last_touched}")
+            result = self.last_touched.dispatch("on_touch_up", touch)
+            return result
 
 
 class RoundedButton(Button):
@@ -40,6 +81,10 @@ class ImageButton(ButtonBehavior, Image):
         super().__init__()
         self.source = src
 
+    def touch_offset(self, x, y) -> tuple[float, float]:
+        distance = Vector(x, y).distance(self.center)
+        return distance, self.norm_image_size[0] / 2
+
     def collide_point(self, x, y):
         distance = Vector(x, y).distance(self.center)
         return distance <= self.norm_image_size[0] / 2
@@ -55,6 +100,10 @@ class DynamicImageButton(ButtonBehavior, Image):
             self.source = kwargs.pop("source")
         else:
             self.source = self.sources[0]
+
+    def touch_offset(self, x, y) -> tuple[float, float]:
+        distance = Vector(x, y).distance(self.center)
+        return distance, self.norm_image_size[0] / 2
 
     def collide_point(self, x, y):
         distance = Vector(x, y).distance(self.center)
@@ -73,7 +122,7 @@ class PlayStateButton(DynamicImageButton):
                 "atlas://static/icons/button_bar/play",
                 "atlas://static/icons/button_bar/pause",
             ],
-            **kwargs
+            **kwargs,
         )
         App.get_running_app().bind()
 
