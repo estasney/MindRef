@@ -20,8 +20,9 @@
         text: root.title_text
         size_hint_x: 0.95
         mipmap: True
-        font_size: 18
-        text_size: self.size[0]*0.9, None
+        font_size: min(self.size[1] / 2, 18)
+        text_size: self.size[0], None
+        padding_x: 5
         valign: 'middle'
         halign: 'left'
     Button:
@@ -54,7 +55,8 @@
         size_hint_x: 0.5
         mipmap: True
         text_size: self.size[0]*0.9, None
-        font_size: 18
+        font_size: min(self.size[1] / 2, 18)
+
         valign: 'middle'
         halign: 'left'
     ListItemKeyboardContainer:

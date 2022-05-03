@@ -37,9 +37,12 @@
             color: hex('#ffffff')
             text: root.title_text
             bold: True
-            font_size: 28
+            font_size: min(self.size[1] / 2, 28)
+            text_size: self.size[0]*0.9, None
             pos_hint: {"x": 0, "y": 0}
             size_hint: (0.7, 1)
+            halign: "center"
+            valign: "center"
             mipmap: True
         ButtonBar:
             id: button_bar
