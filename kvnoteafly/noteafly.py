@@ -165,7 +165,7 @@ class NoteAFly(App):
         self.screen_manager = sm
         self.play_state = os.environ.get("PLAY_STATE", "play")
         self.note_category = os.environ.get("CATEGORY_SELECTED", "")
-        self.log_level = int(os.environ.get("LOG_LEVEL", logging.DEBUG))
+        self.log_level = int(os.environ.get("LOG_LEVEL", logging.INFO))
 
         return sm
 
