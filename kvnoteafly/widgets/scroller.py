@@ -69,6 +69,7 @@ class ListItemKeyboardContainer(BoxLayout):
 class ListView(GridLayout):
     def set(self, meta_notes: Sequence["NoteMetaDataDict"]):
         self.clear_widgets()
+
         for note in meta_notes:
             if note["has_shortcut"]:
                 self.add_widget(

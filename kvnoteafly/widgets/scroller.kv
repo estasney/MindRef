@@ -18,12 +18,12 @@
     cols: 2
     Label:
         text: root.title_text
-        size_hint_x: 0.8
+        size_hint_x: 0.95
         mipmap: True
-        font_size: 36
-        text_size: self.size
+        font_size: 18
+        text_size: self.size[0]*0.9, None
         valign: 'middle'
-        halign: 'center'
+        halign: 'left'
     Button:
         canvas:
             Color:
@@ -34,8 +34,8 @@
         background_color: [*app.colors['Dark'], 1]
         background_normal: ''
         opacity: 1 if self.state == 'normal' else 0.6
-        size_hint_x: 0.2
-        text: str(root.index)
+        size_hint_x: 0.05
+
         mipmap: True
         on_release: app.select_index(root.index)
 
@@ -51,15 +51,15 @@
     cols: 3
     Label:
         text: root.title_text
-        size_hint_x: 0.3
+        size_hint_x: 0.5
         mipmap: True
-        text_size: self.size
-        font_size: 24
+        text_size: self.size[0]*0.9, None
+        font_size: 18
         valign: 'middle'
-        halign: 'center'
+        halign: 'left'
     ListItemKeyboardContainer:
         id: kbd
-        size_hint_x: 0.3
+        size_hint_x: 0.4
     Button:
         canvas:
             Color:
@@ -70,14 +70,11 @@
         background_color: [*app.colors['Dark'], 1]
         background_normal: ''
         opacity: 1 if self.state == 'normal' else 0.6
-        size_hint_x: 0.1
-        text: ''
+        size_hint_x: 0.05
         mipmap: True
         on_release: app.select_index(root.index)
 
 
 <ListItemKeyboardContainer>:
     orientation: 'horizontal'
-    canvas.before:
-        Color:
-            rgba: 1, 1, 1, 0.8
+    padding: [0,0,10,0]
