@@ -71,7 +71,7 @@
         background_normal: ''
         opacity: 1 if self.state == 'normal' else 0.6
         size_hint_x: 0.1
-        text: str(root.index)
+        text: ''
         mipmap: True
         on_release: app.select_index(root.index)
 
@@ -81,6 +81,3 @@
     canvas.before:
         Color:
             rgba: 1, 1, 1, 0.8
-
-
-
