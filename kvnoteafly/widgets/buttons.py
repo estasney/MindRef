@@ -20,8 +20,11 @@ from utils import import_kv
 import_kv(__file__)
 
 
-class ButtonBar(BoxLayout):
+def get_uri(name):
+    return App.get_running_app().atlas_service.uri_for(name, atlas_name="button_bar")
 
+
+class ButtonBar(BoxLayout):
     last_touched = ObjectProperty()
 
     def on_touch_down(self, touch):
@@ -116,12 +119,10 @@ class PlayStateButton(DynamicImageButton):
     color = ColorProperty([1, 1, 1, 1])
 
     def __init__(self, **kwargs):
+
         super().__init__(
-            source="atlas://static/icons/button_bar/play",
-            sources=[
-                "atlas://static/icons/button_bar/play",
-                "atlas://static/icons/button_bar/pause",
-            ],
+            source=get_uri("play"),
+            sources=[get_uri("play"), get_uri("pause")],
             **kwargs,
         )
         App.get_running_app().bind()
@@ -137,19 +138,19 @@ class PlayStateButton(DynamicImageButton):
 
 class BackButton(ImageButton):
     def __init__(self, *args, **kwargs):
-        super().__init__(src="atlas://static/icons/button_bar/back")
+        super().__init__(src=get_uri("back"))
 
 
 class ForwardButton(ImageButton):
     def __init__(self, *args, **kwargs):
-        super().__init__(src="atlas://static/icons/button_bar/forward")
+        super().__init__(src=get_uri("forward"))
 
 
 class ReturnButton(ImageButton):
     def __init__(self, *args, **kwargs):
-        super().__init__(src="atlas://static/icons/button_bar/back_arrow")
+        super().__init__(src=get_uri("back_arrow"))
 
 
 class ListViewButton(ImageButton):
     def __init__(self, *args, **kwargs):
-        super().__init__(src="atlas://static/icons/button_bar/list_view")
+        super().__init__(src=get_uri("list_view"))

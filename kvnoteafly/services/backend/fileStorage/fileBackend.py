@@ -11,7 +11,7 @@ from services.backend.fileStorage.utils import (
     _get_folder_files,
     _load_category_metas,
 )
-from services.backend.utils import LazyLoaded
+from services.utils import LazyLoaded
 from services.domain import MarkdownNote, MarkdownNoteMeta
 
 if TYPE_CHECKING:

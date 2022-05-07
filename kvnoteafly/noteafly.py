@@ -17,6 +17,7 @@ from kivy.properties import (
 )
 from kivy.uix.screenmanager import NoTransition, SlideTransition
 
+from services.atlas.atlas import AtlasService
 from services.backend.fileStorage.fileBackend import FileSystemBackend
 from widgets.screens import NoteAppScreenManager
 
@@ -54,6 +55,7 @@ class NoteAFly(App):
     """
 
     APP_NAME = "NoteAFly"
+    atlas_service = AtlasService(storage_path=Path("./static").resolve())
     note_service = FileSystemBackend(
         new_first=True,
         storage_path=Path(os.environ.get("NOTES_PATH")).expanduser().resolve(),

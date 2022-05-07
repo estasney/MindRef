@@ -14,6 +14,7 @@ from kivy.uix.label import Label
 from kivy.uix.widget import Widget
 from kivy.utils import get_color_from_hex
 from typing import TYPE_CHECKING
+from kivy.app import App
 
 if TYPE_CHECKING:
     from services.domain import MarkdownNoteDict
@@ -44,8 +45,7 @@ class KeyboardImage(Image):
 
     def __init__(self, **kwargs):
         text = kwargs.pop("text")
-        # src = os.path.join("static", "keys", text.lower()) + ".png"
-        src = f"atlas://static/keys/keys/{text.lower()}"
+        src = App.get_running_app().atlas_service.uri_for(text.lower(), "keys")
         super().__init__(source=src, **kwargs)
 
     def on_pressed(self, obj, value):

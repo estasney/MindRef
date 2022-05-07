@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 import yaml
+from PIL import Image, ImageDraw
 
 
 @pytest.fixture(scope="session")
@@ -26,3 +27,31 @@ def stored_categories(storage_directory):
                 note_doc.write(f"# {note['text']}\n{note['title']}\n")
 
     return storage_directory, data
+
+
+@pytest.fixture()
+def stored_atlas(storage_directory):
+    def _stored_atlas(atlas_name, *img_names):
+        atlas_folder_path = storage_directory / atlas_name
+        atlas_folder_path.mkdir()
+        img_files = []
+        for im in img_names:
+            img_path = atlas_folder_path / im
+            img_path = img_path.with_suffix(".png")
+            img = Image.new(mode="RGB", size=(24, 24))
+            draw = ImageDraw.Draw(img)
+            draw.line((0, 0, *img.size), fill=128, width=10)
+            img.save(img_path)
+            img_files.append(str(img_path))
+        import os
+
+        os.environ["KIVY_NO_ARGS"] = "1"
+        from kivy.atlas import Atlas
+
+        Atlas.create(str(atlas_folder_path / atlas_name), img_files, (24 * 4, 24 * 4))
+        for im in img_names:
+            img_path = atlas_folder_path / im
+            img_path.with_suffix(".png").unlink()
+        return atlas_folder_path
+
+    return _stored_atlas

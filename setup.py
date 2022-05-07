@@ -53,7 +53,7 @@ setup(
     data_files=[
         (
             "data",
-            ["kvnoteafly/db/noteafly.db", "kvnoteafly/static/category_icons/*"],
+            ["kvnoteafly/db/noteafly.db", "kvnoteafly/static/category_img/*"],
         )
     ],
     license="MIT",

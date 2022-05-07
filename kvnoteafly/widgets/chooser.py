@@ -1,3 +1,4 @@
+from kivy.app import App
 from kivy.core.window import Window
 from kivy.properties import ListProperty, ObjectProperty, StringProperty
 from kivy.uix.behaviors import ButtonBehavior
@@ -55,7 +56,9 @@ class NoteCategoryButton(ButtonBehavior, BoxLayout):
 
     def __init__(self, text, **kwargs):
         super().__init__(**kwargs)
-        self.source = f"atlas://static/category_icons/category-img/{text.lower()}"
+        self.source = App.get_running_app().atlas_service.uri_for(
+            text.lower(), "category_img"
+        )
         self.text = text
 
     def collide_point(self, x, y):
