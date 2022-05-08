@@ -8,7 +8,8 @@ from marko.ext.gfm import gfm
 
 from services.backend import BackendProtocol, NoteIndex
 from services.backend.fileStorage.utils import (
-    _get_folder_files,
+    discover_folder_notes,
+    get_folder_files,
     _load_category_metas,
 )
 from services.utils import LazyLoaded
@@ -47,7 +48,9 @@ class FileSystemBackend(BackendProtocol):
         -----
         Does not read the notes, only gathers a listing of them
         """
-        note_files = asyncio.run(_get_folder_files(self.storage_path, self.new_first))
+        note_files = asyncio.run(
+            get_folder_files(self.storage_path, discover=discover_folder_notes)
+        )
         return note_files
 
     @category_meta
