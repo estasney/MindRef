@@ -55,33 +55,25 @@ class AtlasService(AtlasServiceProtocol):
                     atlas.append(AtlasItem(item.stem, af))
         return atlas
 
-    def _read_atlas(self, atlas_name: str) -> AtlasFileData:
+    def _match_atlas(self, atlas_name: str):
         try:
-            matched_item = next(
-                atlas for atlas in self.atlases if atlas.name == atlas_name
-            )
+            matched = next(atlas for atlas in self.atlases if atlas.name == atlas_name)
+            return matched
         except StopIteration as e:
             raise KeyError(f"{atlas_name} does not exist") from e
+
+    def _read_atlas(self, atlas_name: str) -> AtlasFileData:
+        matched_item = self._match_atlas(atlas_name)
         with matched_item.path.open(mode="r", encoding="utf-8") as fp:
             return json.load(fp)
 
     def _store_atlas(self, atlas_name, data):
-        try:
-            matched_item = next(
-                atlas for atlas in self.atlases if atlas.name == atlas_name
-            )
-        except StopIteration as e:
-            raise KeyError(f"{atlas_name} does not exist") from e
+        matched_item = self._match_atlas(atlas_name)
         with matched_item.path.open(mode="w+", encoding="utf-8") as fp:
             json.dump(data, fp)
 
     def _atlas_path(self, atlas_name: str) -> Path:
-        try:
-            matched_item = next(
-                atlas for atlas in self.atlases if atlas.name == atlas_name
-            )
-        except StopIteration as e:
-            raise KeyError(f"{atlas_name} does not exist") from e
+        matched_item = self._match_atlas(atlas_name)
         return matched_item.path.parent
 
     def save_to_atlas(
@@ -174,8 +166,38 @@ class AtlasService(AtlasServiceProtocol):
 
         self._store_atlas(atlas_name, atlas_data)
 
-    def get_from_atlas(self, name: str, atlas_name: str):
-        pass
+    def get_from_atlas(self, name: str, atlas_name: str) -> PIL.Image.Image:
+        """
+        Retrieve an image by name and atlas name
+        Parameters
+        ----------
+        name
+        atlas_name
+
+        Returns
+        -------
+
+        """
+        atlas_data = self._read_atlas(atlas_name)
+        matched_img = None
+        matched_atlas_img = None
+        for atlas_img, members in atlas_data.items():
+            matched_img = next(
+                ((img, members[img]) for img in members if img == name), None
+            )
+            if matched_img:
+                matched_atlas_img = atlas_img
+                break
+        if not matched_img:
+            raise KeyError(f"{name} not found in atlas {atlas_name}")
+
+        matched_img_size = matched_img[1]
+        atlas_path = self._atlas_path(atlas_name)
+        atlas_img_path = atlas_path / matched_atlas_img
+        img_obj = PIL.Image.open(atlas_img_path)
+        x, y, w, h = matched_img_size
+        cropped_im = img_obj.crop((x, (img_obj.height - h - y), x + w, y + h))
+        return cropped_im
 
     def uri_for(self, name: str, atlas_name: str):
         try:

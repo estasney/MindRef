@@ -3,12 +3,15 @@ from __future__ import annotations
 import abc
 from abc import ABC
 from pathlib import Path
-from typing import Optional, Sequence
+from typing import Optional, Sequence, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import PIL.Image
 
 
 class AtlasServiceProtocol(ABC):
     @abc.abstractmethod
-    def get_from_atlas(self, name: str, atlas_name: str):
+    def get_from_atlas(self, name: str, atlas_name: str) -> "PIL.Image.Image":
         raise NotImplementedError
 
     @abc.abstractmethod
