@@ -1,6 +1,7 @@
+import string
 import tempfile
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Sequence
 from string import ascii_letters, digits
 import pytest
 import yaml
@@ -32,6 +33,7 @@ def stored_categories(storage_directory):
 
 
 def img_maker(width, height):
+
     img = Image.new(mode="RGB", size=(width, height))
     draw = ImageDraw.Draw(img)
     draw.line((0, 0, *img.size), fill=128, width=10)
@@ -48,27 +50,31 @@ def static_vars(**kwargs):
 
 
 @pytest.fixture()
-def stored_atlas(storage_directory):
+def img_name():
+    @static_vars(seen=set([]))
+    def _img_name(pool: Sequence[str], name_len: tuple[int, int]):
+        while True:
+            img_name_len = random.randint(*name_len)
+            img_letters = random.choices(pool, k=img_name_len)
+            img_n = "".join(img_letters)
+            if img_n not in _img_name.seen:
+                _img_name.seen.add(img_n)
+                return img_n
+
+    return _img_name
+
+
+@pytest.fixture()
+def stored_atlas(storage_directory, img_name):
     def _stored_atlas(atlas_name, atlas_type: Literal["mono", "multi"], n_images):
         WIDTH, HEIGHT = 10, 10
-        name_pool = ascii_letters + digits
-
-        @static_vars(seen=set([]))
-        def img_name():
-            while True:
-                img_name_len = random.randint(1, 16)
-                img_letters = random.choices(name_pool, k=img_name_len)
-                img_n = "".join(img_letters)
-                if img_n not in img_name.seen:
-                    img_name.seen.add(img_n)
-                    return img_n
-
+        NAME_POOL = string.ascii_letters + string.digits
         atlas_folder_path = storage_directory / atlas_name
         atlas_folder_path.mkdir()
         img_files = []
         img_names = []
         for i in range(n_images):
-            im = img_name()
+            im = img_name(NAME_POOL, (1, 16))
             img_path = atlas_folder_path / im
             img_path = img_path.with_suffix(".png")
             img = img_maker(WIDTH, HEIGHT)

@@ -1,5 +1,9 @@
+from __future__ import annotations
+
 import abc
 from abc import ABC
+from pathlib import Path
+from typing import Optional, Sequence
 
 
 class AtlasServiceProtocol(ABC):
@@ -8,7 +12,14 @@ class AtlasServiceProtocol(ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def save_to_atlas(self, img, name: str, atlas_name: str):
+    def save_to_atlas(
+        self,
+        images: Sequence[Path | str],
+        image_names: Sequence[str],
+        atlas_name: str,
+        atlas_size: Optional[tuple[int, int]] = None,
+        padding=2,
+    ):
         raise NotImplementedError
 
     @abc.abstractmethod

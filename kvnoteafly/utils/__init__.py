@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 from functools import wraps
 from kivy.lang import Builder
@@ -38,3 +39,18 @@ def log_run_time(func):
         return result
 
     return wrapped_log_run_time
+
+
+class EnvironContext:
+    def __init__(self, vals: dict[str, str]):
+        self.vals = vals
+
+    def __enter__(self):
+        import os
+
+        for k, v in self.vals.items():
+            os.environ[k] = v
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        for k in self.vals.keys():
+            del os.environ[k]
