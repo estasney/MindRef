@@ -6,12 +6,14 @@ from registry import DottedList, Publisher
 
 class Topic(Publisher):
     def __call__(self, func: Callable[[Any], Any]):
-        @functools.wraps(func)
-        def publish_result(*args, **kwargs):
-            result = func(*args, **kwargs)
-            self.notify(result)
+        """Register a function as a listener"""
+        # @functools.wraps(func)
+        # def publish_result(*args, **kwargs):
+        #     result = func(*args, **kwargs)
+        #     self.notify(result)
+        self.listeners.append(func)
 
-        return publish_result
+        return func
 
     def __init__(self, name: str):
         super().__init__(name)

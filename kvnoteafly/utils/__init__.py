@@ -3,6 +3,7 @@ from datetime import datetime
 from functools import wraps
 from kivy.lang import Builder
 from kivy import Logger
+from typing import Any
 
 _LOG_LEVEL = None
 

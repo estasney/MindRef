@@ -10,18 +10,32 @@ Emitter = Callable[[Iterable[Listener], Any], Any]
 class Publisher(ABC):
 
     """
-    Metaclass that registers 0 or 1 emitters and 0 or more listeners
-
+    Metaclass that registers an emitter with 0 or more listeners
     """
 
-    emitter: Optional[Emitter]
+    emitter: Emitter
 
-    def __init__(self, name):
+    def __init__(self, name, emitter: Optional[Emitter] = None):
+        """
+
+        Parameters
+        ----------
+        name
+        emitter
+            If None, `self.emitter` will be a generic func that passes *args and **kwargs to all listeners
+        """
         self.name: str = name
-        self.emitter = None
+        self.emitter = emitter if emitter else self._default_emitter_factory()
         self.listeners: list[Listener] = []
 
-    def notify(self, result: Any) -> None:
+    def _default_emitter_factory(self):
+        def emitter(listeners, *args, **kwargs):
+            for listener in listeners:
+                listener(*args, **kwargs)
+
+        return emitter
+
+    def notify(self, *args, **kwargs) -> None:
         """
         Call `self.emitter(self.listeners, result)`
 
@@ -30,9 +44,7 @@ class Publisher(ABC):
         result
 
         """
-        if not self.emitter:
-            raise AttributeError(f"Emitter not set for {self}")
-        self.emitter(self.listeners, result)
+        self.emitter(self.listeners, *args, **kwargs)
 
     def set_emitter(self, emitter: Optional[Emitter]):
         """

@@ -6,12 +6,17 @@ from kvnoteafly.registry import Registry
 
 @pytest.fixture()
 def base_registry():
+    """Create a Registry"""
     reg = Registry("testapp")
     yield reg
 
 
 @pytest.fixture()
 def registry_topic(base_registry):
+    """
+    Add a Topic to base_registry
+    Remove Topic after use
+    """
     topic = base_registry.add_topic("testtopic")
     yield base_registry, topic
     base_registry.remove_topic("testtopic")
@@ -19,6 +24,8 @@ def registry_topic(base_registry):
 
 @pytest.fixture()
 def wrapped_func(registry_topic):
+    """ """
+
     def _wrapped_func(func, emitter, listener):
         registry, topic = registry_topic
         topic.set_emitter(emitter)

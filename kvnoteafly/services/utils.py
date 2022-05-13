@@ -1,4 +1,7 @@
-from typing import Callable, Optional
+from typing import Callable, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from registry import Registry
 
 
 class LazyLoaded:
@@ -26,3 +29,18 @@ class LazyLoaded:
         """Register a loader function"""
         self.loader = func.__name__
         return func
+
+
+class LazyRegistry:
+    registry: Optional["Registry"] = None
+
+    def __get__(self, instance, owner):
+        if self.registry:
+            return self.registry
+        try:
+            from utils.registry import app_registry
+
+            self.registry = app_registry
+            return self.registry
+        except ValueError:
+            return None

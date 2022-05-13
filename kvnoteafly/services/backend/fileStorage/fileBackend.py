@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Optional, TYPE_CHECKING, cast
 
 from marko.ext.gfm import gfm
+from toolz import groupby
 
 from services.backend import BackendProtocol, NoteIndex
 from services.backend.fileStorage.utils import (
@@ -12,7 +13,7 @@ from services.backend.fileStorage.utils import (
     get_folder_files,
     _load_category_metas,
 )
-from services.utils import LazyLoaded
+from services.utils import LazyLoaded, LazyRegistry
 from services.domain import MarkdownNote, MarkdownNoteMeta
 
 if TYPE_CHECKING:
@@ -25,10 +26,18 @@ class FileSystemBackend(BackendProtocol):
     storage_path: Path
     category_files: "CategoryFiles" = LazyLoaded()
     category_meta: "CategoryNoteMeta" = LazyLoaded(default=list)
+    registry = LazyRegistry()
 
     """
     Categories are defined with directories
     Individual notes defined as markdown files within their respective categories
+    
+    Notifies
+    --------
+    self._discover_notes -> note_files : tuple[category_name, img_path]
+        Images in category folders
+    
+    
     """
 
     def __init__(self, storage_path: str | Path, new_first):
@@ -42,15 +51,33 @@ class FileSystemBackend(BackendProtocol):
     @category_files
     def _discover_notes(self):
         """
-        Read `self.storage_path` looking for children folders and the associated notes within each
+        Read `self.storage_path` looking for children folders and the associated notes within each.
+
+        Notifies 'note_files' with Note Files
+        Notifies 'category_images' with Category Images
 
         Notes
         -----
         Does not read the notes, only gathers a listing of them
         """
-        note_files = asyncio.run(
+        note_files_bulk = asyncio.run(
             get_folder_files(self.storage_path, discover=discover_folder_notes)
         )
+
+        # Separate notes from images
+        def is_md(p: Path):
+            return p.suffix == ".md"
+
+        note_files = {}
+        img_files = []
+        for category_name, cat_files in note_files_bulk.items():
+            note_groups = groupby(is_md, cat_files)
+            note_files[category_name] = note_groups.get(True, [])
+            if img := note_groups.get(False):
+                img_files.append((category_name, img[0]))
+
+        self.registry.note_files.notify(note_files)
+        self.registry.category_images.notify(img_files)
         return note_files
 
     @category_meta
@@ -60,10 +87,12 @@ class FileSystemBackend(BackendProtocol):
             _load_category_metas(category_files, new_first=self.new_first)
         )
         meta_texts = cast(list[tuple[int, str]], meta_texts)
-        return [
+        meta_dicts = [
             MarkdownNoteMeta(idx=i, text=text, file=f).to_dict()
             for i, text, f in meta_texts
         ]
+        self.registry.note_meta.notify(meta_dicts)
+        return meta_dicts
 
     @property
     def categories(self) -> list[str]:

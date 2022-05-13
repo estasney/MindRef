@@ -12,6 +12,7 @@ from tests.services.conftest import img_maker
 
 @pytest.mark.parametrize("atlas_type", ["mono", "multi"])
 @pytest.mark.parametrize("n", [1, 5, 20])
+@pytest.mark.atlas
 def test_atlas_discovery(stored_atlas, atlas_type, n):
     """
     Given atlas file, folder and images
@@ -34,6 +35,7 @@ def test_atlas_discovery(stored_atlas, atlas_type, n):
 @pytest.mark.parametrize("duplicated", [True, False])
 @pytest.mark.parametrize("atlas_type", ["mono", "multi"])
 @pytest.mark.parametrize("n", [1, 5, 20])
+@pytest.mark.atlas
 def test_append_atlas(stored_atlas, atlas_type, n, img_name, duplicated):
     atlas_folder, image_names = stored_atlas("test_atlas", atlas_type, n)
     atlas_file = (atlas_folder / "test_atlas").with_suffix(".atlas")

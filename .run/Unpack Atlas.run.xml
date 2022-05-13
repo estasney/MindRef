@@ -18,7 +18,7 @@
       <option name="useCurrentConnection" value="false" />
     </EXTENSION>
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/atlas_utils/unpack.py" />
-    <option name="PARAMETERS" value="./kvnoteafly/static/category_icons/category-img.atlas" />
+    <option name="PARAMETERS" value="./kvnoteafly/static/category_img/category-img.atlas" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />

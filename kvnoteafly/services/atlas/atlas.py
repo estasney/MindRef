@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import asyncio
 import json
+import os
 import re
 import shutil
 import tempfile
@@ -8,12 +10,16 @@ from operator import itemgetter
 from pathlib import Path
 from typing import NamedTuple, NewType, Optional, Sequence, Union
 
+from kivy import Logger
+
+from utils.registry import app_registry
 import PIL.Image
 from kivy.atlas import Atlas as KivyAtlas
 
 from services.atlas import AtlasServiceProtocol
 from services.utils import LazyLoaded
 from utils import EnvironContext
+from .utils import read_img_sizes
 
 ImgParamType = Union[str, Path, PIL.Image.Image]
 
@@ -41,10 +47,25 @@ class AtlasService(AtlasServiceProtocol):
     """
 
     atlases: list[AtlasItem] = LazyLoaded()
+    _instance = None
 
     def __init__(self, storage_path: str | Path):
         self.storage_path = Path(storage_path)
         self._atlases = None
+        app_registry.category_images(self.category_image_listener)
+
+    def __contains__(self, item):
+        """
+        Determine if an image belongs in one of AtlasService's atlases
+
+        This should be passed with the form '{atlas_name}.{image_name}'
+        """
+        if "." not in item:
+            raise ValueError(f"Expected {item} to be of form atlas_name.image_name")
+        atlas_name, image_name = item.split(".")
+        atlas_data = self._read_atlas(atlas_name)
+        image_names = set(name for name_grp in atlas_data.values() for name in name_grp)
+        return image_name in image_names
 
     @atlases
     def _discover_atlases(self):
@@ -147,22 +168,24 @@ class AtlasService(AtlasServiceProtocol):
         else:
             atlas_w, atlas_h = atlas_size
 
-        temp_dir_atlas = tempfile.TemporaryDirectory()
+        temp_dir_container = tempfile.TemporaryDirectory()
+        temp_dir_atlas = Path(temp_dir_container.name) / "kv_temp_atlas"
+
         with EnvironContext(dict(KIVY_NO_ARGS="1")):
             out_name, meta = KivyAtlas.create(
-                temp_dir_atlas.name, images, (atlas_w, atlas_w)
+                os.fspath(temp_dir_atlas), images, (atlas_w, atlas_w)
             )
 
         # Now set about appending these atlas images
         atlas_n_start = get_last_image(atlas_data) + 1
 
         atlas_img_dst_folder = self._atlas_path(atlas_name)
-        for atlas_img in Path(temp_dir_atlas.name).glob("*.png"):
-            atlas_img_name = f"{atlas_name}-{atlas_n_start}"
+        for atlas_img in Path(temp_dir_container.name).glob("*.png"):
+            atlas_img_name = f"{atlas_name}-{atlas_n_start}.png".replace("_", "-")
             dst = (atlas_img_dst_folder / atlas_img_name).with_suffix(".png")
             atlas_data.update({atlas_img_name: meta[atlas_img.name]})
             shutil.move(atlas_img, dst)
-        temp_dir_atlas.cleanup()
+        temp_dir_container.cleanup()
 
         self._store_atlas(atlas_name, atlas_data)
 
@@ -207,3 +230,30 @@ class AtlasService(AtlasServiceProtocol):
         except StopIteration:
             raise KeyError(f"{atlas_name} not found")
         return f"atlas://{matched.path.with_suffix('')}/{name}"
+
+    def category_image_listener(self, imgs: Sequence[tuple[str, Path]]):
+
+        new_imgs = [
+            (cname.lower(), img_path)
+            for cname, img_path in imgs
+            if f"category_img.{cname.lower()}" not in self
+        ]
+        if new_imgs:
+            Logger.info(f"Found new Images {new_imgs}")
+            img_sizes = asyncio.run(read_img_sizes([fp for _, fp in new_imgs]))
+            # Size the atlas to fit the largest image
+            k_large = max(
+                ((a, b) for a, b in img_sizes.values()), key=lambda x: x[0] * x[1]
+            )
+            # Add padding
+            k_large = max(k_large) + 4
+            names, paths = [], []
+            for cname, img_path in new_imgs:
+                names.append(cname)
+                paths.append(img_path)
+            self.save_to_atlas(
+                images=paths,
+                image_names=names,
+                atlas_name="category_img",
+                atlas_size=(k_large, k_large),
+            )

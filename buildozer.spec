@@ -22,10 +22,10 @@ source.include_exts = py,png,jpg,kv,atlas,db
 #source.exclude_exts = spec
 
 # (list) List of directory to exclude (let empty to not exclude anything)
-source.exclude_dirs = atlas_utils
+source.exclude_dirs = atlas_utils,.run,bin,pi_screen,scripts,tests,venv
 
 # (list) List of exclusions using pattern matching
-#source.exclude_patterns = **/*.pyc
+source.exclude_patterns = **/*.pyc,**/.gitkeep
 
 # (str) Application versioning (method 1)
 version = 0.1
@@ -36,7 +36,7 @@ version = 0.1
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy,sqlalchemy==1.4.25,sqlalchemy_utils,python-dotenv,sqlite3,toolz,pygments,docutils,urllib3,chardet,idna,marko[codehilite]
+requirements = python3,kivy,python-dotenv,toolz,pygments,docutils,urllib3,chardet,idna,marko[codehilite]
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -46,10 +46,10 @@ requirements = python3,kivy,sqlalchemy==1.4.25,sqlalchemy_utils,python-dotenv,sq
 #garden_requirements =
 
 # (str) Presplash of the application
-#presplash.filename = %(source.dir)s/data/presplash.png
+#presplash.filename = %(source.dir)s/assests/presplash.png
 
 # (str) Icon of the application
-#icon.filename = %(source.dir)s/data/icon.png
+#icon.filename = %(source.dir)s/data/presplash.png
 
 # (str) Supported orientation (one of landscape, sensorLandscape, portrait or all)
 orientation = sensorLandscape

@@ -17,6 +17,7 @@ from kivy.properties import (
 )
 from kivy.uix.screenmanager import NoTransition, SlideTransition
 
+from registry import Registry
 from services.atlas.atlas import AtlasService
 from services.backend.fileStorage.fileBackend import FileSystemBackend
 from widgets.screens import NoteAppScreenManager
@@ -157,7 +158,6 @@ class NoteAFly(App):
         self.screen_manager.handle_notes(self)
 
     def build(self):
-
         sm = NoteAppScreenManager(
             self,
             transition=NoTransition()
