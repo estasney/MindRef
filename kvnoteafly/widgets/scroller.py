@@ -15,7 +15,7 @@ from widgets.keyboard import KeyboardImage
 from utils import import_kv
 
 if TYPE_CHECKING:
-    from kvnoteafly.services.domain import NoteMetaDataDict
+    from kvnoteafly.services.domain import MarkdownNoteDict
 
 import_kv(__file__)
 
@@ -36,7 +36,7 @@ class ListItem(GridLayout):
     title_text = StringProperty()
     index = NumericProperty()
 
-    def __init__(self, content_data: "NoteMetaDataDict", *args, **kwargs):
+    def __init__(self, content_data: "MarkdownNoteDict", *args, **kwargs):
         self.title_text = content_data["title"]
         self.index = content_data["idx"]
         super().__init__(**kwargs)
@@ -48,7 +48,7 @@ class ListItemKeyboard(GridLayout):
     keyboard_buttons = ListProperty()
     keyboard_container = ObjectProperty()
 
-    def __init__(self, content_data: "NoteMetaDataDict", **kwargs):
+    def __init__(self, content_data: "MarkdownNoteDict", **kwargs):
         self.title_text = content_data["title"]
         self.index = content_data["idx"]
         self.keyboard_buttons = content_data["shortcut_keys"]
@@ -67,7 +67,7 @@ class ListItemKeyboardContainer(BoxLayout):
 
 
 class ListView(GridLayout):
-    def set(self, meta_notes: Sequence["NoteMetaDataDict"]):
+    def set(self, meta_notes: Sequence["MarkdownNoteDict"]):
         self.clear_widgets()
 
         for note in meta_notes:

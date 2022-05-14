@@ -4,17 +4,16 @@ import asyncio
 from pathlib import Path
 from typing import Optional, TYPE_CHECKING, cast
 
-from marko.ext.gfm import gfm
 from toolz import groupby
 
 from services.backend import BackendProtocol, NoteIndex
 from services.backend.fileStorage.utils import (
+    _load_category_notes,
     discover_folder_notes,
     get_folder_files,
-    _load_category_metas,
 )
+from services.domain import MarkdownNote
 from services.utils import LazyLoaded, LazyRegistry
-from services.domain import MarkdownNote, MarkdownNoteMeta
 
 if TYPE_CHECKING:
     from services.backend.fileStorage.utils import CategoryNoteMeta, CategoryFiles
@@ -83,16 +82,15 @@ class FileSystemBackend(BackendProtocol):
     @category_meta
     def _load_category_meta(self):
         category_files = self.category_files[self.current_category]
-        meta_texts = asyncio.run(
-            _load_category_metas(category_files, new_first=self.new_first)
+        category_notes = asyncio.run(
+            _load_category_notes(
+                self.current_category, category_files, new_first=self.new_first
+            )
         )
-        meta_texts = cast(list[tuple[int, str]], meta_texts)
-        meta_dicts = [
-            MarkdownNoteMeta(idx=i, text=text, file=f).to_dict()
-            for i, text, f in meta_texts
-        ]
-        self.registry.note_meta.notify(meta_dicts)
-        return meta_dicts
+        category_notes = cast(list[MarkdownNote], category_notes)
+        category_note_dicts = [note.to_dict() for note in category_notes]
+        self.registry.note_meta.notify(category_note_dicts)
+        return category_note_dicts
 
     @property
     def categories(self) -> list[str]:
@@ -124,14 +122,9 @@ class FileSystemBackend(BackendProtocol):
         category = category if category else self.current_category
         index = index if index is not None else self._index.current
         note_file = self.category_files[category][index]
-        with open(note_file, mode="r", encoding="utf-8") as fp:
-            note_text = fp.read()
-        md_doc = gfm.parse(note_text)
         return MarkdownNote(
-            text=note_text,
             category=category,
             idx=index,
-            document=md_doc,
             file=note_file,
         )
 

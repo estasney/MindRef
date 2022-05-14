@@ -2,16 +2,23 @@
 
 <MarkdownTable>:
     size_hint_y: None
+
     height: self.minimum_height
 
 <MarkdownCellContent>:
-    markup: True
+    halign: self.align
     valign: 'top'
-    halign: 'center'
     size_hint_y: None
     height: self.texture_size[1] + self.my
+    markup: True
     text_size: self.width - self.mx, None
     font_size: sp(self.document.base_font_size / 2.0)
+
+<MarkdownRow>:
+    orientation: 'horizontal'
+    size_hint_y: None
+    size_hint_x: 1
+    height: self.minimum_height
 
 <MarkdownCell>:
     cols: 1
@@ -19,7 +26,7 @@
     height: self.minimum_height
     canvas.before:
         Color:
-            rgb: parse_color('ffffff')
+            rgb: app.colors['Dark']
         Line:
-            width: 1
+            width: 1.5
             rectangle: self.x, self.y, self.width, self.height

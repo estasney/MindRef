@@ -1,10 +1,8 @@
 #:import parse_color kivy.parser.parse_color
 <MarkdownParagraph>:
     cols: 1
-    content: content
-    id: parent
     size_hint_y: None
-    height: content.texture_size[1] + dp(20)
+
     canvas:
         Color:
             rgb: parse_color(root.background_color)

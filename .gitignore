@@ -5,3 +5,4 @@
 bin
 .idea
 **/.env
+**/static/category_img/**

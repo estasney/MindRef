@@ -5,8 +5,10 @@ from _operator import itemgetter
 from pathlib import Path
 from typing import Any, Callable, Coroutine, Mapping
 
+from services.domain import MarkdownNote
+
 CategoryFiles = Mapping[str, list[Path]]
-CategoryNoteMeta = list[int, str, Path]
+CategoryNoteMeta = list[MarkdownNote]
 
 DiscoverType = Callable[[Any, Any], Coroutine[Any, Any, tuple[Path, list[Path]]]]
 
@@ -39,6 +41,18 @@ async def _load_category_metas(note_paths: list[Path], new_first: bool):
         *[_load_category_meta(i, f) for i, f in enumerate(note_paths_ordered)]
     )
     return meta_texts
+
+
+async def _load_category_note(i: int, category: str, note_path: Path) -> MarkdownNote:
+    return MarkdownNote(category, i, note_path)
+
+
+async def _load_category_notes(category: str, note_paths: list[Path], new_first: bool):
+    note_paths_ordered = await _sort_fp_mtimes(note_paths, new_first)
+    notes = await asyncio.gather(
+        *[_load_category_note(i, category, f) for i, f in enumerate(note_paths_ordered)]
+    )
+    return notes
 
 
 async def discover_folder_notes(

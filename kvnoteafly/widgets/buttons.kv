@@ -1,38 +1,43 @@
-#:import VSeparator widgets.separator
+#:import PrimaryVSep widgets.separator
 
+<PrimaryVSep@VSeparator>:
+    color: app.colors['Primary']
+    width: dp(2)
 
 <ButtonBar>:
     orientation: "horizontal"
     play_button: play_button
+    padding: 0, 0, 0, 0
     canvas:
         Color:
             rgb: app.colors['Primary']
-        Rectangle:
-            pos: self.pos
-            size: self.size
+        Line:
+            rounded_rectangle: (self.pos[0], self.pos[1], self.size[0]+4, self.size[1], 4)
+            width: 1
+
     ListViewButton:
         opacity: 1 if self.state == 'normal' else 0.6
-        on_release: App.get_running_app().display_state = 'list'
+        on_release: app.display_state = 'list'
         mipmap: True
-    VSeparator:
+    PrimaryVSep:
     BackButton:
         opacity: 1 if self.state == 'normal' else 0.6
-        on_release: App.get_running_app().paginate(-1)
+        on_release: app.paginate(-1)
         mipmap: True
-    VSeparator:
+    PrimaryVSep:
     PlayStateButton:
         id: play_button
         color: self.color
         opacity: 1 if self.state == 'normal' else 0.6
         on_release: self.toggle_play_state()
         mipmap: True
-    VSeparator:
+    PrimaryVSep:
     ForwardButton:
         opacity: 1 if self.state == 'normal' else 0.6
-        on_release: App.get_running_app().paginate(1)
+        on_release: app.paginate(1)
         mipmap: True
-    VSeparator:
+    PrimaryVSep:
     ReturnButton:
         opacity: 1 if self.state == 'normal' else 0.6
         mipmap: True
-        on_release: App.get_running_app().note_category = ''
+        on_release: app.note_category = ''

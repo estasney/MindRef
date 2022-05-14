@@ -46,6 +46,7 @@ class AtlasService(AtlasServiceProtocol):
     - Provides path for kivy usage
     """
 
+    builtin_atlases = {"button_bar", "category_img", "keys"}
     atlases: list[AtlasItem] = LazyLoaded()
     _instance = None
 
@@ -74,6 +75,17 @@ class AtlasService(AtlasServiceProtocol):
             if item.is_dir():
                 if af := next(item.glob(f"*.atlas"), None):
                     atlas.append(AtlasItem(item.stem, af))
+        missed = self.builtin_atlases - set((name for name, _ in atlas))
+        if not missed:
+            return atlas
+        for missed_atlas in missed:
+            fp = (
+                self.storage_path / missed_atlas / missed_atlas.replace("_", "-")
+            ).with_suffix(".atlas")
+            fp.parent.mkdir(parents=True, exist_ok=True)
+            fp.touch()
+            fp.write_text("{}")
+            atlas.append(AtlasItem(missed_atlas, fp))
         return atlas
 
     def _match_atlas(self, atlas_name: str):
@@ -81,6 +93,7 @@ class AtlasService(AtlasServiceProtocol):
             matched = next(atlas for atlas in self.atlases if atlas.name == atlas_name)
             return matched
         except StopIteration as e:
+
             raise KeyError(f"{atlas_name} does not exist") from e
 
     def _read_atlas(self, atlas_name: str) -> AtlasFileData:
@@ -149,7 +162,10 @@ class AtlasService(AtlasServiceProtocol):
             pattern = re.compile(r"(\d+)(?=.png)")
             atlas_image_names = ",".join(data.keys())
             atlas_image_numbers = (int(x) for x in pattern.findall(atlas_image_names))
-            return max(atlas_image_numbers)
+            try:
+                return max(atlas_image_numbers)
+            except ValueError:
+                return -1
 
         def ensure_name_integrity(data: AtlasFileData) -> bool:
             img_name_set = set(image_names)
@@ -179,12 +195,25 @@ class AtlasService(AtlasServiceProtocol):
         # Now set about appending these atlas images
         atlas_n_start = get_last_image(atlas_data) + 1
 
+        def sort_atlas_imgs(p: Path):
+            return int(p.stem.rsplit("-")[-1])
+
         atlas_img_dst_folder = self._atlas_path(atlas_name)
-        for atlas_img in Path(temp_dir_container.name).glob("*.png"):
-            atlas_img_name = f"{atlas_name}-{atlas_n_start}.png".replace("_", "-")
+        for i, atlas_img in enumerate(
+            sorted(Path(temp_dir_container.name).glob("*.png"), key=sort_atlas_imgs)
+        ):
+            atlas_img_name = f"{atlas_name}-{atlas_n_start + i}.png".replace("_", "-")
             dst = (atlas_img_dst_folder / atlas_img_name).with_suffix(".png")
-            atlas_data.update({atlas_img_name: meta[atlas_img.name]})
+            # Enforce lower casing
+            atlas_data.update(
+                {
+                    atlas_img_name: {
+                        k.lower(): v for k, v in meta[atlas_img.name].items()
+                    }
+                }
+            )
             shutil.move(atlas_img, dst)
+
         temp_dir_container.cleanup()
 
         self._store_atlas(atlas_name, atlas_data)
@@ -249,7 +278,7 @@ class AtlasService(AtlasServiceProtocol):
             k_large = max(k_large) + 4
             names, paths = [], []
             for cname, img_path in new_imgs:
-                names.append(cname)
+                names.append(cname.lower())
                 paths.append(img_path)
             self.save_to_atlas(
                 images=paths,

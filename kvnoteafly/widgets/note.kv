@@ -1,4 +1,4 @@
-#:import App kivy.app.App
+
 
 <Note>:
     id: note_container
@@ -32,9 +32,10 @@
             pos: self.pos
             size: self.size
     BoxLayout:
+        padding: 0, 5, 5, 0
         Label:
             id: note_title_label
-            color: hex('#ffffff')
+            color: app.colors['White']
             text: root.title_text
             bold: True
             font_size: min(self.size[1] / 2, 28)

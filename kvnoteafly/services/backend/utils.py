@@ -3,17 +3,23 @@ from typing import TYPE_CHECKING
 import marko.inline
 
 if TYPE_CHECKING:
-    from marko.block import BlockElement
+    from services.domain.md_parser_types import *
 
 
-def get_md_node_text(node: "BlockElement"):
-    if node is marko.inline.LineBreak:
+def get_md_node_text(node: "MD_TYPES"):
+    node_type = node["type"]
+    if node_type == "text":
+        return node["text"]
+    if node_type in ("linebreak", "newline", "thematic_break"):
         return "\n"
-    if not hasattr(node, "children"):
+    if node_type in ("block_code", "codespan"):
+        return node["text"]
+    if node_type == "strong":
+        return f"[b]{node['children'][0]['text']}[/b]"
+    if "children" not in node:
         return ""
-    if isinstance(node.children, str):
-        return node.children
-    if len(node.children) > 1:
-        return " ".join([get_md_node_text(c) for c in node.children])
+    if "text" in node:
+        return node["text"]
 
-    return get_md_node_text(node.children[0])
+    else:
+        return " ".join([get_md_node_text(c) for c in node["children"]])

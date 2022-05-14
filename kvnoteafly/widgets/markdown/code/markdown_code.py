@@ -1,3 +1,5 @@
+from typing import Optional
+
 from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.gridlayout import GridLayout
 from pygments import lexers, styles
@@ -14,10 +16,16 @@ class MarkdownCode(GridLayout):
     content = ObjectProperty()
     lexer = ObjectProperty(PythonLexer())
     background_color = StringProperty()
+    lexer_name = StringProperty()
 
-    def __init__(self, lexer, **kwargs):
+    def __init__(self, lexer: Optional[str], **kwargs):
         super(MarkdownCode, self).__init__(**kwargs)
         self.styler = styles.get_style_by_name("paraiso-dark")
         self.formatter = BBCodeFormatter(style=self.styler)
-        self.lexer = lexers.get_lexer_by_name(lexer)
+        self.lexer_name = lexer if lexer else "markdown"
+        self.lexer = (
+            lexers.get_lexer_by_name(lexer)
+            if lexer
+            else lexers.get_lexer_by_name("markdown")
+        )
         self.background_color = self.styler.background_color
