@@ -1,7 +1,5 @@
 from typing import TYPE_CHECKING
 
-import marko.inline
-
 if TYPE_CHECKING:
     from services.domain.md_parser_types import *
 

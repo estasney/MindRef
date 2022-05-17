@@ -3,9 +3,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 from operator import itemgetter
 from pathlib import Path
-from typing import Generator, Optional, TypedDict, TYPE_CHECKING
-import re
-import mistune
+from typing import Generator, TYPE_CHECKING, TypedDict
 
 from services.domain.parser import MarkdownParser
 

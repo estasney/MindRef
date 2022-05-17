@@ -1,10 +1,6 @@
 from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.gridlayout import GridLayout
-from pygments import lexers, styles
-from pygments.formatters.bbcode import BBCodeFormatter
-
-from io import StringIO
-
+from pygments import styles
 from pygments.token import Token
 
 from utils import import_kv

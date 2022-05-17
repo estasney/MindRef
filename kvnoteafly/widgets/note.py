@@ -3,16 +3,16 @@ from typing import TYPE_CHECKING
 from kivy.properties import Logger, ObjectProperty, StringProperty
 from kivy.uix.boxlayout import BoxLayout
 
+from utils import import_kv
+
+import_kv(__file__)
+
 
 from widgets.keyboard import ContentKeyboard
 from widgets.markdown.markdown_document import MarkdownDocument
 
-from utils import import_kv
-
 if TYPE_CHECKING:
     from kvnoteafly.services.domain import MarkdownNoteDict
-
-import_kv(__file__)
 
 
 class Note(BoxLayout):
@@ -28,7 +28,9 @@ class Note(BoxLayout):
 class NoteContent(BoxLayout):
     def set(self, content_data: "MarkdownNoteDict"):
         self.clear_widgets()
-        Logger.debug(f"NoteContent: {content_data}")
+        Logger.debug(
+            f"NoteContent: {content_data['category']}, {content_data['title']}"
+        )
         if content_data.get("has_shortcut", False):
             self._set_keyboard(content_data)
         else:

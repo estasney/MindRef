@@ -1,6 +1,6 @@
 from typing import Optional
 
-from kivy.properties import ObjectProperty, StringProperty
+from kivy.properties import AliasProperty, ObjectProperty, StringProperty
 from kivy.uix.gridlayout import GridLayout
 from pygments import lexers, styles
 from pygments.formatters.bbcode import BBCodeFormatter
@@ -12,11 +12,21 @@ import_kv(__file__)
 
 
 class MarkdownCode(GridLayout):
-    text_content = StringProperty()
+    _text_content = StringProperty()
     content = ObjectProperty()
     lexer = ObjectProperty(PythonLexer())
     background_color = StringProperty()
     lexer_name = StringProperty()
+
+    def _get_text_content(self):
+        return self._text_content
+
+    def _set_text_content(self, value):
+        self._text_content = value.strip()
+
+    text_content = AliasProperty(
+        _get_text_content, _set_text_content, bind=["_text_content"]
+    )
 
     def __init__(self, lexer: Optional[str], **kwargs):
         super(MarkdownCode, self).__init__(**kwargs)

@@ -3,7 +3,6 @@ import os
 from functools import partial
 from pathlib import Path
 
-from dotenv import load_dotenv
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.logger import Logger
@@ -17,12 +16,9 @@ from kivy.properties import (
 )
 from kivy.uix.screenmanager import NoTransition, SlideTransition
 
-from registry import Registry
 from services.atlas.atlas import AtlasService
 from services.backend.fileStorage.fileBackend import FileSystemBackend
 from widgets.screens import NoteAppScreenManager
-
-load_dotenv()
 
 
 class NoteAFly(App):
@@ -77,6 +73,7 @@ class NoteAFly(App):
     colors = DictProperty(
         {
             "White": (1, 1, 1),
+            "Gray": (0.49019607843137253, 0.4470588235294118, 0.4823529411764706),
             "Light": (0.3843137254901961, 0.4470588235294118, 0.4823529411764706),
             "Primary": (0.21568627450980393, 0.2784313725490195, 0.30980392156862746),
             "Dark": (0.06274509803921569, 0.1254901960784313, 0.15294117647058825),

@@ -12,6 +12,7 @@ TABLE_CELL_ALIGN = Optional[Literal["left", "right", "center"]]
 STRONG = Literal["strong"]
 CODESPAN = Literal["codespan"]
 LINEBREAK = Literal["linebreak"]
+LINK = Literal["link"]
 NEWLINE = Literal["newline"]
 THEMATIC_BREAK = Literal["thematic_break"]
 BLOCK_CODE = Literal["block_code"]
@@ -40,7 +41,15 @@ MD_LIT_TYPES = Union[
     LIST,
     LIST_ITEM,
     PARAGRAPH,
+    LINK,
 ]
+
+
+class MdLinkItem(TypedDict):
+    type: LINK
+    link: str
+    children: Optional[MdText]
+    title: Optional[str]
 
 
 class MdListItem(TypedDict):
@@ -88,7 +97,7 @@ class MdCodeSpan(TypedDict):
 
 class MdBlockQuote(TypedDict):
     type: BLOCK_QUOTE
-    children: LIST[MD_TYPES]
+    children: list[MD_TYPES]
 
 
 class MdBlockText(TypedDict):
@@ -112,7 +121,7 @@ class MdHeading(TypedDict):
     level: int
 
 
-class MdParagraph:
+class MdParagraph(TypedDict):
     type: PARAGRAPH
     children: list[MD_TYPES]
 
@@ -175,3 +184,32 @@ MD_TYPES = Union[
 ]
 
 MD_DOCUMENT = list[MD_TYPES]
+
+MD_LIT_BLOCK_TYPES = Union[
+    NEWLINE,
+    THEMATIC_BREAK,
+    HEADING,
+    BLOCK_CODE,
+    BLOCK_QUOTE,
+    BLOCK_TEXT,
+    LIST,
+    LIST_ITEM,
+    PARAGRAPH,
+]
+
+MD_BLOCK_TYPES = Union[
+    MdNewLine,
+    MdThematicBreak,
+    MdHeading,
+    MdBlockCode,
+    MdBlockText,
+    MdBlockQuote,
+    MdListOrdered,
+    MdListUnordered,
+    MdListItem,
+    MdParagraph,
+]
+
+MD_LIT_INLINE_TYPES = Union[CODESPAN, STRONG, TEXT]
+
+MD_INLINE_TYPES = [MdCodeSpan, MdTextStrong, MdText]

@@ -2,31 +2,35 @@
 
 <MarkdownTable>:
     size_hint_y: None
-
+    cols: 1
     height: self.minimum_height
-
-<MarkdownCellContent>:
-    halign: self.align
-    valign: 'top'
-    size_hint_y: None
-    height: self.texture_size[1] + self.my
-    markup: True
-    text_size: self.width - self.mx, None
-    font_size: sp(self.document.base_font_size / 2.0)
-
 <MarkdownRow>:
     orientation: 'horizontal'
+    padding: 2, 2, 2, 2
     size_hint_y: None
     size_hint_x: 1
     height: self.minimum_height
-
-<MarkdownCell>:
-    cols: 1
-    size_hint_y: None
-    height: self.minimum_height
-    canvas.before:
+    canvas:
         Color:
             rgb: app.colors['Dark']
         Line:
-            width: 1.5
+            width: 1.2
             rectangle: self.x, self.y, self.width, self.height
+
+<MarkdownCellLabel>:
+
+    valign: 'top'
+    size_hint_y: None
+    markup: True
+    mipmap: True
+    width: self.texture_size[0]
+    height: self.texture_size[1]
+    text_size: root.width, None
+    font_size: sp(15)
+    padding: sp(2), sp(2)
+    canvas:
+        Color:
+            rgb: app.colors['Dark']
+        Line:
+            width: sp(1)
+            points: [ self.x,   self.y,   self.right,   self.y,   self.right,   self.top,   self.x,   self.top,   self.x,   self.y ]

@@ -32,10 +32,8 @@ class ButtonBar(BoxLayout):
         These buttons tend to overlap. To avoid pressing multiple, we dispatch the event to the 'closest' button
         """
         if not self.collide_point(*touch.pos):
-            Logger.debug("Touch outside")
             return
-        if touch.is_double_tap:
-            Logger.debug("Double Tap")
+
         collides = [
             (child, child.touch_offset(*touch.pos))
             for child in self.children[:]
@@ -43,13 +41,11 @@ class ButtonBar(BoxLayout):
         ]
         if not any(collides):
             # Shouldn't happen
-            Logger.debug("No Collides Found")
             return
 
         # Find closest
         child = min(collides, key=itemgetter(1))[0]
         child.dispatch("on_touch_down", touch)
-        Logger.debug(f"Found Closest, {child}")
         self.last_touched = child
         return True
 

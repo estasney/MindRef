@@ -3,9 +3,8 @@
 <MarkdownHeading>:
     markup: True
     valign: 'top'
-    font_size:
-        sp(self.document.base_font_size  * (
-        self.document.base_font_size / (31.0 + (self.level * 8))))
+    font_size: dp(20 - self.level)
+
     size_hint_y: None
     height: self.texture_size[1] + dp(20)
     text_size: self.width, None
@@ -13,7 +12,12 @@
 
     canvas:
         Color:
-            rgba: parse_color(self.document.underline_color)
+            rgba: app.colors['Dark']
         Rectangle:
             pos: self.x, self.y + 5
             size: self.width, 1
+
+<MarkdownBlock>:
+    orientation: 'horizontal'
+    size_hint_y: None
+    height: self.minimum_height

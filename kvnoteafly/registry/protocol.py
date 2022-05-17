@@ -39,10 +39,6 @@ class Publisher(ABC):
         """
         Call `self.emitter(self.listeners, result)`
 
-        Parameters
-        ----------
-        result
-
         """
         self.emitter(self.listeners, *args, **kwargs)
 

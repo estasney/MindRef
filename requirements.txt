@@ -1,5 +1,5 @@
 click~=8.0.1
-Kivy[base]~=2.0.0
+Kivy[base]~=2.1.0
 marshmallow~=3.15.0
 mistune
 Pillow~=8.3.2

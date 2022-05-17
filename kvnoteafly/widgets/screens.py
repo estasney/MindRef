@@ -1,12 +1,12 @@
 import os
 from itertools import cycle
+from typing import TYPE_CHECKING
+
 from kivy.properties import ListProperty, Logger, ObjectProperty, StringProperty
 from kivy.uix.screenmanager import Screen, ScreenManager
 from toolz import sliding_window
 
-
 from utils import import_kv
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from widgets.chooser import NoteCategoryButton

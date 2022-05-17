@@ -1,7 +1,5 @@
 from kivy.properties import NumericProperty, ObjectProperty, StringProperty
-from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
-from kivy.uix.label import Label
 
 from utils import import_kv
 
@@ -14,8 +12,8 @@ class MarkdownListItem(GridLayout):
     content = ObjectProperty(None)
     level = NumericProperty(1)
 
-    def __init__(self, text: str, level: int, *args, **kwargs):
-        super(MarkdownListItem, self).__init__(*args, **kwargs)
+    def __init__(self, text: str, level: int, **kwargs):
+        super(MarkdownListItem, self).__init__(**kwargs)
         self.text = text
         self.level = level
 

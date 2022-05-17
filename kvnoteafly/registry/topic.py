@@ -1,4 +1,3 @@
-import functools
 from typing import Any, Callable
 
 from registry import DottedList, Publisher
