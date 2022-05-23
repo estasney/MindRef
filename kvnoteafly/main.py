@@ -13,7 +13,7 @@ if __name__ == "__main__":
     )
     if os.environ.get("ANDROID_ENTRYPOINT", None):
         ...
-    if os.environ.get("ENVIRONMENT", "PRODUCTION") == "DEVELOPMENT":
+    if os.environ.get("ENVIRONMENT", "PRODUCTION") == "DEBUG":
         Config.set("modules", "inspector", "")
         Config.set("modules", "monitor", "")
 
