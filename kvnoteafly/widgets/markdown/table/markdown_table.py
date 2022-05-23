@@ -1,6 +1,9 @@
 from typing import TYPE_CHECKING
 
-from kivy.clock import Clock
+from utils import import_kv
+
+import_kv(__file__)
+
 from kivy.properties import (
     BooleanProperty,
     NumericProperty,
@@ -9,10 +12,8 @@ from kivy.properties import (
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 
-from utils import import_kv
-from widgets.behavior import LabelBG
+from widgets.behavior import LabelHighlight
 
-import_kv(__file__)
 
 if TYPE_CHECKING:
     pass
@@ -22,7 +23,7 @@ class MarkdownTable(GridLayout):
     pass
 
 
-class MarkdownCellLabel(LabelBG):
+class MarkdownCellLabel(LabelHighlight):
     row = ObjectProperty()
 
     parent_r_pad = NumericProperty()
@@ -30,7 +31,7 @@ class MarkdownCellLabel(LabelBG):
 
     def __init__(self, **kwargs):
         if kwargs.get("font_hinting") == "mono":
-            kwargs.update({"bg_enabled": True})
+            kwargs.update({"highlight": True})
         super(MarkdownCellLabel, self).__init__(**kwargs)
 
     def on_parent(self, instance, value):

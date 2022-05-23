@@ -1,4 +1,5 @@
 #:import parse_color kivy.parser.parse_color
+#:import LabelAutoContrast widgets.behavior
 <MarkdownBlockQuote>:
     cols: 1
     size_hint_y: None
@@ -7,17 +8,18 @@
     padding: sp(10), sp(10), 0, sp(10)
     canvas:
         Color:
-            rgba: (*app.colors['Gray'], 0.5)
+            rgba: (*app.colors['Gray'][:3], 0.5)
         Rectangle:
             pos: [self.pos[0], self.pos[1] + sp(5)]
             size: [self.size[0], self.size[1] -sp(10)]
         Color:
-            rgb: parse_color("#729fcf")
+            rgba: app.colors['LightBlue']
         Rectangle:
             pos: [self.pos[0], self.pos[1] + sp(5)]
             size: [sp(4), self.height - sp(10)]
-    Label:
+    LabelAutoContrast:
         id: content
+        bg_color: app.colors['Gray']
         markup: False
         valign: 'center'
         size: self.texture_size

@@ -1,4 +1,5 @@
 #:import parse_color kivy.parser.parse_color
+
 <MarkdownCodeSpan>:
     id: parent
     cols: 1
@@ -6,12 +7,12 @@
     height: content.texture_size[1] + dp(20)
     canvas.before:
         Color:
-            rgb: app.colors['Dark']
+            rgba: app.colors['Dark']
         Rectangle:
             pos: self.x - 1, self.y - 1
             size: self.width + 2, self.height + 2
         Color:
-            rgb: parse_color(self.background_color)
+            rgba: parse_color(self.background_color)
         Rectangle:
             pos: self.pos
             size: self.size
@@ -23,5 +24,6 @@
         mipmap: True
         font_size: min(self.size[1] / 2, 16)
         text_size: self.size[0], None
+        font_family: "RobotoMono"
         font_hinting: 'mono'
         padding_x: min(self.size[1] / 2, 16)

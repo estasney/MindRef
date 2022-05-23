@@ -6,19 +6,20 @@
     height: self.minimum_height
 <MarkdownRow>:
     orientation: 'horizontal'
-    padding: 2, 2, 2, 2
+    padding: 4,2
     size_hint_y: None
     size_hint_x: 1
     height: self.minimum_height
     canvas:
         Color:
-            rgb: app.colors['Dark']
+            rgba: app.colors['Dark']
         Line:
             width: 1.2
             rectangle: self.x, self.y, self.width, self.height
 
 <MarkdownCellLabel>:
-    bg_color: app.colors['Gray']
+    highlight_color: app.colors['Codespan']
+    bg_color: app.colors['Primary']
     valign: 'top'
     size_hint_y: None
     markup: True
@@ -26,11 +27,11 @@
     width: self.texture_size[0]
     height: self.texture_size[1]
     text_size: root.width, None
-    font_size: sp(14) if self.font_family == "JetBrainsMono" else sp(15)
-    padding: sp(2), sp(2)
+    font_size: sp(14) if self.font_family == "RobotoMono" else sp(15)
+    padding: sp(4), sp(2)
     canvas:
         Color:
-            rgb: app.colors['Dark']
+            rgba: app.colors['Dark']
         Line:
             width: sp(1)
             points: [ self.x,   self.y,   self.right,   self.y,   self.right,   self.top,   self.x,   self.top,   self.x,   self.y ]

@@ -26,26 +26,6 @@ class MarkdownDocument(ScrollView, MarkdownVisitor):
     title = StringProperty()
     document = ObjectProperty()
     base_font_size = NumericProperty(31)
-
-    def _get_bgc(self):
-        return get_color_from_hex(self.colors.background)
-
-    def _set_bgc(self, value):
-        self.colors.background = get_hex_from_color(value)[1:]
-
-    background_color = AliasProperty(_get_bgc, _set_bgc, bind=("colors",), cache=True)
-
-    colors = DictProperty(
-        {
-            "background": "37474fff",
-            "code": "2b2b2bff",
-            "link": "ce5c00ff",
-            "paragraph": "202020ff",
-            "title": "204a87ff",
-            "bullet": "000000ff",
-        }
-    )
-    underline_color = StringProperty("000000ff")
     content = ObjectProperty()
     scatter = ObjectProperty()
 

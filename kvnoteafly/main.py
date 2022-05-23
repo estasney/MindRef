@@ -8,8 +8,8 @@ load_dotenv()
 
 if __name__ == "__main__":
     LabelBase.register(
-        name="JetBrainsMono",
-        fn_regular=str(Path(__file__).parent / "assets" / "JetBrainsMono-Light.ttf"),
+        name="RobotoMono",
+        fn_regular=str(Path(__file__).parent / "assets" / "RobotoMono-Regular.ttf"),
     )
     if os.environ.get("ANDROID_ENTRYPOINT", None):
         ...
