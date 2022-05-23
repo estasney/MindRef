@@ -11,9 +11,6 @@ from kivy.properties import (
 from kivy.uix.label import Label
 import re
 
-RE_COLOR_HEAD = re.compile(r"\[color=#[A-z\d]{6}]")
-RE_COLOR_TAIL = re.compile(r"\[/color]")
-
 
 class LabelBG(Label):
     """Label that draws background sized to extents if bg_enabled is set True"""
@@ -25,10 +22,17 @@ class LabelBG(Label):
     bg_color = ColorProperty()
     text_color = StringProperty("#ffffff")
     text_threshold = NumericProperty(186)
+    raw_text = StringProperty()
 
     def __init__(self, text, **kwargs):
+        self.raw_text = text
         if self.bg_enabled or kwargs.get("bg_enabled"):
-            kwargs.update({"text": f"[color={self.text_contrast()}]{text}[/color]"})
+            kwargs.update(
+                {
+                    "text": f"[color={self.text_contrast()}]{text}[/color]",
+                    "font_family": "JetBrainsMono",
+                }
+            )
         else:
             kwargs.update({"text": text})
         super(LabelBG, self).__init__(**kwargs)
@@ -69,8 +73,7 @@ class LabelBG(Label):
     def get_extents(self, instance, value):
         # Texture created
         # We have to remove markup
-        l_text = RE_COLOR_TAIL.sub("", RE_COLOR_HEAD.sub("", self.text))
-        w, h = self._label.get_extents(l_text)
+        w, h = self._label.get_extents(self.raw_text)
 
         # Now we can draw our codespan background
         self.x_extent = w + (2 * self.padding_x)
