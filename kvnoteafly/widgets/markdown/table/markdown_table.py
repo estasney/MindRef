@@ -24,8 +24,6 @@ class MarkdownTable(GridLayout):
 
 
 class MarkdownCellLabel(LabelHighlight):
-    row = ObjectProperty()
-
     parent_r_pad = NumericProperty()
     _parent_vert_pad_func = None
 
@@ -35,9 +33,8 @@ class MarkdownCellLabel(LabelHighlight):
         super(MarkdownCellLabel, self).__init__(**kwargs)
 
     def on_parent(self, instance, value):
-        self.row = value
-        self.row.fbind("height", self.parent_height)
-        self.parent_r_pad = self.get_parent_r_pad(self.row)
+        self.parent.fbind("height", self.parent_height)
+        self.parent_r_pad = self.get_parent_r_pad(self.parent)
 
     def get_parent_r_pad(self, parent):
         p_pad = parent.padding

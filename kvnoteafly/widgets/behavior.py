@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+from kivy import Logger
+
 from utils import import_kv
 
 import_kv(__file__)
 
-from typing import Any, Iterable, Optional
+from typing import Any, Optional
 from kivy.clock import Clock
+from kivy.cache import Cache
 from kivy.graphics import Color, RoundedRectangle
 from kivy.properties import (
     BooleanProperty,
@@ -15,10 +18,59 @@ from kivy.properties import (
     StringProperty,
 )
 from kivy.uix.label import Label
+from functools import wraps
+
+Cache.register("color_norm", timeout=30)
+Cache.register("text_contrast", timeout=30)
+Cache.register("text_extents", limit=1000)
 
 
-def color_norm(color) -> Iterable[float, float, float, float]:
-    def color_str_components(s: str) -> Iterable[float, float, float, float]:
+def get_cached_extents(label, text):
+    opts = label.options
+    label_id = f"{text}-{opts['font_size']}-{opts['font_family']}"
+    cached_instance = Cache.get("text_extents", label_id)
+    if cached_instance:
+        return cached_instance
+    result = label.get_extents(text)
+    Cache.append("text_extents", label_id, result)
+    return result
+
+
+def cache_text_contrast(func):
+    @wraps(func)
+    def wrapped_text_contrast(background_color, threshold, highlight_color):
+        key = (
+            tuple(background_color),
+            int(threshold),
+            tuple(highlight_color) if highlight_color else None,
+        )
+        cached_instance = Cache.get("text_contrast", key)
+        if cached_instance:
+            return cached_instance
+        result = func(background_color, threshold, highlight_color)
+        Cache.append("text_contrast", key, result)
+        return result
+
+    return wrapped_text_contrast
+
+
+def cached_color_norm(func):
+    @wraps(func)
+    def wrapped_func(color):
+        key = tuple(color)
+        cached_instance = Cache.get("color_norm", key)
+        if cached_instance:
+            return cached_instance
+        result = func(color)
+        Cache.append("color_norm", key, tuple(result))
+        return result
+
+    return wrapped_func
+
+
+@cached_color_norm
+def color_norm(color) -> tuple[float, float, float, float]:
+    def color_str_components(s: str) -> tuple[float, float, float, float]:
         """Return hex as 1.0 * 4"""
         s = s.removeprefix("#")
         # Groups of two
@@ -35,7 +87,7 @@ def color_norm(color) -> Iterable[float, float, float, float]:
 
     def color_float_components(
         s: tuple[int] | tuple[float],
-    ) -> Iterable[float, float, float, float]:
+    ) -> tuple[float, float, float, float]:
         """Return r, g, b (0.0-1.0) as (0-1) and opacity as (0-1)"""
         has_opacity = False
         for i, comp in enumerate(s):
@@ -52,9 +104,10 @@ def color_norm(color) -> Iterable[float, float, float, float]:
     else:
         components = color_float_components(color)
 
-    return components
+    return tuple(components)
 
 
+@cache_text_contrast
 def text_contrast(background_color, threshold, highlight_color: Optional[Any] = None):
     """
     Set text as white or black depending on bg
@@ -143,10 +196,10 @@ class LabelHighlight(LabelAutoContrast):
         super(LabelHighlight, self).__init__(**kwargs)
 
     def on_highlight(self, instance, value):
-        if not value:
-            self.unbind(texture_size=self.get_extents)
-        else:
+        if value:
             self.bind(texture_size=self.get_extents)
+        else:
+            self.unbind(texture_size=self.get_extents)
 
     def on_highlight_color(self, instance, value):
         if self.highlight:
@@ -167,7 +220,7 @@ class LabelHighlight(LabelAutoContrast):
     def get_extents(self, instance, value):
         # Texture created
         # We have to remove markup
-        w, h = self._label.get_extents(self._raw_text)
+        w, h = get_cached_extents(self._label, self._raw_text)
 
         # Now we can draw our codespan background
         self.x_extent = w + (2 * self.padding_x)
