@@ -121,15 +121,16 @@ class PlayStateButton(DynamicImageButton):
             sources=[get_uri("play"), get_uri("pause")],
             **kwargs,
         )
-        App.get_running_app().bind()
+        # App.get_running_app().bind()
 
     def toggle_play_state(self):
         app = App.get_running_app()
         app.play_state = "pause" if app.play_state == "play" else "play"
 
-    def on_playing(self, _old, new):
-        self.source = self.sources[0] if new else self.sources[1]
-        self.color = [1, 1, 1, 1] if new else [0.86666, 0.247, 0.0627, 1]
+    def on_playing(self, _old, playing: bool):
+        app = App.get_running_app()
+        self.source = self.sources[1] if playing else self.sources[0]
+        self.color = app.colors["White"] if playing else app.colors["Warn"]
 
 
 class BackButton(ImageButton):
