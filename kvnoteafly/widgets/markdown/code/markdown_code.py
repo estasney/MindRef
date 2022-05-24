@@ -32,9 +32,9 @@ class MarkdownCode(GridLayout):
         super(MarkdownCode, self).__init__(**kwargs)
         self.styler = styles.get_style_by_name("paraiso-dark")
         self.formatter = BBCodeFormatter(style=self.styler)
-        self.lexer_name = lexer if lexer else "markdown"
+        self.lexer_name = lexer.strip() if lexer else "markdown"
         self.lexer = (
-            lexers.get_lexer_by_name(lexer)
+            lexers.get_lexer_by_name(lexer.strip())
             if lexer
             else lexers.get_lexer_by_name("markdown")
         )
