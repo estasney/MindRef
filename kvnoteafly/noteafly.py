@@ -120,13 +120,13 @@ class NoteAFly(App):
             self.next_note_scheduler.cancel()
 
     def select_index(self, value):
-        def scheduled_select(dt, value):
-            self.note_service.set_index(value)
+        def scheduled_select(dt, val):
+            self.note_service.set_index(val)
             self.note_data = self.note_service.current_note().to_dict()
             self.play_state = "pause"
             self.display_state = "display"
 
-        func = partial(scheduled_select, value=value)
+        func = partial(scheduled_select, val=value)
         Clock.schedule_once(func)
 
     def paginate(self, value):

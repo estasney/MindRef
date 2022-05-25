@@ -2,6 +2,7 @@ import os
 from itertools import cycle
 from typing import TYPE_CHECKING
 
+from kivy.clock import Clock
 from kivy.properties import ListProperty, Logger, ObjectProperty, StringProperty
 from kivy.uix.screenmanager import Screen, ScreenManager
 from toolz import sliding_window
@@ -61,9 +62,11 @@ class NoteAppScreenManager(ScreenManager):
         last_active, next_active = next(self.note_screen_cycler)
         target = f"note_screen{next_active}"
         target_screen = next(screen for screen in self.screens if screen.name == target)
-        target_screen.set_note_content(self.app.note_data)
         self.last_note_screen = next_active
         self.current = target
+        Clock.schedule_once(
+            lambda dt: target_screen.set_note_content(self.app.note_data), 0
+        )
 
     def handle_notes_list_view(self, *args, **kwargs):
         self.ids["list_view_screen"].set_note_list_view()
@@ -71,7 +74,7 @@ class NoteAppScreenManager(ScreenManager):
 
 
 class NoteCategoryChooserScreen(Screen):
-    child_object = ObjectProperty()
+    chooser = ObjectProperty()
     categories = ListProperty()
 
     def __init__(self, **kwargs):
@@ -89,8 +92,7 @@ class NoteCategoryScreen(Screen):
 
 
 class NoteListViewScreen(Screen):
-    child_object = ObjectProperty()
     meta_notes = ListProperty()
 
     def set_note_list_view(self, *args, **kwargs):
-        self.ids["scroller"].set(self.meta_notes)
+        Clock.schedule_once(lambda dt: self.ids["scroller"].set(self.meta_notes), 0)

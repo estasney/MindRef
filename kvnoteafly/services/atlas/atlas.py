@@ -46,7 +46,7 @@ class AtlasService(AtlasServiceProtocol):
     - Provides path for kivy usage
     """
 
-    builtin_atlases = {"button_bar", "category_img", "keys"}
+    builtin_atlases = {"button_bar", "category_img", "keys", "textures"}
     atlases: list[AtlasItem] = LazyLoaded()
     _instance = None
 

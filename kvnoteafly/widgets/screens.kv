@@ -21,12 +21,12 @@
 
 <NoteCategoryChooserScreen>:
     id: manager_screen
-    child_object: chooser_object
+    chooser: chooser
     categories: app.note_categories
     NoteCategoryChooserScrollWrapper:
         manager: manager_screen
         categories: manager_screen.categories
-        id: chooser_object
+        id: chooser
 
 <NoteCategoryScreen>:
     current_note: current_note

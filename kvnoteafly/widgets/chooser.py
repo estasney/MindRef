@@ -1,8 +1,8 @@
 from kivy.app import App
+from kivy.core.image import Image
 from kivy.core.window import Window
 from kivy.properties import (
     ListProperty,
-    NumericProperty,
     ObjectProperty,
     StringProperty,
 )
@@ -10,15 +10,15 @@ from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
-from kivy.vector import Vector
 
 from utils import import_kv
-from widgets.mixins import TrackParentPadding
 
 import_kv(__file__)
 
 
 class NoteCategoryChooserScrollWrapper(ScrollView):
+    """Screen With Buttons for Categories"""
+
     manager = ObjectProperty()
     child_object = ObjectProperty()
     categories = ListProperty()
@@ -56,9 +56,12 @@ class NoteCategoryChooser(GridLayout):
             self.add_widget(cat)
 
 
-class NoteCategoryButton(ButtonBehavior, BoxLayout, TrackParentPadding):
+class NoteCategoryButton(ButtonBehavior, BoxLayout):
     source = StringProperty()
     text = StringProperty()
+    image = ObjectProperty()
+    tx_bg_normal = ObjectProperty()
+    tx_bg_down = ObjectProperty()
 
     def __init__(self, text, **kwargs):
         super().__init__(**kwargs)
@@ -66,3 +69,12 @@ class NoteCategoryButton(ButtonBehavior, BoxLayout, TrackParentPadding):
             text.lower(), "category_img"
         )
         self.text = text
+        self.load_texture("bg_normal")
+        self.load_texture("bg_down")
+
+    def load_texture(self, name):
+        t = Image(
+            App.get_running_app().atlas_service.uri_for(name.lower(), "textures")
+        ).texture
+        t.wrap = "repeat"
+        setattr(self, f"tx_{name}", t)
