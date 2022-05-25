@@ -39,6 +39,7 @@ class MarkdownVisitor:
 
     def __init__(self, *args, **kwargs):
         self.current_list = deque([])
+        self.bb_directives = deque([])
         self.visiting_table = False
 
     def push(self, widget, add: bool = True):
@@ -55,6 +56,17 @@ class MarkdownVisitor:
         else:
             Logger.debug(f"New Stack with {widget.__class__.__name__}")
         self.current_list.append(widget)
+
+    def push_bbcode(self, directive):
+        self.bb_directives.append(directive)
+
+    def pop_bbcode(self, text):
+        bb_text = text
+        while len(self.bb_directives) > 0:
+            d_left = self.bb_directives.pop()
+            d_right = f"[/{d_left[1:]}"
+            bb_text = f"{d_left}{bb_text}{d_right}"
+        return bb_text
 
     def pop(self):
         popped = self.current_list.pop()
@@ -155,27 +167,28 @@ class MarkdownVisitor:
         if self.visiting_table:
             self.push(
                 MarkdownCellLabel(
-                    text=node["text"], **{**kwargs, **{"font_hinting": "mono"}}
+                    text=self.pop_bbcode(node["text"]),
+                    **{**kwargs, **{"font_hinting": "mono"}},
                 )
             )
         else:
-            self.push(MarkdownCodeSpan(text=node["text"], **kwargs))
+            self.push(MarkdownCodeSpan(text=self.pop_bbcode(node["text"]), **kwargs))
         return True
 
     def visit_text(self, node: "MdText", **kwargs) -> bool:
         if isinstance(self.current_list[-1], MarkdownHeading):
             md_widget = self.pop()
-            md_widget.text = node["text"]
+            md_widget.text = self.pop_bbcode(node["text"])
             if kwargs:
                 for k, v in kwargs.items():
                     setattr(md_widget, k, v)
             self.push(md_widget)
             return False
         elif self.visiting_table:
-            self.push(MarkdownCellLabel(text=node["text"], **kwargs))
+            self.push(MarkdownCellLabel(text=self.pop_bbcode(node["text"]), **kwargs))
             return True
         else:
-            self.push(Label(text=node["text"], **kwargs))
+            self.push(Label(text=self.pop_bbcode(node["text"]), **kwargs))
             return True
 
     def visit_block_quote(self, node: "MdBlockQuote", **kwargs) -> bool:
@@ -186,8 +199,18 @@ class MarkdownVisitor:
         return False
 
     def visit_strong(self, node: "MdTextStrong", **kwargs):
+        self.push_bbcode("[b]")
         widget_kwargs = {k: v for k, v in kwargs.items()}
-        widget_kwargs.update({"bold": True})
+        widget_kwargs.update({"markup": True})
+        for child in node["children"]:
+            if self.visit(child, **widget_kwargs):
+                self.pop()
+        return False
+
+    def visit_emphasis(self, node: "MdTextEmphasis", **kwargs):
+        self.push_bbcode("[i]")
+        widget_kwargs = {k: v for k, v in kwargs.items()}
+        widget_kwargs.update({"markup": True})
         for child in node["children"]:
             if self.visit(child, **widget_kwargs):
                 self.pop()

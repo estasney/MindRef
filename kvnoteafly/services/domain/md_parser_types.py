@@ -10,6 +10,7 @@ TABLE_ROW = Literal["table_row"]
 TABLE_CELL = Literal["table_cell"]
 TABLE_CELL_ALIGN = Optional[Literal["left", "right", "center"]]
 STRONG = Literal["strong"]
+EMPHASIS = Literal["emphasis"]
 CODESPAN = Literal["codespan"]
 LINEBREAK = Literal["linebreak"]
 LINK = Literal["link"]
@@ -108,6 +109,11 @@ class MdBlockText(TypedDict):
 class MdText(TypedDict):
     type: TEXT
     text: str
+
+
+class MdTextEmphasis(TypedDict):
+    type: EMPHASIS
+    children: list[MdText]
 
 
 class MdTextStrong(TypedDict):
@@ -210,6 +216,6 @@ MD_BLOCK_TYPES = Union[
     MdParagraph,
 ]
 
-MD_LIT_INLINE_TYPES = Union[CODESPAN, STRONG, TEXT]
+MD_LIT_INLINE_TYPES = Union[CODESPAN, STRONG, TEXT, EMPHASIS]
 
 MD_INLINE_TYPES = [MdCodeSpan, MdTextStrong, MdText]
