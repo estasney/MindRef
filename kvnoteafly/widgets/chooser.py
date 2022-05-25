@@ -1,6 +1,11 @@
 from kivy.app import App
 from kivy.core.window import Window
-from kivy.properties import ListProperty, ObjectProperty, StringProperty
+from kivy.properties import (
+    ListProperty,
+    NumericProperty,
+    ObjectProperty,
+    StringProperty,
+)
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
@@ -8,6 +13,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.vector import Vector
 
 from utils import import_kv
+from widgets.mixins import TrackParentPadding
 
 import_kv(__file__)
 
@@ -50,7 +56,7 @@ class NoteCategoryChooser(GridLayout):
             self.add_widget(cat)
 
 
-class NoteCategoryButton(ButtonBehavior, BoxLayout):
+class NoteCategoryButton(ButtonBehavior, BoxLayout, TrackParentPadding):
     source = StringProperty()
     text = StringProperty()
 
@@ -60,6 +66,3 @@ class NoteCategoryButton(ButtonBehavior, BoxLayout):
             text.lower(), "category_img"
         )
         self.text = text
-
-    def collide_point(self, x, y):
-        return Vector(x, y).distance(self.center) <= self.width / 2

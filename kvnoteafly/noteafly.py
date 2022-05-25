@@ -120,10 +120,14 @@ class NoteAFly(App):
             self.next_note_scheduler.cancel()
 
     def select_index(self, value):
-        self.note_service.set_index(value)
-        self.note_data = self.note_service.current_note().to_dict()
-        self.play_state = "pause"
-        self.display_state = "display"
+        def scheduled_select(dt, value):
+            self.note_service.set_index(value)
+            self.note_data = self.note_service.current_note().to_dict()
+            self.play_state = "pause"
+            self.display_state = "display"
+
+        func = partial(scheduled_select, value=value)
+        Clock.schedule_once(func)
 
     def paginate(self, value):
         self.next_note_scheduler.cancel()
@@ -164,24 +168,33 @@ class NoteAFly(App):
         Category button pressed
         """
         self.note_service.current_category = value
-        if not value:
+
+        def return_to_category(dt):
             self.note_category_meta = []
             if self.next_note_scheduler:
                 self.next_note_scheduler.cancel()
             self.display_state = "choose"
-        else:
+
+        def select_category(dt, category):
             self.note_category_meta = self.note_service.category_meta
             if not self.next_note_scheduler:
                 self.next_note_scheduler = Clock.schedule_interval(
                     self.paginate_note, self.paginate_interval
                 )
-                if self.play_state == "pause":
-                    self.next_note_scheduler.cancel()
+            if self.play_state == "pause":
+                self.next_note_scheduler.cancel()
             else:
                 if self.play_state == "play":
                     self.next_note_scheduler()
             self.paginate_note(initial=True)
             self.display_state = "display"
+
+        if not value:
+            Clock.schedule_once(return_to_category)
+            return
+        else:
+            func = partial(select_category, category=value)
+            Clock.schedule_once(func)
 
     def on_note_data(self, *args, **kwargs):
         self.screen_manager.handle_notes(self)

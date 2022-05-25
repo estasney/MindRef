@@ -14,7 +14,6 @@ from kivy.uix.gridlayout import GridLayout
 
 from widgets.behavior import LabelHighlight
 
-
 if TYPE_CHECKING:
     pass
 
@@ -25,12 +24,12 @@ class MarkdownTable(GridLayout):
 
 class MarkdownCellLabel(LabelHighlight):
     parent_r_pad = NumericProperty()
-    _parent_vert_pad_func = None
 
     def __init__(self, **kwargs):
         if kwargs.get("font_hinting") == "mono":
             kwargs.update({"highlight": True})
         super(MarkdownCellLabel, self).__init__(**kwargs)
+        self._parent_vert_pad_func = None
 
     def on_parent(self, instance, value):
         self.parent.fbind("height", self.parent_height)
