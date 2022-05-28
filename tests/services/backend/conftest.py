@@ -125,6 +125,10 @@ def _get_expected(fp):
             has_sk_keys,
             no_text_with(["shortcut", "Ctrl", "Enter", "Shift", "```"]),
         ],
+        "Zen.md": [
+            no_table,
+            has_title("The Zen of Python, by Tim Peters"),
+        ],
     }
     return fp, data[fp.name]
 
