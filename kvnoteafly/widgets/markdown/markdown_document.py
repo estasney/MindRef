@@ -1,16 +1,11 @@
 from typing import TYPE_CHECKING
 
 from kivy.properties import (
-    AliasProperty,
-    DictProperty,
-    Logger,
     NumericProperty,
     ObjectProperty,
     StringProperty,
 )
 from kivy.uix.scrollview import ScrollView
-from kivy.utils import get_color_from_hex, get_hex_from_color
-
 
 from utils import import_kv
 from widgets.markdown.markdown_visitor import MarkdownVisitor

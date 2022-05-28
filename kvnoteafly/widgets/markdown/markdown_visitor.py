@@ -1,8 +1,9 @@
+from __future__ import annotations
+
 from collections import deque
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Union, overload
 
 from kivy import Logger
-from kivy.uix.label import Label
 
 from services.backend.utils import get_md_node_text
 from widgets.markdown.code.code_span import MarkdownCodeSpan
@@ -10,15 +11,18 @@ from widgets.markdown.code.markdown_code import MarkdownCode
 from widgets.markdown.list.markdown_list import MarkdownList
 from widgets.markdown.list.markdown_list_item import MarkdownListItem
 from widgets.markdown.markdown_block import MarkdownBlock, MarkdownHeading
+from widgets.markdown.markdown_interceptor import WidgetIntercept
 from widgets.markdown.paragraph.blocks import MarkdownBlockQuote
 from widgets.markdown.table.markdown_table import (
     MarkdownCellLabel,
     MarkdownRow,
     MarkdownTable,
 )
+from kivy.uix.layout import Layout
 
 if TYPE_CHECKING:
     from services.domain.md_parser_types import *
+    from kivy.uix.widget import Widget
 
 
 class MarkdownVisitor:
@@ -41,32 +45,39 @@ class MarkdownVisitor:
         self.current_list = deque([])
         self.bb_directives = deque([])
         self.visiting_table = False
+        self.tip_type_layout = False
 
-    def push(self, widget, add: bool = True):
+    @overload
+    def push(self, widget: Widget):
+        ...
+
+    @overload
+    def push(self, widget: Layout):
+        ...
+
+    @overload
+    def push(self, widget: "MD_INLINE_TYPES"):
+        ...
+
+    def push(self, widget):
+        if isinstance(widget, dict):
+            raise AttributeError(
+                f"Passing {widget} to push is only supported with {WidgetIntercept.__class__.__name__}"
+            )
         if len(self.current_list):
-            if add:
-                self.current_list[-1].add_widget(widget)
+            self.current_list[-1].add_widget(widget)
+            if isinstance(widget, Layout):
+                self.current_list.append(widget)
                 Logger.debug(
                     f"Pushed-->: {widget.__class__.__name__} --> {self.current_list[-1].__class__.__name__}"
                 )
             else:
                 Logger.debug(
-                    f"Pushed-->: {widget.__class__.__name__} XX> {self.current_list[-1].__class__.__name__}"
+                    f"Pushed-->: {widget.__class__.__name__} --> {self.current_list[-1].__class__.__name__} XXX"
                 )
         else:
             Logger.debug(f"New Stack with {widget.__class__.__name__}")
-        self.current_list.append(widget)
-
-    def push_bbcode(self, directive):
-        self.bb_directives.append(directive)
-
-    def pop_bbcode(self, text):
-        bb_text = text
-        while len(self.bb_directives) > 0:
-            d_left = self.bb_directives.pop()
-            d_right = f"[/{d_left[1:]}"
-            bb_text = f"{d_left}{bb_text}{d_right}"
-        return bb_text
+            self.current_list.append(widget)
 
     def pop(self):
         popped = self.current_list.pop()
@@ -87,22 +98,25 @@ class MarkdownVisitor:
         return visit_func(node, **kwargs)
 
     def visit_heading(self, node: "MdHeading", **kwargs) -> bool:
-        heading_widget = MarkdownHeading(level=node["level"])
-        self.push(heading_widget, add=False)
-        for node in node["children"]:
-            if self.visit(node):
-                self.pop()
+        heading_widget = MarkdownHeading()
+        heading_widget.level = node["level"]
+        child_kwargs = {**kwargs, "inline": True}
+        with WidgetIntercept(visitor=self, widget=heading_widget):
+            for node in node["children"]:
+                self.visit(node, **child_kwargs)
+        self.push(heading_widget)
         return True
 
     def visit_table_cell(self, node: "MdTableHeadCell", **kwargs) -> bool:
-        # self.push(MarkdownCell())
         cell_label_kwargs = {k: v for k, v in kwargs.items()}
         cell_align = node["align"] if node["align"] else "center"
         cell_bold = node["is_head"]
         cell_label_kwargs.update({"halign": cell_align, "bold": cell_bold})
-        for child in node["children"]:
-            if self.visit(child, **cell_label_kwargs):
-                self.pop()
+        cell_widget = MarkdownCellLabel(**cell_label_kwargs)
+        with WidgetIntercept(visitor=self, widget=cell_widget):
+            for child in node["children"]:
+                self.visit(child, **cell_label_kwargs)
+        self.push(cell_widget)
         return False
 
     def visit_table(self, node: "MdTable", **kwargs) -> bool:
@@ -118,6 +132,7 @@ class MarkdownVisitor:
             if self.visit(cell, **head_kwargs):
                 self.pop()
         self.pop()
+
         Logger.debug("Start Table Body")
 
         del head_kwargs
@@ -129,6 +144,7 @@ class MarkdownVisitor:
                 if self.visit(cell, **kwargs):
                     self.pop()
             self.pop()
+        self.visiting_table = False
         return True
 
     def visit_paragraph(self, node: "MdParagraph", **kwargs) -> bool:
@@ -165,31 +181,16 @@ class MarkdownVisitor:
 
     def visit_codespan(self, node: "MdCodeSpan", **kwargs) -> bool:
         if self.visiting_table:
-            self.push(
-                MarkdownCellLabel(
-                    text=self.pop_bbcode(node["text"]),
-                    **{**kwargs, **{"font_hinting": "mono"}},
-                )
-            )
+            self.push(node)
+        elif kwargs.get("inline"):
+            self.push(node)
         else:
-            self.push(MarkdownCodeSpan(text=self.pop_bbcode(node["text"]), **kwargs))
+            self.push(MarkdownCodeSpan(text=node["text"], **kwargs))
         return True
 
     def visit_text(self, node: "MdText", **kwargs) -> bool:
-        if isinstance(self.current_list[-1], MarkdownHeading):
-            md_widget = self.pop()
-            md_widget.text = self.pop_bbcode(node["text"])
-            if kwargs:
-                for k, v in kwargs.items():
-                    setattr(md_widget, k, v)
-            self.push(md_widget)
-            return False
-        elif self.visiting_table:
-            self.push(MarkdownCellLabel(text=self.pop_bbcode(node["text"]), **kwargs))
-            return True
-        else:
-            self.push(Label(text=self.pop_bbcode(node["text"]), **kwargs))
-            return True
+        self.push(node)
+        return True
 
     def visit_block_quote(self, node: "MdBlockQuote", **kwargs) -> bool:
         self.push(MarkdownBlockQuote(text_content=get_md_node_text(node), **kwargs))
@@ -199,22 +200,22 @@ class MarkdownVisitor:
         return False
 
     def visit_strong(self, node: "MdTextStrong", **kwargs):
-        self.push_bbcode("[b]")
-        widget_kwargs = {k: v for k, v in kwargs.items()}
-        widget_kwargs.update({"markup": True})
         for child in node["children"]:
-            if self.visit(child, **widget_kwargs):
+            if self.visit(child, **kwargs):
                 self.pop()
         return False
 
     def visit_emphasis(self, node: "MdTextEmphasis", **kwargs):
-        self.push_bbcode("[i]")
-        widget_kwargs = {k: v for k, v in kwargs.items()}
-        widget_kwargs.update({"markup": True})
-        for child in node["children"]:
-            if self.visit(child, **widget_kwargs):
-                self.pop()
-        return False
+        if self.visiting_table or kwargs.get("inline"):
+            self.push(node)
+            for child in node["children"]:
+                self.push(child)
+                return True
+        else:
+            for child in node["children"]:
+                if self.visit(child, **kwargs):
+                    self.pop()
+            return True
 
     def visit_generic(self, node, **kwargs):
         node_type = node.get("type")

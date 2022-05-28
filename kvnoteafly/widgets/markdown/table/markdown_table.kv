@@ -18,15 +18,16 @@
             rectangle: self.x, self.y, self.width, self.height
 
 <MarkdownCellLabel>:
+    highlight: self.is_codespan
     highlight_color: app.colors['Codespan']
-    bg_color: app.colors['Primary']
+    bg_color: app.colors['Dark']
     valign: 'top'
     size_hint_y: None
     markup: True
     mipmap: True
     width: self.texture_size[0]
     height: self.texture_size[1]
-    text_size: root.width, None
+    text_size: self.width, None
     font_size: sp(14) if self.font_family == "RobotoMono" else sp(15)
     padding: sp(4), sp(2)
     canvas:

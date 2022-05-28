@@ -139,27 +139,38 @@ def text_contrast(background_color, threshold, highlight_color: Optional[Any] = 
 
 class LabelAutoContrast(Label):
     """
-    Label that changes text color to optimize contrast
+    Label that changes text color to optimize contrast. bg_color should reference the color it is drawn on top of.
     """
 
     bg_color = ColorProperty()
     text_color = StringProperty("#ffffff")
     text_threshold = NumericProperty(186)
-    _raw_text = StringProperty()
+    raw_text = StringProperty()
 
     def __init__(self, **kwargs):
         if "text" in kwargs:
             text = kwargs.pop("text")
         else:
             text = ""
-        kwargs.update({"_raw_text": text, "text": text})
         super().__init__(**kwargs)
+        self.raw_text = text
+        self.bind(raw_text=self.handle_raw_text)
+        self.bind(bg_color=self.handle_bg_color)
+        self.bind(text_color=self.handle_text_color)
 
-    def on_bg_color(self, instance, value):
+    def handle_bg_color(self, instance, value):
+        """When bg_color is set we set our text_color accordingly"""
         self.text_color = text_contrast(self.bg_color, self.text_threshold, None)
+        return True
 
-    def on_text_color(self, instance, value):
-        self.text = f"[color={self.text_color}]{self._raw_text}[/color]"
+    def handle_text_color(self, instance, value):
+        """With text_color updated, we update our text with markup"""
+        self.text = f"[color={self.text_color}]{self.raw_text}[/color]"
+        return True
+
+    def handle_raw_text(self, instance, value):
+        self.text = f"[color={self.text_color}]{value}[/color]"
+        return True
 
 
 class LabelHighlight(LabelAutoContrast):
@@ -178,7 +189,7 @@ class LabelHighlight(LabelAutoContrast):
     text_color: Either white or black. Auto color based on contrast of highlight_color and bg_color
     text_threshold: Threshold to change text_color
     font_family:
-    _raw_text: Holds text before applying any markup. Required since get_extents does not remove markup.
+    raw_text: Holds text before applying any markup. Required since get_extents does not remove markup.
     """
 
     y_extent = NumericProperty()
@@ -188,46 +199,57 @@ class LabelHighlight(LabelAutoContrast):
     highlight_color = ColorProperty()
 
     def __init__(self, **kwargs):
-        if "text" in kwargs:
-            text = kwargs.pop("text")
-        else:
-            text = ""
-        kwargs.update({"_raw_text": text, "text": text})
         super(LabelHighlight, self).__init__(**kwargs)
+        self.bind(highlight=self.handle_highlight)
+        self.bind(bg_color=self.handle_bg_color)
 
-    def on_highlight(self, instance, value):
-        if value:
-            self.bind(texture_size=self.get_extents)
+    def handle_bg_color(self, instance, value):
+        if self.highlight:
+            self.text_color = text_contrast(
+                self.bg_color, self.text_threshold, self.highlight_color
+            )
         else:
+            self.text_color = text_contrast(self.bg_color, self.text_threshold, None)
+        return True
+
+    def handle_highlight(self, instance, value):
+        """Main switch to enable/disable behavior"""
+        if value:
+            self.bind(text=self.get_extents)
+            self.bind(texture_size=self.get_extents)
+            self.bind(highlight_color=self.handle_highlight_color)
+            self.bind(bg_color=self.handle_bg_color)
+            self.bind(text_color=self.handle_text_color)
+            self.bind(extents=self.draw_highlight)
+            self.bind(pos=self.draw_highlight)
+        else:
+            self.unbind(text=self.get_extents)
             self.unbind(texture_size=self.get_extents)
+            self.unbind(highlight_color=self.handle_highlight_color)
+            self.unbind(bg_color=self.handle_bg_color)
+            self.unbind(text_color=self.handle_text_color)
+            self.unbind(extents=self.draw_highlight)
+            self.unbind(pos=self.draw_highlight)
 
-    def on_highlight_color(self, instance, value):
+    def handle_highlight_color(self, instance, value):
         if self.highlight:
             self.text_color = text_contrast(
                 self.bg_color, self.text_threshold, self.highlight_color
             )
-
-    def on_bg_color(self, instance, value):
-        if self.highlight:
-            self.text_color = text_contrast(
-                self.bg_color, self.text_threshold, self.highlight_color
-            )
-
-    def on_text_color(self, instance, value):
-        if self.highlight:
-            self.text = f"[color={self.text_color}]{self._raw_text}[/color]"
+            return True
 
     def get_extents(self, instance, value):
         # Texture created
         # We have to remove markup
-        w, h = get_cached_extents(self._label, self._raw_text)
+        w, h = get_cached_extents(self._label, self.raw_text)
 
         # Now we can draw our codespan background
-        self.x_extent = w + (2 * self.padding_x)
-        self.y_extent = h + self.padding_y
+        self.extents = [w + (2 * self.padding_x), h + self.padding_y]
+        return True
 
-    def on_extents(self, instance, value):
-        Clock.schedule_once(self.draw_bg_extents)
+    def draw_highlight(self, instance, value):
+        if self.highlight:
+            Clock.schedule_once(self.draw_bg_extents)
 
     def get_x(self):
         if self.halign == "left":
@@ -243,8 +265,9 @@ class LabelHighlight(LabelAutoContrast):
         return (self.center_y - self.texture_size[1] * 0.5) + (self.padding_y * 0.5)
 
     def draw_bg_extents(self, *args, **kwargs):
-        self.canvas.before.clear()
+
         with self.canvas.before:
+            self.canvas.before.clear()
             Color(*self.highlight_color)
             RoundedRectangle(
                 pos=(self.get_x(), self.get_y()), size=self.extents, radius=(3,)

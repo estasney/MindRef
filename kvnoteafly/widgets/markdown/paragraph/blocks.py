@@ -1,6 +1,5 @@
 from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.gridlayout import GridLayout
-from kivy.uix.label import Label
 
 from utils import import_kv
 

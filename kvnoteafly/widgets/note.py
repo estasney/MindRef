@@ -1,6 +1,8 @@
 from typing import TYPE_CHECKING
+
+from kivy import Logger
 from kivy.cache import Cache
-from kivy.properties import Logger, ObjectProperty, StringProperty
+from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.boxlayout import BoxLayout
 
 from utils import import_kv

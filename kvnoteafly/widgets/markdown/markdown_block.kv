@@ -1,15 +1,11 @@
 #:import parse_color kivy.parser.parse_color
+#:import LabelHighlight widgets.behavior
 
 <MarkdownHeading>:
-    markup: True
-    valign: 'top'
-    font_size: sp(20 - self.level)
-
+    label: label
+    orientation: 'horizontal'
     size_hint_y: None
-    height: self.texture_size[1] + dp(20)
-    text_size: self.width, None
-    bold: True
-
+    height: self.minimum_height
     canvas:
         Color:
             rgba: app.colors['Dark']
@@ -17,7 +13,25 @@
             pos: self.x, self.y + 5
             size: self.width, 1
 
+    LabelHighlight:
+        id: label
+        raw_text: root.raw_text
+        highlight: root.is_codespan
+        highlight_color: app.colors['Codespan']
+        bg_color: app.colors['Dark']
+        padding: (sp(5), 0) if self.highlight else (0, 0)
+        markup: True
+        valign: 'top'
+        halign: 'left'
+        font_size: sp(20 - root.level)
+        size_hint_y: None
+        height: self.texture_size[1] + dp(20)
+        text_size: self.width, None
+        bold: True
+
+
 <MarkdownBlock>:
     orientation: 'horizontal'
     size_hint_y: None
     height: self.minimum_height
+    markup: True

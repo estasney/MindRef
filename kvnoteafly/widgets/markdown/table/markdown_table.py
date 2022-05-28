@@ -1,13 +1,14 @@
 from typing import TYPE_CHECKING
 
 from utils import import_kv
+from widgets.markdown.markdown_interceptor import InterceptingWidgetMixin
 
 import_kv(__file__)
 
 from kivy.properties import (
     BooleanProperty,
     NumericProperty,
-    ObjectProperty,
+    StringProperty,
 )
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
@@ -22,17 +23,19 @@ class MarkdownTable(GridLayout):
     pass
 
 
-class MarkdownCellLabel(LabelHighlight):
+class MarkdownCellLabel(LabelHighlight, InterceptingWidgetMixin):
     parent_r_pad = NumericProperty()
+    is_codespan = BooleanProperty(False)
+    open_bbcode_tag = StringProperty()
 
     def __init__(self, **kwargs):
         if kwargs.get("font_hinting") == "mono":
             kwargs.update({"highlight": True})
-        super(MarkdownCellLabel, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self._parent_vert_pad_func = None
 
     def on_parent(self, instance, value):
-        self.parent.fbind("height", self.parent_height)
+        self.parent.bind(height=self.parent_height)
         self.parent_r_pad = self.get_parent_r_pad(self.parent)
 
     def get_parent_r_pad(self, parent):

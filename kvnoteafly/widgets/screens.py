@@ -2,8 +2,9 @@ import os
 from itertools import cycle
 from typing import TYPE_CHECKING
 
+from kivy import Logger
 from kivy.clock import Clock
-from kivy.properties import ListProperty, Logger, ObjectProperty, StringProperty
+from kivy.properties import ListProperty, ObjectProperty, StringProperty
 from kivy.uix.screenmanager import Screen, ScreenManager
 from toolz import sliding_window
 

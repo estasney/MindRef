@@ -218,4 +218,4 @@ MD_BLOCK_TYPES = Union[
 
 MD_LIT_INLINE_TYPES = Union[CODESPAN, STRONG, TEXT, EMPHASIS]
 
-MD_INLINE_TYPES = [MdCodeSpan, MdTextStrong, MdText]
+MD_INLINE_TYPES = Union[MdCodeSpan, MdTextStrong, MdText, MdTextEmphasis]
