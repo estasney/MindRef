@@ -127,7 +127,7 @@ class MarkdownVisitor:
         # Table head row
         head_kwargs = {k: v for k, v in kwargs.items()}
         head_kwargs.update({"bold": True, "font_hinting": None, "halign": "center"})
-        self.push(MarkdownRow(is_head=True))
+        self.push(MarkdownRow())
         for cell in table_head["children"]:
             if self.visit(cell, **head_kwargs):
                 self.pop()
@@ -139,7 +139,7 @@ class MarkdownVisitor:
 
         rows = node["children"][1]["children"]
         for row_idx, row in enumerate(rows):
-            self.push(MarkdownRow(is_head=False))
+            self.push(MarkdownRow())
             for cell in row["children"]:
                 if self.visit(cell, **kwargs):
                     self.pop()
