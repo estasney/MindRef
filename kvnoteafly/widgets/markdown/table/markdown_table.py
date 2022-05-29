@@ -37,67 +37,60 @@ class MarkdownCellLabel(LabelHighlight, InterceptingWidgetMixin):
         if kwargs.get("font_hinting") == "mono":
             kwargs.update({"highlight": True})
         super().__init__(**kwargs)
-        self._parent_vert_pad_func = None
+        self.fbind("parent", self.handle_parent)
+        self.fbind("texture_size", self.handle_parent_height)
 
-    def on_parent(self, instance, value):
-        self.parent.bind(height=self.parent_height)
-        self.parent_r_pad = self.get_parent_r_pad(self.parent)
+    def handle_parent(self, instance, value):
+        self.parent.fbind("height", self.handle_parent_height)
+        self.parent.fbind("padding", self.handle_parent_padding)
+        return True
 
-    def get_parent_r_pad(self, parent):
+    def handle_parent_height(self, instance, value):
+        parent = self.parent
         p_pad = parent.padding
-        if len(p_pad) == 4:
-            return p_pad[2]
-        elif len(p_pad) == 2:
-            return p_pad[0]
-        elif len(p_pad) == 1:
-            return p_pad
-        else:
-            return 0
+        n_pads = len(p_pad)
+        f_table = {
+            4: lambda p: sum((p.padding[1], p.padding[3])),
+            2: lambda p: p.padding[1],
+            1: lambda p: p.padding,
+        }
+        vert_pad = f_table.get(n_pads, lambda p: 0)
+        calc_height = max(self.height - vert_pad(parent), self.texture_size[1])
+        self.height = calc_height
 
-    def parent_vert_pad_func(self, parent):
-        if self._parent_vert_pad_func:
-            return self._parent_vert_pad_func(parent)
-        p_pad = parent.padding
+    def handle_parent_padding(self, instance, value):
+        p_pad = self.parent.padding
         if len(p_pad) == 4:
-            self._parent_vert_pad_func = lambda p: sum((p.padding[1], p.padding[3]))
+            self.parent_r_pad = p_pad[2]
         elif len(p_pad) == 2:
-            self._parent_vert_pad_func = lambda p: p.padding[1]
+            self.parent_r_pad = p_pad[0]
         elif len(p_pad) == 1:
-            self._parent_vert_pad_func = lambda p: p.padding
+            self.parent_r_pad = p_pad
         else:
-            self._parent_vert_pad_func = lambda p: 0
-        return self._parent_vert_pad_func(parent)
-
-    def parent_height(self, parent, height):
-        self.height = max(
-            height - self.parent_vert_pad_func(parent), self.texture_size[1]
-        )
+            self.parent_r_pad = 0
 
 
 class MarkdownRow(BoxLayout):
     ...
 
-    def on_children(self, instance, value):
+    def __init__(self, **kwargs):
+        super(MarkdownRow, self).__init__(**kwargs)
+        fbind = self.fbind
+        draw = self.schedule_draw
+        fbind("x", draw)
+        fbind("y", draw)
+        fbind("width", draw)
+        fbind("height", draw)
+        fbind("children", draw)
+
+    def schedule_draw(self, instance, value):
         Clock.schedule_once(self.draw_cell_border)
         return True
 
     def draw_cell_border(self, dt):
-        with self.canvas:
+        with self.canvas.before:
+            self.canvas.before.clear()
             Color(rgba=App.get_running_app().colors["Dark"])
+            Line(width=1.2, rectangle=(self.x, self.y, self.width, self.height))
             for child in self.children[:-1]:
                 Line(width=1.2, rectangle=(self.x, self.y, child.width, self.height))
-
-    # def on_pos(self, instance, value):
-    #     with self.canvas.before:
-    #         self.canvas.before.clear()
-    #         Color(rgba=App.get_running_app().colors['Dark'])
-    #         Line(width=1.2, rectangle=(self.x, self.y, self.width, self.height))
-
-
-# """canvas:
-#         Color:
-#             rgba: app.colors['Dark']
-#         Line:
-#             width: 1.2
-#             rectangle: self.x, self.y, self.width, self.height
-# """
