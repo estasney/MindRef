@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from kivy import Logger
-
 from utils import import_kv
 
 import_kv(__file__)

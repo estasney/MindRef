@@ -14,7 +14,6 @@
         Line:
             rounded_rectangle: (self.pos[0], self.pos[1], self.size[0]+4, self.size[1], 4)
             width: dp(1)
-
     ListViewButton:
         opacity: 1 if self.state == 'normal' else 0.6
         on_release: app.display_state = 'list'
@@ -27,9 +26,8 @@
     PrimaryVSep:
     PlayStateButton:
         id: play_button
-        color: self.color
         opacity: 1 if self.state == 'normal' else 0.6
-        on_release: self.toggle_play_state()
+        on_release: self.playing = not self.playing
         mipmap: True
     PrimaryVSep:
     ForwardButton:
