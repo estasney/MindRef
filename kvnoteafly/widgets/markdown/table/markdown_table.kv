@@ -30,9 +30,3 @@
     text_size: self.width, None
     font_size: sp(14) if self.font_family == "RobotoMono" else sp(15)
     padding: sp(4), sp(2)
-    canvas:
-        Color:
-            rgba: app.colors['Dark']
-        Line:
-            width: sp(1)
-            points: [ self.x,   self.y,   self.right,   self.y,   self.right,   self.top,   self.x,   self.top,   self.x,   self.y ]

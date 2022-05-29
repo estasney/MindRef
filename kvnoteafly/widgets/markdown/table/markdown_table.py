@@ -1,5 +1,10 @@
 from typing import TYPE_CHECKING
 
+from kivy.app import App
+from kivy.clock import Clock
+from kivy.graphics import Line
+from kivy.graphics.context_instructions import Color
+
 from utils import import_kv
 from widgets.markdown.markdown_interceptor import InterceptingWidgetMixin
 
@@ -70,4 +75,29 @@ class MarkdownCellLabel(LabelHighlight, InterceptingWidgetMixin):
 
 
 class MarkdownRow(BoxLayout):
-    is_head = BooleanProperty()
+    ...
+
+    def on_children(self, instance, value):
+        Clock.schedule_once(self.draw_cell_border)
+        return True
+
+    def draw_cell_border(self, dt):
+        with self.canvas:
+            Color(rgba=App.get_running_app().colors["Dark"])
+            for child in self.children[:-1]:
+                Line(width=1.2, rectangle=(self.x, self.y, child.width, self.height))
+
+    # def on_pos(self, instance, value):
+    #     with self.canvas.before:
+    #         self.canvas.before.clear()
+    #         Color(rgba=App.get_running_app().colors['Dark'])
+    #         Line(width=1.2, rectangle=(self.x, self.y, self.width, self.height))
+
+
+# """canvas:
+#         Color:
+#             rgba: app.colors['Dark']
+#         Line:
+#             width: 1.2
+#             rectangle: self.x, self.y, self.width, self.height
+# """
