@@ -220,22 +220,27 @@ class LabelHighlight(LabelAutoContrast):
 
     def handle_highlight(self, instance, value):
         """Main switch to enable/disable behavior"""
+        fbind = self.fbind
+        funbind = self.funbind
+
         if value:
-            self.bind(text=self.get_extents)
-            self.bind(texture_size=self.get_extents)
-            self.bind(highlight_color=self.handle_highlight_color)
-            self.bind(bg_color=self.handle_bg_color)
-            self.bind(text_color=self.handle_text_color)
-            self.bind(extents=self.draw_highlight)
-            self.bind(pos=self.draw_highlight)
+            fbind("text", self.get_extents)
+            fbind("texture_size", self.get_extents)
+            fbind("highlight_color", self.handle_highlight_color)
+            fbind("bg_color", self.handle_bg_color)
+            fbind("text_color", self.handle_text_color)
+            fbind("extents", self.draw_highlight)
+            fbind("pos", self.draw_highlight)
+            fbind("size", self.draw_highlight)
         else:
-            self.unbind(text=self.get_extents)
-            self.unbind(texture_size=self.get_extents)
-            self.unbind(highlight_color=self.handle_highlight_color)
-            self.unbind(bg_color=self.handle_bg_color)
-            self.unbind(text_color=self.handle_text_color)
-            self.unbind(extents=self.draw_highlight)
-            self.unbind(pos=self.draw_highlight)
+            funbind("text", self.get_extents)
+            funbind("texture_size", self.get_extents)
+            funbind("highlight_color", self.handle_highlight_color)
+            funbind("bg_color", self.handle_bg_color)
+            funbind("text_color", self.handle_text_color)
+            funbind("extents", self.draw_highlight)
+            funbind("pos", self.draw_highlight)
+            funbind("size", self.draw_highlight)
 
     def handle_highlight_color(self, instance, value):
         if self.highlight:
