@@ -139,7 +139,16 @@ def text_contrast(background_color, threshold, highlight_color: Optional[Any] = 
 
 class LabelAutoContrast(Label):
     """
-    Label that changes text color to optimize contrast. bg_color should reference the color it is drawn on top of.
+    Label that changes text color to optimize contrast
+
+    Attributes
+    ----------
+    bg_color: ColorProperty
+        Refers to the color it is drawn on top of.
+    text_color: StringProperty
+    text_threshold: NumericProperty, defaults to 186
+    raw_text: StringProperty
+        Update text content with raw_text
     """
 
     bg_color = ColorProperty()
@@ -169,26 +178,22 @@ class LabelAutoContrast(Label):
         return True
 
     def handle_raw_text(self, instance, value):
+        """Wrap our raw_text with text_color"""
         self.text = f"[color={self.text_color}]{value}[/color]"
         return True
 
 
 class LabelHighlight(LabelAutoContrast):
     """
-    Label that draws background sized to extents if highlight is set True
+    Label that adds highlighting functionality
 
     Attributes
     ----------
-
     y_extent : The extent of the text in the y-axis
     x_extent : The extent of the text in the x-axis
     extents: ReferenceListProperty of x_extent, y_extent
     highlight: Toggles highlighting behavior
-    bg_color: Color of the background. Since highlighting is mostly opaque, this is used for the text contrast check.
     highlight_color: Color of highlighting
-    text_color: Either white or black. Auto color based on contrast of highlight_color and bg_color
-    text_threshold: Threshold to change text_color
-    font_family:
     raw_text: Holds text before applying any markup. Required since get_extents does not remove markup.
     """
 
@@ -204,6 +209,7 @@ class LabelHighlight(LabelAutoContrast):
         self.bind(bg_color=self.handle_bg_color)
 
     def handle_bg_color(self, instance, value):
+        """Update our text color"""
         if self.highlight:
             self.text_color = text_contrast(
                 self.bg_color, self.text_threshold, self.highlight_color
@@ -239,8 +245,7 @@ class LabelHighlight(LabelAutoContrast):
             return True
 
     def get_extents(self, instance, value):
-        # Texture created
-        # We have to remove markup
+        """Measure the size of our text. Use cache if possible"""
         w, h = get_cached_extents(self._label, self.raw_text)
 
         # Now we can draw our codespan background
@@ -265,7 +270,6 @@ class LabelHighlight(LabelAutoContrast):
         return (self.center_y - self.texture_size[1] * 0.5) + (self.padding_y * 0.5)
 
     def draw_bg_extents(self, *args, **kwargs):
-
         with self.canvas.before:
             self.canvas.before.clear()
             Color(*self.highlight_color)
