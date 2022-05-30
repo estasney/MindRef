@@ -1,10 +1,37 @@
 from dotenv import load_dotenv
+from kivy import Logger
 from kivy.core.text import LabelBase
 from kivy.config import Config
 from pathlib import Path
 import os
 
-load_dotenv()
+
+def run_android():
+    def permission_callback(*args):
+        Logger.info(f"{args}")
+        Logger.info("Permissions")
+        os.environ.update({"NOTES_PATH": primary_external_storage_path()})
+        from noteafly import NoteAFly
+
+        NoteAFly().run()
+
+    from android.storage import primary_external_storage_path  # noqa
+    from android.permissions import request_permissions, Permission, check_permission
+
+    if not check_permission(Permission.READ_EXTERNAL_STORAGE):
+        request_permissions([Permission.READ_EXTERNAL_STORAGE], permission_callback)
+
+
+def run_desktop():
+    load_dotenv()
+    if os.environ.get("ENVIRONMENT", "PRODUCTION") == "DEBUG":
+        Config.set("modules", "inspector", "")
+        Config.set("modules", "monitor", "")
+    Config.set("input", "mouse", "mouse,disable_multitouch")
+    from noteafly import NoteAFly
+
+    NoteAFly().run()
+
 
 if __name__ == "__main__":
     LabelBase.register(
@@ -12,12 +39,6 @@ if __name__ == "__main__":
         fn_regular=str(Path(__file__).parent / "assets" / "RobotoMono-Regular.ttf"),
     )
     if os.environ.get("ANDROID_ENTRYPOINT", None):
-        ...
-    if os.environ.get("ENVIRONMENT", "PRODUCTION") == "DEBUG":
-        Config.set("modules", "inspector", "")
-        Config.set("modules", "monitor", "")
-
-    Config.set("input", "mouse", "mouse,disable_multitouch")
-    from noteafly import NoteAFly
-
-    NoteAFly().run()
+        run_android()
+    else:
+        run_desktop()

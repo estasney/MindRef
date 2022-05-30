@@ -14,7 +14,7 @@ def import_kv(path: Union[Path, str]):
     base_path = Path(path).resolve()
     kv_path = base_path.with_suffix(".kv")
     if kv_path.exists() and (sp := str(kv_path)) not in Builder.files:
-        Logger.info(f"Loading {kv_path.name}")
+        Logger.debug(f"Loading {kv_path.name}")
         Builder.load_file(sp, rulesonly=True)
 
 
