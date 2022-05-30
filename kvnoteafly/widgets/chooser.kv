@@ -1,7 +1,19 @@
+<NoteCategoryChooserScrollWrapper>:
+
+
 <NoteCategoryChooser>:
-    cols: 4
-    padding: 10
-    spacing: 10
+    categories: categories
+    orientation: 'vertical'
+    BoxLayout:
+        orientation: 'horizontal'
+        Button:
+            text: 'Settings'
+            on_release: app.open_settings()
+    GridLayout:
+        id: categories
+        cols: 4
+        padding: 10
+        spacing: 10
 
 <NoteCategoryButton>:
     orientation: 'vertical'

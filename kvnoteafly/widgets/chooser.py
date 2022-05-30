@@ -35,8 +35,9 @@ class NoteCategoryChooserScrollWrapper(ScrollView):
             self.children[0].set(value)
 
 
-class NoteCategoryChooser(GridLayout):
+class NoteCategoryChooser(BoxLayout):
     manager = ObjectProperty()
+    categories = ObjectProperty()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -53,7 +54,7 @@ class NoteCategoryChooser(GridLayout):
         ]
         for cat in category_widgets:
             cat.bind(on_release=self.category_callback)
-            self.add_widget(cat)
+            self.categories.add_widget(cat)
 
 
 class NoteCategoryButton(ButtonBehavior, BoxLayout):
