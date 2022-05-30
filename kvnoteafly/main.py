@@ -7,9 +7,7 @@ import os
 
 
 def run_android():
-    def permission_callback(*args):
-        Logger.info(f"{args}")
-        Logger.info("Permissions")
+    def start_app(*args):
         os.environ.update({"NOTES_PATH": primary_external_storage_path()})
         from noteafly import NoteAFly
 
@@ -19,7 +17,10 @@ def run_android():
     from android.permissions import request_permissions, Permission, check_permission
 
     if not check_permission(Permission.READ_EXTERNAL_STORAGE):
-        request_permissions([Permission.READ_EXTERNAL_STORAGE], permission_callback)
+        Logger.info(f"Requesting Permissions")
+        request_permissions([Permission.READ_EXTERNAL_STORAGE], start_app)
+    else:
+        start_app()
 
 
 def run_desktop():
