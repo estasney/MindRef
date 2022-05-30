@@ -18,6 +18,7 @@ from kivy.uix.screenmanager import NoTransition, SlideTransition
 
 from services.atlas.atlas import AtlasService
 from services.backend.fileStorage.fileBackend import FileSystemBackend
+from services.settings import SETTINGS_PATH
 from widgets.screens import NoteAppScreenManager
 
 
@@ -53,11 +54,8 @@ class NoteAFly(App):
 
     APP_NAME = "NoteAFly"
     atlas_service = AtlasService(storage_path=Path("./static").resolve())
-    note_service = FileSystemBackend(
-        new_first=True,
-        storage_path=Path(os.environ.get("NOTES_PATH")).expanduser().resolve(),
-    )
-    note_categories = ListProperty(note_service.categories)
+    note_service = FileSystemBackend(new_first=True)
+    note_categories = ListProperty()
     note_category = StringProperty("")
     note_data = DictProperty(rebind=True)
     note_category_meta = ListProperty()
@@ -200,6 +198,7 @@ class NoteAFly(App):
         self.screen_manager.handle_notes(self)
 
     def build(self):
+        self.note_service.storage_path = self.config.get("Storage", "NOTES_PATH")
         sm = NoteAppScreenManager(
             self,
             transition=NoTransition()
@@ -207,11 +206,26 @@ class NoteAFly(App):
             else SlideTransition(),
         )
         self.screen_manager = sm
-        self.play_state = os.environ.get("PLAY_STATE", "play")
-        self.note_category = os.environ.get("CATEGORY_SELECTED", "")
-        self.log_level = int(os.environ.get("LOG_LEVEL", logging.INFO))
-
+        self.play_state = self.config.get("Behavior", "PLAY_STATE")
+        self.note_category = self.config.get("Behavior", "CATEGORY_SELECTED")
+        self.log_level = self.config.get("Behavior", "LOG_LEVEL")
+        self.note_categories = self.note_service.categories
         return sm
+
+    def build_settings(self, settings):
+        settings.add_json_panel("Storage", self.config, SETTINGS_PATH)
+
+    def build_config(self, config):
+        get_environ = os.environ.get
+        config.setdefaults("Storage", {"NOTES_PATH": get_environ("NOTES_PATH", None)})
+        config.setdefaults(
+            "Behavior",
+            {
+                "PLAY_STATE": get_environ("PLAY_STATE", "play"),
+                "CATEGORY_SELECTED": get_environ("CATEGORY_SELECTED", ""),
+                "LOG_LEVEL": int(get_environ("LOG_LEVEL", logging.INFO)),
+            },
+        )
 
 
 if __name__ == "__main__":
