@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 class FileSystemBackend(BackendProtocol):
     _index: Optional[NoteIndex]
     _current_category: Optional[str]
-    storage_path: Path
+    _storage_path: Optional[Path]
     category_files: "CategoryFiles" = LazyLoaded()
     category_meta: "CategoryNoteMeta" = LazyLoaded(default=list)
     registry = LazyRegistry()
@@ -39,8 +39,8 @@ class FileSystemBackend(BackendProtocol):
     
     """
 
-    def __init__(self, storage_path: str | Path, new_first):
-        self.storage_path = Path(storage_path)
+    def __init__(self, new_first):
+        self._storage_path = None
         self.new_first = new_first
         self._category_files = None
         self._category_meta = []
@@ -94,11 +94,24 @@ class FileSystemBackend(BackendProtocol):
 
     @property
     def categories(self) -> list[str]:
-        return list(self.category_files.keys())
+        try:
+            return list(self.category_files.keys())
+        except AttributeError:
+            return []
 
     @property
     def current_category(self) -> Optional[str]:
         return self._current_category
+
+    @property
+    def storage_path(self) -> Path:
+        if not self._storage_path:
+            raise AttributeError("Storage Path not set")
+        return self._storage_path
+
+    @storage_path.setter
+    def storage_path(self, value: Path | str):
+        self._storage_path = Path(value)
 
     @current_category.setter
     def current_category(self, value: Optional[str]):

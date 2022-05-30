@@ -48,10 +48,11 @@ class AtlasService(AtlasServiceProtocol):
 
     builtin_atlases = {"button_bar", "category_img", "keys", "textures"}
     atlases: list[AtlasItem] = LazyLoaded()
+    _storage_path: Optional[Path]
     _instance = None
 
-    def __init__(self, storage_path: str | Path):
-        self.storage_path = Path(storage_path)
+    def __init__(self, storage_path: Optional[Path | str] = None):
+        self.storage_path = storage_path
         self._atlases = None
         app_registry.category_images(self.category_image_listener)
 
@@ -67,6 +68,16 @@ class AtlasService(AtlasServiceProtocol):
         atlas_data = self._read_atlas(atlas_name)
         image_names = set(name for name_grp in atlas_data.values() for name in name_grp)
         return image_name in image_names
+
+    @property
+    def storage_path(self):
+        if not self._storage_path:
+            raise AttributeError("Storage Path not set")
+        return self._storage_path
+
+    @storage_path.setter
+    def storage_path(self, value: Path | str):
+        self._storage_path = Path(value)
 
     @atlases
     def _discover_atlases(self):
