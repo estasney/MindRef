@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Unpack Keys" type="PythonConfigurationType" factoryName="Python" folderName="Atlas">
+  <configuration default="false" name="Unpack Icons" type="PythonConfigurationType" factoryName="Python" folderName="Atlas">
     <module name="KVNoteAFly" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
@@ -18,7 +18,7 @@
       <option name="useCurrentConnection" value="false" />
     </EXTENSION>
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/atlas_utils/atlas.py" />
-    <option name="PARAMETERS" value="unpack ./static/keys/keys.atlas" />
+    <option name="PARAMETERS" value="unpack ./static/icons/icons.atlas" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />

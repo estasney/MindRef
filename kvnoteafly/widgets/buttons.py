@@ -15,7 +15,7 @@ import_kv(__file__)
 
 
 def get_uri(name):
-    return App.get_running_app().atlas_service.uri_for(name, atlas_name="button_bar")
+    return App.get_running_app().atlas_service.uri_for(name, atlas_name="icons")
 
 
 class ButtonBar(BoxLayout):
