@@ -66,7 +66,6 @@ class NoteAFly(App):
     play_state = OptionProperty("play", options=["play", "pause"])
     paginate_interval = NumericProperty(15)
     log_level = NumericProperty(logging.ERROR)
-    needs_settings = BooleanProperty(False)
 
     screen_manager = ObjectProperty()
     fonts = DictProperty({"mono": "RobotoMono", "default": "Roboto"})
@@ -204,8 +203,6 @@ class NoteAFly(App):
         storage_path = (
             np if (np := self.config.get("Storage", "NOTES_PATH")) != "None" else None
         )
-        if not storage_path:
-            self.needs_settings = True
         if storage_path:
             self.note_service.storage_path = storage_path
         sm = NoteAppScreenManager(

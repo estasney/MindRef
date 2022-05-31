@@ -81,5 +81,4 @@ class NoteCategoryButton(ButtonBehavior, BoxLayout):
         region = get_region(name.lower(), "textures")
         texture = img.texture
         texture = texture.get_region(*region)
-        texture.wrap = "clamp_to_edge"
         setattr(self, f"tx_{name}", texture)
