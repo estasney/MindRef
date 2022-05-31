@@ -1,0 +1,9 @@
+[
+  {
+    "type": "numeric",
+    "title": "Base Font Size",
+    "desc": "Set the base font size",
+    "section": "Display",
+    "key": "BASE_FONT_SIZE"
+  }
+]

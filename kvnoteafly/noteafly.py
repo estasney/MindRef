@@ -19,7 +19,7 @@ from kivy.uix.screenmanager import NoTransition, SlideTransition
 
 from services.atlas.atlas import AtlasService
 from services.backend.fileStorage.fileBackend import FileSystemBackend
-from services.settings import SETTINGS_PATH
+from services.settings import SETTINGS_DISPLAY_PATH, SETTINGS_STORAGE_PATH
 from widgets.screens import NoteAppScreenManager
 
 
@@ -70,6 +70,7 @@ class NoteAFly(App):
 
     screen_manager = ObjectProperty()
     fonts = DictProperty({"mono": "RobotoMono", "default": "Roboto"})
+    base_font_size = NumericProperty()
     colors = DictProperty(
         {
             "White": (1, 1, 1),
@@ -218,16 +219,19 @@ class NoteAFly(App):
         self.play_state = self.config.get("Behavior", "PLAY_STATE")
         self.note_category = self.config.get("Behavior", "CATEGORY_SELECTED")
         self.log_level = self.config.get("Behavior", "LOG_LEVEL")
+        self.base_font_size = self.config.get("Display", "BASE_FONT_SIZE")
         if storage_path:
             self.note_categories = self.note_service.categories
         return sm
 
     def build_settings(self, settings):
-        settings.add_json_panel("Storage", self.config, SETTINGS_PATH)
+        settings.add_json_panel("Storage", self.config, SETTINGS_STORAGE_PATH)
+        settings.add_json_panel("Display", self.config, SETTINGS_DISPLAY_PATH)
 
     def build_config(self, config):
         get_environ = os.environ.get
         config.setdefaults("Storage", {"NOTES_PATH": get_environ("NOTES_PATH", None)})
+        config.setdefaults("Display", {"BASE_FONT_SIZE": 16})
         config.setdefaults(
             "Behavior",
             {
@@ -242,6 +246,13 @@ class NoteAFly(App):
         if section == "Storage":
             if key == "NOTES_PATH":
                 self.note_service.storage_path = value
+                self.note_categories = self.note_service.categories
+        elif section == "Behavior":
+            if key == "LOG_LEVEL":
+                self.log_level = value
+        elif section == "Display":
+            if key == "BASE_FONT_SIZE":
+                self.base_font_size = value
 
 
 if __name__ == "__main__":

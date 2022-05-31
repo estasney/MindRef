@@ -4,6 +4,6 @@
         "title": "Note Storage",
         "desc": "Choose the root folder to store notes in",
         "section": "Storage",
-        "key": "notes_path"
+        "key": "NOTES_PATH"
     }
 ]
