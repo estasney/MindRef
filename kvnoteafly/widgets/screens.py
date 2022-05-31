@@ -11,7 +11,7 @@ from toolz import sliding_window
 from utils import import_kv
 
 if TYPE_CHECKING:
-    from widgets.chooser import NoteCategoryButton
+    from widgets.categories import NoteCategoryButton
     from services.domain import MarkdownNoteDict
 
 import_kv(__file__)
@@ -27,8 +27,9 @@ class NoteAppScreenManager(ScreenManager):
         self.note_screen_cycler = self.make_note_cycler()
         self.last_note_screen = None
         self.app = app
-        self.app.bind(display_state=self.handle_app_display_state)
-        self.app.bind(play_state=self.handle_app_play_state)
+        app.bind(display_state=self.handle_app_display_state)
+        app.bind(play_state=self.handle_app_play_state)
+        app.bind(needs_settings=self.handle_app_settings_state)
 
     def make_note_cycler(self):
         n_screens = 1 if os.environ.get("NO_TRANSITION", False) else 2
@@ -39,6 +40,10 @@ class NoteAppScreenManager(ScreenManager):
 
     def category_selected(self, category: "NoteCategoryButton"):
         self.app.note_category = category.text
+
+    def handle_app_settings_state(self, instance, needs_settings):
+        if needs_settings:
+            self.app.open_settings()
 
     def handle_app_display_state(self, instance, new):
         Logger.debug(f"ScreenManager: app_display_state : {new}")

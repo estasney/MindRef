@@ -7,6 +7,7 @@ from kivy.app import App
 from kivy.clock import Clock
 from kivy.logger import Logger
 from kivy.properties import (
+    BooleanProperty,
     DictProperty,
     ListProperty,
     NumericProperty,
@@ -65,6 +66,7 @@ class NoteAFly(App):
     play_state = OptionProperty("play", options=["play", "pause"])
     paginate_interval = NumericProperty(15)
     log_level = NumericProperty(logging.ERROR)
+    needs_settings = BooleanProperty(False)
 
     screen_manager = ObjectProperty()
     fonts = DictProperty({"mono": "RobotoMono", "default": "Roboto"})
@@ -198,18 +200,26 @@ class NoteAFly(App):
         self.screen_manager.handle_notes(self)
 
     def build(self):
-        self.note_service.storage_path = self.config.get("Storage", "NOTES_PATH")
+        storage_path = (
+            np if (np := self.config.get("Storage", "NOTES_PATH")) != "None" else None
+        )
+        if not storage_path:
+            self.needs_settings = True
+        if storage_path:
+            self.note_service.storage_path = storage_path
         sm = NoteAppScreenManager(
             self,
             transition=NoTransition()
-            if os.environ.get("NO_TRANSITION", False)
+            if self.config.get("Behavior", "NO_TRANSITION")
             else SlideTransition(),
         )
+
         self.screen_manager = sm
         self.play_state = self.config.get("Behavior", "PLAY_STATE")
         self.note_category = self.config.get("Behavior", "CATEGORY_SELECTED")
         self.log_level = self.config.get("Behavior", "LOG_LEVEL")
-        self.note_categories = self.note_service.categories
+        if storage_path:
+            self.note_categories = self.note_service.categories
         return sm
 
     def build_settings(self, settings):
@@ -224,8 +234,14 @@ class NoteAFly(App):
                 "PLAY_STATE": get_environ("PLAY_STATE", "play"),
                 "CATEGORY_SELECTED": get_environ("CATEGORY_SELECTED", ""),
                 "LOG_LEVEL": int(get_environ("LOG_LEVEL", logging.INFO)),
+                "NO_TRANSITION": bool(get_environ("NO_TRANSITION", False)),
             },
         )
+
+    def on_config_change(self, config, section, key, value):
+        if section == "Storage":
+            if key == "NOTES_PATH":
+                self.note_service.storage_path = value
 
 
 if __name__ == "__main__":

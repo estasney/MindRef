@@ -5,10 +5,12 @@ from kivy.config import Config
 from pathlib import Path
 import os
 
+__version__ = "0.0.1"
+
 
 def run_android():
     def start_app(*args):
-        os.environ.update({"NOTES_PATH": primary_external_storage_path()})
+        # os.environ.update({"NOTES_PATH": primary_external_storage_path()})
         from noteafly import NoteAFly
 
         NoteAFly().run()

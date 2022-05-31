@@ -1,0 +1,36 @@
+<HamburgerIcon@BoxLayout>:
+    orientation: 'horizontal'
+    size_hint_y: 1
+    size_hint_x: None
+    width: dp(40)
+    Button:
+        canvas:
+            Color:
+                rgba: app.colors['White']
+            RoundedRectangle:
+                pos: (self.x + self.center_x) / 2, self.center_y
+                size: self.width/2, 2
+                radius: 2,2
+            RoundedRectangle:
+                pos: ((self.x + self.center_x)/2, self.center_y - self.height/5)
+                size: self.width/2, 2
+                radius: 2,2
+            RoundedRectangle:
+                pos: ((self.x + self.center_x)/2, self.center_y + self.height/5)
+                size: self.width/2, 2
+                radius: 2,2
+        on_release: app.open_settings()
+
+
+
+<Toolbar>:
+    orientation: 'horizontal'
+    canvas.before:
+        Color:
+            rgba: app.colors['Primary']
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    HamburgerIcon:
+    Label:
+        text: app.APP_NAME

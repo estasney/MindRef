@@ -7,6 +7,7 @@ from typing import Optional, Sequence, TYPE_CHECKING
 
 if TYPE_CHECKING:
     import PIL.Image
+    from .atlas import ImgPos
 
 
 class AtlasServiceProtocol(ABC):
@@ -28,4 +29,9 @@ class AtlasServiceProtocol(ABC):
     @abc.abstractmethod
     def uri_for(self, name: str, atlas_name: str) -> str:
         """Return URI for Kivy"""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def region_for(self, name: str, atlas_name: str) -> "ImgPos":
+        """Return X,Y,W,H for Image"""
         raise NotImplementedError

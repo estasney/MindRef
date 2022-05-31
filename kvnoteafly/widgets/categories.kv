@@ -1,24 +1,31 @@
-<NoteCategoryChooserScrollWrapper>:
+#:import Toolbar widgets.toolbar
 
+<CategoryScreenScrollWrapper>:
+    chooser: chooser
+    height: chooser.minimum_height
+    NoteCategories:
+        id: chooser
+        categories: root.categories
+        size_hint_x:1
+        size_hint_y:None
 
-<NoteCategoryChooser>:
-    categories: categories
+<NoteCategories>:
+    category_container: category_container
     orientation: 'vertical'
-    BoxLayout:
-        orientation: 'horizontal'
-        Button:
-            text: 'Settings'
-            on_release: app.open_settings()
-    GridLayout:
-        id: categories
-        cols: 4
+    Toolbar:
         padding: 10
-        spacing: 10
+
+    GridLayout:
+        id: category_container
+        cols: 4
+        padding: dp(10)
+        spacing: dp(10)
 
 <NoteCategoryButton>:
     orientation: 'vertical'
-    padding: 10
+    padding: dp(10)
     image: image
+    size_hint: 0.25, None
     canvas.before:
         RoundedRectangle:
             pos: self.pos

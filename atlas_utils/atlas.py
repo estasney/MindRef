@@ -53,6 +53,7 @@ def make_atlas(image_glob, atlas_output, padding, remove, size: Optional[str] = 
                 max_h = max(im_h, max_h)
 
         atlas_size = max(max_w, max_h)
+        atlas_size *= 6
     else:
         size = size.lower().replace("x", ",").split(",")
         if len(size) == 1:

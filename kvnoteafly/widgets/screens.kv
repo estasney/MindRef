@@ -1,5 +1,5 @@
-#:import NoteCategoryChooser widgets.chooser
-#:import NoteCategoryChooserScrollWrapper widgets.chooser
+#:import NoteCategories widgets.categories
+#:import CategoryScreenScrollWrapper widgets.categories
 #:import ScrollingListView widgets.scroller
 #:import Note widgets.note
 
@@ -23,7 +23,13 @@
     id: manager_screen
     chooser: chooser
     categories: app.note_categories
-    NoteCategoryChooserScrollWrapper:
+    canvas.before:
+        Color:
+            rgba: app.colors['Dark']
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    CategoryScreenScrollWrapper:
         manager: manager_screen
         categories: manager_screen.categories
         id: chooser

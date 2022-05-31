@@ -242,17 +242,9 @@ class AtlasService(AtlasServiceProtocol):
 
         """
         atlas_data = self._read_atlas(atlas_name)
-        matched_img = None
-        matched_atlas_img = None
-        for atlas_img, members in atlas_data.items():
-            matched_img = next(
-                ((img, members[img]) for img in members if img == name), None
-            )
-            if matched_img:
-                matched_atlas_img = atlas_img
-                break
-        if not matched_img:
-            raise KeyError(f"{name} not found in atlas {atlas_name}")
+        matched_atlas_img, matched_img = self._match_atlas_member(
+            atlas_data, atlas_name, name
+        )
 
         matched_img_size = matched_img[1]
         atlas_path = self._atlas_path(atlas_name)
@@ -262,14 +254,29 @@ class AtlasService(AtlasServiceProtocol):
         cropped_im = img_obj.crop((x, (img_obj.height - h - y), x + w, y + h))
         return cropped_im
 
+    def _match_atlas_member(
+        self, atlas_data: AtlasFileData, atlas_name: str, name: str
+    ) -> tuple[str, ImgPos]:
+        """Find an atlas member"""
+        for atlas_img, members in atlas_data.items():
+            matched_img = next((members[img] for img in members if img == name), None)
+            if matched_img:
+                return atlas_img, matched_img
+
+        raise KeyError(f"{name} not found in atlas {atlas_name}")
+
     def uri_for(self, name: str, atlas_name: str):
-        try:
-            matched = next(
-                (atlas for atlas in self.atlases if atlas.name == atlas_name)
-            )
-        except StopIteration:
-            raise KeyError(f"{atlas_name} not found")
+        matched = self._match_atlas(atlas_name)
         return f"atlas://{matched.path.with_suffix('')}/{name}"
+
+    def region_for(self, name: str, atlas_name: str) -> "ImgPos":
+        matched_atlas = self._match_atlas(atlas_name)
+        matched_atlas_data = self._read_atlas(atlas_name)
+        atlas_img, region = self._match_atlas_member(
+            matched_atlas_data, atlas_name, name
+        )
+        atlas_img_path = matched_atlas.path.parent / atlas_img
+        return region
 
     def category_image_listener(self, imgs: Sequence[tuple[str, Path]]):
 

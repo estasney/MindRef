@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Unpack Texture" type="PythonConfigurationType" factoryName="Python" folderName="Atlas">
+  <configuration default="false" name="KVNoteAFly - High Density Screen" type="PythonConfigurationType" factoryName="Python">
     <module name="KVNoteAFly" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
@@ -17,8 +17,8 @@
       <option name="region" />
       <option name="useCurrentConnection" value="false" />
     </EXTENSION>
-    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/atlas_utils/atlas.py" />
-    <option name="PARAMETERS" value="unpack ./static/textures/textures.atlas" />
+    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/kvnoteafly/main.py" />
+    <option name="PARAMETERS" value="-m screen:phone_nexus_6" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />
