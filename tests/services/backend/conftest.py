@@ -136,3 +136,18 @@ def _get_expected(fp):
 @pytest.fixture
 def get_expected():
     return _get_expected
+
+
+@pytest.fixture
+def category_folders(tmpdir, img_maker):
+    def _category_folders(n_categories):
+        expected = []
+        for i in range(n_categories):
+            cat_folder = Path(tmpdir) / str(i)
+            cat_folder.mkdir()
+            cat_img = img_maker(64, 64)
+            cat_img.save(f"{i}.png")
+            expected.append((cat_folder, cat_img))
+        return expected, Path(tmpdir)
+
+    return _category_folders

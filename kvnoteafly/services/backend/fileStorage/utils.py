@@ -64,7 +64,10 @@ async def discover_folder_notes(
 
 
 async def get_folder_files(folder: Path, discover: DiscoverType, **discover_kwargs):
-    categories, folders = zip(*[(f.name, f) for f in folder.iterdir() if f.is_dir()])
+    candidates = [(f.name, f) for f in folder.iterdir() if f.is_dir()]
+    if not candidates:
+        return {}
+    categories, folders = zip(*candidates)
     folder_notes = await asyncio.gather(
         *[discover(f, **discover_kwargs) for f in folders]
     )

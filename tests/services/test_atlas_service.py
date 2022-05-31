@@ -7,7 +7,6 @@ from pathlib import Path
 import pytest
 
 from kvnoteafly.services.atlas.atlas import AtlasService
-from tests.services.conftest import img_maker
 
 
 @pytest.mark.parametrize("atlas_type", ["mono", "multi"])
@@ -36,7 +35,7 @@ def test_atlas_discovery(stored_atlas, atlas_type, n):
 @pytest.mark.parametrize("atlas_type", ["mono", "multi"])
 @pytest.mark.parametrize("n", [1, 5, 20])
 @pytest.mark.atlas
-def test_append_atlas(stored_atlas, atlas_type, n, img_name, duplicated):
+def test_append_atlas(stored_atlas, atlas_type, n, img_name, duplicated, img_maker):
     atlas_folder, image_names = stored_atlas("test_atlas", atlas_type, n)
     atlas_file = (atlas_folder / "test_atlas").with_suffix(".atlas")
     service = AtlasService(storage_path=atlas_folder.parent)
