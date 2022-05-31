@@ -19,13 +19,13 @@
         highlight: root.is_codespan
         highlight_color: app.colors['Codespan']
         bg_color: app.colors['Dark']
-        padding: (sp(5), 0) if self.highlight else (0, 0)
+        padding: (5, 0) if self.highlight else (0, 0)
         markup: True
         valign: 'top'
         halign: 'left'
-        font_size: sp(20 - root.level)
+        font_size: app.base_font_size + 2 - root.level
         size_hint_y: None
-        height: self.texture_size[1] + dp(20)
+        height: self.texture_size[1] + 20
         text_size: self.width, None
         bold: True
 

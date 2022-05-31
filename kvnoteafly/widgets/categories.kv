@@ -1,5 +1,5 @@
 #:import Toolbar widgets.toolbar
-
+#:import SmallLabel widgets.style
 <CategoryScreenScrollWrapper>:
     chooser: chooser
     height: chooser.minimum_height
@@ -18,12 +18,12 @@
     GridLayout:
         id: category_container
         cols: 4
-        padding: dp(10)
-        spacing: dp(10)
+        padding: 10
+        spacing: 10
 
 <NoteCategoryButton>:
     orientation: 'vertical'
-    padding: dp(10)
+    padding: 10
     image: image
     size_hint: 0.25, None
     canvas.before:
@@ -36,7 +36,7 @@
         source: root.source
         mipmap: True
 
-    Label:
+    SmallLabel:
         text: root.text
         size_hint_x: 1
         size_hint_y: 0.4

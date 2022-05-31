@@ -1,3 +1,5 @@
+#:import LargeLabel, BaseLabel widgets.styles
+
 <ScrollingListView>:
     do_scroll_x: False
     do_scroll_y: True
@@ -14,11 +16,10 @@
             width: 1
             rectangle: (self.x, self.y, self.width, self.height)
     cols: 2
-    Label:
+    BaseLabel:
         text: root.title_text
         size_hint_x: 0.95
         mipmap: True
-        font_size: min(sp(self.size[1] / 2), sp(18))
         text_size: self.size[0], None
         padding_x: 5
         valign: 'middle'
@@ -48,13 +49,11 @@
             width: 1
             rectangle: (self.x, self.y, self.width, self.height)
     cols: 3
-    Label:
+    LargeLabel:
         text: root.title_text
         size_hint_x: 0.5
         mipmap: True
         text_size: self.size[0]*0.9, None
-        font_size: min(sp(self.size[1] / 2), sp(18))
-
         valign: 'middle'
         halign: 'left'
     ListItemKeyboardContainer:

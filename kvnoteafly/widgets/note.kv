@@ -1,3 +1,5 @@
+#:import LargeLabel widgets.style
+
 <Note>:
     id: note_container
     note_title: note_title
@@ -31,12 +33,11 @@
             size: self.size
     BoxLayout:
         padding: 0, 5, 5, 0
-        Label:
+        BaseLabel:
             id: note_title_label
             color: app.colors['White']
             text: root.title_text
             bold: True
-            font_size: min(sp(self.size[1] / 2), sp(28))
             text_size: self.size[0]*0.9, None
             pos_hint: {"x": 0, "y": 0}
             size_hint: (0.7, 1)

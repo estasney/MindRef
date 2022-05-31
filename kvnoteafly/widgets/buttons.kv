@@ -2,7 +2,7 @@
 
 <PrimaryVSep@VSeparator>:
     color: app.colors['Primary']
-    width: dp(2)
+    width: 2
 
 <ButtonBar>:
     orientation: "horizontal"
@@ -13,7 +13,7 @@
             rgb: app.colors['Primary']
         Line:
             rounded_rectangle: (self.pos[0], self.pos[1], self.size[0]+4, self.size[1], 4)
-            width: dp(1)
+            width: 1
     ListViewButton:
         opacity: 1 if self.state == 'normal' else 0.6
         on_release: app.display_state = 'list'
