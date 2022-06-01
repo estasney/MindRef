@@ -16,17 +16,17 @@ source.dir = ./kvnoteafly
 source.include_exts = py,png,jpg,kv,atlas,ttf,json
 
 # (list) List of inclusions using pattern matching
-source.include_patterns = assets/*,images/*.png
+#source.include_patterns = assets/*,images/*.png
 
 # (list) Source files to exclude (let empty to not exclude anything)
-#source.exclude_exts = spec
+source.exclude_exts = spec,ini
 
 # (list) List of directory to exclude (let empty to not exclude anything)
 source.exclude_dirs = atlas_utils,.run,bin,pi_screen,scripts,tests,venv,**/__pycache__
 
 # (list) List of exclusions using pattern matching
 # Do not prefix with './'
-source.exclude_patterns = license,images/*/*.jpg
+#source.exclude_patterns = license,images/*/*.jpg
 
 # (str) Application versioning (method 1)
 # version = 0.1
@@ -50,7 +50,7 @@ presplash.filename = %(source.dir)s/assets/presplash.png
 #icon.filename = %(source.dir)s/data/presplash.png
 
 # (str) Supported orientation (one of landscape, sensorLandscape, portrait or all)
-orientation = sensorLandscape
+orientation = all
 
 # (list) List of service to declare
 #services = NAME:ENTRYPOINT_TO_PY,NAME2:ENTRYPOINT2_TO_PY
@@ -249,7 +249,7 @@ android.logcat_filters = *:S python:D
 
 # (list) The Android archs to build for, choices: armeabi-v7a, arm64-v8a, x86, x86_64
 # In past, was `android.arch` as we weren't supporting builds for multiple archs at the same time.
-android.archs = arm64-v8a, armeabi-v7a
+android.archs = arm64-v8a
 
 # (int) overrides automatic versionCode computation (used in build.gradle)
 # this is not the same as app version and should only be edited if you know what you're doing

@@ -10,17 +10,20 @@ __version__ = "0.0.1"
 
 def run_android():
     def start_app(*args):
-        # os.environ.update({"NOTES_PATH": primary_external_storage_path()})
         from noteafly import NoteAFly
 
+        # Create default folder
+        notes_dir = Path(primary_external_storage_path()) / "kvnotes"
+        notes_dir.mkdir(exist_ok=True)
+        os.environ.update({"NOTES_PATH": str(notes_dir)})
         NoteAFly().run()
 
     from android.storage import primary_external_storage_path  # noqa
     from android.permissions import request_permissions, Permission, check_permission
 
-    if not check_permission(Permission.READ_EXTERNAL_STORAGE):
+    if not check_permission(Permission.WRITE_EXTERNAL_STORAGE):
         Logger.info(f"Requesting Permissions")
-        request_permissions([Permission.READ_EXTERNAL_STORAGE], start_app)
+        request_permissions([Permission.WRITE_EXTERNAL_STORAGE], start_app)
     else:
         start_app()
 
