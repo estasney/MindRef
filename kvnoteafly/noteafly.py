@@ -7,7 +7,6 @@ from kivy.app import App
 from kivy.clock import Clock
 from kivy.logger import Logger
 from kivy.properties import (
-    BooleanProperty,
     DictProperty,
     ListProperty,
     NumericProperty,
@@ -19,40 +18,15 @@ from kivy.uix.screenmanager import NoTransition, SlideTransition
 
 from services.atlas.atlas import AtlasService
 from services.backend.fileStorage.fileBackend import FileSystemBackend
-from services.settings import SETTINGS_DISPLAY_PATH, SETTINGS_STORAGE_PATH
+from services.settings import (
+    SETTINGS_BEHAVIOR_PATH,
+    SETTINGS_DISPLAY_PATH,
+    SETTINGS_STORAGE_PATH,
+)
 from widgets.screens import NoteAppScreenManager
 
 
 class NoteAFly(App):
-    """
-    Attributes
-    ----------
-
-    note_service: BackendProtocol
-    note_categories: ListProperty
-        All known note categories
-    note_category: StringProperty
-        The active Category. If no active category, value is empty string
-    note_data: DictProperty
-        The active Note belonging to active Category
-    note_category_meta: ListProperty
-        Metadata for notes associated with active Category. Info such as Title, and Shortcuts
-    next_note_scheduler: ObjectProperty
-    display_state: OptionProperty
-        One of [Display, Choose]
-        Choose:: Display all known categories
-        Display:: Iterate through notes matching `self.note_category`
-    play_state: OptionProperty
-        One of [play, pause]
-        play:: schedule pagination through notes
-        pause:: stop pagination through notes
-    screen_manager: ObjectProperty
-        Holds the reference to ScreenManager
-    colors: DictProperty
-        Color scheme
-    log_level: NumericProperty
-    """
-
     APP_NAME = "NoteAFly"
     atlas_service = AtlasService(storage_path=Path("./static").resolve())
     note_service = FileSystemBackend(new_first=True)
@@ -61,7 +35,9 @@ class NoteAFly(App):
     note_data = DictProperty(rebind=True)
     note_category_meta = ListProperty()
     next_note_scheduler = ObjectProperty()
-
+    screen_transitions = OptionProperty(
+        "slide", options=["None", "Slide", "Rise-In", "Card", "Fade", "Swap", "Wipe"]
+    )
     display_state = OptionProperty("choose", options=["choose", "display", "list"])
     play_state = OptionProperty("play", options=["play", "pause"])
     paginate_interval = NumericProperty(15)
@@ -112,6 +88,34 @@ class NoteAFly(App):
             ),  # fa1919
         }
     )
+    """
+        Attributes
+        ----------
+
+        note_service: BackendProtocol
+        note_categories: ListProperty
+            All known note categories
+        note_category: StringProperty
+            The active Category. If no active category, value is empty string
+        note_data: DictProperty
+            The active Note belonging to active Category
+        note_category_meta: ListProperty
+            Metadata for notes associated with active Category. Info such as Title, and Shortcuts
+        next_note_scheduler: ObjectProperty
+        display_state: OptionProperty
+            One of [Display, Choose]
+            Choose:: Display all known categories
+            Display:: Iterate through notes matching `self.note_category`
+        play_state: OptionProperty
+            One of [play, pause]
+            play:: schedule pagination through notes
+            pause:: stop pagination through notes
+        screen_manager: ObjectProperty
+            Holds the reference to ScreenManager
+        colors: DictProperty
+            Color scheme
+        log_level: NumericProperty
+        """
 
     def on_display_state(self, instance, new):
         if new != "list":
@@ -205,13 +209,11 @@ class NoteAFly(App):
         )
         if storage_path:
             self.note_service.storage_path = storage_path
-        sm = NoteAppScreenManager(
-            self,
-            transition=NoTransition()
-            if self.config.get("Behavior", "NO_TRANSITION")
-            else SlideTransition(),
+        self.note_service.new_first = (
+            True if self.config.get("Behavior", "NEW_FIRST") == "True" else False
         )
-
+        sm = NoteAppScreenManager(self)
+        sm.screen_transitions = self.screen_transitions
         self.screen_manager = sm
         self.play_state = self.config.get("Behavior", "PLAY_STATE")
         self.note_category = self.config.get("Behavior", "CATEGORY_SELECTED")
@@ -224,6 +226,7 @@ class NoteAFly(App):
     def build_settings(self, settings):
         settings.add_json_panel("Storage", self.config, SETTINGS_STORAGE_PATH)
         settings.add_json_panel("Display", self.config, SETTINGS_DISPLAY_PATH)
+        settings.add_json_panel("Behavior", self.config, SETTINGS_BEHAVIOR_PATH)
 
     def build_config(self, config):
         get_environ = os.environ.get
@@ -232,10 +235,11 @@ class NoteAFly(App):
         config.setdefaults(
             "Behavior",
             {
-                "PLAY_STATE": get_environ("PLAY_STATE", "play"),
-                "CATEGORY_SELECTED": get_environ("CATEGORY_SELECTED", ""),
+                "NEW_FIRST": True,
+                "PLAY_STATE": "play",
+                "CATEGORY_SELECTED": "",
                 "LOG_LEVEL": int(get_environ("LOG_LEVEL", logging.INFO)),
-                "NO_TRANSITION": bool(get_environ("NO_TRANSITION", False)),
+                "TRANSITIONS": "Slide",
             },
         )
 
@@ -247,6 +251,13 @@ class NoteAFly(App):
         elif section == "Behavior":
             if key == "LOG_LEVEL":
                 self.log_level = value
+            elif key == "NEW_FIRST":
+                ...  # No effect here, this is on first load
+            elif key == "PLAY_STATE":
+                ...  # No effect here, this is on first load
+            elif key == "TRANSITIONS":
+                self.screen_transitions = value
+
         elif section == "Display":
             if key == "BASE_FONT_SIZE":
                 self.base_font_size = value

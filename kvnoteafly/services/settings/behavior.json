@@ -1,0 +1,41 @@
+[
+  {
+    "type": "bool",
+    "title": "Show New First",
+    "desc": "Sort notes by date, newest first",
+    "section": "Behavior",
+    "key": "NEW_FIRST"
+  },
+  {
+    "type": "options",
+    "title": "Autoplay State",
+    "desc": "Set the initial play state",
+    "options": [
+      "play", "pause"
+    ],
+    "key": "PLAY_STATE",
+    "section": "Behavior"
+  },
+  {
+    "type": "string",
+    "title": "Initial Category",
+    "desc": "If set, loads this category on open",
+    "key": "CATEGORY_SELECTED",
+    "section": "Behavior"
+  },
+  {
+    "type": "options",
+    "title": "Screen Transitions",
+    "desc": "Select screen transition animation",
+    "key": "TRANSITIONS",
+    "options": ["None", "Slide", "Rise-In", "Card", "Fade", "Swap", "Wipe"],
+    "section": "Behavior"
+  },
+  {
+    "type": "numeric",
+    "title": "Log Level",
+    "desc": "Set the Logging Level",
+    "key": "LOG_LEVEL",
+    "section": "Behavior"
+  }
+]

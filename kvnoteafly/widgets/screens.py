@@ -1,14 +1,32 @@
 import os
 from itertools import cycle
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from kivy import Logger
 from kivy.clock import Clock
-from kivy.properties import ListProperty, ObjectProperty, StringProperty
-from kivy.uix.screenmanager import Screen, ScreenManager
+from kivy.properties import (
+    BoundedNumericProperty,
+    ListProperty,
+    NumericProperty,
+    ObjectProperty,
+    OptionProperty,
+    StringProperty,
+)
+from kivy.uix.screenmanager import (
+    CardTransition,
+    FadeTransition,
+    RiseInTransition,
+    Screen,
+    ScreenManager,
+    SlideTransition,
+    SwapTransition,
+    WipeTransition,
+)
 from toolz import sliding_window
 
 from utils import import_kv
+
+TR_OPTS = Literal["None", "Slide", "Rise-In", "Card", "Fade", "Swap", "Wipe"]
 
 if TYPE_CHECKING:
     from widgets.categories import NoteCategoryButton
@@ -20,25 +38,60 @@ import_kv(__file__)
 class NoteAppScreenManager(ScreenManager):
     app = ObjectProperty()
     play_state = StringProperty()
+    screen_transitions = OptionProperty(
+        "slide", options=["None", "Slide", "Rise-In", "Card", "Fade", "Swap", "Wipe"]
+    )
+    n_screens = BoundedNumericProperty(defaultvalue=2, min=1, max=2)
 
     def __init__(self, app, **kwargs):
         super().__init__(**kwargs)
         self.current = "chooser_screen"
-        self.note_screen_cycler = self.make_note_cycler()
+        self.note_screen_cycler = None
+        self.make_note_cycler()
         self.last_note_screen = None
         self.app = app
         app.bind(display_state=self.handle_app_display_state)
         app.bind(play_state=self.handle_app_play_state)
+        app.bind(screen_transitions=self.setter("screen_transitions"))
+        self.fbind("n_screens", self.handle_n_screens)
 
     def make_note_cycler(self):
-        n_screens = 1 if os.environ.get("NO_TRANSITION", False) else 2
-        for i in range(n_screens):
+        for i in range(self.n_screens):
             note_screen = NoteCategoryScreen(name=f"note_screen{i}")
             self.add_widget(note_screen)
-        return sliding_window(2, cycle(range(n_screens)))
+        self.note_screen_cycler = sliding_window(2, cycle(range(self.n_screens)))
+
+    def handle_n_screens(self, instance, value):
+        self.clear_widgets()
+        self.make_note_cycler()
 
     def category_selected(self, category: "NoteCategoryButton"):
         self.app.note_category = category.text
+
+    def on_screen_transitions(self, instance, value: TR_OPTS):
+        if value == "None":
+            self.n_screens = 1
+            return True
+        elif value == "Slide":
+            self.transition = SlideTransition()
+            return True
+        elif value == "Rise-In":
+            self.transition = RiseInTransition()
+            return True
+        elif value == "Card":
+            self.transition = CardTransition()
+            return True
+        elif value == "Fade":
+            self.transition = FadeTransition()
+            return True
+        elif value == "Swap":
+            self.transition = SwapTransition()
+            return True
+        elif value == "Wipe":
+            self.transition = WipeTransition()
+            return True
+        else:
+            raise ValueError(f"Unhandled Transition {value}")
 
     def handle_app_display_state(self, instance, new):
         Logger.debug(f"ScreenManager: app_display_state : {new}")
