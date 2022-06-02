@@ -1,0 +1,29 @@
+<AppMenu>:
+    size_hint_y: 0.9
+    size_hint_x: 0.3
+    anchor_x: 'right'
+    anchor_y: 'top'
+    padding: 20
+    BoxLayout:
+        orientation: 'vertical'
+        size_hint_y: None
+        spacing: 5
+        height: self.minimum_height
+        id: btnroot
+        Button:
+            id: btnx
+            text: "X"
+            padding: [5, 2]
+            size_hint_x: None
+            size_hint_y: None
+            pos_hint: {"right": 1}
+            size: self.texture_size
+            on_release: app.menu_open = not app.menu_open
+
+        Button:
+            padding: [0, 4]
+            text: "Settings"
+            size_hint_y: None
+            pos_hint: {"right": 1}
+            height: self.texture_size[1]
+            on_release: app.open_settings()

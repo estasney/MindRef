@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Literal
 from kivy import Logger
 from kivy.clock import Clock
 from kivy.properties import (
+    BooleanProperty,
     BoundedNumericProperty,
     ListProperty,
     NumericProperty,
@@ -25,6 +26,7 @@ from kivy.uix.screenmanager import (
 from toolz import sliding_window
 
 from utils import import_kv
+from widgets.app_menu import AppMenu
 
 TR_OPTS = Literal["None", "Slide", "Rise-In", "Card", "Fade", "Swap", "Wipe"]
 
@@ -41,6 +43,7 @@ class NoteAppScreenManager(ScreenManager):
     screen_transitions = OptionProperty(
         "slide", options=["None", "Slide", "Rise-In", "Card", "Fade", "Swap", "Wipe"]
     )
+    menu_open = BooleanProperty(False)
     n_screens = BoundedNumericProperty(defaultvalue=2, min=1, max=2)
 
     def __init__(self, app, **kwargs):
@@ -50,16 +53,41 @@ class NoteAppScreenManager(ScreenManager):
         self.make_note_cycler()
         self.last_note_screen = None
         self.app = app
+        self.menu = None
         app.bind(display_state=self.handle_app_display_state)
-        app.bind(play_state=self.handle_app_play_state)
+        app.bind(play_state=self.setter("play_state"))
         app.bind(screen_transitions=self.setter("screen_transitions"))
+        app.bind(menu_open=self.setter("menu_open"))
         self.fbind("n_screens", self.handle_n_screens)
+        self.fbind("menu_open", self.handle_menu_state)
 
     def make_note_cycler(self):
         for i in range(self.n_screens):
             note_screen = NoteCategoryScreen(name=f"note_screen{i}")
             self.add_widget(note_screen)
         self.note_screen_cycler = sliding_window(2, cycle(range(self.n_screens)))
+
+    def handle_menu_state(self, instance, menu_open: bool):
+        def resume_temp_pause(*args):
+            Logger.debug("Resume Temp Pause")
+            self.app.play_state = "play"
+
+        def remove_from_screen(*args):
+            Logger.debug("Remove Menu")
+            self.current_screen.remove_widget(self.menu)
+            self.menu = None
+
+        Logger.debug(f"Menu Open {menu_open}")
+        if menu_open:
+            view = AppMenu()
+            self.menu = view
+            temp_pause = self.play_state == "play"
+            self.current_screen.add_widget(view)
+            if temp_pause:
+                view.fbind("on_dismiss", resume_temp_pause)
+            view.fbind("on_dismiss", remove_from_screen)
+        else:
+            self.menu.dispatch("on_dismiss")
 
     def handle_n_screens(self, instance, value):
         self.clear_widgets()
@@ -106,11 +134,6 @@ class NoteAppScreenManager(ScreenManager):
 
     def handle_app_play_state(self, instance, value):
         self.play_state = value
-        for screen in self.screens:
-            if screen.name.startswith("note_screen"):
-                screen.current_note.note_title.button_bar.play_button.playing = (
-                    value == "play"
-                )
 
     def handle_notes(self, *args, **kwargs):
         last_active, next_active = next(self.note_screen_cycler)

@@ -7,6 +7,7 @@ from kivy.app import App
 from kivy.clock import Clock
 from kivy.logger import Logger
 from kivy.properties import (
+    BooleanProperty,
     DictProperty,
     ListProperty,
     NumericProperty,
@@ -38,6 +39,7 @@ class NoteAFly(App):
     screen_transitions = OptionProperty(
         "slide", options=["None", "Slide", "Rise-In", "Card", "Fade", "Swap", "Wipe"]
     )
+    menu_open = BooleanProperty(False)
     display_state = OptionProperty("choose", options=["choose", "display", "list"])
     play_state = OptionProperty("play", options=["play", "pause"])
     paginate_interval = NumericProperty(15)
