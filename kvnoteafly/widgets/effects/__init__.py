@@ -1,0 +1,1 @@
+from .pulsing import PulsingEffect

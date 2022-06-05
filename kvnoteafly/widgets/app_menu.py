@@ -1,5 +1,6 @@
-from utils import import_kv
 from kivy.uix.modalview import ModalView
+
+from utils import import_kv
 
 import_kv(__file__)
 
