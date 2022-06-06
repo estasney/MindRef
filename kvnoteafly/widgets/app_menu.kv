@@ -1,14 +1,11 @@
 #: import HSeparator widgets.separator
 #: import ew kivy.uix.effectwidget
 #: import effects widgets.effects
+#
 
-<GlowLine@EffectWidget>:
-    effects: [effects.PulsingEffect()]
-    size_hint_y: None
-    height: sep.height
-    HSeparator:
-        id: sep
-        color: app.colors['White']
+
+<GlowLine@HSeparator>:
+    color: app.colors['White']
 
 <AppMenu>:
     pos_hint: {'top': 1}
@@ -31,6 +28,7 @@
             size_hint_y: None
             pos_hint: {"right": 1}
             size: self.texture_size
+            font_size: sp(16)
             on_release: app.menu_open = not app.menu_open
         GlowLine:
             size_hint_y: None

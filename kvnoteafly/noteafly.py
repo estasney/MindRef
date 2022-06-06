@@ -2,11 +2,12 @@ import logging
 import os
 from functools import partial
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from kivy.app import App
 from kivy.clock import Clock
-from kivy.logger import Logger
 from kivy.config import Config
+from kivy.logger import Logger
 from kivy.properties import (
     BooleanProperty,
     DictProperty,
@@ -16,7 +17,6 @@ from kivy.properties import (
     OptionProperty,
     StringProperty,
 )
-from kivy.uix.screenmanager import NoTransition, SlideTransition
 
 from services.atlas.atlas import AtlasService
 from services.backend.fileStorage.fileBackend import FileSystemBackend
@@ -25,9 +25,8 @@ from services.settings import (
     SETTINGS_DISPLAY_PATH,
     SETTINGS_STORAGE_PATH,
 )
-from widgets.screens import NoteAppScreenManager
 from utils.registry import app_registry
-from typing import TYPE_CHECKING
+from widgets.screens import NoteAppScreenManager
 
 if TYPE_CHECKING:
     from services.backend.fileStorage.utils import CategoryFiles
