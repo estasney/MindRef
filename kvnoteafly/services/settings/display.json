@@ -5,5 +5,20 @@
     "desc": "Set the base font size",
     "section": "Display",
     "key": "BASE_FONT_SIZE"
+  },
+  {
+    "type": "numeric",
+    "title": "Screen Width",
+    "desc": "Screen Width in Pixels. Takes effect after restart",
+    "section": "Display",
+    "key": "SCREEN_WIDTH"
+  },
+  {
+    "type": "numeric",
+    "title": "Screen Height",
+    "desc": "Screen Height in Pixels. Takes effect after restart",
+    "section": "Display",
+    "key": "SCREEN_HEIGHT"
   }
+
 ]

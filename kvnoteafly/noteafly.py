@@ -6,6 +6,7 @@ from pathlib import Path
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.logger import Logger
+from kivy.config import Config
 from kivy.properties import (
     BooleanProperty,
     DictProperty,
@@ -233,7 +234,9 @@ class NoteAFly(App):
     def build_config(self, config):
         get_environ = os.environ.get
         config.setdefaults("Storage", {"NOTES_PATH": get_environ("NOTES_PATH", None)})
-        config.setdefaults("Display", {"BASE_FONT_SIZE": 16})
+        config.setdefaults(
+            "Display", {"BASE_FONT_SIZE": 16, "SCREEN_HEIGHT": 640, "SCREEN_WIDTH": 800}
+        )
         config.setdefaults(
             "Behavior",
             {
@@ -259,10 +262,15 @@ class NoteAFly(App):
                 ...  # No effect here, this is on first load
             elif key == "TRANSITIONS":
                 self.screen_transitions = value
-
         elif section == "Display":
             if key == "BASE_FONT_SIZE":
                 self.base_font_size = value
+            elif key == "SCREEN_WIDTH":
+                Config.set("graphics", "width", value)
+                Config.write()
+            elif key == "SCREEN_HEIGHT":
+                Config.set("graphics", "height", value)
+                Config.write()
 
 
 if __name__ == "__main__":
