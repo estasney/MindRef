@@ -1,0 +1,20 @@
+<RefreshSymbol>:
+    size_hint_y: None
+    size_hint_x: None
+    height: 50
+    width: 50
+    pos_hint: {"center_x": 0.5, "center_y": 0.9}
+    canvas.before:
+        PushMatrix
+        Rotate:
+            angle: self.rotation
+            origin: self.center
+    canvas:
+        Color:
+            rgba: (*app.colors['White'], 1)
+        Rectangle:
+            size: self.size
+            pos: self.pos
+            source: self.source
+    canvas.after:
+        PopMatrix
