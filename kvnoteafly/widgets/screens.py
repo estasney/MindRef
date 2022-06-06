@@ -1,14 +1,13 @@
-import os
 from itertools import cycle
-from typing import TYPE_CHECKING, Literal
+from typing import Literal, TYPE_CHECKING
 
 from kivy import Logger
+from kivy.app import App
 from kivy.clock import Clock
 from kivy.properties import (
     BooleanProperty,
     BoundedNumericProperty,
     ListProperty,
-    NumericProperty,
     ObjectProperty,
     OptionProperty,
     StringProperty,
@@ -155,25 +154,46 @@ class NoteCategoryChooserScreen(Screen):
     chooser = ObjectProperty()
     categories = ListProperty()
     refresh_triggered = BooleanProperty(False)
+    refresh_running = BooleanProperty(False)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.refresh_icon = None
+        self.fbind("refresh_running", self.handle_refresh_running)
 
     def category_selected(self, category_btn: "NoteCategoryButton"):
         self.manager.category_selected(category_btn)
 
     def handle_refresh_icon(self, dt):
-        if self.refresh_triggered and not self.refresh_icon:
+        """
+        Child can notify us to display refresh icon but we want to handle it's clearing
+        """
+        if (
+            self.refresh_triggered
+            and not self.refresh_icon
+            and not self.refresh_running
+        ):
+            self.refresh_running = True
             self.refresh_icon = RefreshSymbol(
                 pos_hint={"center_x": 0.5, "center_y": 0.5}
             )
             self.add_widget(self.refresh_icon)
-        else:
-            if self.refresh_icon:
-                self.remove_widget(self.refresh_icon)
-                del self.refresh_icon
-                self.refresh_icon = None
+
+    def clear_refresh_icon(self, instance, value):
+        Logger.debug("Clearing Refresh Icon")
+        self.unbind(categories=self.clear_refresh_icon)
+        if self.refresh_icon:
+            self.remove_widget(self.refresh_icon)
+            del self.refresh_icon
+            self.refresh_icon = None
+        self.refresh_running = False
+
+    def handle_refresh_running(self, instance, value):
+        """Call the NoteService and ask for refresh"""
+        Logger.debug("Refreshing")
+        app = App.get_running_app()
+        self.bind(categories=self.clear_refresh_icon)
+        Clock.schedule_once(app.refresh_note_categories, 1)
 
     def on_refresh_triggered(self, instance, value):
         Clock.schedule_once(self.handle_refresh_icon)

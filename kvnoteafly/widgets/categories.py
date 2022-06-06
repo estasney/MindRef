@@ -40,7 +40,7 @@ class CategoryScreenScrollWrapper(ScrollView):
         self.bind(refresh_triggered=self.screen.setter("refresh_triggered"))
 
     def category_selected(self, instance: "NoteCategoryButton"):
-        self.manager.category_selected(instance)
+        self.screen.category_selected(instance)
 
 
 class NoteCategories(BoxLayout):

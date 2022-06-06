@@ -68,16 +68,16 @@ class RefreshOverscrollEffect(OpacityScrollEffect):
     def refresh_hold_callback(self, dt):
         """Check if refresh_triggered_ is still True after delay"""
         if self.refresh_triggered_:
-            Logger.debug("Refresh is True")
             self.refresh_triggered = True
+        return False
 
     def schedule_refresh_check(self, instance, value):
         if self.refresh_scheduler:
             self.refresh_scheduler.cancel()
             self.refresh_scheduler = None
         if self.refresh_triggered_:
-            self.refresh_scheduler = Clock.schedule_once(
-                self.refresh_hold_callback, 0.75
+            self.refresh_scheduler = Clock.schedule_interval(
+                self.refresh_hold_callback, 0.05
             )
             self.refresh_scheduler()
 
@@ -95,7 +95,7 @@ class RefreshOverscrollEffect(OpacityScrollEffect):
                 alpha = max(0.1, 1 - ratio - 0.3)
                 # noinspection PyTypeChecker
                 self.target_widget.opacity = min(1, alpha)
-                if ratio >= 0.15:
+                if ratio >= 0.25:
                     self.refresh_triggered_ = True
                 else:
                     self.refresh_triggered_ = False

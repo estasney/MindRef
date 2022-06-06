@@ -44,6 +44,10 @@ class BackendProtocol(ABC):
     def set_index(self, n: Optional[int]):
         raise NotImplementedError
 
+    @abc.abstractmethod
+    def refresh_categories(self):
+        raise NotImplementedError
+
 
 class NoteIndex:
     """

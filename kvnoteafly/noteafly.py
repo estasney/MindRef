@@ -26,6 +26,11 @@ from services.settings import (
     SETTINGS_STORAGE_PATH,
 )
 from widgets.screens import NoteAppScreenManager
+from utils.registry import app_registry
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from services.backend.fileStorage.utils import CategoryFiles
 
 
 class NoteAFly(App):
@@ -206,6 +211,22 @@ class NoteAFly(App):
     def on_note_data(self, *args, **kwargs):
         self.screen_manager.handle_notes(self)
 
+    def note_files_listener(self, files: "CategoryFiles"):
+        Logger.debug(f"Note Files from Registry {files}")
+        self.note_categories = files
+
+    def refresh_note_categories(self, *args):
+        Logger.debug("Refreshing note categories")
+
+        def clear_note_categories(dt):
+            self.note_categories = []
+            Clock.schedule_once(refresh_categories, 1)
+
+        def refresh_categories(dt):
+            self.note_service.refresh_categories()
+
+        Clock.schedule_once(clear_note_categories)
+
     def build(self):
         storage_path = (
             np if (np := self.config.get("Storage", "NOTES_PATH")) != "None" else None
@@ -224,6 +245,7 @@ class NoteAFly(App):
         self.base_font_size = self.config.get("Display", "BASE_FONT_SIZE")
         if storage_path:
             self.note_categories = self.note_service.categories
+        app_registry.note_files(self.note_files_listener)
         return sm
 
     def build_settings(self, settings):

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
+from time import sleep
 from typing import Optional, TYPE_CHECKING, cast
 
 from toolz import groupby
@@ -157,3 +158,10 @@ class FileSystemBackend(BackendProtocol):
         if not self._index:
             raise Exception("No Index")
         return self.read_note()
+
+    def refresh_categories(self):
+        # noinspection PyTypeChecker
+        self.category_files = None
+        getattr(self, "category_files")
+        # noinspection PyTypeChecker
+        self.category_meta = None
