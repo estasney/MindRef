@@ -1,21 +1,24 @@
 #:import Toolbar widgets.toolbar
 #:import SmallLabel widgets.style
+#:import window kivy.core.window
 <CategoryScreenScrollWrapper>:
     chooser: chooser
-    height: chooser.minimum_height
     NoteCategories:
         id: chooser
         categories: root.categories
-        size_hint_x:1
-        size_hint_y:None
+        size_hint_y: None
 
 <NoteCategories>:
     category_container: category_container
     orientation: 'vertical'
     Toolbar:
+        size_hint_y: None
         padding: 10
+        height: 50
 
     GridLayout:
+        size_hint_y: None
+        height: self.minimum_height
         id: category_container
         cols: 4
         padding: 10

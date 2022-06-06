@@ -3,7 +3,9 @@ from functools import partial
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.core.image import Image
+from kivy.effects.opacityscroll import OpacityScrollEffect
 from kivy.properties import (
+    BooleanProperty,
     ListProperty,
     ObjectProperty,
     StringProperty,
@@ -13,6 +15,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.scrollview import ScrollView
 
 from utils import import_kv
+from widgets.effects.scrolling import RefreshOverscrollEffect
 
 import_kv(__file__)
 
@@ -20,9 +23,21 @@ import_kv(__file__)
 class CategoryScreenScrollWrapper(ScrollView):
     """Screen With Buttons for Categories"""
 
-    manager = ObjectProperty()
+    screen = ObjectProperty()
     chooser = ObjectProperty()
     categories = ListProperty()
+    refresh_triggered = BooleanProperty(False)
+
+    effect_cls = RefreshOverscrollEffect
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def on_chooser(self, instance, value):
+        self.chooser.bind(minimum_height=self.chooser.setter("height"))
+
+    def on_screen(self, instance, value):
+        self.bind(refresh_triggered=self.screen.setter("refresh_triggered"))
 
     def category_selected(self, instance: "NoteCategoryButton"):
         self.manager.category_selected(instance)
