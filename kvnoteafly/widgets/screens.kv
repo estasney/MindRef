@@ -20,7 +20,7 @@
 
 
 <NoteCategoryChooserScreen>:
-    id: manager_screen
+    id: category_screen
     chooser: chooser
     categories: app.note_categories
     canvas.before:
@@ -30,8 +30,8 @@
             size: self.size
             pos: self.pos
     CategoryScreenScrollWrapper:
-        manager: manager_screen
-        categories: manager_screen.categories
+        screen: category_screen
+        categories: category_screen.categories
         id: chooser
 
 <NoteCategoryScreen>:

@@ -27,6 +27,7 @@ from toolz import sliding_window
 
 from utils import import_kv
 from widgets.app_menu import AppMenu
+from widgets.effects.scrolling import RefreshSymbol
 
 TR_OPTS = Literal["None", "Slide", "Rise-In", "Card", "Fade", "Swap", "Wipe"]
 
@@ -153,12 +154,29 @@ class NoteAppScreenManager(ScreenManager):
 class NoteCategoryChooserScreen(Screen):
     chooser = ObjectProperty()
     categories = ListProperty()
+    refresh_triggered = BooleanProperty(False)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.refresh_icon = None
 
     def category_selected(self, category_btn: "NoteCategoryButton"):
         self.manager.category_selected(category_btn)
+
+    def handle_refresh_icon(self, dt):
+        if self.refresh_triggered and not self.refresh_icon:
+            self.refresh_icon = RefreshSymbol(
+                pos_hint={"center_x": 0.5, "center_y": 0.5}
+            )
+            self.add_widget(self.refresh_icon)
+        else:
+            if self.refresh_icon:
+                self.remove_widget(self.refresh_icon)
+                del self.refresh_icon
+                self.refresh_icon = None
+
+    def on_refresh_triggered(self, instance, value):
+        Clock.schedule_once(self.handle_refresh_icon)
 
 
 class NoteCategoryScreen(Screen):
