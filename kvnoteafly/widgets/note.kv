@@ -1,4 +1,5 @@
-#:import LargeLabel widgets.style
+#:import StyledLabels widgets.style
+
 
 <Note>:
     id: note_container
@@ -9,18 +10,23 @@
     BoxLayout:
         orientation: 'vertical'
         NoteTitle:
+            padding: 0, dp(5), 0, dp(5)
             id: note_title
             size_hint: 1, 0.1
+            size_hint_max_y: '45dp'
         HSeparator:
             size_hint: 1, 0.01
+            size_hint_max_y: '2sp'
         NoteContent:
             id: note_content
             size_hint: 1, 0.75
         HSeparator:
             size_hint: 1, 0.01
+            size_hint_max_y: '2sp'
         NoteTags:
             id: note_tags
             size_hint: 1, 0.05
+            size_hint_max_y: '20dp'
 
 <NoteTitle>:
     id: note_title
@@ -32,13 +38,14 @@
             pos: self.pos
             size: self.size
     BoxLayout:
-        padding: 0, 5, 5, 0
+        padding: 0, '1sp', '1sp', 0
         BaseLabel:
             id: note_title_label
             color: app.colors['White']
             text: root.title_text
             bold: True
-            text_size: self.size[0]*0.9, None
+            text_size: sp(self.size[0]*0.9), None
+            font_size: app.base_font_size
             pos_hint: {"x": 0, "y": 0}
             size_hint: (0.7, 1)
             halign: "center"
@@ -46,6 +53,7 @@
             mipmap: True
         ButtonBar:
             id: button_bar
+
             size_hint: (0.3, 1)
 
 
@@ -70,7 +78,7 @@
             size: self.size
     BoxLayout:
         orientation: 'vertical'
-        Label:
+        SmallLabel:
             id: note_tag_label
             color: hex('#000000')
             text: ''
