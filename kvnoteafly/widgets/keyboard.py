@@ -80,10 +80,16 @@ class ContentKeyboard(BoxLayout):
     ANIMATION_WINDOW = 2
 
     def __init__(self, content_data: "MarkdownNoteDict", **kwargs):
-        self.note_text = content_data["text"] if content_data["text"] else ""
+        self.note_text = self.strip_shortcut_block(content_data["text"])
         self.keyboard_buttons = content_data["shortcut_keys"]
         super(ContentKeyboard, self).__init__(**kwargs)
         self.on_keyboard_buttons()
+
+    @classmethod
+    def strip_shortcut_block(cls, text: str):
+        """Remove the markdown formatted block code from display"""
+        head, _, rest = text.split("```")
+        return "\n".join((head.strip(), rest.strip())).replace("#", "").strip()
 
     @staticmethod
     def _set_btn_pressed(*args):

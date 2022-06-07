@@ -83,13 +83,7 @@ class MarkdownNote:
             self.title = title
         self.document = document
         self.shortcut_keys = self._get_block_code_shortcut(document)
-
-        if self.shortcut_keys:
-            self.has_shortcut = True
-            # Strip out shortcut from text
-            head, _, rest = self.text.split("```")
-            text = "\n".join((head.strip(), rest.strip())).replace("#", "").strip()
-            self.text = text
+        self.has_shortcut = bool(self.shortcut_keys)
 
         if not hasattr(self, "title"):
             # Fallback in case we couldn't parse it in markdown
