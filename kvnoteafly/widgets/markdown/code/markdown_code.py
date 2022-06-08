@@ -1,10 +1,12 @@
 from typing import Optional
 
+from kivy import Logger
 from kivy.properties import AliasProperty, ObjectProperty, StringProperty
 from kivy.uix.gridlayout import GridLayout
 from pygments import lexers, styles
 from pygments.formatters.bbcode import BBCodeFormatter
 from pygments.lexers import PythonLexer
+from pygments.util import ClassNotFound
 
 from utils import import_kv
 
@@ -33,9 +35,13 @@ class MarkdownCode(GridLayout):
         self.styler = styles.get_style_by_name("paraiso-dark")
         self.formatter = BBCodeFormatter(style=self.styler)
         self.lexer_name = lexer.strip() if lexer else "markdown"
-        self.lexer = (
-            lexers.get_lexer_by_name(lexer.strip())
-            if lexer
-            else lexers.get_lexer_by_name("markdown")
-        )
+        try:
+            self.lexer = (
+                lexers.get_lexer_by_name(lexer.strip())
+                if lexer
+                else lexers.get_lexer_by_name("markdown")
+            )
+        except ClassNotFound as e:
+            Logger.warn(f"Unknown lexer {self.lexer} - falling back to markdown")
+            self.lexer = lexers.get_lexer_by_name("markdown")
         self.background_color = self.styler.background_color
