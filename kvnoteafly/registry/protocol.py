@@ -59,6 +59,9 @@ class Publisher(ABC):
     def add_listener(self, cb: Listener):
         self.listeners.append(cb)
 
+    def remove_listener(self, cb: Listener):
+        self.listeners.remove(cb)
+
     @abc.abstractmethod
     def __call__(self, func: Callable[[Any], Any]):
         raise NotImplementedError

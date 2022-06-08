@@ -41,6 +41,53 @@ def test_get_topic(registry_topic):
 
 
 @pytest.mark.registry
+def test_registry_dynamic_listeners(registry_topic):
+    """
+    Given a registry, topic and several listeners
+    Subscribe all listeners
+    Remove listeners, ensuring their callbacks are not invoked
+
+    Parameters
+    ----------
+    registry_topic
+
+    Returns
+    -------
+
+    """
+    registry, topic = registry_topic
+
+    g_object = []
+
+    class MultiListener:
+        def __init__(self, x):
+            self.x = x
+            topic(self.topic_listener)
+
+        def topic_listener(self):
+            nonlocal g_object
+            g_object.append(self.x)
+
+    assert len(g_object) == 0
+    x1 = MultiListener(1)
+    x10 = MultiListener(10)
+    topic.notify()
+    assert 10 in g_object
+    assert 1 in g_object
+    g_object.clear()
+    topic.remove_listener(x10.topic_listener)
+    del x10
+    topic.notify()
+    assert 10 not in g_object
+    assert 1 in g_object
+    g_object.clear()
+    topic.remove_listener(x1.topic_listener)
+    del x1
+    topic.notify()
+    assert len(g_object) == 0
+
+
+@pytest.mark.registry
 def test_dotted_registry(registry_topic):
     registry, topic = registry_topic
     assert getattr(registry.topics, topic.name) == topic
