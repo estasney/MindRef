@@ -8,7 +8,9 @@ def _load_registry():
     if _APP_REGISTRY:
         return _APP_REGISTRY
     app_registry = Registry("app_registry")
-    app_registry.add_topics(["note_files", "note_meta", "category_images"])
+    app_registry.add_topics(
+        ["note_files", "note_meta", "category_images", "note_editor"]
+    )
     _APP_REGISTRY = app_registry
     return _APP_REGISTRY
 
