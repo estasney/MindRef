@@ -46,7 +46,6 @@ class PlayStateButton(DynamicImageButton):
     color = ColorProperty([1, 1, 1, 1])
 
     def __init__(self, **kwargs):
-
         self.fbind("playing", self.handle_play_state)
 
         app_state = App.get_running_app().play_state
@@ -82,3 +81,18 @@ class ReturnButton(ImageButton):
 class ListViewButton(ImageButton):
     def __init__(self, *args, **kwargs):
         super().__init__(src=get_uri("list_view"))
+
+
+class EditButton(ImageButton):
+    def __init__(self, *args, **kwargs):
+        super(EditButton, self).__init__(src=get_uri("edit"))
+
+
+class SaveButton(ImageButton):
+    def __init__(self, *args, **kwargs):
+        super(SaveButton, self).__init__(src=get_uri("save"))
+
+
+class CancelButton(ImageButton):
+    def __init__(self, *args, **kwargs):
+        super(CancelButton, self).__init__(src=get_uri("cancel"))

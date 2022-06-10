@@ -20,6 +20,7 @@ from kivy.properties import (
 
 from services.atlas.atlas import AtlasService
 from services.backend.fileStorage.fileBackend import FileSystemBackend
+from services.editor.fileStorage import FileSystemEditor
 from services.settings import (
     SETTINGS_BEHAVIOR_PATH,
     SETTINGS_DISPLAY_PATH,
@@ -36,6 +37,7 @@ class NoteAFly(App):
     APP_NAME = "NoteAFly"
     atlas_service = AtlasService(storage_path=Path("./static").resolve())
     note_service = FileSystemBackend(new_first=True)
+    editor_service = FileSystemEditor()
     note_categories = ListProperty()
     note_category = StringProperty("")
     note_data = DictProperty(rebind=True)
@@ -45,7 +47,9 @@ class NoteAFly(App):
         "slide", options=["None", "Slide", "Rise-In", "Card", "Fade", "Swap", "Wipe"]
     )
     menu_open = BooleanProperty(False)
-    display_state = OptionProperty("choose", options=["choose", "display", "list"])
+    display_state = OptionProperty(
+        "choose", options=["choose", "display", "list", "edit"]
+    )
     play_state = OptionProperty("play", options=["play", "pause"])
     paginate_interval = NumericProperty(15)
     log_level = NumericProperty(logging.ERROR)
@@ -127,6 +131,8 @@ class NoteAFly(App):
     def on_display_state(self, instance, new):
         if new != "list":
             return
+        if new == "edit":
+            self.play_state = "pause"
         if self.next_note_scheduler:
             self.next_note_scheduler.cancel()
 

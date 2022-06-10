@@ -19,7 +19,7 @@ Cache.register("note_widget", limit=100, timeout=3600)
 
 
 def get_cached_note(content_data: "MarkdownNoteDict"):
-    key = f"{content_data['file']}-{content_data['idx']}"
+    key = f"{content_data['file']}-{content_data['idx']}-{content_data['text']}"
     cached_instance = Cache.get("note_widget", key)
     if cached_instance:
         if cached_instance.parent:
@@ -38,6 +38,9 @@ class Note(BoxLayout):
     note_title = ObjectProperty()
     note_content = ObjectProperty()
     note_tags = ObjectProperty()
+
+    def __init__(self, **kwargs):
+        super(Note, self).__init__(**kwargs)
 
     def set_note_content(self, note_data: "MarkdownNoteDict"):
         self.note_title.set({"title": note_data["title"]})
@@ -66,9 +69,7 @@ class NoteContent(BoxLayout):
 
 class NoteTitle(BoxLayout):
     title_text = StringProperty()
-    play_state = StringProperty()
-    button_bar = ObjectProperty()
-    play_state_button = ObjectProperty()
+    edit_button = ObjectProperty()
 
     def __init__(self, **kwargs):
         if "note_title" in kwargs:
@@ -78,8 +79,11 @@ class NoteTitle(BoxLayout):
     def set(self, title_data):
         self.title_text = title_data["title"]
 
-    def on_play_state(self, instance, value):
-        pass
+    def handle_edit(self):
+        """Pass this to screen manager"""
+        Logger.debug("Edit")
+        self.parent.handle_edit()
+        return True
 
 
 class NoteTags(BoxLayout):

@@ -2,6 +2,7 @@
 #:import CategoryScreenScrollWrapper widgets.categories
 #:import ScrollingListView widgets.scroller
 #:import Note widgets.note
+#:import Buttons widgets.buttons
 
 <NoteAppScreenManager>:
     id: screen_manager
@@ -11,6 +12,10 @@
     NoteListViewScreen:
         id: list_view_screen
         name: 'list_view_screen'
+    NoteEditScreen:
+        id: note_edit_screen
+        name: 'note_edit_screen'
+
 
 <NoteListViewScreen>:
     id: manager_screen
@@ -38,3 +43,32 @@
     current_note: current_note
     Note:
         id: current_note
+
+<NoteEditScreen>:
+    id: edit_screen
+    editor: editor
+    canvas:
+        Color:
+            rgba: app.colors['Dark']
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    BoxLayout:
+        orientation: 'vertical'
+        CodeInput:
+            id: editor
+            size_hint_x: 1
+            size_hint_y: .9
+            lexer: edit_screen.lexer
+            style_name: edit_screen.style_name
+            font_family: "RobotoMono"
+            font_size: app.base_font_size
+
+        BoxLayout:
+            size_hint_x: 1
+            size_hint_y: 0.1
+            orientation: 'horizontal'
+            SaveButton:
+                on_release: edit_screen.handle_save()
+            CancelButton:
+                on_release: edit_screen.handle_cancel()

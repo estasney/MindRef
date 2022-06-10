@@ -12,6 +12,7 @@ from kivy.properties import (
     OptionProperty,
     StringProperty,
 )
+
 from kivy.uix.screenmanager import (
     CardTransition,
     FadeTransition,
@@ -22,9 +23,10 @@ from kivy.uix.screenmanager import (
     SwapTransition,
     WipeTransition,
 )
+
 from toolz import sliding_window
 
-from utils import import_kv
+from utils import import_kv, sch_cb
 from widgets.app_menu import AppMenu
 from widgets.effects.scrolling import RefreshSymbol
 
@@ -32,7 +34,8 @@ TR_OPTS = Literal["None", "Slide", "Rise-In", "Card", "Fade", "Swap", "Wipe"]
 
 if TYPE_CHECKING:
     from widgets.categories import NoteCategoryButton
-    from services.domain import MarkdownNoteDict
+    from services.domain import MarkdownNoteDict, MarkdownNote
+    from kivy.uix.codeinput import CodeInput
 
 import_kv(__file__)
 
@@ -129,6 +132,9 @@ class NoteAppScreenManager(ScreenManager):
             self.handle_notes()
         elif new == "list":
             self.handle_notes_list_view()
+        elif new == "edit":
+            self.handle_notes_edit_view()
+
         else:
             raise Exception(f"Unhandled display state {new}")
 
@@ -148,6 +154,15 @@ class NoteAppScreenManager(ScreenManager):
     def handle_notes_list_view(self, *args, **kwargs):
         self.ids["list_view_screen"].set_note_list_view()
         self.current = "list_view_screen"
+
+    def handle_notes_edit_view(self, *args, **kwargs):
+        Logger.debug("Switching to edit view")
+        fs = self.app.editor_service
+        edit_note = fs.edit_current_note(self.app)
+        edit_screen: "NoteEditScreen" = self.ids["note_edit_screen"]
+        update_screen = lambda x: setattr(self, "current", "note_edit_screen")
+        set_init_text = lambda x: setattr(edit_screen, "init_text", edit_note.edit_text)
+        sch_cb(0, update_screen, set_init_text)
 
 
 class NoteCategoryChooserScreen(Screen):
@@ -211,3 +226,57 @@ class NoteListViewScreen(Screen):
 
     def set_note_list_view(self, *args, **kwargs):
         Clock.schedule_once(lambda dt: self.ids["scroller"].set(self.meta_notes), 0)
+
+
+class NoteEditScreen(Screen):
+    from pygments.lexers import get_lexer_by_name
+
+    editor = ObjectProperty()
+    init_text = StringProperty()
+    lexer = ObjectProperty(get_lexer_by_name("Markdown"))
+    style_name = StringProperty("paraiso-dark")
+
+    def __init__(self, **kwargs):
+        super(NoteEditScreen, self).__init__(**kwargs)
+        self.fbind("init_text", self.handle_init_text)
+
+    def handle_init_text(self, instance, value):
+        editor: "CodeInput" = self.editor
+        editor.text = self.init_text
+
+    def handle_save(self):
+        Logger.debug("Saving Note")
+        # Store new text to memory - we want to close the editor screen ASAP
+
+        app = App.get_running_app()
+
+        from utils.registry import app_registry
+
+        app_registry.note_editor.notify("edit", text=self.editor.text)
+        md_note = None
+
+        def md_save_cb(md):
+            """Registry can't directly return a value, but can call a function with result"""
+            nonlocal md_note
+            md_note = md
+
+        app_registry.note_editor.notify("save", cb=md_save_cb)
+
+        # noinspection PyUnresolvedReferences
+        app.note_data = md_note.to_dict()
+        update_display_state = lambda x: setattr(app, "display_state", "display")
+        clear_self_text = lambda x: setattr(self, "init_text", "")
+
+        sch_cb(0, update_display_state, clear_self_text)
+
+    def handle_cancel(self, *args, **kwargs):
+        Logger.debug("Cancel Edit")
+        from utils.registry import app_registry
+
+        app_registry.note_editor.notify("cancel")
+        app = App.get_running_app()
+
+        update_display_state = lambda x: setattr(app, "display_state", "display")
+        clear_self_text = lambda x: setattr(self, "init_text", "")
+
+        sch_cb(0, update_display_state, clear_self_text)

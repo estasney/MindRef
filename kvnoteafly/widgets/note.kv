@@ -1,5 +1,5 @@
 #:import StyledLabels widgets.style
-
+#:import btns widgets.buttons
 
 <Note>:
     id: note_container
@@ -30,7 +30,7 @@
 
 <NoteTitle>:
     id: note_title
-    button_bar: button_bar
+    edit_button: edit_button
     canvas:
         Color:
             rgba: app.colors['Dark']
@@ -39,10 +39,18 @@
             size: self.size
     BoxLayout:
         padding: 0, '1sp', '1sp', 0
+        EditButton:
+            id: edit_button
+            size_hint_min_y: 1
+            size_hint_x: None
+            width: self.height * 1.618
+            opacity: 1 if self.state == 'normal' else 0.6
+            mipmap: True
+            on_release: app.display_state = "edit"
         BaseLabel:
             id: note_title_label
             color: app.colors['White']
-            text: root.title_text
+            text: note_title.title_text
             bold: True
             text_size: sp(self.size[0]*0.9), None
             font_size: app.base_font_size
@@ -52,8 +60,6 @@
             valign: "center"
             mipmap: True
         ButtonBar:
-            id: button_bar
-
             size_hint: (0.3, 1)
 
 

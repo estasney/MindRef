@@ -20,16 +20,12 @@ VERSION = "0.0.1"
 # What packages are required for this module to be executed?
 REQUIRED = [
     "python-dotenv",
-    "sqlalchemy",
     "toolz",
     "Kivy[base]",
     "Pygments",
     "Pillow",
-    "requests",
-    "sqlalchemy-utils",
     "click",
     "pyperclip",
-    "marko[codehilite]",
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))

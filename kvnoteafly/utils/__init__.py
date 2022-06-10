@@ -1,11 +1,12 @@
 import os
 from datetime import datetime
-from functools import wraps
+from functools import partial, wraps
+from pathlib import Path
 from typing import Union
 
-from kivy.lang import Builder
 from kivy import Logger
-from pathlib import Path
+from kivy.clock import Clock
+from kivy.lang import Builder
 
 _LOG_LEVEL = None
 
@@ -39,6 +40,25 @@ def log_run_time(func):
         return result
 
     return wrapped_log_run_time
+
+
+def sch_cb(timeout: float = 0, *args):
+    """Chain functions that sequentially call the next"""
+
+    func_pipe = (f for f in args)
+
+    def _scheduled_func(*args, **kwargs):
+
+        func = kwargs.pop("func")
+        func(*args, **kwargs)
+        next_func = next(func_pipe, None)
+        if next_func:
+            cb = partial(_scheduled_func, func=next_func)
+            Clock.schedule_once(cb, timeout)
+
+    head_func = partial(_scheduled_func, func=next(func_pipe))
+
+    Clock.schedule_once(head_func, timeout=timeout)
 
 
 class EnvironContext:

@@ -2,6 +2,15 @@ import abc
 from dataclasses import field, dataclass
 
 from services.domain import MarkdownNote
+from typing import TYPE_CHECKING, Protocol
+
+if TYPE_CHECKING:
+    from services.backend import BackendProtocol
+    from kivy.app import App
+
+
+class NoteServiceApp(Protocol):
+    note_service: "BackendProtocol"
 
 
 @dataclass
@@ -29,6 +38,10 @@ class EditorProtocol(abc.ABC):
 
     @abc.abstractmethod
     def edit_note(self, note: MarkdownNote) -> EditableNote:
+        ...
+
+    @abc.abstractmethod
+    def edit_current_note(self, app: NoteServiceApp) -> EditableNote:
         ...
 
     @abc.abstractmethod

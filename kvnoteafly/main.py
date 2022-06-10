@@ -1,8 +1,8 @@
+from pathlib import Path
 from dotenv import load_dotenv
 from kivy import Logger
 from kivy.core.text import LabelBase
 from kivy.config import Config
-from pathlib import Path
 import os
 
 __version__ = "0.0.1"

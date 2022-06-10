@@ -2,7 +2,14 @@
 
 <PrimaryVSep@VSeparator>:
     color: app.colors['Primary']
-    width: 2
+    width: dp(2)
+
+<ImageButton>:
+    opacity: 1 if self.state == 'normal' else 0.6
+    mipmap: True
+
+<SaveButton>:
+<CancelButton>:
 
 <ButtonBar>:
     orientation: "horizontal"
