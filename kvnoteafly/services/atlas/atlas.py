@@ -9,7 +9,7 @@ import tempfile
 from operator import itemgetter
 from pathlib import Path
 from typing import NamedTuple, NewType, Optional, Sequence, Union
-
+from functools import lru_cache
 from kivy import Logger
 
 from utils.registry import app_registry
@@ -268,15 +268,6 @@ class AtlasService(AtlasServiceProtocol):
     def uri_for(self, name: str, atlas_name: str):
         matched = self._match_atlas(atlas_name)
         return f"atlas://{matched.path.with_suffix('')}/{name}"
-
-    def region_for(self, name: str, atlas_name: str) -> "ImgPos":
-        matched_atlas = self._match_atlas(atlas_name)
-        matched_atlas_data = self._read_atlas(atlas_name)
-        atlas_img, region = self._match_atlas_member(
-            matched_atlas_data, atlas_name, name
-        )
-        atlas_img_path = matched_atlas.path.parent / atlas_img
-        return region
 
     def category_image_listener(self, imgs: Sequence[tuple[str, Path]]):
 

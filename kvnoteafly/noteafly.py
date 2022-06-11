@@ -3,7 +3,7 @@ import os
 from functools import partial
 from pathlib import Path
 from typing import TYPE_CHECKING
-
+from kivy.parser import parse_color
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.config import Config
@@ -60,37 +60,16 @@ class NoteAFly(App):
     colors = DictProperty(
         {
             "White": (1, 1, 1),
+            "Gray-100": parse_color("#f3f3f3"),
+            "Gray-200": parse_color("#dddedf"),
+            "Gray-300": parse_color("#c7c8ca"),
+            "Gray-400": parse_color("#9a9da1"),  # White text
+            "Gray-500": parse_color("#6d7278"),
             "Codespan": (0, 0, 0, 0.15),
-            "Gray": (
-                0.7803921568627451,
-                0.7803921568627451,
-                0.7803921568627451,
-                1,
-            ),  # c7c7c7
-            "Primary": (
-                0.21568627450980393,
-                0.2784313725490195,
-                0.30980392156862746,
-                1,
-            ),  # 37464f
-            "Dark": (
-                0.06274509803921569,
-                0.1254901960784313,
-                0.15294117647058825,
-                1,
-            ),  # 101f27
-            "Accent1": (
-                0.30196078431372547,
-                0.7058823529411765,
-                0.18823529411764706,
-                1.0,
-            ),  # 4db430
-            "Accent2": (
-                0.4470588235294118,
-                0.6235294117647059,
-                0.8117647058823529,
-                1.0,
-            ),
+            "Primary": parse_color("#37464f"),
+            "Dark": parse_color("#101f27"),
+            "Accent-One": parse_color("#388fe5"),
+            "Accent-Two": parse_color("#56e39f"),
             "Warn": (
                 0.9803921568627451,
                 0.09803921568627451,

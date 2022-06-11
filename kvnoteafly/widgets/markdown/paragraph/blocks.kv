@@ -8,18 +8,18 @@
     padding: sp(10), sp(10), 0, sp(10)
     canvas:
         Color:
-            rgba: (*app.colors['Gray'][:3], 0.5)
+            rgba: (*app.colors['Gray-200'][:3], 0.5)
         Rectangle:
             pos: [self.pos[0], self.pos[1] + sp(5)]
             size: [self.size[0], self.size[1] -sp(10)]
         Color:
-            rgba: app.colors['Accent2']
+            rgba: app.colors['Accent-One']
         Rectangle:
             pos: [self.pos[0], self.pos[1] + sp(5)]
             size: [sp(4), self.height - sp(10)]
     LabelAutoContrast:
         id: content
-        bg_color: app.colors['Gray']
+        bg_color: app.colors['Gray-500']
         markup: False
         valign: 'center'
         size: self.texture_size

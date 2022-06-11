@@ -30,14 +30,17 @@
     image: image
     size_hint: 0.25, None
     canvas.before:
-        RoundedRectangle:
+        BorderImage:
             pos: self.pos
             size: self.size
+            border: (25,25,25,25)
             texture: self.tx_bg_normal if self.state == 'normal' else self.tx_bg_down
+
     Image:
         id: image
         source: root.source
         mipmap: True
+
 
     SmallLabel:
         text: root.text

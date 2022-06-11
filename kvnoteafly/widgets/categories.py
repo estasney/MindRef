@@ -90,10 +90,4 @@ class NoteCategoryButton(ButtonBehavior, BoxLayout):
 
     def load_texture(self, name):
         get_uri = App.get_running_app().atlas_service.uri_for
-        get_region = App.get_running_app().atlas_service.region_for
-
         img = Image(get_uri(name.lower(), "textures"))
-        region = get_region(name.lower(), "textures")
-        texture = img.texture
-        texture = texture.get_region(*region)
-        setattr(self, f"tx_{name}", texture)
