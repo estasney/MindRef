@@ -1,6 +1,12 @@
 from __future__ import annotations
 
 from utils import import_kv
+from utils.caching import (
+    cache_key_color_norm,
+    cache_key_text_contrast,
+    cache_key_text_extents,
+    kivy_cache,
+)
 
 import_kv(__file__)
 
@@ -16,58 +22,50 @@ from kivy.properties import (
     StringProperty,
 )
 from kivy.uix.label import Label
-from functools import wraps
 
-Cache.register("color_norm", timeout=30)
-Cache.register("text_contrast", timeout=30)
+Cache.register("color_norm", limit=1000)
+Cache.register("text_contrast", limit=1000)
 Cache.register("text_extents", limit=1000)
 
 
-def get_cached_extents(label, text):
-    opts = label.options
-    label_id = f"{text}-{opts['font_size']}-{opts['font_family']}"
-    cached_instance = Cache.get("text_extents", label_id)
-    if cached_instance:
-        return cached_instance
-    result = label.get_extents(text)
-    Cache.append("text_extents", label_id, result)
-    return result
+@kivy_cache(cache_name="text_extents", key_func=cache_key_text_extents)
+def get_cached_extents(*, label, text: str):
+    return label.get_extents(text)
 
 
-def cache_text_contrast(func):
-    @wraps(func)
-    def wrapped_text_contrast(background_color, threshold, highlight_color):
-        key = (
-            tuple(background_color),
-            int(threshold),
-            tuple(highlight_color) if highlight_color else None,
-        )
-        cached_instance = Cache.get("text_contrast", key)
-        if cached_instance:
-            return cached_instance
-        result = func(background_color, threshold, highlight_color)
-        Cache.append("text_contrast", key, result)
-        return result
+@kivy_cache(cache_name="text_contrast", key_func=cache_key_text_contrast)
+def get_cached_text_contrast(
+    *, background_color, threshold, highlight_color: Optional[Any] = None
+):
+    """
+    Set text as white or black depending on bg
+    """
+    if not highlight_color:
+        r, g, b, opacity = get_cached_color_norm(color=background_color)
+        brightness = (r * 0.299 + g * 0.587 + b * 0.114 + (1 - opacity)) * 255
+    else:
+        hl_norm = get_cached_color_norm(color=highlight_color)
+        bg_norm = get_cached_color_norm(color=background_color)
 
-    return wrapped_text_contrast
+        r_hl, g_hl, b_hl, opacity_hl = hl_norm
+        r_bg, g_bg, b_bg, opacity_bg = bg_norm
+
+        # https://stackoverflow.com/questions/726549/algorithm-for-additive-color-mixing-for-rgb-values
+        opacity = 1 - (1 - opacity_hl) * (1 - opacity_bg)
+        r = r_hl * opacity_hl / opacity + r_bg * opacity_bg * (1 - opacity_hl) / opacity
+        g = g_hl * opacity_hl / opacity + g_bg * opacity_bg * (1 - opacity_hl) / opacity
+        b = b_hl * opacity_hl / opacity + b_bg * opacity_bg * (1 - opacity_hl) / opacity
+
+        # https://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color
+        brightness = (r * 0.299 + g * 0.587 + b * 0.114 + (1 - opacity)) * 255
+    if brightness > threshold:
+        return "#000000"
+    else:
+        return "#ffffff"
 
 
-def cached_color_norm(func):
-    @wraps(func)
-    def wrapped_func(color):
-        key = tuple(color)
-        cached_instance = Cache.get("color_norm", key)
-        if cached_instance:
-            return cached_instance
-        result = func(color)
-        Cache.append("color_norm", key, tuple(result))
-        return result
-
-    return wrapped_func
-
-
-@cached_color_norm
-def color_norm(color) -> tuple[float, float, float, float]:
+@kivy_cache(cache_name="color_norm", key_func=cache_key_color_norm)
+def get_cached_color_norm(color) -> tuple[float, float, float, float]:
     def color_str_components(s: str) -> tuple[float, float, float, float]:
         """Return hex as 1.0 * 4"""
         s = s.removeprefix("#")
@@ -105,36 +103,6 @@ def color_norm(color) -> tuple[float, float, float, float]:
     return tuple(components)
 
 
-@cache_text_contrast
-def text_contrast(background_color, threshold, highlight_color: Optional[Any] = None):
-    """
-    Set text as white or black depending on bg
-
-    """
-    if not highlight_color:
-        r, g, b, opacity = color_norm(background_color)
-        brightness = (r * 0.299 + g * 0.587 + b * 0.114 + (1 - opacity)) * 255
-    else:
-        hl_norm = color_norm(highlight_color)
-        bg_norm = color_norm(background_color)
-
-        r_hl, g_hl, b_hl, opacity_hl = hl_norm
-        r_bg, g_bg, b_bg, opacity_bg = bg_norm
-
-        # https://stackoverflow.com/questions/726549/algorithm-for-additive-color-mixing-for-rgb-values
-        opacity = 1 - (1 - opacity_hl) * (1 - opacity_bg)
-        r = r_hl * opacity_hl / opacity + r_bg * opacity_bg * (1 - opacity_hl) / opacity
-        g = g_hl * opacity_hl / opacity + g_bg * opacity_bg * (1 - opacity_hl) / opacity
-        b = b_hl * opacity_hl / opacity + b_bg * opacity_bg * (1 - opacity_hl) / opacity
-
-        # https://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color
-        brightness = (r * 0.299 + g * 0.587 + b * 0.114 + (1 - opacity)) * 255
-    if brightness > threshold:
-        return "#000000"
-    else:
-        return "#ffffff"
-
-
 class LabelAutoContrast(Label):
     """
     Label that changes text color to optimize contrast
@@ -167,7 +135,11 @@ class LabelAutoContrast(Label):
 
     def handle_bg_color(self, instance, value):
         """When bg_color is set we set our text_color accordingly"""
-        self.text_color = text_contrast(self.bg_color, self.text_threshold, None)
+        self.text_color = get_cached_text_contrast(
+            background_color=self.bg_color,
+            threshold=self.text_threshold,
+            highlight_color=None,
+        )
         return True
 
     def handle_text_color(self, instance, value):
@@ -209,11 +181,17 @@ class LabelHighlight(LabelAutoContrast):
     def handle_bg_color(self, instance, value):
         """Update our text color"""
         if self.highlight:
-            self.text_color = text_contrast(
-                self.bg_color, self.text_threshold, self.highlight_color
+            self.text_color = get_cached_text_contrast(
+                background_color=self.bg_color,
+                threshold=self.text_threshold,
+                highlight_color=self.highlight_color,
             )
         else:
-            self.text_color = text_contrast(self.bg_color, self.text_threshold, None)
+            self.text_color = get_cached_text_contrast(
+                background_color=self.bg_color,
+                threshold=self.text_threshold,
+                highlight_color=None,
+            )
         return True
 
     def handle_highlight(self, instance, value):
@@ -242,14 +220,16 @@ class LabelHighlight(LabelAutoContrast):
 
     def handle_highlight_color(self, instance, value):
         if self.highlight:
-            self.text_color = text_contrast(
-                self.bg_color, self.text_threshold, self.highlight_color
+            self.text_color = get_cached_text_contrast(
+                background_color=self.bg_color,
+                threshold=self.text_threshold,
+                highlight_color=self.highlight_color,
             )
             return True
 
     def get_extents(self, instance, value):
         """Measure the size of our text. Use cache if possible"""
-        w, h = get_cached_extents(self._label, self.raw_text)
+        w, h = get_cached_extents(label=self._label, text=self.raw_text)
 
         # Now we can draw our codespan background
         self.extents = [w + (2 * self.padding_x), h + self.padding_y]

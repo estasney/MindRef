@@ -28,10 +28,10 @@ class AtlasServiceProtocol(ABC):
 
     @abc.abstractmethod
     def uri_for(self, name: str, atlas_name: str) -> str:
-        """Return URI for Kivy"""
+        """Return URI for Image"""
         raise NotImplementedError
 
     @abc.abstractmethod
     def region_for(self, name: str, atlas_name: str) -> "ImgPos":
-        """Return X,Y,W,H for Image"""
+        """Given an atlas image, Return X,Y,W,H for Image Region"""
         raise NotImplementedError

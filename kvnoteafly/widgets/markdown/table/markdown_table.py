@@ -18,7 +18,7 @@ from kivy.properties import (
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 
-from widgets.behavior import LabelHighlight
+from widgets.behavior.label_behavior import LabelHighlight
 
 if TYPE_CHECKING:
     pass

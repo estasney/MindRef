@@ -6,6 +6,7 @@ from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.boxlayout import BoxLayout
 
 from utils import import_kv
+from utils.caching import cache_key_note, kivy_cache
 
 import_kv(__file__)
 
@@ -18,19 +19,12 @@ if TYPE_CHECKING:
 Cache.register("note_widget", limit=100, timeout=3600)
 
 
-def get_cached_note(content_data: "MarkdownNoteDict"):
-    key = f"{content_data['file']}-{content_data['idx']}-{content_data['text']}"
-    cached_instance = Cache.get("note_widget", key)
-    if cached_instance:
-        if cached_instance.parent:
-            cached_instance.parent.clear_widgets()
-            Cache.append("note_widget", key, cached_instance)
-        return cached_instance
+@kivy_cache(cache_name="note_widget", key_func=cache_key_note)
+def get_cached_note(*, content_data: "MarkdownNoteDict"):
     if content_data.get("has_shortcut", False):
         result = ContentKeyboard(content_data=content_data)
     else:
         result = MarkdownDocument(content_data=content_data)
-    Cache.append("note_widget", key, result)
     return result
 
 
@@ -59,11 +53,11 @@ class NoteContent(BoxLayout):
             self._set_markdown(content_data)
 
     def _set_keyboard(self, content_data: "MarkdownNoteDict"):
-        widget = get_cached_note(content_data)
+        widget = get_cached_note(content_data=content_data)
         self.add_widget(widget)
 
     def _set_markdown(self, content_data: "MarkdownNoteDict"):
-        md_widget = get_cached_note(content_data)
+        md_widget = get_cached_note(content_data=content_data)
         self.add_widget(md_widget)
 
 
