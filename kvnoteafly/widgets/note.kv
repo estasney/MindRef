@@ -48,20 +48,21 @@
             opacity: 1 if self.state == 'normal' else 0.6
             mipmap: True
             on_release: app.display_state = "edit"
-        BaseLabel:
+        LargeLabel:
             id: note_title_label
             color: app.colors['White']
             text: note_title.title_text
             bold: True
             text_size: sp(self.size[0]*0.9), None
-            font_size: app.base_font_size
             pos_hint: {"x": 0, "y": 0}
             size_hint: (0.7, 1)
             halign: "center"
             valign: "center"
             mipmap: True
         ButtonBar:
-            size_hint: (0.3, 1)
+            size_hint_min_y: 0.95
+
+
 
 
 <NoteContent>:

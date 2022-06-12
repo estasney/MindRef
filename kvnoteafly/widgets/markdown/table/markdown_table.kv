@@ -6,7 +6,7 @@
     height: self.minimum_height
 <MarkdownRow>:
     orientation: 'horizontal'
-    padding: 4,2
+    padding: sp(4),sp(2)
     size_hint_y: None
     size_hint_x: 1
     height: self.minimum_height
@@ -23,5 +23,5 @@
     width: self.texture_size[0]
     height: self.texture_size[1]
     text_size: self.width, None
-    font_size: sp(14) if self.font_family == "RobotoMono" else sp(15)
+    font_size: app.base_font_size - 1 if self.font_family == "RobotoMono" else app.base_font_size
     padding: sp(4), sp(2)

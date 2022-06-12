@@ -20,9 +20,9 @@
         size_hint_y: None
         height: self.minimum_height
         id: category_container
-        cols: int(self.width / sp(180))
-        padding: 10
-        spacing: 10
+        cols: int(self.width / sp(120))
+        padding: dp(10)
+        spacing: dp(10)
 
 <NoteCategoryButton>:
     orientation: 'vertical'
@@ -33,7 +33,7 @@
         BorderImage:
             pos: self.pos
             size: self.size
-            border: (25,25,25,25)
+            border: (dp(5), dp(5), dp(5), dp(5))
             texture: self.tx_bg_normal if self.state == 'normal' else self.tx_bg_down
 
     Image:
@@ -41,8 +41,7 @@
         source: root.source
         mipmap: True
 
-
-    SmallLabel:
+    BaseLabel:
         text: root.text
         size_hint_x: 1
         size_hint_y: 0.4

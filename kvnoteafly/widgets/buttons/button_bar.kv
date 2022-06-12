@@ -9,27 +9,19 @@
             rgb: app.colors['Primary']
         Line:
             rounded_rectangle: (self.pos[0], self.pos[1], self.size[0]+4, self.size[1], 4)
-            width: 1
+            width: dp(1)
     ListViewButton:
-        opacity: 1 if self.state == 'normal' else 0.6
         on_release: app.display_state = 'list'
-        mipmap: True
     PrimaryVSep:
     BackButton:
         on_release: app.paginate(-1)
     PrimaryVSep:
     PlayStateButton:
         id: play_button
-        opacity: 1 if self.state == 'normal' else 0.6
         on_release: self.playing = not self.playing
-        mipmap: True
     PrimaryVSep:
     ForwardButton:
-        opacity: 1 if self.state == 'normal' else 0.6
         on_release: app.paginate(1)
-        mipmap: True
     PrimaryVSep:
     ReturnButton:
-        opacity: 1 if self.state == 'normal' else 0.6
-        mipmap: True
         on_release: app.note_category = ''

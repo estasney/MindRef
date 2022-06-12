@@ -1,9 +1,11 @@
+#:import styles widgets.style
+
 <MarkdownListItem>:
     content: content
     cols: 1
     size_hint_y: None
     height: content.texture_size[1] + dp(20)
-    Label:
+    BaseLabel:
         id: content
         markup: True
         valign: 'top'

@@ -1,4 +1,5 @@
 #:import parse_color kivy.parser.parse_color
+#:import styles widgets.style
 
 <MarkdownCodeSpan>:
     id: parent
@@ -16,14 +17,13 @@
         Rectangle:
             pos: self.pos
             size: self.size
-    Label:
+    BaseLabel:
         id: content
         text: root.text
         markup: True
         size_hint: 0.99, 0.95
         mipmap: True
-        font_size: min(self.size[1] / 2, 16)
         text_size: self.size[0], None
         font_family: "RobotoMono"
         font_hinting: 'mono'
-        padding_x: min(self.size[1] / 2, 16)
+        padding_x: min(sp(self.size[1] / 2), sp(16))
