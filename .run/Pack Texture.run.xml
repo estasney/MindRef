@@ -18,12 +18,14 @@
       <option name="useCurrentConnection" value="false" />
     </EXTENSION>
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/atlas_utils/atlas.py" />
-    <option name="PARAMETERS" value="pack -i ./static/textures/*.png -o ./static/textures/textures --size 400" />
+    <option name="PARAMETERS" value="pack -i ./static/textures/*.png -o ./static/textures/textures --size 400 -rm y" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />
     <option name="REDIRECT_INPUT" value="false" />
     <option name="INPUT_FILE" value="" />
-    <method v="2" />
+    <method v="2">
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="Make Textures" run_configuration_type="PythonConfigurationType" />
+    </method>
   </configuration>
 </component>
