@@ -1,15 +1,18 @@
 from functools import wraps
-from typing import Callable, Any, Optional, ParamSpec, TypeVar, Hashable
+from typing import Callable, Optional, TypeVar, Hashable, TYPE_CHECKING
 from kivy.cache import Cache
 
-POuter = ParamSpec("POuter")
-PInner = ParamSpec("PInner")
-TInner = TypeVar("TInner")
+if TYPE_CHECKING:
+    from typing import ParamSpec
+
+    POuter = ParamSpec("POuter")
+    PInner = ParamSpec("PInner")
+    TInner = TypeVar("TInner")
+    KeyedCallable = Callable[POuter, Hashable]
+    InnerCallable = Callable[PInner, TInner]
 
 
-def kivy_cache(
-    cache_name: str, key_func: Callable[POuter, Hashable]
-) -> Callable[PInner, TInner]:
+def kivy_cache(cache_name: str, key_func: "KeyedCallable") -> "InnerCallable":
     """
     Used as decorator to wrap a function in a Kivy Cache
 
@@ -21,11 +24,11 @@ def kivy_cache(
         Function that accepts *args, **kwargs that generates a key to lookup in cache
     """
 
-    def dec_kivy_cache(func: Callable[PInner, TInner]):
+    def dec_kivy_cache(func: "InnerCallable"):
         @wraps(func)
-        def wrapped_func(**kwargs: PInner.kwargs) -> TInner:
+        def wrapped_func(**kwargs: "PInner.kwargs") -> "TInner":
             key = key_func(**kwargs)
-            cached_result: TInner = Cache.get(cache_name, key)
+            cached_result: "TInner" = Cache.get(cache_name, key)
             if cached_result is not None:
                 return cached_result
             result = func(**kwargs)
