@@ -1,9 +1,7 @@
 from kivy.app import App
 from kivy.properties import (
     BooleanProperty,
-    ColorProperty,
     DictProperty,
-    ListProperty,
 )
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.image import Image
