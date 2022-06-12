@@ -1,15 +1,4 @@
-#:import PrimaryVSep widgets.separator
-
-<PrimaryVSep@VSeparator>:
-    color: app.colors['Primary']
-    width: dp(2)
-
-<ImageButton>:
-    opacity: 1 if self.state == 'normal' else 0.6
-    mipmap: True
-
-<SaveButton>:
-<CancelButton>:
+#:import btns widgets.buttons.buttons
 
 <ButtonBar>:
     orientation: "horizontal"
@@ -27,9 +16,7 @@
         mipmap: True
     PrimaryVSep:
     BackButton:
-        opacity: 1 if self.state == 'normal' else 0.6
         on_release: app.paginate(-1)
-        mipmap: True
     PrimaryVSep:
     PlayStateButton:
         id: play_button

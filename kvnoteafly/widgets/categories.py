@@ -3,7 +3,6 @@ from functools import partial
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.core.image import Image
-from kivy.effects.opacityscroll import OpacityScrollEffect
 from kivy.properties import (
     BooleanProperty,
     ListProperty,
@@ -91,3 +90,5 @@ class NoteCategoryButton(ButtonBehavior, BoxLayout):
     def load_texture(self, name):
         get_uri = App.get_running_app().atlas_service.uri_for
         img = Image(get_uri(name.lower(), "textures"))
+        tx = img.texture
+        setattr(self, f"tx_{name}", tx)

@@ -1,0 +1,12 @@
+#:import PrimaryVSep widgets.separator
+
+<PrimaryVSep@VSeparator>:
+    color: app.colors['Primary']
+    width: dp(2)
+
+<ImageButton>:
+    color: app.colors['White'] if self.state == 'normal' else app.colors['Accent-One']
+    mipmap: True
+
+<SaveButton>:
+<CancelButton>:

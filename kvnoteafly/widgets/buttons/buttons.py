@@ -2,10 +2,10 @@ from kivy.app import App
 from kivy.properties import (
     BooleanProperty,
     ColorProperty,
+    DictProperty,
     ListProperty,
 )
 from kivy.uix.behaviors import ButtonBehavior
-from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.image import Image
 
 from utils import import_kv
@@ -18,48 +18,37 @@ def get_uri(name):
     return App.get_running_app().atlas_service.uri_for(name, atlas_name="icons")
 
 
-class ButtonBar(BoxLayout):
-    ...
-
-
 class ImageButton(ButtonBehavior, Image, TrackParentPadding):
     def __init__(self, src, *args, **kwargs):
         super().__init__()
         self.source = src
 
 
-class DynamicImageButton(ButtonBehavior, Image):
-    sources = ListProperty([])
+class DynamicImageButton(ImageButton):
+    sources = DictProperty()
 
     def __init__(self, sources: list[str], **kwargs):
-        super().__init__(**kwargs)
-        self.sources = sources
-        if "source" in kwargs:
-            self.source = kwargs.pop("source")
-        else:
-            self.source = self.sources[0]
+        self.sources = {k: get_uri(k) for k in sources}
+        super().__init__(**{**{"src": self.sources[sources[0]]}, **kwargs})
 
 
 class PlayStateButton(DynamicImageButton):
-    sources = ListProperty([])
     playing = BooleanProperty(True)
-    color = ColorProperty([1, 1, 1, 1])
 
     def __init__(self, **kwargs):
         self.fbind("playing", self.handle_play_state)
-
         app_state = App.get_running_app().play_state
         src = "play" if app_state == "pause" else "pause"
         super().__init__(
-            source=get_uri(src),
-            sources=[get_uri("play"), get_uri("pause")],
+            sources=["play", "pause"],
             **kwargs,
         )
+        self.source = self.sources[src]
 
     def handle_play_state(self, instance, value):
         app = App.get_running_app()
         app.play_state = "play" if self.playing else "pause"
-        self.source = self.sources[1] if self.playing else self.sources[0]
+        self.source = self.sources["pause"] if self.playing else self.sources["play"]
         return True
 
 
