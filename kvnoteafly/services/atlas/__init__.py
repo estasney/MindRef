@@ -30,8 +30,3 @@ class AtlasServiceProtocol(ABC):
     def uri_for(self, name: str, atlas_name: str) -> str:
         """Return URI for Image"""
         raise NotImplementedError
-
-    @abc.abstractmethod
-    def region_for(self, name: str, atlas_name: str) -> "ImgPos":
-        """Given an atlas image, Return X,Y,W,H for Image Region"""
-        raise NotImplementedError
