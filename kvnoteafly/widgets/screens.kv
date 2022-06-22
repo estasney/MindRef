@@ -3,6 +3,7 @@
 #:import ScrollingListView widgets.scroller
 #:import Note widgets.note
 #:import Buttons widgets.buttons.buttons
+#:import e widgets.editor.editor
 
 <NoteAppScreenManager>:
     id: screen_manager
@@ -46,7 +47,8 @@
 
 <NoteEditScreen>:
     id: edit_screen
-    editor: editor
+    note_editor: note_editor
+    container: container
     canvas:
         Color:
             rgba: app.colors['Dark']
@@ -55,20 +57,23 @@
             size: self.size
     BoxLayout:
         orientation: 'vertical'
-        CodeInput:
-            id: editor
-            size_hint_x: 1
-            size_hint_y: .9
-            lexer: edit_screen.lexer
-            style_name: edit_screen.style_name
-            font_family: "RobotoMono"
-            font_size: app.base_font_size
-
-        BoxLayout:
-            size_hint_x: 1
-            size_hint_y: 0.1
-            orientation: 'horizontal'
-            SaveButton:
-                on_release: edit_screen.handle_save()
-            CancelButton:
-                on_release: edit_screen.handle_cancel()
+        id: container
+        NoteEditor:
+            id: note_editor
+#        CodeInput:
+#            id: note_editor
+#            pos_hint: {"top": 1}
+#            size_hint_x: 1
+#            size_hint_y: .9
+#            lexer: edit_screen.lexer
+#            style_name: edit_screen.style_name
+#            font_family: "RobotoMono"
+#            font_size: app.base_font_size
+#        BoxLayout:
+#            size_hint_x: 1
+#            size_hint_y: 0.1
+#            orientation: 'horizontal'
+#            SaveButton:
+#                on_release: edit_screen.handle_save()
+#            CancelButton:
+#                on_release: edit_screen.handle_cancel()

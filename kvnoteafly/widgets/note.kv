@@ -31,7 +31,7 @@
 
 <NoteTitle>:
     id: note_title
-    edit_button: edit_button
+
     canvas:
         Color:
             rgba: app.colors['Dark']
@@ -39,15 +39,12 @@
             pos: self.pos
             size: self.size
     BoxLayout:
-        padding: 0, '1sp', '1sp', 0
-        EditButton:
-            id: edit_button
-            size_hint_min_y: 1
-            size_hint_x: None
-            width: self.height * 1.618
-            opacity: 1 if self.state == 'normal' else 0.6
-            mipmap: True
-            on_release: app.display_state = "edit"
+        padding: '5sp', '1sp', '5sp', '0sp'
+        NoteActionButtonBar:
+            size_hint_min_y: 0.95
+            size_hint_x: 0.20
+            padding: '2dp'
+
         LargeLabel:
             id: note_title_label
             color: app.colors['White']
@@ -59,8 +56,9 @@
             halign: "center"
             valign: "center"
             mipmap: True
-        ButtonBar:
+        ControllerButtonBar:
             size_hint_min_y: 0.95
+            padding: '2dp'
 
 
 

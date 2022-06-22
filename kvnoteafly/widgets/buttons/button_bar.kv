@@ -1,9 +1,25 @@
 #:import btns widgets.buttons.buttons
 
-<ButtonBar>:
+<NoteActionButtonBar>:
+    orientation: "horizontal"
+
+    canvas:
+        Color:
+            rgb: app.colors['Primary']
+        Line:
+            rounded_rectangle: (self.pos[0], self.pos[1], self.size[0]+4, self.size[1], 4)
+            width: dp(1)
+    AddButton:
+        on_release: app.display_state = 'add'
+    PrimaryVSep:
+    EditButton:
+        on_release: app.display_state = 'edit'
+
+
+<ControllerButtonBar>:
     orientation: "horizontal"
     play_button: play_button
-    padding: 0
+
     canvas:
         Color:
             rgb: app.colors['Primary']

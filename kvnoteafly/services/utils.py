@@ -1,18 +1,19 @@
-from typing import Callable, Optional, TYPE_CHECKING
+from typing import Callable, Optional, TYPE_CHECKING, Generic, TypeVar
 
+T = TypeVar("T")
 if TYPE_CHECKING:
     from registry import Registry
 
 
-class LazyLoaded:
-    def __init__(self, default: Optional[Callable] = None):
+class LazyLoaded(Generic[T]):
+    def __init__(self, default: "Optional[Callable]" = None):
         self.default = default if default is None else default()
 
     def __set_name__(self, owner, name):
         self.private_name = f"_{name}"
         setattr(owner, self.private_name, self.default)
 
-    def __get__(self, obj, objtype=None):
+    def __get__(self, obj, objtype=None) -> "T":
         value = getattr(obj, self.private_name)
         if value == self.default:
             value = getattr(obj, self.loader)()

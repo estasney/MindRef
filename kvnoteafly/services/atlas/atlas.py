@@ -47,7 +47,7 @@ class AtlasService(AtlasServiceProtocol):
     """
 
     builtin_atlases = {"icons", "category_img", "keys", "textures"}
-    atlases: list[AtlasItem] = LazyLoaded()
+    atlases: LazyLoaded[list[AtlasItem]] = LazyLoaded()
     _storage_path: Optional[Path]
     _instance = None
 

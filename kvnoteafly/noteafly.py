@@ -48,7 +48,7 @@ class NoteAFly(App):
     )
     menu_open = BooleanProperty(False)
     display_state = OptionProperty(
-        "choose", options=["choose", "display", "list", "edit"]
+        "choose", options=["choose", "display", "list", "edit", "add"]
     )
     play_state = OptionProperty("play", options=["play", "pause"])
     paginate_interval = NumericProperty(15)
@@ -110,7 +110,7 @@ class NoteAFly(App):
     def on_display_state(self, instance, new):
         if new != "list":
             return
-        if new == "edit":
+        if new in {"edit", "add"}:
             self.play_state = "pause"
         if self.next_note_scheduler:
             self.next_note_scheduler.cancel()
@@ -195,7 +195,9 @@ class NoteAFly(App):
     def on_note_data(self, *args, **kwargs):
         self.screen_manager.handle_notes(self)
 
-    def note_files_listener(self, files: "CategoryFiles"):
+    def note_files_listener(self, event: str, files: "CategoryFiles", *args, **kwargs):
+        if event != "discovery":
+            return
         Logger.debug(f"Note Files from Registry {files}")
         self.note_categories = files
 

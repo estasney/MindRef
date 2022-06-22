@@ -2,7 +2,7 @@ import abc
 from dataclasses import field, dataclass
 
 from services.domain import MarkdownNote
-from typing import TYPE_CHECKING, Protocol
+from typing import Callable, Optional, TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
     from services.backend import BackendProtocol
@@ -11,6 +11,15 @@ if TYPE_CHECKING:
 
 class NoteServiceApp(Protocol):
     note_service: "BackendProtocol"
+
+
+@dataclass
+class TextNote:
+    """Intermediate Form"""
+
+    category: Optional[str] = field(default=None)
+    text: Optional[str] = field(default=None)
+    filename: Optional[str] = field(default=None)
 
 
 @dataclass
@@ -33,7 +42,7 @@ class EditableNote:
 
 class EditorProtocol(abc.ABC):
     @abc.abstractmethod
-    def new_note(self) -> EditableNote:
+    def new_note(self) -> TextNote:
         ...
 
     @abc.abstractmethod
@@ -45,5 +54,5 @@ class EditorProtocol(abc.ABC):
         ...
 
     @abc.abstractmethod
-    def save_note(self, note: EditableNote) -> MarkdownNote:
+    def save_note(self, note: EditableNote, callback: Callable[[MarkdownNote], None]):
         ...

@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
-from time import sleep
-from typing import Optional, TYPE_CHECKING, cast
+from typing import Callable, Optional, TYPE_CHECKING, Union, cast
 
+from kivy.logger import Logger
 from toolz import groupby
 
 from services.backend import BackendProtocol, NoteIndex
@@ -13,8 +13,9 @@ from services.backend.fileStorage.utils import (
     discover_folder_notes,
     get_folder_files,
 )
-from services.domain import MarkdownNote
 from services.utils import LazyLoaded, LazyRegistry
+from services.domain import MarkdownNote
+from services.editor import EditableNote, TextNote
 
 if TYPE_CHECKING:
     from services.backend.fileStorage.utils import CategoryNoteMeta, CategoryFiles
@@ -24,8 +25,8 @@ class FileSystemBackend(BackendProtocol):
     _index: Optional[NoteIndex]
     _current_category: Optional[str]
     _storage_path: Optional[Path]
-    category_files: "CategoryFiles" = LazyLoaded()
-    category_meta: "CategoryNoteMeta" = LazyLoaded(default=list)
+    category_files: "LazyLoaded[CategoryFiles]" = LazyLoaded()
+    category_meta: "LazyLoaded[CategoryNoteMeta]" = LazyLoaded(default=list)
     registry = LazyRegistry()
 
     """
@@ -47,6 +48,7 @@ class FileSystemBackend(BackendProtocol):
         self._category_meta = []
         self._current_category = None
         self._index = None
+        self.registry.note_files(self.save_note_listener)
 
     @category_files
     def _discover_notes(self):
@@ -76,7 +78,7 @@ class FileSystemBackend(BackendProtocol):
             if img := note_groups.get(False):
                 img_files.append((category_name, img[0]))
 
-        self.registry.note_files.notify(note_files)
+        self.registry.note_files.notify("discovery", note_files, None)
         self.registry.category_images.notify(img_files)
         return note_files
 
@@ -165,3 +167,58 @@ class FileSystemBackend(BackendProtocol):
         getattr(self, "category_files")
         # noinspection PyTypeChecker
         self.category_meta = None
+
+    def refresh_current_category(self):
+        """Read contents of current category folder"""
+        current = self.current_category
+        self.current_category = None
+        self.current_category = current
+
+    def save_note_listener(
+        self,
+        event: str,
+        note: "Union[TextNote, EditableNote]",
+        callback: Optional[Callable[[MarkdownNote], None]],
+        *args,
+        **kwargs,
+    ):
+
+        if event != "save_note" or not callback:
+            Logger.debug(f"fileBackend ignoring event {event}")
+            return
+        Logger.debug(
+            f"fileBackend processing event: {event}, note: {note}, callback: {callback}"
+        )
+        if isinstance(note, TextNote):
+            Logger.debug(f"Processing TextNote")
+            note_filepath = (
+                Path(self.storage_path) / note.category / note.filename
+            ).with_suffix(".md")
+            if not note_filepath.parent.exists():
+                raise FileNotFoundError(f"Category {note_filepath.parent} not found")
+            note_filepath.write_text(note.text)
+            self.refresh_categories()
+            matched_file_idx, matched_file = next(
+                (
+                    (i, cf)
+                    for i, cf in enumerate(self.category_files[note.category])
+                    if cf == note_filepath
+                )
+            )
+            callback(
+                MarkdownNote(
+                    category=note.category, idx=matched_file_idx, file=matched_file
+                )
+            )
+
+        elif note is EditableNote:
+            Logger.debug(f"Processing EditableNote")
+            md_note = note.note
+            md_note.file.write_text(note.edit_text, encoding="utf-8")
+            Logger.debug(f"Saved File To {md_note.file}")
+
+            callback(
+                MarkdownNote(
+                    category=md_note.category, idx=md_note.idx, file=md_note.file
+                )
+            )

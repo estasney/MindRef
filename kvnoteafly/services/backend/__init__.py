@@ -1,6 +1,10 @@
 import abc
 from abc import ABC
-from typing import Optional
+from typing import Callable, Literal, Optional, TYPE_CHECKING, Union
+
+if TYPE_CHECKING:
+    from services.domain import MarkdownNote
+    from services.editor import TextNote, EditableNote
 
 
 class BackendProtocol(ABC):
@@ -46,6 +50,19 @@ class BackendProtocol(ABC):
 
     @abc.abstractmethod
     def refresh_categories(self):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def refresh_current_category(self):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def save_note_listener(
+        self,
+        event: Literal["save_note"],
+        note: "Union[TextNote, EditableNote]",
+        callback: "Callable[[MarkdownNote], None]",
+    ):
         raise NotImplementedError
 
 

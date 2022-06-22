@@ -5,5 +5,9 @@ from utils import import_kv
 import_kv(__file__)
 
 
-class ButtonBar(BoxLayout):
+class ControllerButtonBar(BoxLayout):
+    ...
+
+
+class NoteActionButtonBar(BoxLayout):
     ...

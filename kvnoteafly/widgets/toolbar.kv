@@ -1,27 +1,7 @@
 #:import BaseLabel widgets.style
+#:import buttons widgets.buttons
 
-<HamburgerIcon@BoxLayout>:
-    orientation: 'horizontal'
-    size_hint_min_y: 1
-    size_hint_x: None
-    width: self.height*1.618
-    Button:
-        canvas:
-            Color:
-                rgba: app.colors['White']
-            RoundedRectangle:
-                pos: (self.x + self.center_x) / 2, self.center_y
-                size: self.width/2, sp(2)
-                radius: sp(2),sp(2)
-            RoundedRectangle:
-                pos: ((self.x + self.center_x)/2, self.center_y - self.height/5)
-                size: self.width/2, sp(2)
-                radius: sp(2),sp(2)
-            RoundedRectangle:
-                pos: ((self.x + self.center_x)/2, self.center_y + self.height/5)
-                size: self.width/2, sp(2)
-                radius: sp(2), sp(2)
-        on_release: app.menu_open = not app.menu_open
+
 
 
 

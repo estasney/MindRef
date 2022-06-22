@@ -12,7 +12,6 @@ from kivy.properties import (
     OptionProperty,
     StringProperty,
 )
-
 from kivy.uix.screenmanager import (
     CardTransition,
     FadeTransition,
@@ -23,7 +22,7 @@ from kivy.uix.screenmanager import (
     SwapTransition,
     WipeTransition,
 )
-
+from pygments.lexers import get_lexer_by_name
 from toolz import sliding_window
 
 from utils import import_kv, sch_cb
@@ -34,8 +33,7 @@ TR_OPTS = Literal["None", "Slide", "Rise-In", "Card", "Fade", "Swap", "Wipe"]
 
 if TYPE_CHECKING:
     from widgets.categories import NoteCategoryButton
-    from services.domain import MarkdownNoteDict, MarkdownNote
-    from kivy.uix.codeinput import CodeInput
+    from services.domain import MarkdownNoteDict
 
 import_kv(__file__)
 
@@ -134,6 +132,8 @@ class NoteAppScreenManager(ScreenManager):
             self.handle_notes_list_view()
         elif new == "edit":
             self.handle_notes_edit_view()
+        elif new == "add":
+            self.handle_notes_add_view()
 
         else:
             raise Exception(f"Unhandled display state {new}")
@@ -160,9 +160,20 @@ class NoteAppScreenManager(ScreenManager):
         fs = self.app.editor_service
         edit_note = fs.edit_current_note(self.app)
         edit_screen: "NoteEditScreen" = self.ids["note_edit_screen"]
-        update_screen = lambda x: setattr(self, "current", "note_edit_screen")
+        screen_edit_mode = lambda x: setattr(edit_screen, "mode", "edit")
         set_init_text = lambda x: setattr(edit_screen, "init_text", edit_note.edit_text)
-        sch_cb(0, update_screen, set_init_text)
+        update_screen = lambda x: setattr(self, "current", "note_edit_screen")
+        sch_cb(0, screen_edit_mode, update_screen, set_init_text)
+
+    def handle_notes_add_view(self, *args, **kwargs):
+        Logger.debug("Switching to add view")
+        fs = self.app.editor_service
+        _ = fs.new_note()  # This is necessary to kick set up listeners
+        edit_screen: "NoteEditScreen" = self.ids["note_edit_screen"]
+        set_screen_mode = lambda x: setattr(edit_screen, "mode", "add")
+        update_screen = lambda x: setattr(self, "current", "note_edit_screen")
+        set_init_text = lambda x: setattr(edit_screen, "init_text", "")
+        sch_cb(0, set_screen_mode, update_screen, set_init_text)
 
 
 class NoteCategoryChooserScreen(Screen):
@@ -229,45 +240,16 @@ class NoteListViewScreen(Screen):
 
 
 class NoteEditScreen(Screen):
-    from pygments.lexers import get_lexer_by_name
-
-    editor = ObjectProperty()
+    mode = OptionProperty("edit", options=["add", "edit"])
     init_text = StringProperty()
-    lexer = ObjectProperty(get_lexer_by_name("Markdown"))
-    style_name = StringProperty("paraiso-dark")
+    note_editor = ObjectProperty()
 
     def __init__(self, **kwargs):
         super(NoteEditScreen, self).__init__(**kwargs)
-        self.fbind("init_text", self.handle_init_text)
 
-    def handle_init_text(self, instance, value):
-        editor: "CodeInput" = self.editor
-        editor.text = self.init_text
-
-    def handle_save(self):
-        Logger.debug("Saving Note")
-        # Store new text to memory - we want to close the editor screen ASAP
-
-        app = App.get_running_app()
-
-        from utils.registry import app_registry
-
-        app_registry.note_editor.notify("edit", text=self.editor.text)
-        md_note = None
-
-        def md_save_cb(md):
-            """Registry can't directly return a value, but can call a function with result"""
-            nonlocal md_note
-            md_note = md
-
-        app_registry.note_editor.notify("save", cb=md_save_cb)
-
-        # noinspection PyUnresolvedReferences
-        app.note_data = md_note.to_dict()
-        update_display_state = lambda x: setattr(app, "display_state", "display")
-        clear_self_text = lambda x: setattr(self, "init_text", "")
-
-        sch_cb(0, update_display_state, clear_self_text)
+    def on_note_editor(self, instance, value):
+        self.note_editor.bind(on_save=self.handle_save)
+        self.note_editor.bind(on_cancel=self.handle_cancel)
 
     def handle_cancel(self, *args, **kwargs):
         Logger.debug("Cancel Edit")
@@ -280,3 +262,56 @@ class NoteEditScreen(Screen):
         clear_self_text = lambda x: setattr(self, "init_text", "")
 
         sch_cb(0, update_display_state, clear_self_text)
+
+    def handle_save(self, *args, **kwargs):
+        app = App.get_running_app()
+        text = kwargs.get("text")
+        if text is None:
+            raise ValueError("Expected text")
+
+        from utils.registry import app_registry
+
+        md_note = None
+
+        def md_save_cb(md):
+            """Registry can't directly return a value, but can call a function with result"""
+            nonlocal md_note
+            md_note = md
+
+        if self.mode == "edit":
+            # We've modified an existing note
+            # Notify editor service which will ...
+            # Modify local closure of EditableNote
+            # We update the note's text by notifying with edit
+            app_registry.note_editor.notify("edit", text=text)
+            # Teardown listener for app_registry.note_editor
+            # Invoke editor.save_note with local closure of EditableNote
+            # Callback passed to note_service which will populate md_note
+            app_registry.note_editor.notify("save", callback=md_save_cb)
+        elif self.mode == "add":
+            # We've created a new note
+            # Notify editor service of text, category and filename
+            app_registry.note_editor.notify("edit", text=text)
+            note_filename = kwargs.get("filename")
+            if note_filename is None:
+                raise ValueError("Expected note_filename")
+            # This will follow same chain of events as above
+            app_registry.note_editor.notify(
+                "save",
+                callback=md_save_cb,
+                category=app.note_category,
+                filename=note_filename,
+            )
+
+        # noinspection PyUnresolvedReferences
+        app.note_data = md_note.to_dict()
+        update_display_state = lambda x: setattr(app, "display_state", "display")
+        clear_self_text = lambda x: setattr(self, "init_text", "")
+
+        sch_cb(0, update_display_state, clear_self_text)
+
+    def on_init_text(self, instance, value):
+        self.note_editor.init_text = self.init_text
+
+    def on_mode(self, instance, value):
+        self.note_editor.mode = self.mode

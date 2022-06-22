@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from kivy import Logger
 from kivy.core.text import LabelBase
 from kivy.config import Config
-import os
+
 
 __version__ = "0.0.1"
 
@@ -40,10 +40,13 @@ def run_desktop():
 
 
 if __name__ == "__main__":
+    import os
+
     LabelBase.register(
         name="RobotoMono",
         fn_regular=str(Path(__file__).parent / "assets" / "RobotoMono-Regular.ttf"),
     )
+
     if os.environ.get("ANDROID_ENTRYPOINT", None):
         run_android()
     else:
