@@ -14,7 +14,7 @@ from widgets.keyboard import ContentKeyboard
 from widgets.markdown.markdown_document import MarkdownDocument
 
 if TYPE_CHECKING:
-    from kvnoteafly.services.domain import MarkdownNoteDict
+    from domain.markdown_note import MarkdownNoteDict
 
 Cache.register("note_widget", limit=100, timeout=3600)
 

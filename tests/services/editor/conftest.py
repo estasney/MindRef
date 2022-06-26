@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from services.domain import MarkdownNote
+from domain.markdown_note import MarkdownNote
 
 
 @pytest.fixture()
@@ -15,6 +15,6 @@ def md_note(tmpdir):
     Testing, testing ... 123
     """
     fp.write_text(doc, encoding="utf-8")
-    md = MarkdownNote(category="test", idx=0, file=fp)
+    md = MarkdownNote.from_file(category="test", idx=0, fp=fp)
     yield md
     fp.unlink()

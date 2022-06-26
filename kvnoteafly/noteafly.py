@@ -2,12 +2,12 @@ import logging
 import os
 from functools import partial
 from pathlib import Path
-from typing import TYPE_CHECKING
-from kivy.parser import parse_color
+
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.config import Config
 from kivy.logger import Logger
+from kivy.parser import parse_color
 from kivy.properties import (
     BooleanProperty,
     DictProperty,
@@ -18,29 +18,40 @@ from kivy.properties import (
     StringProperty,
 )
 
-from services.atlas.atlas import AtlasService
-from services.backend.fileStorage.fileBackend import FileSystemBackend
-from services.editor.fileStorage import FileSystemEditor
-from services.settings import (
+from adapters.atlas.fs.fs_atlas_repository import AtlasService
+from adapters.editor.fs.fs_editor_repository import FileSystemEditor
+from adapters.notes.fs.fs_note_repository import FileSystemNoteRepository
+from domain.events import (
+    AddNoteEvent,
+    CancelEditEvent,
+    EditNoteEvent,
+    NoteFetched,
+    SaveNoteEvent,
+)
+from domain.settings import (
     SETTINGS_BEHAVIOR_PATH,
     SETTINGS_DISPLAY_PATH,
     SETTINGS_STORAGE_PATH,
 )
-from utils.registry import app_registry
+from service.registry import Registry
+from utils import sch_cb
 from widgets.screens import NoteAppScreenManager
-
-if TYPE_CHECKING:
-    from services.backend.fileStorage.utils import CategoryFiles
 
 
 class NoteAFly(App):
     APP_NAME = "NoteAFly"
     atlas_service = AtlasService(storage_path=Path("./static").resolve())
-    note_service = FileSystemBackend(new_first=True)
+    note_service = FileSystemNoteRepository(new_first=True)
     editor_service = FileSystemEditor()
+
+    registry = Registry(logger=Logger)
+
     note_categories = ListProperty()
     note_category = StringProperty("")
     note_data = DictProperty(rebind=True)
+
+    editor_note = ObjectProperty(allownone=True)
+
     note_category_meta = ListProperty()
     next_note_scheduler = ObjectProperty()
     screen_transitions = OptionProperty(
@@ -82,13 +93,15 @@ class NoteAFly(App):
         Attributes
         ----------
 
-        note_service: BackendProtocol
+        note_service: AbstractNoteRepository
         note_categories: ListProperty
             All known note categories
         note_category: StringProperty
             The active Category. If no active category, value is empty string
         note_data: DictProperty
             The active Note belonging to active Category
+        editor_note: ObjectProperty
+            Ephemeral note used by editor service
         note_category_meta: ListProperty
             Metadata for notes associated with active Category. Info such as Title, and Shortcuts
         next_note_scheduler: ObjectProperty
@@ -108,10 +121,16 @@ class NoteAFly(App):
         """
 
     def on_display_state(self, instance, new):
-        if new != "list":
-            return
+
         if new in {"edit", "add"}:
             self.play_state = "pause"
+        if new == "edit":
+            self.editor_note = self.editor_service.edit_current_note(self)
+
+        elif new == "add":
+            self.editor_note = self.editor_service.new_note(
+                category=self.note_category, idx=self.note_service.index_size()
+            )
         if self.next_note_scheduler:
             self.next_note_scheduler.cancel()
 
@@ -195,33 +214,67 @@ class NoteAFly(App):
     def on_note_data(self, *args, **kwargs):
         self.screen_manager.handle_notes(self)
 
-    def note_files_listener(self, event: str, files: "CategoryFiles", *args, **kwargs):
-        if event != "discovery":
-            return
-        Logger.debug(f"Note Files from Registry {files}")
-        self.note_categories = files
-
     def refresh_note_categories(self, *args):
         Logger.debug("Refreshing note categories")
+        clear_note_categories = lambda x: setattr(self, "note_categories", [])
+        refresh_categories = lambda x: self.note_service.refresh_categories()
 
-        def clear_note_categories(dt):
-            self.note_categories = []
-            Clock.schedule_once(refresh_categories, 1)
+        sch_cb(0, clear_note_categories, refresh_categories)
 
-        def refresh_categories(dt):
-            self.note_service.refresh_categories()
+    def process_cancel_edit_event(self, event: CancelEditEvent):
+        update_display_state = lambda x: setattr(self, "display_state", "display")
+        clear_edit_note = lambda x: setattr(self, "editor_note", None)
+        sch_cb(0, update_display_state, clear_edit_note)
 
-        Clock.schedule_once(clear_note_categories)
+    def process_edit_note_event(self, event: EditNoteEvent):
+        data_note = self.registry.edit_note(category=event.category, idx=event.idx)
+        update_edit_note = lambda x: setattr(self, "editor_note", data_note)
+        update_display_state = lambda x: setattr(self, "display_state", "edit")
+        sch_cb(0, update_edit_note, update_display_state)
+
+    def process_add_note_event(self, event: AddNoteEvent):
+        data_note = self.registry.new_note(category=self.note_category, idx=None)
+        update_edit_note = lambda x: setattr(self, "editor_note", data_note)
+        update_display_mode = lambda x: setattr(self, "display_state", "add")
+        sch_cb(0, update_edit_note, update_display_mode)
+
+    def process_save_note_event(self, event: SaveNoteEvent):
+        note_is_new = self.display_state == "add"
+        data_note = self.editor_note
+        data_note.edit_text = event.text
+        if note_is_new:
+            data_note.edit_title = event.title
+        update_edit_note = lambda x: setattr(self, "editor_note", None)
+        update_display_state = lambda x: setattr(self, "display_state", "display")
+        persist_note = lambda x: self.registry.save_note(data_note)
+        sch_cb(1, update_display_state, persist_note, update_edit_note)
+
+    def process_note_fetched_event(self, event: NoteFetched):
+        note_data = event.note.to_dict()
+        update_data = lambda x: setattr(self, "note_data", note_data)
+        sch_cb(1, update_data)
+
+    def process_event(self, dt):
+        if len(self.registry.events) == 0:
+            return
+        event = self.registry.events.popleft()
+        Logger.debug(f"Processing Event: {event}")
+        event_type = event.event_type
+        func = getattr(self, f"process_{event_type}_event")
+        return func(event)
 
     def build(self):
+        self.registry.app = self
         storage_path = (
             np if (np := self.config.get("Storage", "NOTES_PATH")) != "None" else None
         )
         if storage_path:
-            self.note_service.storage_path = storage_path
+            self.registry.storage_path = storage_path
+
         self.note_service.new_first = (
             True if self.config.get("Behavior", "NEW_FIRST") == "True" else False
         )
+
         sm = NoteAppScreenManager(self)
         sm.screen_transitions = self.screen_transitions
         self.screen_manager = sm
@@ -230,8 +283,8 @@ class NoteAFly(App):
         self.log_level = self.config.get("Behavior", "LOG_LEVEL")
         self.base_font_size = self.config.get("Display", "BASE_FONT_SIZE")
         if storage_path:
-            self.note_categories = self.note_service.categories
-        app_registry.note_files(self.note_files_listener)
+            self.note_categories = [d["category"] for d in self.registry.query_all()]
+        Clock.schedule_interval(self.process_event, 0.1)
         return sm
 
     def build_settings(self, settings):

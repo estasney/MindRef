@@ -1,5 +1,6 @@
 #:import btns widgets.buttons.buttons
 
+
 <NoteActionButtonBar>:
     orientation: "horizontal"
 
@@ -10,10 +11,10 @@
             rounded_rectangle: (self.pos[0], self.pos[1], self.size[0]+4, self.size[1], 4)
             width: dp(1)
     AddButton:
-        on_release: app.display_state = 'add'
+        on_release: root.push_add_event(app)
     PrimaryVSep:
     EditButton:
-        on_release: app.display_state = 'edit'
+        on_release: root.push_edit_event(app, app.note_category, app.note_data['idx'])
 
 
 <ControllerButtonBar>:

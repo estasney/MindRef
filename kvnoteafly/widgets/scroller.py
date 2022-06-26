@@ -15,7 +15,7 @@ from widgets.keyboard import KeyboardImage
 from utils import import_kv
 
 if TYPE_CHECKING:
-    from kvnoteafly.services.domain import MarkdownNoteDict
+    from domain.markdown_note import MarkdownNoteDict
 
 import_kv(__file__)
 

@@ -67,4 +67,4 @@ def cache_key_color_norm(*args, **kwargs) -> tuple:
 def cache_key_note(*args, **kwargs) -> str:
     content_data = kwargs.get("content_data")
     parent = kwargs.pop("parent")
-    return f"{content_data['file']}-{content_data['text']}-{hash(parent)}"
+    return f"{content_data['filepath']}-{content_data['text']}-{hash(parent)}"

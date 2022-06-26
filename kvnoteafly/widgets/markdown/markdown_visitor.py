@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Union, overload
 
 from kivy import Logger
 
-from services.backend.utils import get_md_node_text
+from domain.parser import get_md_node_text
 from widgets.markdown.code.code_span import MarkdownCodeSpan
 from widgets.markdown.code.markdown_code import MarkdownCode
 from widgets.markdown.list.markdown_list import MarkdownList
@@ -21,7 +21,7 @@ from widgets.markdown.table.markdown_table import (
 from kivy.uix.layout import Layout
 
 if TYPE_CHECKING:
-    from services.domain.md_parser_types import *
+    from domain.md_parser_types import *
     from kivy.uix.widget import Widget
 
 

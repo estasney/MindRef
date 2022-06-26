@@ -20,6 +20,18 @@ if TYPE_CHECKING:
 
 
 class NoteEditor(BoxLayout):
+    """
+    Attributes
+    -----------
+    editor
+    lexer
+    style_name
+    init_text: StringProperty
+    mode
+    title_widget: ObjectProperty
+        Text input which is only displayed when in mode 'add'
+    """
+
     editor = ObjectProperty()
     lexer = ObjectProperty(get_lexer_by_name("Markdown"))
     style_name = StringProperty("paraiso-dark")
@@ -29,8 +41,7 @@ class NoteEditor(BoxLayout):
 
     def __init__(self, **kwargs):
         super(NoteEditor, self).__init__(**kwargs)
-        self.fbind("init_text", self.handle_init_text)
-        self.fbind("mode", self.handle_mode_change)
+        self.bind(init_text=self.handle_init_text)
         self.title_widget = NoteTitleInput(size_hint_y=0.1, pos_hint={"top": 0})
         self.register_event_type("on_save")
         self.register_event_type("on_cancel")
@@ -39,7 +50,8 @@ class NoteEditor(BoxLayout):
         editor: "CodeInput" = self.editor
         editor.text = self.init_text
 
-    def handle_mode_change(self, instance, value):
+    def on_mode(self, instance, value):
+
         if self.mode == "add":
             self.add_widget(self.title_widget, len(self.children))
         else:
@@ -50,10 +62,10 @@ class NoteEditor(BoxLayout):
         if self.mode == "add":
             self.dispatch(
                 "on_save",
-                **{"text": self.editor.text, "filename": self.title_widget.title}
+                **{"text": self.editor.text, "title": self.title_widget.title}
             )
         else:
-            self.dispatch("on_save", **{"text": self.editor.text})
+            self.dispatch("on_save", **{"text": self.editor.text, "title": None})
 
     def on_save(self, *args, **kwargs):
         ...

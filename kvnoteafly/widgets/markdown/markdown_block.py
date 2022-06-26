@@ -14,7 +14,7 @@ import_kv(__file__)
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from services.domain.md_parser_types import *
+    pass
 
 
 class MarkdownHeading(BoxLayout, InterceptingWidgetMixin):

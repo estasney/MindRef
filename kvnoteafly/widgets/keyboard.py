@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING
 from kivy.app import App
 
 if TYPE_CHECKING:
-    from services.domain import MarkdownNoteDict
+    from domain.markdown_note import MarkdownNoteDict
 
 from utils import import_kv
 

@@ -11,7 +11,7 @@ from utils import import_kv
 from widgets.markdown.markdown_visitor import MarkdownVisitor
 
 if TYPE_CHECKING:
-    from services.domain import MarkdownNoteDict
+    from domain.markdown_note import MarkdownNoteDict
 
 import_kv(__file__)
 

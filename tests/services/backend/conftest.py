@@ -123,7 +123,6 @@ def _get_expected(fp):
             no_table,
             has_title("Accept suggestion, with syntax fixing"),
             has_sk_keys,
-            no_text_with(["shortcut", "Ctrl", "Enter", "Shift", "```"]),
         ],
         "Zen.md": [
             no_table,

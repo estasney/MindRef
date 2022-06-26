@@ -7,7 +7,7 @@ from kivy.uix.layout import Layout
 from kivy.uix.widget import Widget
 
 if TYPE_CHECKING:
-    from services.domain import (
+    from domain import (
         MD_INLINE_TYPES,
         MdText,
         MdCodeSpan,

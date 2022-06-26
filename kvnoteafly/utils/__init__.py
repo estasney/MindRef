@@ -2,11 +2,12 @@ import os
 from datetime import datetime
 from functools import partial, wraps
 from pathlib import Path
-from typing import Union
+from typing import Any, Callable, Generic, Literal, Optional, Protocol, TypeVar, Union
 
 from kivy import Logger
 from kivy.clock import Clock
 from kivy.lang import Builder
+
 
 _LOG_LEVEL = None
 
@@ -48,7 +49,6 @@ def sch_cb(timeout: float = 0, *args):
     func_pipe = (f for f in args)
 
     def _scheduled_func(*args, **kwargs):
-
         func = kwargs.pop("func")
         func(*args, **kwargs)
         next_func = next(func_pipe, None)
@@ -74,3 +74,86 @@ class EnvironContext:
     def __exit__(self, exc_type, exc_val, exc_tb):
         for k in self.vals.keys():
             del os.environ[k]
+
+
+class Singleton(type):
+    def __init__(cls, *args, **kwargs):
+        cls.__instance = None
+        super().__init__(*args, **kwargs)
+
+    def __call__(cls, *args, **kwargs):
+        if cls.__instance is None:
+            cls.__instance = super(Singleton, cls).__call__(*args, **kwargs)
+            return cls.__instance
+        else:
+            return cls.__instance
+
+
+T = TypeVar("T")
+
+
+class LazyLoaded(Generic[T]):
+    def __init__(self, default: "Optional[Callable]" = None):
+        self.default = default if default is None else default()
+
+    def __set_name__(self, owner, name):
+        self.private_name = f"_{name}"
+        setattr(owner, self.private_name, self.default)
+
+    def __get__(self, obj, objtype=None) -> "T":
+        value = getattr(obj, self.private_name)
+        if value == self.default:
+            value = getattr(obj, self.loader)()
+            setattr(obj, self.private_name, value)
+        return value
+
+    def __set__(self, instance, value):
+        if not value:
+            setattr(instance, self.private_name, self.default)
+        else:
+            setattr(instance, self.private_name, value)
+
+    def __call__(self, func):
+        """Register a loader function"""
+        self.loader = func.__name__
+        return func
+
+
+class LoggerProtocol(Protocol):
+    def debug(self, msg: Any):
+        ...
+
+    def info(self, msg: Any):
+        ...
+
+    def warning(self, msg: Any):
+        ...
+
+    def error(self, msg: Any):
+        ...
+
+    def exception(self, msg: Any):
+        ...
+
+
+LOG_LEVEL = Literal["debug", "info", "warning", "error", "exception"]
+
+
+class GenericLoggerMixin:
+    logger: Optional[LoggerProtocol]
+    _log: Optional[Callable[[Any, LOG_LEVEL], None]]
+
+    def __init__(self):
+
+        self._log = None
+
+    def log(self, msg: Any, level: LOG_LEVEL):
+        if self._log:
+            self._log(msg, level)
+        # Create the method on the fly
+        if self.logger:
+            self._log = lambda msg, lvl: getattr(self.logger, lvl)(msg)
+            self._log(msg, level)
+        else:
+            self._log = lambda msg, lvl: print(msg)
+            self._log(msg, level)

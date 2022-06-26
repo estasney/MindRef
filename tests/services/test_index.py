@@ -1,6 +1,6 @@
 import pytest
 from contextlib import nullcontext as does_not_raise
-from services.backend import NoteIndex
+from adapters.notes.note_repository import NoteIndex
 from functools import partial
 
 

@@ -1,11 +1,10 @@
+import random
 import string
 import tempfile
 from pathlib import Path
 from typing import Literal, Sequence
-from string import ascii_letters, digits
+
 import pytest
-import yaml
-import random
 from PIL import Image, ImageDraw
 
 
