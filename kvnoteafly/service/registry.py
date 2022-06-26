@@ -1,7 +1,7 @@
 from collections import deque
 from pathlib import Path
 from typing import Optional, Type, Callable, TYPE_CHECKING, Protocol
-from domain.events import NoteFetched
+from domain.events import NoteFetchedEvent, NotesQueryEvent
 from utils import GenericLoggerMixin, LoggerProtocol
 
 if TYPE_CHECKING:
@@ -52,7 +52,7 @@ class Registry(GenericLoggerMixin):
     def push_event(self, event: "Event"):
         self.events.append(event)
 
-    def query_all(self) -> list["NoteDiscovery"]:
+    def query_all(self, on_complete: Optional[Callable] = None):
         """
         Find available categories, their associated image and associated notes
         Returns
@@ -60,7 +60,8 @@ class Registry(GenericLoggerMixin):
 
         """
         note_repo = self.app.note_service
-        return note_repo.discover_notes()
+        result = note_repo.discover_notes()
+        self.push_event(NotesQueryEvent(result=result, on_complete=on_complete))
 
     def new_note(self, category: Optional[str], idx: Optional[int]) -> "EditableNote":
         category = category if category else self.app.note_category
@@ -77,4 +78,4 @@ class Registry(GenericLoggerMixin):
 
     def save_note(self, note: "EditableNote"):
         md_note = self.app.note_service.save_note(note)
-        self.push_event(NoteFetched(note=md_note))
+        self.push_event(NoteFetchedEvent(note=md_note))

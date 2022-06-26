@@ -2,6 +2,7 @@ from kivy import Logger
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.effects.opacityscroll import OpacityScrollEffect
+from math import sin
 from kivy.properties import (
     BooleanProperty,
     NumericProperty,
@@ -19,6 +20,7 @@ class RefreshSymbol(FloatLayout):
     """Spinning Refresh Symbol"""
 
     rotation = NumericProperty(0)
+    event_dt = NumericProperty(0)
     source = StringProperty(None)
 
     def __init__(self, **kwargs):
@@ -37,7 +39,10 @@ class RefreshSymbol(FloatLayout):
             self._scheduler()
 
     def increment_spin(self, dt):
-        self.rotation -= 5
+
+        self.event_dt = self.event_dt + dt
+        rot = (sin(self.event_dt) * 3) - 5
+        self.rotation = self.rotation + rot
 
 
 class RefreshOverscrollEffect(OpacityScrollEffect):

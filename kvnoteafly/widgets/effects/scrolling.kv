@@ -1,9 +1,10 @@
 <RefreshSymbol>:
     size_hint_y: None
     size_hint_x: None
-    height: 50
-    width: 50
+    width: dp(80)
+    height: dp(80)
     pos_hint: {"center_x": 0.5, "center_y": 0.9}
+
     canvas.before:
         PushMatrix
         Rotate:
@@ -13,7 +14,7 @@
         Color:
             rgb: app.colors['White']
         Rectangle:
-            size: self.size
+            size: root.size
             pos: self.pos
             source: self.source
     canvas.after:

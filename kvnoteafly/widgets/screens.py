@@ -24,7 +24,7 @@ from kivy.uix.screenmanager import (
 )
 from toolz import sliding_window
 
-from domain.events import CancelEditEvent, SaveNoteEvent
+from domain.events import CancelEditEvent, RefreshNotesEvent, SaveNoteEvent
 from utils import import_kv, sch_cb
 from widgets.app_menu import AppMenu
 from widgets.effects.scrolling import RefreshSymbol
@@ -197,9 +197,7 @@ class NoteCategoryChooserScreen(Screen):
             )
             self.add_widget(self.refresh_icon)
 
-    def clear_refresh_icon(self, instance, value):
-        Logger.debug("Clearing Refresh Icon")
-        self.unbind(categories=self.clear_refresh_icon)
+    def clear_refresh_icon(self, *args, **kwargs):
         if self.refresh_icon:
             self.remove_widget(self.refresh_icon)
             del self.refresh_icon
@@ -210,8 +208,7 @@ class NoteCategoryChooserScreen(Screen):
         """Call the NoteService and ask for refresh"""
         Logger.debug("Refreshing")
         app = App.get_running_app()
-        self.bind(categories=self.clear_refresh_icon)
-        Clock.schedule_once(app.refresh_note_categories, 1)
+        app.registry.push_event(RefreshNotesEvent(on_complete=self.clear_refresh_icon))
 
     def on_refresh_triggered(self, instance, value):
         Clock.schedule_once(self.handle_refresh_icon)

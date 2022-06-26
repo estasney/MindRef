@@ -1,9 +1,10 @@
 import abc
-from dataclasses import dataclass
-from typing import Optional, TYPE_CHECKING
+from dataclasses import dataclass, field
+from typing import Callable, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from domain.markdown_note import MarkdownNote
+    from adapters.notes.note_repository import NoteDiscovery
 
 
 class Event(abc.ABC):
@@ -38,6 +39,19 @@ class SaveNoteEvent(Event):
 
 
 @dataclass
-class NoteFetched(Event):
+class NoteFetchedEvent(Event):
     event_type = "note_fetched"
     note: "MarkdownNote"
+
+
+@dataclass
+class NotesQueryEvent(Event):
+    event_type = "notes_query"
+    on_complete: Optional[Callable]
+    result: list["NoteDiscovery"] = field(default_factory=list)
+
+
+@dataclass
+class RefreshNotesEvent(Event):
+    event_type = "refresh_notes"
+    on_complete: Callable[[None], None]

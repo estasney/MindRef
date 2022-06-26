@@ -25,7 +25,9 @@ from domain.events import (
     AddNoteEvent,
     CancelEditEvent,
     EditNoteEvent,
-    NoteFetched,
+    NoteFetchedEvent,
+    NotesQueryEvent,
+    RefreshNotesEvent,
     SaveNoteEvent,
 )
 from domain.settings import (
@@ -214,13 +216,6 @@ class NoteAFly(App):
     def on_note_data(self, *args, **kwargs):
         self.screen_manager.handle_notes(self)
 
-    def refresh_note_categories(self, *args):
-        Logger.debug("Refreshing note categories")
-        clear_note_categories = lambda x: setattr(self, "note_categories", [])
-        refresh_categories = lambda x: self.note_service.refresh_categories()
-
-        sch_cb(0, clear_note_categories, refresh_categories)
-
     def process_cancel_edit_event(self, event: CancelEditEvent):
         update_display_state = lambda x: setattr(self, "display_state", "display")
         clear_edit_note = lambda x: setattr(self, "editor_note", None)
@@ -249,10 +244,34 @@ class NoteAFly(App):
         persist_note = lambda x: self.registry.save_note(data_note)
         sch_cb(1, update_display_state, persist_note, update_edit_note)
 
-    def process_note_fetched_event(self, event: NoteFetched):
+    def process_note_fetched_event(self, event: NoteFetchedEvent):
         note_data = event.note.to_dict()
         update_data = lambda x: setattr(self, "note_data", note_data)
         sch_cb(1, update_data)
+
+    def process_refresh_notes_event(self, event: RefreshNotesEvent):
+        clear_categories = lambda x: setattr(self, "note_categories", [])
+        run_query = lambda x: self.registry.query_all(on_complete=event.on_complete)
+        sch_cb(0.5, clear_categories, run_query)
+
+    def process_notes_query_event(self, event: NotesQueryEvent):
+        def append_category_factory(category):
+            def append_category(dt, c):
+                current = [c for c in self.note_categories]
+                current.append(c)
+                self.note_categories = current
+
+            func = partial(append_category, c=category)
+            return func
+
+        steps = [
+            append_category_factory(c) for c in [d["category"] for d in event.result]
+        ]
+
+        if event.on_complete is not None:
+            steps.append(event.on_complete)
+
+        sch_cb(0, *steps)
 
     def process_event(self, dt):
         if len(self.registry.events) == 0:
@@ -282,8 +301,7 @@ class NoteAFly(App):
         self.note_category = self.config.get("Behavior", "CATEGORY_SELECTED")
         self.log_level = self.config.get("Behavior", "LOG_LEVEL")
         self.base_font_size = self.config.get("Display", "BASE_FONT_SIZE")
-        if storage_path:
-            self.note_categories = [d["category"] for d in self.registry.query_all()]
+        self.registry.query_all()
         Clock.schedule_interval(self.process_event, 0.1)
         return sm
 
