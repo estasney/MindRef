@@ -192,6 +192,9 @@ class MarkdownVisitor:
 
     def visit_text(self, node: "MdText", **kwargs) -> bool:
         inline = kwargs.get("inline", False)
+        if self.has_intercept:
+            self.push(node)
+            return False
         if inline:
             widget = self.pop()
             widget.raw_text = node["text"]
@@ -200,7 +203,7 @@ class MarkdownVisitor:
         else:
             para_widget = MarkdownBlock(text=node["text"])
             self.push(para_widget)
-            return True
+            return False
 
     def visit_block_quote(self, node: "MdBlockQuote", **kwargs) -> bool:
         self.push(MarkdownBlockQuote(text_content=get_md_node_text(node), **kwargs))
