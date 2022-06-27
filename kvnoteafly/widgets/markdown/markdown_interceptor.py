@@ -81,8 +81,10 @@ class WidgetIntercept:
     def __enter__(self):
         self.visitor.push = self.intercept_push
         self.visitor.pop = self.intercept_pop
+        self.visitor.has_intercept = True
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.visitor.push = self.visitor_push
         self.visitor.pop = self.visitor_pop
+        self.visitor.has_intercept = False

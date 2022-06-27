@@ -4,6 +4,7 @@ from collections import deque
 from typing import TYPE_CHECKING, Union, overload
 
 from kivy import Logger
+from kivy.uix.label import Label
 
 from domain.parser import get_md_node_text
 from widgets.markdown.code.code_span import MarkdownCodeSpan
@@ -46,6 +47,7 @@ class MarkdownVisitor:
         self.bb_directives = deque([])
         self.visiting_table = False
         self.tip_type_layout = False
+        self.has_intercept = False
 
     @overload
     def push(self, widget: Widget):
@@ -62,7 +64,7 @@ class MarkdownVisitor:
     def push(self, widget):
         if isinstance(widget, dict):
             raise AttributeError(
-                f"Passing {widget} to push is only supported with {WidgetIntercept.__class__.__name__}"
+                f"Passing {widget} to push is only supported with WidgetIntercept"
             )
         if len(self.current_list):
             self.current_list[-1].add_widget(widget)
@@ -152,7 +154,7 @@ class MarkdownVisitor:
             return False
         self.push(MarkdownBlock())
         for child in node["children"]:
-            if self.visit(child, **kwargs):
+            if self.visit(child, **{**kwargs, **{"inline": True}}):
                 self.pop()
         return True
 
@@ -189,8 +191,16 @@ class MarkdownVisitor:
         return True
 
     def visit_text(self, node: "MdText", **kwargs) -> bool:
-        self.push(node)
-        return True
+        inline = kwargs.get("inline", False)
+        if inline:
+            widget = self.pop()
+            widget.raw_text = node["text"]
+            self.push(widget)
+            return False
+        else:
+            para_widget = MarkdownBlock(text=node["text"])
+            self.push(para_widget)
+            return True
 
     def visit_block_quote(self, node: "MdBlockQuote", **kwargs) -> bool:
         self.push(MarkdownBlockQuote(text_content=get_md_node_text(node), **kwargs))

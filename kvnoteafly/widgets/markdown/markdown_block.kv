@@ -30,8 +30,29 @@
         bold: True
 
 
+
 <MarkdownBlock>:
     orientation: 'horizontal'
     size_hint_y: None
     height: self.minimum_height
+    size_hint_x: 1
     markup: True
+    label: label
+
+    LabelHighlight:
+        id: label
+        raw_text: root.raw_text
+        highlight: root.is_codespan
+        highlight_color: app.colors['Codespan']
+        bg_color: app.colors['Dark']
+        padding: (5, 0) if self.highlight else (0, 0)
+        markup: True
+        valign: 'top'
+        halign: 'left'
+        font_size: app.base_font_size
+        size_hint_y: None
+        height: self.texture_size[1] + 20
+        text_size: self.width, None
+        bold: False
+        mipmap: True
+        size_hint_x: 1
