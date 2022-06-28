@@ -102,10 +102,9 @@ class MarkdownVisitor:
     def visit_heading(self, node: "MdHeading", **kwargs) -> bool:
         heading_widget = MarkdownHeading()
         heading_widget.level = node["level"]
-        child_kwargs = {**kwargs, "inline": True}
         with WidgetIntercept(visitor=self, widget=heading_widget):
             for node in node["children"]:
-                self.visit(node, **child_kwargs)
+                self.visit(node, **kwargs)
         self.push(heading_widget)
         return True
 
@@ -152,10 +151,11 @@ class MarkdownVisitor:
     def visit_paragraph(self, node: "MdParagraph", **kwargs) -> bool:
         if not node["children"]:
             return False
-        self.push(MarkdownBlock())
-        for child in node["children"]:
-            if self.visit(child, **{**kwargs, **{"inline": True}}):
-                self.pop()
+        paragraph_widget = MarkdownBlock()
+        with WidgetIntercept(visitor=self, widget=paragraph_widget):
+            for node in node["children"]:
+                self.visit(node, **kwargs)
+        self.push(paragraph_widget)
         return True
 
     def visit_list(
@@ -182,23 +182,16 @@ class MarkdownVisitor:
         return True
 
     def visit_codespan(self, node: "MdCodeSpan", **kwargs) -> bool:
-        if self.visiting_table:
+        if self.visiting_table or self.has_intercept:
             self.push(node)
-        elif kwargs.get("inline"):
-            self.push(node)
+
         else:
             self.push(MarkdownCodeSpan(text=node["text"], **kwargs))
         return True
 
     def visit_text(self, node: "MdText", **kwargs) -> bool:
-        inline = kwargs.get("inline", False)
         if self.has_intercept:
             self.push(node)
-            return False
-        if inline:
-            widget = self.pop()
-            widget.raw_text = node["text"]
-            self.push(widget)
             return False
         else:
             para_widget = MarkdownBlock(text=node["text"])

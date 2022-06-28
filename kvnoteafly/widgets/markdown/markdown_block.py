@@ -35,7 +35,7 @@ class MarkdownHeading(BoxLayout, InterceptingWidgetMixin):
         self.label.raw_text = value
 
 
-class MarkdownBlock(BoxLayout):
+class MarkdownBlock(BoxLayout, InterceptingWidgetMixin):
     label = ObjectProperty()
     level = NumericProperty()
     is_codespan = BooleanProperty()

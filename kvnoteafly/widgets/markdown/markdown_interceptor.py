@@ -7,7 +7,7 @@ from kivy.uix.layout import Layout
 from kivy.uix.widget import Widget
 
 if TYPE_CHECKING:
-    from domain import (
+    from domain.md_parser_types import (
         MD_INLINE_TYPES,
         MdText,
         MdCodeSpan,
@@ -30,6 +30,16 @@ class InterceptingWidgetProtocol(Protocol):
 
 
 class InterceptingWidgetMixin:
+    """
+    The purpose of this mixin class is to handle the imperfect mapping of Markdown AST to Kivy Layouts/Widgets.
+
+    For example, when we've encountered a Heading that is also a Codespan. In this case 3 nodes become 1 Widget:
+        - Heading -> Sizing, Bold
+        - CodeSpan -> Mono-size font, code highlighting
+        - Text -> Content
+
+    """
+
     text: str
     raw_text: str
     is_codespan: bool
