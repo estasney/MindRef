@@ -30,6 +30,9 @@ class InterceptingWidgetProtocol(Protocol):
     def handle_intercept(self, node: "MD_INLINE_TYPES"):
         ...
 
+    def handle_intercept_exit(self):
+        ...
+
 
 class InterceptingWidgetMixin:
     """
@@ -74,6 +77,9 @@ class InterceptingWidgetMixin:
             self.open_bbcode_tag = "[/i]"
         else:
             Logger.warn(f"Unhandled node {node}")
+
+    def handle_intercept_exit(self):
+        ...
 
 
 class InterceptingInlineWidgetMixin:
@@ -125,6 +131,25 @@ class InterceptingInlineWidgetMixin:
         else:
             Logger.warn(f"Unhandled node {node}")
 
+    def handle_intercept_exit(self):
+        """
+        We append a newline
+        """
+        if not self.snippets:
+            return
+        if len(self.snippets) == 1:
+            snippets = []
+            last_snippet = self.snippets[0]
+        else:
+            snippets = self.snippets[:-1]
+            last_snippet = self.snippets[-1]
+
+        nl_snippet = TextSnippet(
+            text=f"{last_snippet.text}\n", highlight=last_snippet.highlight
+        )
+        snippets.append(nl_snippet)
+        self.snippets = snippets
+
 
 class WidgetIntercept:
     def __init__(self, visitor: VisitorProtocol, widget: InterceptingWidgetProtocol):
@@ -150,3 +175,4 @@ class WidgetIntercept:
         self.visitor.push = self.visitor_push
         self.visitor.pop = self.visitor_pop
         self.visitor.has_intercept = False
+        self.widget.handle_intercept_exit()

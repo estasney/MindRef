@@ -76,14 +76,13 @@ class LabelHighlightInline(Label):
             bind(highlight_spans=self.draw_spans)
             bind(size=self.compute_snippet_layout)
             bind(pos=self.compute_snippet_layout)
-        # else:
-        #     funbind("text_color", self.markup_text)
-        #     funbind("text_color_highlight", self.markup_text)
-        #     funbind("snippets", self.markup_text)
-        #
-        #     funbind("highlight_spans", self.draw_spans)
-        #     funbind('size', self.compute_snippet_layout)
-        #     funbind('pos', self.compute_snippet_layout)
+        else:
+            unbind(text_color=self.markup_text)
+            unbind(text_color_highlight=self.markup_text)
+            unbind(snippets=self.markup_text)
+            unbind(highlight_spans=self.draw_spans)
+            unbind(size=self.compute_snippet_layout)
+            unbind(pos=self.compute_snippet_layout)
 
     def add_snippet(self, snippet: TextSnippet):
         self.snippets.append(snippet)
@@ -114,7 +113,8 @@ class LabelHighlightInline(Label):
             else:
                 texts.append(f"[color={self.text_color}]{snippet.text}[/color]")
 
-        self.text = " ".join(texts)
+        # Snippets preserve leading/trailing whitespace
+        self.text = "".join(texts)
         return True
 
     @classmethod
@@ -126,10 +126,9 @@ class LabelHighlightInline(Label):
             if i < last_token:
                 yield " "
 
-    def iter_tokens(self) -> Iterator[tuple[str, bool]]:
+    def iter_snippets(self) -> Iterator[tuple[str, bool]]:
         """
-        For each snippet in self.text_snippets, tokenize the text (including white_space) and yield tuples of token,
-         is_highlight
+        For each snippet in self.text_snippets, yield the text and the 'is_highlight' attribute.
 
         """
         for snippet in self.snippets:
@@ -163,31 +162,50 @@ class LabelHighlightInline(Label):
     def compute_snippet_layout(self, instance, value):
         """
         Compute extents of each of our snippets
+
         Notes
         ------
         This assumes our text_size is self.width, None. The result is a label that is constrained horizontally
         but can grow vertically.
+
+        When a word cannot fit on a line Kivy will split the word across lines.
         """
         if not self.width:
             self.highlight_spans = []
             return
         l = self._label
-        space_width, _ = l.get_cached_extents()(" ")
+        get_extents = l.get_cached_extents()
+        space_width, _ = get_extents(" ")
+
+        # Label Options
+        # -------------
+        # Space width needs to be set
+
+        # Options applied to default text
         l_opts = {
             **l.options,
             **{"font_name": self.font_family_normal, "space_width": space_width},
         }
+
+        # Options applied to highlighted text
         l_opts_hl = {
             **l.options,
             **{"font_name": self.font_family_mono, "space_width": space_width},
         }
-        current_w, current_h = 0, 0
-        lines = []
-        max_w = self.width
 
+        # 'Pointers' for layout_text to use
+
+        # current_w, current_h is updated with each call and provides updated positions
+        current_w, current_h = 0, 0
+
+        # Container for kivy to append LayoutLine(s)
+        lines = []
+
+        # Text size constraints
+        max_w = self.width
         max_h = None
 
-        for token, hl in self.iter_tokens():
+        for token, hl in self.iter_snippets():
             current_w, current_h, clipped = layout_text(
                 token,
                 lines,
@@ -211,10 +229,6 @@ class LabelHighlightInline(Label):
             True,
         )
 
-        # We do this at the token level as snippets can cross lines
-        # Keep a generator with tokens, is_highlight
-        i_tokens = self.iter_tokens()
-
         # Each line goes from top (self.height) to bottom
         # line_y tracks the offset from self.height
         # y will change with each line
@@ -234,52 +248,52 @@ class LabelHighlightInline(Label):
             token_rel_x = 0
             last_word = len(line.words) - 1
             for word_idx, word in enumerate(line.words):
-                word_width = word.lw
                 if not word.text:
+                    token_rel_x += word.lw
                     continue
-                try:
-                    _, is_highlight = next(i_tokens)
-                except StopIteration:
-                    Logger.debug("Ran out of tokens")
-                    self.highlight_spans = []
-                    break
-                token_abs_x = dp(token_rel_x) + dp(line_pos_x)
-                token_abs_y = dp(line_pos_y)
+
+                # We can determine if highlighting is active based on the label options which remain associated with
+                # even after splitting across lines
+
+                is_highlight = word.options["font_name"] == self.font_family_mono
+
+                token_abs_x = token_rel_x + line_pos_x
+                token_abs_y = line_pos_y
                 if is_highlight:
                     if current_span is None:
                         # Start a new span
                         current_span = HighlightSpan(
-                            pos_x=dp(token_abs_x) + dp(space_width / 2),
-                            pos_y=dp(token_abs_y),
-                            w=dp(word_width + space_width * 4),
-                            h=dp(line.h),
+                            pos_x=token_abs_x,
+                            pos_y=token_abs_y,
+                            w=word.lw + space_width,
+                            h=word.lh,
                         )
-                        token_rel_x += word_width
+                        token_rel_x += word.lw
                     else:
                         # Extend span
                         current_span = HighlightSpan(
                             pos_x=current_span.pos_x,
                             pos_y=current_span.pos_y,
-                            w=current_span.w + word_width,
+                            w=current_span.w + word.lw,
                             h=current_span.h,
                         )
-                        token_rel_x += word_width
+                        token_rel_x += word.lw
                 else:
                     if current_span is None:
                         # We don't need to close a span
-                        token_rel_x += word_width
+                        token_rel_x += word.lw
                     else:
                         # This token ends the highlighting
                         hl_spans.append(current_span)
                         current_span = None
-                        token_rel_x += word_width
+                        token_rel_x += word.lw
                 if word_idx == last_word and current_span is not None:
                     # Ensure we've closed out spans
                     current_span = HighlightSpan(
-                        pos_x=dp(token_abs_x),
-                        pos_y=dp(token_abs_y),
-                        w=current_span.w + word_width,
-                        h=dp(line.h),
+                        pos_x=token_abs_x,
+                        pos_y=token_abs_y,
+                        w=current_span.w + word.lw,
+                        h=line.h,
                     )
                     hl_spans.append(current_span)
                     current_span = None
