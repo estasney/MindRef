@@ -1,5 +1,6 @@
 #:import parse_color kivy.parser.parse_color
 #:import LabelHighlight widgets.behavior.label_behavior
+#:import LabelHighlightInline widgets.behavior.inline_behavior
 
 <MarkdownHeading>:
     label: label
@@ -36,24 +37,14 @@
     size_hint_y: None
     height: self.minimum_height
     size_hint_x: 1
-    markup: True
-
     label: label
-
-    LabelHighlight:
+    LabelHighlightInline:
         id: label
-        raw_text: root.raw_text
-        highlight: root.is_codespan
-        highlight_color: app.colors['Codespan']
-        bg_color: app.colors['Dark']
-        padding: (5, 0) if self.highlight else (0, 0)
-        markup: True
-        valign: 'top'
+        valign: 'center'
         halign: 'left'
-        font_size: app.base_font_size
+        bg_color: app.colors['Dark']
+        highlight_color: app.colors['Codespan']
+        height: self.texture_size[1]
+
         size_hint_y: None
-        height: self.texture_size[1] + 20
-        text_size: self.width, None
-        bold: False
-        mipmap: True
-        size_hint_x: 1
+        snippets: root.snippets

@@ -1,5 +1,6 @@
 from kivy.properties import (
     BooleanProperty,
+    ListProperty,
     NumericProperty,
     ObjectProperty,
     StringProperty,
@@ -7,7 +8,10 @@ from kivy.properties import (
 from kivy.uix.boxlayout import BoxLayout
 
 from utils import import_kv
-from widgets.markdown.markdown_interceptor import InterceptingWidgetMixin
+from widgets.markdown.markdown_interceptor import (
+    InterceptingInlineWidgetMixin,
+    InterceptingWidgetMixin,
+)
 
 import_kv(__file__)
 
@@ -35,19 +39,13 @@ class MarkdownHeading(BoxLayout, InterceptingWidgetMixin):
         self.label.raw_text = value
 
 
-class MarkdownBlock(BoxLayout, InterceptingWidgetMixin):
+class MarkdownBlock(BoxLayout, InterceptingInlineWidgetMixin):
     label = ObjectProperty()
-    level = NumericProperty()
-    is_codespan = BooleanProperty()
-    raw_text = StringProperty()
-    text = StringProperty()
     open_bbcode_tag = StringProperty()
+    snippets = ListProperty()
 
     def __init__(self, text: str = "", is_codespan: bool = False, **kwargs):
         super().__init__(**kwargs)
         self.is_codespan = is_codespan
         self.raw_text = text
         self.open_bbcode_tag = ""
-
-    def on_raw_text(self, instance, value):
-        self.label.raw_text = value
