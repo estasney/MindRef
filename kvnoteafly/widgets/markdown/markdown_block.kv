@@ -19,7 +19,7 @@
         raw_text: root.raw_text
         highlight: root.is_codespan
         highlight_color: app.colors['Codespan']
-        bg_color: app.colors['Dark']
+        bg_color: app.colors['Primary']
         padding: (5, 0) if self.highlight else (0, 0)
         markup: True
         valign: 'top'
@@ -40,11 +40,13 @@
     label: label
     LabelHighlightInline:
         id: label
+        snippets: root.snippets
+        bg_color: app.colors['Primary']
+        highlight_color: app.colors['Codespan']
+        text_threshold: 170
+
         valign: 'center'
         halign: 'left'
-        bg_color: app.colors['Dark']
-        highlight_color: app.colors['Codespan']
         height: self.texture_size[1]
-
         size_hint_y: None
-        snippets: root.snippets
+        font_size: sp(app.base_font_size)
