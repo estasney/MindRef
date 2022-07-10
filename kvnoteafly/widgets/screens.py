@@ -1,5 +1,6 @@
+from copy import copy, deepcopy
 from itertools import cycle
-from typing import Literal, TYPE_CHECKING, Union
+from typing import Literal, Optional, TYPE_CHECKING, Union
 
 from kivy import Logger
 from kivy.app import App
@@ -25,9 +26,11 @@ from kivy.uix.screenmanager import (
 from toolz import sliding_window
 
 from domain.events import CancelEditEvent, RefreshNotesEvent, SaveNoteEvent
-from utils import import_kv, sch_cb
+from utils import DottedDict, import_kv, sch_cb
+from utils.triggers import trigger_factory
 from widgets.app_menu import AppMenu
 from widgets.effects.scrolling import RefreshSymbol
+
 
 TR_OPTS = Literal["None", "Slide", "Rise-In", "Card", "Fade", "Swap", "Wipe"]
 
@@ -35,7 +38,8 @@ if TYPE_CHECKING:
     from widgets.categories import NoteCategoryButton
     from widgets.editor.editor import NoteEditor
     from domain.markdown_note import MarkdownNoteDict
-    from domain.editable import EditableNote, TextNote
+    from domain.editable import EditableNote
+    from widgets.note import Note
 
 import_kv(__file__)
 
@@ -48,28 +52,23 @@ class NoteAppScreenManager(ScreenManager):
     )
     menu_open = BooleanProperty(False)
     n_screens = BoundedNumericProperty(defaultvalue=2, min=1, max=2)
+    screen_triggers: DottedDict
 
     def __init__(self, app, **kwargs):
         super().__init__(**kwargs)
-        self.current = "chooser_screen"
         self.note_screen_cycler = None
-        self.make_note_cycler()
-        self.last_note_screen = None
+        self.fbind("n_screens", self.handle_n_screens)
+        self.current = "chooser_screen"
         self.app = app
         self.menu = None
+        self.note_trigger = Clock.create_trigger(self.handle_notes)
         app.bind(display_state=self.handle_app_display_state)
-        app.bind(note_data=self.handle_notes)
+        app.bind(note_data=self.note_trigger)
         app.bind(play_state=self.setter("play_state"))
         app.bind(screen_transitions=self.setter("screen_transitions"))
         app.bind(menu_open=self.setter("menu_open"))
-        self.fbind("n_screens", self.handle_n_screens)
         self.fbind("menu_open", self.handle_menu_state)
-
-    def make_note_cycler(self):
-        for i in range(self.n_screens):
-            note_screen = NoteCategoryScreen(name=f"note_screen{i}")
-            self.add_widget(note_screen)
-        self.note_screen_cycler = sliding_window(2, cycle(range(self.n_screens)))
+        self.screen_triggers = trigger_factory(self, "current", self.screen_names)
 
     def handle_menu_state(self, instance, menu_open: bool):
         def resume_temp_pause(*args):
@@ -94,32 +93,50 @@ class NoteAppScreenManager(ScreenManager):
             self.menu.dispatch("on_dismiss")
 
     def handle_n_screens(self, instance, value):
-        self.clear_widgets()
-        self.make_note_cycler()
+        """
+        Remove any existing note screens, create `n` note_screen(s) and create cycler
+        """
+        note_screen_ids = (s for s in self.ids if s.startswith("note_screen"))
+        for ns_id in note_screen_ids:
+            self.remove_widget(ns_id)
+        self.note_screen_cycler = None
+
+        for i in range(self.n_screens):
+            note_screen = NoteCategoryScreen(name=f"note_screen{i}")
+            self.add_widget(note_screen)
+
+        self.note_screen_cycler = sliding_window(2, cycle(range(self.n_screens)))
+        self.screen_triggers = trigger_factory(self, "current", self.screen_names)
 
     def category_selected(self, category: "NoteCategoryButton"):
         self.app.note_category = category.text
 
-    def on_screen_transitions(self, instance, value: TR_OPTS):
+    def handle_screen_transitions(self, instance, value: TR_OPTS):
         if value == "None":
             self.n_screens = 1
             return True
         elif value == "Slide":
+            self.n_screens = 2
             self.transition = SlideTransition()
             return True
         elif value == "Rise-In":
+            self.n_screens = 2
             self.transition = RiseInTransition()
             return True
         elif value == "Card":
+            self.n_screens = 2
             self.transition = CardTransition()
             return True
         elif value == "Fade":
+            self.n_screens = 2
             self.transition = FadeTransition()
             return True
         elif value == "Swap":
+            self.n_screens = 2
             self.transition = SwapTransition()
             return True
         elif value == "Wipe":
+            self.n_screens = 2
             self.transition = WipeTransition()
             return True
         else:
@@ -128,9 +145,9 @@ class NoteAppScreenManager(ScreenManager):
     def handle_app_display_state(self, instance, new):
         Logger.debug(f"ScreenManager: app_display_state : {new}")
         if new == "choose":  # Show the Category Selection Screen
-            self.current = "chooser_screen"
+            self.screen_triggers.chooser_screen()
         elif new == "display":
-            self.handle_notes()
+            self.note_trigger()
         elif new == "list":
             self.handle_notes_list_view()
         elif new == "edit":
@@ -145,14 +162,29 @@ class NoteAppScreenManager(ScreenManager):
         self.play_state = value
 
     def handle_notes(self, *args, **kwargs):
-        last_active, next_active = next(self.note_screen_cycler)
-        target = f"note_screen{next_active}"
-        target_screen = next(screen for screen in self.screens if screen.name == target)
-        self.last_note_screen = next_active
-        self.current = target
-        Clock.schedule_once(
-            lambda dt: target_screen.set_note_content(self.app.note_data), 0
+        if not self.note_screen_cycler:
+            self.handle_n_screens(self, self.n_screens)
+        current_screen_idx, next_screen_idx = next(self.note_screen_cycler)
+        target_name = f"note_screen{next_screen_idx}"
+        current_name = f"note_screen{current_screen_idx}"
+        target_screen = next(
+            screen for screen in self.screens if screen.name == target_name
         )
+        current_screen = next(
+            screen for screen in self.screens if screen.name == current_name
+        )
+
+        # Call trigger to update current screen
+        update_current_screen = getattr(self.screen_triggers, target_screen.name)
+
+        # Set note data
+        data = {k: v for k, v in self.app.note_data.items()}
+        set_data = lambda dt: target_screen.set_note_content(data)
+
+        # Clear note data from last screen
+        clear_data = lambda dt: current_screen.set_note_content(None)
+
+        sch_cb(0.1, set_data, update_current_screen, clear_data)
 
     def handle_notes_list_view(self, *args, **kwargs):
         self.ids["list_view_screen"].set_note_list_view()
@@ -216,10 +248,13 @@ class NoteCategoryChooserScreen(Screen):
 
 
 class NoteCategoryScreen(Screen):
-    current_note = ObjectProperty()
+    current_note: "Note" = ObjectProperty()
 
-    def set_note_content(self, note_data: "MarkdownNoteDict"):
-        self.current_note.set_note_content(note_data)
+    def set_note_content(self, note_data: Optional["MarkdownNoteDict"]):
+        if note_data:
+            self.current_note.set_note_content(note_data)
+        else:
+            self.current_note.clear_note_content()
 
 
 class NoteListViewScreen(Screen):
@@ -265,9 +300,7 @@ class NoteEditScreen(Screen):
         self.bind(init_text=self.note_editor.setter("init_text"))
         self.bind(mode=self.note_editor.setter("mode"))
 
-    def handle_app_editor_note(
-        self, instance, value: Union["EditableNote", "TextNote", "None"]
-    ):
+    def handle_app_editor_note(self, instance, value: Union["EditableNote", "None"]):
         """
         Tracks App.editor_note
         """

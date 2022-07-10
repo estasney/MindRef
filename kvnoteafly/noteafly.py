@@ -40,7 +40,7 @@ from domain.settings import (
 )
 from service.registry import Registry
 from utils import DottedDict, sch_cb
-from utils.triggers import trigger_factory
+from utils.triggers import trigger_factory_from_prop
 from widgets.screens import NoteAppScreenManager
 
 
@@ -321,8 +321,8 @@ class NoteAFly(App):
 
     def build(self):
         self.registry.app = self
-        self.play_state_triggers = trigger_factory(self, "play_state")
-        self.display_state_triggers = trigger_factory(self, "display_state")
+        self.play_state_triggers = trigger_factory_from_prop(self, "play_state")
+        self.display_state_triggers = trigger_factory_from_prop(self, "display_state")
         Window.bind(on_keyboard=self.key_input)
         storage_path = (
             np if (np := self.config.get("Storage", "NOTES_PATH")) != "None" else None
@@ -335,7 +335,6 @@ class NoteAFly(App):
         )
 
         sm = NoteAppScreenManager(self)
-        sm.screen_transitions = self.screen_transitions
         self.screen_manager = sm
         self.play_state = self.config.get("Behavior", "PLAY_STATE")
         self.note_category = self.config.get("Behavior", "CATEGORY_SELECTED")

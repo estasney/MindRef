@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import TYPE_CHECKING
 
 from kivy import Logger
@@ -5,7 +6,7 @@ from kivy.cache import Cache
 from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.boxlayout import BoxLayout
 
-from utils import import_kv
+from utils import import_kv, sch_cb
 from utils.caching import cache_key_note, kivy_cache
 
 import_kv(__file__)
@@ -37,8 +38,18 @@ class Note(BoxLayout):
         super(Note, self).__init__(**kwargs)
 
     def set_note_content(self, note_data: "MarkdownNoteDict"):
-        self.note_title.set({"title": note_data["title"]})
-        self.note_content.set(note_data)
+
+        title = note_data["title"]
+        set_title = lambda x: self.note_title.set({"title": title})
+        data = deepcopy(note_data)
+        set_content = lambda x: self.note_content.set(data)
+        sch_cb(0, set_title, set_content)
+
+    def clear_note_content(self):
+        clear_title = lambda x: self.note_title.set({"title": ""})
+        self.note_title.set({"title": ""})
+        clear_content = lambda x: self.note_content.clear()
+        sch_cb(0, clear_title, clear_content)
 
 
 class NoteContent(BoxLayout):
@@ -51,6 +62,9 @@ class NoteContent(BoxLayout):
             self._set_keyboard(content_data)
         else:
             self._set_markdown(content_data)
+
+    def clear(self):
+        self.clear_widgets()
 
     def _set_keyboard(self, content_data: "MarkdownNoteDict"):
         widget = get_cached_note(content_data=content_data, parent=self)
