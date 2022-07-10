@@ -14,7 +14,8 @@ def run_android():
         from android import loadingscreen  # noqa
         from kivy.clock import Clock
 
-        Clock.schedule_once(loadingscreen.hide_loading_screen)
+        hide_loading = lambda x: loadingscreen.hide_loading_screen()
+        Clock.schedule_once(hide_loading)
 
         # Create default folder
         notes_dir = Path(primary_external_storage_path()) / "kvnotes"
