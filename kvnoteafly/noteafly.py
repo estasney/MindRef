@@ -2,6 +2,7 @@ import logging
 import os
 from functools import partial
 from pathlib import Path
+from typing import Callable, Literal
 
 from kivy.app import App
 from kivy.clock import Clock
@@ -38,7 +39,8 @@ from domain.settings import (
     SETTINGS_STORAGE_PATH,
 )
 from service.registry import Registry
-from utils import sch_cb
+from utils import DottedDict, sch_cb
+from utils.triggers import trigger_factory
 from widgets.screens import NoteAppScreenManager
 
 
@@ -62,10 +64,17 @@ class NoteAFly(App):
         "slide", options=["None", "Slide", "Rise-In", "Card", "Fade", "Swap", "Wipe"]
     )
     menu_open = BooleanProperty(False)
+
     display_state = OptionProperty(
         "choose", options=["choose", "display", "list", "edit", "add"]
     )
+    display_state_triggers: DottedDict[
+        Literal["choose", "display", "list", "edit", "add"], Callable
+    ]
+
     play_state = OptionProperty("play", options=["play", "pause"])
+    play_state_triggers: DottedDict[Literal["play", "pause"], Callable]
+
     paginate_interval = NumericProperty(15)
     log_level = NumericProperty(logging.ERROR)
 
@@ -127,10 +136,9 @@ class NoteAFly(App):
     def on_display_state(self, instance, new):
 
         if new in {"edit", "add"}:
-            self.play_state = "pause"
+            self.play_state_triggers.pause()
         if new == "edit":
             self.editor_note = self.editor_service.edit_current_note(self)
-
         elif new == "add":
             self.editor_note = self.editor_service.new_note(
                 category=self.note_category, idx=self.note_service.index_size()
@@ -139,26 +147,21 @@ class NoteAFly(App):
             self.next_note_scheduler.cancel()
 
     def select_index(self, value):
-        def scheduled_select(dt, val):
-            self.note_service.set_index(val)
-            self.note_data = self.note_service.current_note().to_dict()
-            self.play_state = "pause"
-            self.display_state = "display"
 
-        func = partial(scheduled_select, val=value)
-        Clock.schedule_once(func)
+        set_index = lambda x: self.note_service.set_index(value)
+        set_note_data = lambda x: setattr(
+            self, "note_data", self.note_service.current_note().to_dict()
+        )
+        pause_state = self.play_state_triggers.pause
+        display_state_display = self.display_state_triggers.display
+
+        sch_cb(0, set_index, set_note_data, pause_state, display_state_display)
 
     def paginate(self, value):
         self.next_note_scheduler.cancel()
         Clock.schedule_once(partial(self.paginate_note, direction=value), 0)
         if self.play_state == "play":
             self.next_note_scheduler()
-
-    def toggle_play_state(self, *args, **kwargs):
-        if self.play_state == "play":
-            self.play_state = "pause"
-        else:
-            self.play_state = "play"
 
     def paginate_note(self, *args, **kwargs):
         direction = kwargs.get("direction", 1)
@@ -217,6 +220,10 @@ class NoteAFly(App):
 
     def on_note_data(self, *args, **kwargs):
         self.screen_manager.handle_notes(self)
+
+    """
+    Event Handlers for Registry
+    """
 
     def process_cancel_edit_event(self, event: CancelEditEvent):
         update_display_state = lambda x: setattr(self, "display_state", "display")
@@ -313,8 +320,12 @@ class NoteAFly(App):
         else:
             return False
 
+    """Kivy"""
+
     def build(self):
         self.registry.app = self
+        self.play_state_triggers = trigger_factory(self, "play_state")
+        self.display_state_triggers = trigger_factory(self, "display_state")
         Window.bind(on_keyboard=self.key_input)
         storage_path = (
             np if (np := self.config.get("Storage", "NOTES_PATH")) != "None" else None
