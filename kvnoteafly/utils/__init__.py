@@ -157,3 +157,19 @@ class GenericLoggerMixin:
         else:
             self._log = lambda msg, lvl: print(msg)
             self._log(msg, level)
+
+
+K = TypeVar("K", bound=str)
+V = TypeVar("V")
+
+
+class DottedDict(dict, Generic[K, V]):
+    def __init__(self):
+        super().__init__()
+
+    def __getattr__(self, item: K) -> V:
+
+        return self[item]
+
+    def __setattr__(self, key: K, value: V):
+        self.__setitem__(key, value)
