@@ -218,9 +218,6 @@ class NoteAFly(App):
             func = partial(select_category, category=value)
             Clock.schedule_once(func)
 
-    def on_note_data(self, *args, **kwargs):
-        self.screen_manager.handle_notes(self)
-
     """
     Event Handlers for Registry
     """

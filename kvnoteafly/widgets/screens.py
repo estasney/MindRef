@@ -58,6 +58,7 @@ class NoteAppScreenManager(ScreenManager):
         self.app = app
         self.menu = None
         app.bind(display_state=self.handle_app_display_state)
+        app.bind(note_data=self.handle_notes)
         app.bind(play_state=self.setter("play_state"))
         app.bind(screen_transitions=self.setter("screen_transitions"))
         app.bind(menu_open=self.setter("menu_open"))
