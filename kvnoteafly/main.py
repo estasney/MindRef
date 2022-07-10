@@ -11,6 +11,10 @@ __version__ = "0.0.1"
 def run_android():
     def start_app(*args):
         from noteafly import NoteAFly
+        from android import loadingscreen  # noqa
+        from kivy.clock import Clock
+
+        Clock.schedule_once(loadingscreen.hide_loading_screen)
 
         # Create default folder
         notes_dir = Path(primary_external_storage_path()) / "kvnotes"
@@ -19,7 +23,11 @@ def run_android():
         NoteAFly().run()
 
     from android.storage import primary_external_storage_path  # noqa
-    from android.permissions import request_permissions, Permission, check_permission
+    from android.permissions import (
+        request_permissions,
+        Permission,
+        check_permission,
+    )  # noqa
 
     if not check_permission(Permission.WRITE_EXTERNAL_STORAGE):
         Logger.info(f"Requesting Permissions")

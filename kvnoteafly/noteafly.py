@@ -6,6 +6,7 @@ from pathlib import Path
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.config import Config
+from kivy.core.window import Window
 from kivy.logger import Logger
 from kivy.parser import parse_color
 from kivy.properties import (
@@ -23,6 +24,7 @@ from adapters.editor.fs.fs_editor_repository import FileSystemEditor
 from adapters.notes.fs.fs_note_repository import FileSystemNoteRepository
 from domain.events import (
     AddNoteEvent,
+    BackButtonEvent,
     CancelEditEvent,
     EditNoteEvent,
     NoteFetchedEvent,
@@ -273,6 +275,27 @@ class NoteAFly(App):
 
         sch_cb(0, *steps)
 
+    def process_back_button_event(self, event: BackButtonEvent):
+        # The display state when button was pressed
+        ds = event.display_state
+        if ds == "choose":
+            # Cannot go further back
+            App.get_running_app().stop()
+        elif ds == "display":
+            set_ds_choose = lambda dt: setattr(self, "display_state", "choose")
+            sch_cb(0, set_ds_choose)
+        elif ds == "list":
+            set_ds_display = lambda dt: setattr(self, "display_state", "display")
+            sch_cb(0, set_ds_display)
+        elif ds == "edit":
+            self.registry.push_event(CancelEditEvent())
+        elif ds == "add":
+            self.registry.push_event(CancelEditEvent())
+        else:
+            Logger.warning(
+                f"Unknown display state encountered when handling back button: {ds}"
+            )
+
     def process_event(self, dt):
         if len(self.registry.events) == 0:
             return
@@ -282,8 +305,17 @@ class NoteAFly(App):
         func = getattr(self, f"process_{event_type}_event")
         return func(event)
 
+    def key_input(self, window, key, scancode, codepoint, modifier):
+        if key == 27:  # Esc Key
+            # Back Button Event
+            self.registry.push_event(BackButtonEvent(display_state=self.display_state))
+            return True
+        else:
+            return False
+
     def build(self):
         self.registry.app = self
+        Window.bind(on_keyboard=self.key_input)
         storage_path = (
             np if (np := self.config.get("Storage", "NOTES_PATH")) != "None" else None
         )
