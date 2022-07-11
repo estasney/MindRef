@@ -28,7 +28,7 @@
             rounded_rectangle: (self.pos[0], self.pos[1], self.size[0]+4, self.size[1], 4)
             width: dp(1)
     ListViewButton:
-        on_release: app.display_state = 'list'
+        on_release: app.display_state_trigger('list')
     PrimaryVSep:
     BackButton:
         on_release: app.paginate(-1)

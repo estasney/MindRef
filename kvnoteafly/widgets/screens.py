@@ -1,6 +1,6 @@
 from copy import copy, deepcopy
 from itertools import cycle
-from typing import Literal, Optional, TYPE_CHECKING, Union
+from typing import Callable, Literal, Optional, TYPE_CHECKING, Union
 
 from kivy import Logger
 from kivy.app import App
@@ -52,7 +52,7 @@ class NoteAppScreenManager(ScreenManager):
     )
     menu_open = BooleanProperty(False)
     n_screens = BoundedNumericProperty(defaultvalue=2, min=1, max=2)
-    screen_triggers: DottedDict
+    screen_triggers: Callable[[str], None]
 
     def __init__(self, app, **kwargs):
         super().__init__(**kwargs)
@@ -145,7 +145,7 @@ class NoteAppScreenManager(ScreenManager):
     def handle_app_display_state(self, instance, new):
         Logger.debug(f"ScreenManager: app_display_state : {new}")
         if new == "choose":  # Show the Category Selection Screen
-            self.screen_triggers.chooser_screen()
+            self.screen_triggers("chooser_screen")
         elif new == "display":
             self.note_trigger()
         elif new == "list":
@@ -175,7 +175,8 @@ class NoteAppScreenManager(ScreenManager):
         )
 
         # Call trigger to update current screen
-        update_current_screen = getattr(self.screen_triggers, target_screen.name)
+
+        update_current_screen = lambda x: self.screen_triggers(target_screen.name)
 
         # Set note data
         data = {k: v for k, v in self.app.note_data.items()}
@@ -184,7 +185,7 @@ class NoteAppScreenManager(ScreenManager):
         # Clear note data from last screen
         clear_data = lambda dt: current_screen.set_note_content(None)
 
-        sch_cb(0.1, set_data, update_current_screen, clear_data)
+        sch_cb(0, set_data, update_current_screen, clear_data)
 
     def handle_notes_list_view(self, *args, **kwargs):
         self.ids["list_view_screen"].set_note_list_view()
@@ -326,7 +327,9 @@ class NoteEditScreen(Screen):
         if text is None:
             raise ValueError("Expected text")
 
-        app.registry.push_event(SaveNoteEvent(text=text, title=title))
+        app.registry.push_event(
+            SaveNoteEvent(text=text, title=title, category=app.note_category)
+        )
 
         clear_self_text = lambda x: setattr(self, "init_text", "")
         Clock.schedule_once(clear_self_text, 0)

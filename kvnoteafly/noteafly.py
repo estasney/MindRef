@@ -39,8 +39,8 @@ from domain.settings import (
     SETTINGS_STORAGE_PATH,
 )
 from service.registry import Registry
-from utils import DottedDict, sch_cb
-from utils.triggers import trigger_factory_from_prop
+from utils import sch_cb
+from utils.triggers import trigger_factory
 from widgets.screens import NoteAppScreenManager
 
 
@@ -68,12 +68,11 @@ class NoteAFly(App):
     display_state = OptionProperty(
         "choose", options=["choose", "display", "list", "edit", "add"]
     )
-    display_state_triggers: DottedDict[
-        Literal["choose", "display", "list", "edit", "add"], Callable
+    display_state_trigger: Callable[
+        [Literal["choose", "display", "list", "edit", "add"]], None
     ]
-
     play_state = OptionProperty("play", options=["play", "pause"])
-    play_state_triggers: DottedDict[Literal["play", "pause"], Callable]
+    play_state_trigger: Callable[[Literal["play", "pause"]], None]
 
     paginate_interval = NumericProperty(15)
     log_level = NumericProperty(logging.ERROR)
@@ -136,7 +135,7 @@ class NoteAFly(App):
     def on_display_state(self, instance, new):
 
         if new in {"edit", "add"}:
-            self.play_state_triggers.pause()
+            self.play_state_trigger("pause")
         if new == "edit":
             self.editor_note = self.editor_service.edit_current_note(self)
         elif new == "add":
@@ -152,8 +151,8 @@ class NoteAFly(App):
         set_note_data = lambda x: setattr(
             self, "note_data", self.note_service.current_note().to_dict()
         )
-        pause_state = self.play_state_triggers.pause
-        display_state_display = self.display_state_triggers.display
+        pause_state = lambda x: self.play_state_trigger("pause")
+        display_state_display = lambda x: self.display_state_trigger("display")
 
         sch_cb(0, set_index, set_note_data, pause_state, display_state_display)
 
@@ -195,7 +194,7 @@ class NoteAFly(App):
             self.note_category_meta = []
             if self.next_note_scheduler:
                 self.next_note_scheduler.cancel()
-            self.display_state = "choose"
+            self.display_state_trigger("choose")
 
         def select_category(dt, category):
             self.note_category_meta = self.note_service.category_meta
@@ -209,23 +208,21 @@ class NoteAFly(App):
                 if self.play_state == "play":
                     self.next_note_scheduler()
             self.paginate_note(initial=True)
-            self.display_state = "display"
 
         if not value:
-            Clock.schedule_once(return_to_category)
-            return
+            sch_cb(0.1, return_to_category)
         else:
             func = partial(select_category, category=value)
-            Clock.schedule_once(func)
+            sch_cb(0.1, func, lambda x: self.display_state_trigger("display"))
 
     """
     Event Handlers for Registry
     """
 
     def process_cancel_edit_event(self, event: CancelEditEvent):
-        update_display_state = lambda x: setattr(self, "display_state", "display")
+
         clear_edit_note = lambda x: setattr(self, "editor_note", None)
-        sch_cb(0, update_display_state, clear_edit_note)
+        sch_cb(0, lambda x: self.display_state_trigger("display"), clear_edit_note)
 
     def process_edit_note_event(self, event: EditNoteEvent):
         data_note = self.registry.edit_note(category=event.category, idx=event.idx)
@@ -236,7 +233,7 @@ class NoteAFly(App):
     def process_add_note_event(self, event: AddNoteEvent):
         data_note = self.registry.new_note(category=self.note_category, idx=None)
         update_edit_note = lambda x: setattr(self, "editor_note", data_note)
-        update_display_mode = lambda x: setattr(self, "display_state", "add")
+        update_display_mode = lambda x: self.display_state_trigger("add")
         sch_cb(0, update_edit_note, update_display_mode)
 
     def process_save_note_event(self, event: SaveNoteEvent):
@@ -246,7 +243,7 @@ class NoteAFly(App):
         if note_is_new:
             data_note.edit_title = event.title
         update_edit_note = lambda x: setattr(self, "editor_note", None)
-        update_display_state = lambda x: setattr(self, "display_state", "display")
+        update_display_state = lambda x: self.display_state_trigger("display")
         persist_note = lambda x: self.registry.save_note(data_note)
         sch_cb(1, update_display_state, persist_note, update_edit_note)
 
@@ -321,8 +318,12 @@ class NoteAFly(App):
 
     def build(self):
         self.registry.app = self
-        self.play_state_triggers = trigger_factory_from_prop(self, "play_state")
-        self.display_state_triggers = trigger_factory_from_prop(self, "display_state")
+        self.play_state_trigger = trigger_factory(
+            self, "play_state", self.__class__.play_state.options
+        )
+        self.display_state_trigger = trigger_factory(
+            self, "display_state", self.__class__.display_state.options
+        )
         Window.bind(on_keyboard=self.key_input)
         storage_path = (
             np if (np := self.config.get("Storage", "NOTES_PATH")) != "None" else None

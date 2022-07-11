@@ -48,6 +48,7 @@ class MarkdownVisitor:
         self.visiting_table = False
         self.tip_type_layout = False
         self.has_intercept = False
+        self.debug_nodes = kwargs.get("debug_nodes", False)
 
     @overload
     def push(self, widget: Widget):
@@ -74,16 +75,18 @@ class MarkdownVisitor:
                     f"Pushed-->: {widget.__class__.__name__} --> {self.current_list[-1].__class__.__name__}"
                 )
             else:
-                Logger.debug(
+                self.debug_nodes and Logger.debug(
                     f"Pushed-->: {widget.__class__.__name__} --> {self.current_list[-1].__class__.__name__} XXX"
                 )
         else:
-            Logger.debug(f"New Stack with {widget.__class__.__name__}")
+            self.debug_nodes and Logger.debug(
+                f"New Stack with {widget.__class__.__name__}"
+            )
             self.current_list.append(widget)
 
     def pop(self):
         popped = self.current_list.pop()
-        Logger.debug(
+        self.debug_nodes and Logger.debug(
             f"<--  Popped : {popped.__class__.__name__}  <-- {self.current_list[-1].__class__.__name__ if self.current_list else 'Empty'}"
         )
         return popped
@@ -91,7 +94,9 @@ class MarkdownVisitor:
     def pop_entry(self):
         popped = self.current_list.popleft()
         self.current_list.clear()
-        Logger.debug(f"<--  Popped Entry : {popped.__class__.__name__}")
+        self.debug_nodes and Logger.debug(
+            f"<--  Popped Entry : {popped.__class__.__name__}"
+        )
         return popped
 
     def visit(self, node: "MD_TYPES", **kwargs):
@@ -134,7 +139,7 @@ class MarkdownVisitor:
                 self.pop()
         self.pop()
 
-        Logger.debug("Start Table Body")
+        self.debug_nodes and Logger.debug("Start Table Body")
 
         del head_kwargs
 

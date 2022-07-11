@@ -152,17 +152,19 @@ class FileSystemNoteRepository(AbstractNoteRepository):
 
     def save_note(self, note: "EditableNote") -> MarkdownNote:
         note_is_new = bool(note.edit_title)
-        md_note = note.md_note
 
-        md_note.text = note.edit_text
         if note_is_new:
             # Construct filepath
-            fp = (self.storage_path / md_note.category / note.edit_title).with_suffix(
+            fp = (self.storage_path / note.category / note.edit_title).with_suffix(
                 ".md"
             )
-            md_note.filepath = fp
-            md_note.filepath.write_text(md_note.text, encoding="utf-8")
+            fp.write_text(note.edit_text, encoding="utf-8")
+            self.discover_notes()
+            return MarkdownNote.from_file(note.category, note.idx, fp)
+
         else:
+            md_note = note.md_note
+            md_note.text = note.edit_text
             md_note.filepath.write_text(md_note.text, encoding="utf-8")
         return MarkdownNote.from_file(md_note.category, md_note.idx, md_note.filepath)
 

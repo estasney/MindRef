@@ -1,5 +1,6 @@
 from typing import NamedTuple
 
+from kivy.clock import Clock
 from kivy.graphics import Color, RoundedRectangle
 from kivy.properties import (
     BooleanProperty,
@@ -54,34 +55,37 @@ class LabelHighlightInline(Label):
 
     def __init__(self, **kwargs):
         super(LabelHighlightInline, self).__init__(**kwargs)
+        self.markup_text_trigger = Clock.create_trigger(self.markup_text)
+        self.handle_contrast_trigger = Clock.create_trigger(self.handle_contrast)
+        self.draw_ref_spans_trigger = Clock.create_trigger(self.draw_ref_spans)
 
     def on_parent(self, instance, value):
         fbind = self.fbind
         funbind = self.funbind
         if self.parent:
-            fbind("text_color", self.markup_text)
-            fbind("text_color_highlight", self.markup_text)
-            fbind("bg_color", self.handle_contrast)
-            fbind("text_threshold", self.handle_contrast)
-            fbind("snippets", self.markup_text)
-            fbind("refs", self.draw_ref_spans)
-            fbind("size", self.draw_ref_spans)
-            fbind("pos", self.draw_ref_spans)
+            fbind("text_color", self.markup_text_trigger)
+            fbind("text_color_highlight", self.markup_text_trigger)
+            fbind("bg_color", self.handle_contrast_trigger)
+            fbind("text_threshold", self.handle_contrast_trigger)
+            fbind("snippets", self.markup_text_trigger)
+            fbind("refs", self.draw_ref_spans_trigger)
+            fbind("size", self.draw_ref_spans_trigger)
+            fbind("pos", self.draw_ref_spans_trigger)
 
         else:
-            funbind("text_color", self.markup_text)
-            funbind("text_color_highlight", self.markup_text)
-            funbind("bg_color", self.handle_contrast)
-            funbind("text_threshold", self.handle_contrast)
-            funbind("snippets", self.markup_text)
-            funbind("refs", self.draw_ref_spans)
-            funbind("size", self.draw_ref_spans)
-            funbind("pos", self.draw_ref_spans)
+            funbind("text_color", self.markup_text_trigger)
+            funbind("text_color_highlight", self.markup_text_trigger)
+            funbind("bg_color", self.handle_contrast_trigger)
+            funbind("text_threshold", self.handle_contrast_trigger)
+            funbind("snippets", self.markup_text_trigger)
+            funbind("refs", self.draw_ref_spans_trigger)
+            funbind("size", self.draw_ref_spans_trigger)
+            funbind("pos", self.draw_ref_spans_trigger)
 
     def add_snippet(self, snippet: TextSnippet):
         self.snippets.append(snippet)
 
-    def handle_contrast(self, instance, value):
+    def handle_contrast(self, *args, **kwargs):
         """Update computed text_colors"""
         self.text_color = get_cached_text_contrast(
             background_color=self.bg_color,
@@ -95,7 +99,7 @@ class LabelHighlightInline(Label):
         )
         return True
 
-    def markup_text(self, instance, value):
+    def markup_text(self, *args, **kwargs):
         """Update the markup within text to reflect new colors"""
 
         texts = []
@@ -111,7 +115,7 @@ class LabelHighlightInline(Label):
         self.text = "".join(texts)
         return True
 
-    def draw_ref_spans(self, instance, value):
+    def draw_ref_spans(self, *args, **kwargs):
         """Draw ref highlights"""
         if not self.refs:
             return

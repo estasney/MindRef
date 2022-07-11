@@ -38,6 +38,7 @@ class SaveNoteEvent(Event):
     event_type = "save_note"
     text: str
     title: Optional[str]
+    category: int
 
 
 @dataclass
