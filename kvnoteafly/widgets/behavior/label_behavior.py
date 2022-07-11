@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from kivy.utils import escape_markup
+
 from utils import import_kv
 from utils.caching import (
     cache_key_color_norm,
@@ -149,7 +151,7 @@ class LabelAutoContrast(Label):
 
     def handle_raw_text(self, instance, value):
         """Wrap our raw_text with text_color"""
-        self.text = f"[color={self.text_color}]{value}[/color]"
+        self.text = f"[color={self.text_color}]{escape_markup(value)}[/color]"
         return True
 
 

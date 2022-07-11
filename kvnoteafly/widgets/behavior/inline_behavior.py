@@ -10,6 +10,7 @@ from kivy.properties import (
     StringProperty,
 )
 from kivy.uix.label import Label
+from kivy.utils import escape_markup
 
 from utils import import_kv
 from widgets.behavior.label_behavior import get_cached_text_contrast
@@ -104,12 +105,15 @@ class LabelHighlightInline(Label):
 
         texts = []
         for snippet in self.snippets:
+
             if snippet.highlight:
                 texts.append(
-                    f"[font={self.font_family_mono}][color={self.text_color_highlight}][ref=hl] {snippet.text} [/ref][/color][/font]"
+                    f"[font={self.font_family_mono}][color={self.text_color_highlight}][ref=hl] {escape_markup(snippet.text)} [/ref][/color][/font]"
                 )
             else:
-                texts.append(f"[color={self.text_color}]{snippet.text}[/color]")
+                texts.append(
+                    f"[color={self.text_color}]{escape_markup(snippet.text)}[/color]"
+                )
 
         # Snippets preserve leading/trailing whitespace
         self.text = "".join(texts)
