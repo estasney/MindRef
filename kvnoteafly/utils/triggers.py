@@ -1,11 +1,8 @@
+from functools import partial
+from typing import Callable, Sequence, TYPE_CHECKING, TypeVar
+
 from kivy import Logger
 from kivy.clock import Clock
-from kivy.properties import OptionProperty
-from kivy.utils import QueryDict
-from typing import Callable, TYPE_CHECKING, TypeVar, ParamSpec, Sequence
-from functools import partial
-
-from utils import DottedDict
 
 if TYPE_CHECKING:
     from kivy.uix.widget import Widget
