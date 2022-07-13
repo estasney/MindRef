@@ -7,6 +7,8 @@ from kivy.config import Config
 
 __version__ = "0.0.1"
 
+from plugins import ScreenSaverPlugin
+
 
 def run_android():
     def start_app(*args):
@@ -45,7 +47,9 @@ def run_desktop():
     Config.set("input", "mouse", "mouse,disable_multitouch")
     from noteafly import NoteAFly
 
-    NoteAFly().run()
+    app = NoteAFly()
+
+    app.run()
 
 
 if __name__ == "__main__":

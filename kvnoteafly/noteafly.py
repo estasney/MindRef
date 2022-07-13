@@ -36,8 +36,10 @@ from domain.events import (
 from domain.settings import (
     SETTINGS_BEHAVIOR_PATH,
     SETTINGS_DISPLAY_PATH,
+    SETTINGS_PLUGIN_DATA,
     SETTINGS_STORAGE_PATH,
 )
+from plugins import PluginManager, ScreenSaverPlugin
 from service.registry import Registry
 from utils import sch_cb
 from utils.triggers import trigger_factory
@@ -49,6 +51,7 @@ class NoteAFly(App):
     atlas_service = AtlasService(storage_path=Path("./static").resolve())
     note_service = FileSystemNoteRepository(new_first=True)
     editor_service = FileSystemEditor()
+    plugin_manager = PluginManager()
 
     registry = Registry(logger=Logger)
 
@@ -78,6 +81,7 @@ class NoteAFly(App):
     log_level = NumericProperty(logging.ERROR)
 
     screen_manager = ObjectProperty()
+
     fonts = DictProperty({"mono": "RobotoMono", "default": "Roboto"})
     base_font_size = NumericProperty()
     colors = DictProperty(
@@ -343,12 +347,14 @@ class NoteAFly(App):
         self.base_font_size = self.config.get("Display", "BASE_FONT_SIZE")
         self.registry.query_all()
         Clock.schedule_interval(self.process_event, 0.1)
+        self.plugin_manager.init_app(self)
         return sm
 
     def build_settings(self, settings):
         settings.add_json_panel("Storage", self.config, SETTINGS_STORAGE_PATH)
         settings.add_json_panel("Display", self.config, SETTINGS_DISPLAY_PATH)
         settings.add_json_panel("Behavior", self.config, SETTINGS_BEHAVIOR_PATH)
+        settings.add_json_panel("Plugins", self.config, data=SETTINGS_PLUGIN_DATA)
 
     def build_config(self, config):
         get_environ = os.environ.get
@@ -365,6 +371,9 @@ class NoteAFly(App):
                 "LOG_LEVEL": int(get_environ("LOG_LEVEL", logging.INFO)),
                 "TRANSITIONS": "Slide",
             },
+        )
+        config.setdefaults(
+            "Plugins", {"SCREEN_SAVER_ENABLE": False, "SCREEN_SAVER_DELAY": 60}
         )
 
     def on_config_change(self, config, section, key, value):
@@ -390,6 +399,9 @@ class NoteAFly(App):
             elif key == "SCREEN_HEIGHT":
                 Config.set("graphics", "height", value)
                 Config.write()
+        elif section == "Plugins":
+
+            return False
 
 
 if __name__ == "__main__":
