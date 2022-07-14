@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import Protocol, TYPE_CHECKING
 
 from kivy import Logger
 from kivy.clock import Clock
@@ -9,10 +9,20 @@ if TYPE_CHECKING:
     from kivy.app import App
 
 
+class PluginProtocol(Protocol):
+    def handle_event(self, event: str):
+        ...
+
+
 class PluginManager(EventDispatcher):
     def __init__(self, *args, **kwargs):
         super(PluginManager, self).__init__(*args, **kwargs)
-        self.plugins = []
+        self.plugins: list[PluginProtocol] = []
+
+    def plugin_event(self, event):
+        for plugin in self.plugins:
+            plugin.handle_event(event)
+        return True
 
     def init_app(self, app: "App"):
         plugin_config = list(app.config["Plugins"].items())
@@ -58,15 +68,21 @@ class PluginManager(EventDispatcher):
 
 
 class ScreenSaverPlugin(EventDispatcher):
-    delay_minutes = NumericProperty(defaultvalue=1)
+    delay_minutes = NumericProperty(defaultvalue=60)
+    elapsed_minutes = NumericProperty(defaultvalue=0)
     enabled = BooleanProperty(defaultvalue=False)
 
     def __init__(self, *args, **kwargs):
         super(ScreenSaverPlugin, self).__init__(*args, **kwargs)
-        self.trigger = Clock.create_trigger(
-            self.callback, interval=True, timeout=self.delay_minutes * 3600
-        )
+        self.trigger = Clock.create_trigger(self.callback, interval=True, timeout=3600)
         self.fbind("enabled", self.handle_enabled)
+
+    def handle_event(self, event):
+        if event == "on_interact":
+            self.elapsed_minutes = 0
+            Logger.debug(
+                f"ScreenSaverPlugin elapsed_minutes at : {self.elapsed_minutes}"
+            )
 
     def handle_enabled(self, instance, value):
         if not self.enabled:
@@ -77,3 +93,6 @@ class ScreenSaverPlugin(EventDispatcher):
     def callback(self, dt):
         # TODO
         Logger.debug(dt)
+        self.elapsed_minutes = self.elapsed_minutes + 1
+        if self.delay_minutes <= self.elapsed_minutes:
+            Logger.info("ScreenSaver Active")

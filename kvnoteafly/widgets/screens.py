@@ -29,8 +29,8 @@ from domain.events import CancelEditEvent, RefreshNotesEvent, SaveNoteEvent
 from utils import DottedDict, import_kv, sch_cb
 from utils.triggers import trigger_factory
 from widgets.app_menu import AppMenu
+from widgets.behavior.interact_behavior import InteractBehavior
 from widgets.effects.scrolling import RefreshSymbol
-
 
 TR_OPTS = Literal["None", "Slide", "Rise-In", "Card", "Fade", "Swap", "Wipe"]
 
@@ -44,7 +44,11 @@ if TYPE_CHECKING:
 import_kv(__file__)
 
 
-class NoteAppScreenManager(ScreenManager):
+class InteractScreen(InteractBehavior, Screen):
+    ...
+
+
+class NoteAppScreenManager(InteractBehavior, ScreenManager):
     app = ObjectProperty()
     play_state = StringProperty()
     screen_transitions = OptionProperty(
@@ -202,7 +206,7 @@ class NoteAppScreenManager(ScreenManager):
         sch_cb(0, update_screen)
 
 
-class NoteCategoryChooserScreen(Screen):
+class NoteCategoryChooserScreen(InteractScreen):
     chooser = ObjectProperty()
     categories = ListProperty()
     refresh_triggered = BooleanProperty(False)
@@ -248,7 +252,7 @@ class NoteCategoryChooserScreen(Screen):
         Clock.schedule_once(self.handle_refresh_icon)
 
 
-class NoteCategoryScreen(Screen):
+class NoteCategoryScreen(InteractScreen):
     current_note: "Note" = ObjectProperty()
 
     def set_note_content(self, note_data: Optional["MarkdownNoteDict"]):
@@ -258,14 +262,14 @@ class NoteCategoryScreen(Screen):
             self.current_note.clear_note_content()
 
 
-class NoteListViewScreen(Screen):
+class NoteListViewScreen(InteractScreen):
     meta_notes = ListProperty()
 
     def set_note_list_view(self, *args, **kwargs):
         Clock.schedule_once(lambda dt: self.ids["scroller"].set(self.meta_notes), 0)
 
 
-class NoteEditScreen(Screen):
+class NoteEditScreen(InteractScreen):
     """
 
     Displays Screen for Editing Existing Notes and Creating New Ones

@@ -348,6 +348,9 @@ class NoteAFly(App):
         self.registry.query_all()
         Clock.schedule_interval(self.process_event, 0.1)
         self.plugin_manager.init_app(self)
+        sm.fbind(
+            "on_interact", lambda x: self.plugin_manager.plugin_event("on_interact")
+        )
         return sm
 
     def build_settings(self, settings):
