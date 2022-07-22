@@ -36,9 +36,9 @@ from domain.events import (
 from domain.settings import (
     SETTINGS_BEHAVIOR_PATH,
     SETTINGS_DISPLAY_PATH,
-    SETTINGS_PLUGIN_DATA,
     SETTINGS_STORAGE_PATH,
 )
+from domain.plugin_settings import SETTINGS_PLUGIN_DATA
 from plugins import PluginManager, ScreenSaverPlugin
 from service.registry import Registry
 from utils import sch_cb
