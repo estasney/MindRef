@@ -1,5 +1,6 @@
 import json
 from functools import partial
+from itertools import chain
 from pathlib import Path
 from typing import Callable, Iterable, Optional
 
@@ -47,8 +48,12 @@ def _generate_screen_saver_dict(checker: Callable[[], bool]) -> list[dict]:
 def _generate_plugin_json(
     plugin_generators: Iterable[Callable[[], Optional[list[dict]]]]
 ) -> str:
-    data = [p() for p in plugin_generators]
-    return json.dumps([result for result in data if result is not None])
+    data = []
+    for p in plugin_generators:
+        p_data = p()
+        if p_data:
+            data.extend(p_data)
+    return json.dumps(data)
 
 
 def _load_plugin_settings():
