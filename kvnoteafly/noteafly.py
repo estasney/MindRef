@@ -403,7 +403,6 @@ class NoteAFly(App):
                 Config.set("graphics", "height", value)
                 Config.write()
         elif section == "Plugins":
-
             return False
 
 

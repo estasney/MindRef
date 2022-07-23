@@ -1,9 +1,10 @@
+from pathlib import Path
 from typing import Protocol, TYPE_CHECKING
 
 from kivy import Logger
 from kivy.clock import Clock
 from kivy.event import EventDispatcher
-from kivy.properties import BooleanProperty, NumericProperty
+from kivy.properties import BooleanProperty, NumericProperty, StringProperty
 
 if TYPE_CHECKING:
     from kivy.app import App
@@ -48,8 +49,9 @@ class PluginManager(EventDispatcher):
                     if ss:
                         ss.enabled = False
             elif k == "screen_saver_delay":
-                ss = self.ensure_plugin(ScreenSaverPlugin, make=True)
-                ss.delay_minutes = int(value)
+                ss = self.ensure_plugin(ScreenSaverPlugin, make=False)
+                if ss:
+                    ss.active_after_minutes = int(value)
         return
 
     def ensure_plugin(self, plugin_type, make: bool):
@@ -68,21 +70,27 @@ class PluginManager(EventDispatcher):
 
 
 class ScreenSaverPlugin(EventDispatcher):
-    delay_minutes = NumericProperty(defaultvalue=60)
+    active_after_minutes = NumericProperty(defaultvalue=60)
     elapsed_minutes = NumericProperty(defaultvalue=0)
     enabled = BooleanProperty(defaultvalue=False)
+    screen_saved = BooleanProperty(defaultvalue=False)
+    sys_fs_path = StringProperty(
+        defaultvalue="/sys/class/backlight/rpi_backlight/bl_power"
+    )
 
     def __init__(self, *args, **kwargs):
         super(ScreenSaverPlugin, self).__init__(*args, **kwargs)
-        self.trigger = Clock.create_trigger(self.callback, interval=True, timeout=3600)
+        # Every ~ 60 seconds
+        self.trigger = Clock.create_trigger(self.check_time, interval=True, timeout=60)
+        self.screen_save_trigger = Clock.create_trigger(self.save_screen)
         self.fbind("enabled", self.handle_enabled)
+        self.fbind("screen_saved", self.screen_save_trigger)
 
     def handle_event(self, event):
         if event == "on_interact":
             self.elapsed_minutes = 0
-            Logger.debug(
-                f"ScreenSaverPlugin elapsed_minutes at : {self.elapsed_minutes}"
-            )
+            Logger.debug(f"ScreenSaverPlugin: elapsed_minutes - {self.elapsed_minutes}")
+            self.screen_saved = False
 
     def handle_enabled(self, instance, value):
         if not self.enabled:
@@ -90,9 +98,19 @@ class ScreenSaverPlugin(EventDispatcher):
         else:
             self.trigger()
 
-    def callback(self, dt):
-        # TODO
-        Logger.debug(dt)
-        self.elapsed_minutes = self.elapsed_minutes + 1
-        if self.delay_minutes <= self.elapsed_minutes:
-            Logger.info("ScreenSaver Active")
+    def check_time(self, dt_secs):
+        """Check the amount of time elapsed"""
+        self.elapsed_minutes = self.elapsed_minutes + (dt_secs / 60)
+        if self.active_after_minutes <= self.elapsed_minutes:
+            Logger.info("ScreenSaverPlugin: Saving Screen")
+            self.screen_saved = True
+        else:
+            self.screen_saved = False
+
+    def save_screen(self, dt):
+        if self.screen_saved:
+            # Power off screen
+            Path(self.sys_fs_path).write_text("1", encoding="ascii")
+        else:
+            # Power on screen
+            Path(self.sys_fs_path).write_text("0", encoding="ascii")
