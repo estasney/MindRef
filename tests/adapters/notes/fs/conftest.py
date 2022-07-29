@@ -1,19 +1,11 @@
 from pathlib import Path
-from typing import Iterable
+from typing import Callable, Iterable
 
 from toolz import curry
-from toolz.curried import get, nth, compose_left
+from toolz.curried import get, compose_left
+from string import printable
+import random
 import pytest
-
-
-def pytest_generate_tests(metafunc):
-    if "md_files" in metafunc.fixturenames:
-        md_files = (Path(__file__).parent.parent / "data").glob("*.md")
-        idlist, argvalues = [], []
-        for md_file in md_files:
-            idlist.append(md_file.name)
-            argvalues.append(md_file)
-        metafunc.parametrize("md_files", argvalues, ids=idlist, indirect=True)
 
 
 def _get_expected(fp):
@@ -138,15 +130,64 @@ def get_expected():
 
 
 @pytest.fixture
-def category_folders(tmpdir, img_maker):
-    def _category_folders(n_categories):
+def category_folders(
+    tmpdir, img_maker
+) -> Callable[[int], tuple[list[tuple[Path, Path]], Path]]:
+    def _category_folders(n_categories) -> tuple[list[tuple[Path, Path]], Path]:
         expected = []
         for i in range(n_categories):
             cat_folder = Path(tmpdir) / str(i)
             cat_folder.mkdir()
             cat_img = img_maker(64, 64)
-            cat_img.save(f"{i}.png")
-            expected.append((cat_folder, cat_img))
+            cat_img.save(img_fp := (cat_folder / f"{i}.png"))
+            expected.append((cat_folder, img_fp))
         return expected, Path(tmpdir)
 
     return _category_folders
+
+
+@pytest.fixture()
+def markdown_generator():
+    """Spit out valid markdown"""
+
+    def _markdown_generator():
+        def random_line():
+            return "".join(random.choices(printable, k=random.randint(1, 255)))
+
+        while True:
+            strategy = random.choice(("text", "code", "heading"))
+            if strategy == "heading":
+                yield ("#" * random.randint(1, 4)) + random_line()
+                continue
+            if strategy == "code":
+                chunk = ["```python", random_line()]
+                while random.randint(0, 1) < 1:
+                    chunk.append(random_line())
+                chunk.append("```")
+                yield "\n".join(chunk)
+                continue
+            if strategy == "text":
+                yield "\n".join((random_line() for i in range(random.randint(1, 5))))
+                continue
+
+    return _markdown_generator
+
+
+@pytest.fixture
+def filesystem_data(
+    category_folders, markdown_generator
+) -> Callable[[int, int], tuple[dict[Path, list[Path]], Path]]:
+    def _filesystem_data(n_categories, n_notes) -> tuple[dict[Path, list[Path]], Path]:
+        folders, parent = category_folders(n_categories)
+        gen = markdown_generator()
+        category_files = {}
+        for category_folder, _ in folders:
+            category_files[category_folder] = []
+            for i in range(n_notes):
+                note_path = category_folder / f"{i}.md"
+                note_path.write_text(next(gen))
+                category_files[category_folder].append(note_path)
+
+        return category_files, parent
+
+    return _filesystem_data

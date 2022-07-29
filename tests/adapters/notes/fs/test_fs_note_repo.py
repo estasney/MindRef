@@ -7,5 +7,8 @@ def test_category_discovery(n_categories, category_folders):
     expected_folders, root_folder = category_folders(n_categories)
     fs = FileSystemNoteRepository(new_first=True)
     fs.storage_path = root_folder
-    for folder, _ in expected_folders:
+    discovery = fs.discover_notes()
+    for folder, img in expected_folders:
         assert folder.name in fs.categories
+        assert folder.name in ((d["category"] for d in discovery))
+        assert img in ((d["image_path"] for d in discovery))

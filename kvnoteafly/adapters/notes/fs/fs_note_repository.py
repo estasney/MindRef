@@ -9,7 +9,6 @@ from toolz import groupby
 from adapters.notes.fs.utils import (
     _load_category_notes,
     discover_folder_notes,
-    get_folder_files,
 )
 from adapters.notes.note_repository import (
     AbstractNoteRepository,
@@ -66,25 +65,30 @@ class FileSystemNoteRepository(AbstractNoteRepository):
 
         List of tuples: (category_name, img_path)
         """
-        note_files_bulk = asyncio.run(
-            get_folder_files(self.storage_path, discover=discover_folder_notes)
-        )
 
-        # Separate notes from images
+        category_folders = (f for f in self.storage_path.iterdir() if f.is_dir())
+
         def is_md(p: Path):
             return p.suffix == ".md"
 
-        self._category_files.clear()
         discovery = []
-        for category_name, cat_files in note_files_bulk.items():
-            ext_file_groups = groupby(is_md, cat_files)
-            note_files = ext_file_groups.get(True, [])
-            if img := ext_file_groups.get(False):
-                img = img[0]
-            discovery.append(
-                NoteDiscovery(category=category_name, image_path=img, notes=note_files)
+        for category_folder in category_folders:
+            category_name = category_folder.name
+            category_files = list(
+                discover_folder_notes(category_folder, new_first=self.new_first)
             )
-            self._category_files[category_name] = note_files
+            category_files = groupby(is_md, category_files)
+            category_note_files = category_files.get(True, [])
+            if category_img := category_files.get(False):
+                category_img = category_img[0]
+            discovery.append(
+                NoteDiscovery(
+                    category=category_name,
+                    image_path=category_img,
+                    notes=category_note_files,
+                )
+            )
+            self._category_files[category_name] = category_note_files
 
         return discovery
 

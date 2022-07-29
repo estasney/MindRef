@@ -7,3 +7,5 @@ bin
 **/.env
 **/static/category_img/**
 **/.pytest_cache
+**/.coverage
+tests/**/*.png

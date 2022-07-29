@@ -1,29 +1,9 @@
 import random
 import string
-import tempfile
 from pathlib import Path
 from typing import Literal, Sequence
 
 import pytest
-from PIL import Image, ImageDraw
-
-
-@pytest.fixture()
-def storage_directory():
-    temp_dir = tempfile.TemporaryDirectory()
-    yield Path(temp_dir.name)
-    temp_dir.cleanup()
-
-
-@pytest.fixture()
-def img_maker():
-    def _img_maker(width, height):
-        img = Image.new(mode="RGB", size=(width, height))
-        draw = ImageDraw.Draw(img)
-        draw.line((0, 0, *img.size), fill=128, width=10)
-        return img
-
-    return _img_maker
 
 
 def static_vars(**kwargs):
@@ -51,11 +31,11 @@ def img_name():
 
 
 @pytest.fixture()
-def stored_atlas(storage_directory, img_name, img_maker):
+def stored_atlas(tmpdir, img_name, img_maker):
     def _stored_atlas(atlas_name, atlas_type: Literal["mono", "multi"], n_images):
         WIDTH, HEIGHT = 10, 10
         NAME_POOL = string.ascii_letters + string.digits
-        atlas_folder_path = storage_directory / atlas_name
+        atlas_folder_path = Path(tmpdir) / atlas_name
         atlas_folder_path.mkdir()
         img_files = []
         img_names = []

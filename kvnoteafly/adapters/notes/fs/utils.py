@@ -4,7 +4,7 @@ import asyncio
 from _operator import itemgetter
 
 from pathlib import Path
-from typing import Any, Callable, Coroutine, Mapping
+from typing import Any, Callable, Coroutine, Generator, Mapping
 
 from domain.markdown_note import MarkdownNote
 
@@ -55,20 +55,19 @@ async def _load_category_notes(category: str, note_paths: list[Path], new_first:
     return notes
 
 
-async def discover_folder_notes(
+def discover_folder_notes(
     folder: Path, new_first: bool = True
-) -> tuple[Path, list[Path]]:
-    notes = [f for f in folder.iterdir() if f.is_file()]
-    ordered_notes = await _sort_fp_mtimes(notes, new_first)
-    return folder, ordered_notes
-
-
-async def get_folder_files(folder: Path, discover: DiscoverType, **discover_kwargs):
-    candidates = [(f.name, f) for f in folder.iterdir() if f.is_dir()]
-    if not candidates:
-        return {}
-    categories, folders = zip(*candidates)
-    folder_notes = await asyncio.gather(
-        *[discover(f, **discover_kwargs) for f in folders]
-    )
-    return {folder.name: items for folder, items in folder_notes}
+) -> Generator[Path, None, None]:
+    """
+    Get files in folder, sorted by `st_mtime_ns`
+    Parameters
+    ----------
+    folder : Path
+        Folder to Search
+    new_first : bool, defaults to True
+        If True, newer files appear first
+    """
+    notes = ((f, f.lstat().st_mtime_ns) for f in folder.iterdir() if f.is_file())
+    sorted_notes = sorted(notes, key=itemgetter(1), reverse=new_first)
+    for note, _ in sorted_notes:
+        yield note
