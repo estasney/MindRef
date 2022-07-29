@@ -33,13 +33,13 @@ from domain.events import (
     RefreshNotesEvent,
     SaveNoteEvent,
 )
+from domain.plugin_settings import SETTINGS_PLUGIN_DATA
 from domain.settings import (
     SETTINGS_BEHAVIOR_PATH,
     SETTINGS_DISPLAY_PATH,
     SETTINGS_STORAGE_PATH,
 )
-from domain.plugin_settings import SETTINGS_PLUGIN_DATA
-from plugins import PluginManager, ScreenSaverPlugin
+from plugins import PluginManager
 from service.registry import Registry
 from utils import sch_cb
 from utils.triggers import trigger_factory
@@ -135,6 +135,8 @@ class NoteAFly(App):
             Color scheme
         log_level: NumericProperty
         """
+
+    settings_cls = "KVNoteAFlySettings"
 
     def on_display_state(self, instance, new):
 
