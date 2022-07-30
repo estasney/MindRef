@@ -19,3 +19,7 @@ class InteractBehavior(Widget):
     def on_touch_down(self, touch):
         self.dispatch("on_interact")
         return super(InteractBehavior, self).on_touch_down(touch)
+
+    def on_touch_move(self, touch):
+        self.dispatch("on_interact")
+        return super(InteractBehavior, self).on_touch_move(touch)
