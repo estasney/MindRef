@@ -210,7 +210,6 @@ class NoteAppScreenManager(InteractBehavior, ScreenManager):
 
 class NoteCategoryChooserScreen(InteractScreen):
     chooser = ObjectProperty()
-    categories = ListProperty()
     refresh_triggered = BooleanProperty(False)
     refresh_running = BooleanProperty(False)
 

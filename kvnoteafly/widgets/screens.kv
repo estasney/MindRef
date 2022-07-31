@@ -28,7 +28,6 @@
 <NoteCategoryChooserScreen>:
     id: category_screen
     chooser: chooser
-    categories: app.note_categories
     canvas.before:
         Color:
             rgba: app.colors['Dark']
@@ -37,7 +36,6 @@
             pos: self.pos
     CategoryScreenScrollWrapper:
         screen: category_screen
-        categories: category_screen.categories
         id: chooser
 
 <NoteCategoryScreen>:

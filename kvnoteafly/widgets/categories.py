@@ -24,7 +24,6 @@ class CategoryScreenScrollWrapper(ScrollView):
 
     screen = ObjectProperty()
     chooser = ObjectProperty()
-    categories = ListProperty()
     refresh_triggered = BooleanProperty(False)
 
     effect_cls = RefreshOverscrollEffect
