@@ -113,7 +113,9 @@ class NoteAppScreenManager(InteractBehavior, ScreenManager):
         self.screen_triggers = trigger_factory(self, "current", self.screen_names)
 
     def category_selected(self, category: "NoteCategoryButton"):
-        self.app.note_category = category.text
+        Clock.schedule_once(
+            lambda x: setattr(self.app, "note_category", category.text), 0
+        )
 
     def handle_screen_transitions(self, instance, value: TR_OPTS):
         if value == "None":
@@ -215,7 +217,10 @@ class NoteCategoryChooserScreen(InteractScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.refresh_icon = None
-        self.fbind("refresh_running", self.handle_refresh_running)
+        self.handle_refresh_running_trigger = Clock.create_trigger(
+            self.handle_refresh_running
+        )
+        self.fbind("refresh_running", self.handle_refresh_running_trigger)
 
     def category_selected(self, category_btn: "NoteCategoryButton"):
         self.manager.category_selected(category_btn)
@@ -242,11 +247,14 @@ class NoteCategoryChooserScreen(InteractScreen):
             self.refresh_icon = None
         self.refresh_running = False
 
-    def handle_refresh_running(self, instance, value):
+    def handle_refresh_running(self, *args):
         """Call the NoteService and ask for refresh"""
-        Logger.debug("Refreshing")
-        app = App.get_running_app()
-        app.registry.push_event(RefreshNotesEvent(on_complete=self.clear_refresh_icon))
+        if self.refresh_running:
+            Logger.info("Refreshing")
+            app = App.get_running_app()
+            app.registry.push_event(
+                RefreshNotesEvent(on_complete=self.clear_refresh_icon)
+            )
 
     def on_refresh_triggered(self, instance, value):
         Clock.schedule_once(self.handle_refresh_icon)

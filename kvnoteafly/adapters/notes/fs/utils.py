@@ -1,58 +1,54 @@
 from __future__ import annotations
 
-import asyncio
-from _operator import itemgetter
-
+from _operator import attrgetter, itemgetter
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Any, Callable, Coroutine, Generator, Mapping
+from typing import Generator, Iterable, Mapping, Sequence
 
 from domain.markdown_note import MarkdownNote
 
 CategoryFiles = Mapping[str, list[Path]]
 CategoryNoteMeta = list[MarkdownNote]
-DiscoverType = Callable[[Any, Any], Coroutine[Any, Any, tuple[Path, list[Path]]]]
 
 
-async def _fetch_fp_mtime(f: Path) -> tuple[Path, int]:
-    return f, f.lstat().st_mtime_ns
-
-
-async def _sort_fp_mtimes(files: list[Path], new_first: bool) -> list[Path]:
-    """Fetch and sort file modified times
-
-    Parameters
-    ----------
-    new_first
-    """
-    fetched = await asyncio.gather(*[_fetch_fp_mtime(f) for f in files])
-    fetched = sorted(fetched, key=itemgetter(1), reverse=new_first)
-    return [f for f, _ in fetched]
-
-
-async def _load_category_meta(i: int, note_path: Path) -> tuple[int, str, Path]:
-    with note_path.open(mode="r", encoding="utf-8") as fp:
-        note_text = fp.read()
-    return i, note_text, note_path
-
-
-async def _load_category_metas(note_paths: list[Path], new_first: bool):
-    note_paths_ordered = await _sort_fp_mtimes(note_paths, new_first)
-    meta_texts = await asyncio.gather(
-        *[_load_category_meta(i, f) for i, f in enumerate(note_paths_ordered)]
-    )
-    return meta_texts
-
-
-async def _load_category_note(i: int, category: str, note_path: Path) -> MarkdownNote:
+def _load_category_note(i: int, category: str, note_path: Path) -> MarkdownNote:
     return MarkdownNote.from_file(category=category, idx=i, fp=note_path)
 
 
-async def _load_category_notes(category: str, note_paths: list[Path], new_first: bool):
-    note_paths_ordered = await _sort_fp_mtimes(note_paths, new_first)
-    notes = await asyncio.gather(
-        *[_load_category_note(i, category, f) for i, f in enumerate(note_paths_ordered)]
-    )
-    return notes
+def _load_category_notes(
+    category: str, note_paths: Sequence[Path], new_first: bool
+) -> Iterable[MarkdownNote]:
+    """
+    Given a category, load MarkdownNote for each of its files
+
+    Parameters
+    ----------
+    category : str
+        Name of category
+    note_paths : Sequence[Path]
+        File paths
+    new_first : bool
+        Determines ordering by `st_mtime_ns`
+
+    Returns
+    -------
+    """
+    notes = ((f, f.lstat().st_mtime_ns) for f in note_paths)
+    notes = sorted(notes, key=itemgetter(1), reverse=new_first)
+    notes = (f for f, _ in notes)
+
+    with ThreadPoolExecutor() as executor:
+        pipeline = [
+            executor.submit(
+                _load_category_note, i=i, category=category, note_path=note_path
+            )
+            for i, note_path in enumerate(notes)
+        ]
+        output = []
+        for future in as_completed(pipeline):
+            output.append(future.result())
+
+    return sorted(output, key=attrgetter("idx"), reverse=new_first)
 
 
 def discover_folder_notes(

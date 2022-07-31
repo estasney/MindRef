@@ -27,6 +27,7 @@ from domain.events import (
     AddNoteEvent,
     BackButtonEvent,
     CancelEditEvent,
+    DiscoverCategoryEvent,
     EditNoteEvent,
     NoteFetchedEvent,
     NotesQueryEvent,
@@ -49,8 +50,8 @@ from widgets.screens import NoteAppScreenManager
 class NoteAFly(App):
     APP_NAME = "NoteAFly"
     atlas_service = AtlasService(storage_path=Path("./static").resolve())
-    note_service = FileSystemNoteRepository(new_first=True)
-    editor_service = FileSystemEditor()
+    note_service = FileSystemNoteRepository(get_app=App.get_running_app, new_first=True)
+    editor_service = FileSystemEditor(get_app=App.get_running_app)
     plugin_manager = PluginManager()
 
     registry = Registry(logger=Logger)
@@ -264,23 +265,10 @@ class NoteAFly(App):
         sch_cb(0.5, clear_categories, run_query)
 
     def process_notes_query_event(self, event: NotesQueryEvent):
-        def append_category_factory(category):
-            def append_category(dt, c):
-                current = [c for c in self.note_categories]
-                current.append(c)
-                self.note_categories = current
-
-            func = partial(append_category, c=category)
-            return func
-
-        steps = [
-            append_category_factory(c) for c in [d["category"] for d in event.result]
-        ]
+        """Notes have finished Querying"""
 
         if event.on_complete is not None:
-            steps.append(event.on_complete)
-
-        sch_cb(0, *steps)
+            sch_cb(0.1, event.on_complete)
 
     def process_back_button_event(self, event: BackButtonEvent):
         # The display state when button was pressed
@@ -302,6 +290,12 @@ class NoteAFly(App):
             Logger.warning(
                 f"Unknown display state encountered when handling back button: {ds}"
             )
+
+    def process_discover_category_event(self, event: DiscoverCategoryEvent):
+        event_category = event.category
+        if event_category not in self.note_categories:
+            Logger.debug(f"NoteDiscoveryEvent: {event_category}")
+            self.note_categories.append(event_category)
 
     def process_event(self, dt):
         if len(self.registry.events) == 0:

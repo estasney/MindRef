@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-import asyncio
 from pathlib import Path
-from typing import Optional, cast, TYPE_CHECKING
+from typing import Generator, Optional, TYPE_CHECKING, cast, NamedTuple
 
 from toolz import groupby
 
@@ -12,19 +11,24 @@ from adapters.notes.fs.utils import (
 )
 from adapters.notes.note_repository import (
     AbstractNoteRepository,
-    NoteDiscovery,
     NoteIndex,
 )
 from domain.markdown_note import MarkdownNote
 
 if TYPE_CHECKING:
+    from os import PathLike
     from domain.editable import EditableNote
+    from domain.markdown_note import MarkdownNoteDict
+
+
+class NoteDiscovery(NamedTuple):
+    category: str
+    image_path: Optional[Path]
+    notes: list[Path]
 
 
 class FileSystemNoteRepository(AbstractNoteRepository):
-    _index: Optional[NoteIndex]
-    _current_category: Optional[str]
-    _storage_path: Optional[Path]
+    _category_files: dict[str, list[Path]]
 
     """
     Categories are defined with directories
@@ -36,7 +40,8 @@ class FileSystemNoteRepository(AbstractNoteRepository):
         Images in category folders
     """
 
-    def __init__(self, new_first: bool):
+    def __init__(self, get_app, new_first: bool):
+        super().__init__(get_app)
         self.new_first = new_first
         self._category_files = {}
         self._storage_path = None
@@ -49,21 +54,20 @@ class FileSystemNoteRepository(AbstractNoteRepository):
         return self._storage_path
 
     @storage_path.setter
-    def storage_path(self, value: Path | str):
+    def storage_path(self, value: "PathLike"):
         self._storage_path = Path(value)
 
-    def discover_notes(self, *args) -> list[NoteDiscovery]:
+    def discover_notes(self, *args) -> Generator[NoteDiscovery, None, None]:
         """
-        Read `self.storage_path` looking for children folders and the associated notes within each.
+        Read `self.storage_path` looking for category folders, their notes, and optional image
+
         Notes
         -----
         Does not read the notes, only gathers a listing of them
 
-        Returns
+        Yields
         -------
-        Mapping of category: note_paths
-
-        List of tuples: (category_name, img_path)
+        NoteDiscovery
         """
 
         category_folders = (f for f in self.storage_path.iterdir() if f.is_dir())
@@ -71,7 +75,6 @@ class FileSystemNoteRepository(AbstractNoteRepository):
         def is_md(p: Path):
             return p.suffix == ".md"
 
-        discovery = []
         for category_folder in category_folders:
             category_name = category_folder.name
             category_files = list(
@@ -81,29 +84,25 @@ class FileSystemNoteRepository(AbstractNoteRepository):
             category_note_files = category_files.get(True, [])
             if category_img := category_files.get(False):
                 category_img = category_img[0]
-            discovery.append(
-                NoteDiscovery(
-                    category=category_name,
-                    image_path=category_img,
-                    notes=category_note_files,
-                )
-            )
             self._category_files[category_name] = category_note_files
-
-        return discovery
+            yield NoteDiscovery(
+                category=category_name,
+                image_path=category_img,
+                notes=category_note_files,
+            )
 
     @property
     def category_meta(self):
         return self._load_category_meta()
 
-    def _load_category_meta(self):
+    def _load_category_meta(self) -> list["MarkdownNoteDict"]:
         category_files = self._category_files[self.current_category]
-        category_notes = asyncio.run(
-            _load_category_notes(
-                self.current_category, category_files, new_first=self.new_first
-            )
+        category_notes = _load_category_notes(
+            category=self.current_category,
+            note_paths=category_files,
+            new_first=self.new_first,
         )
-        category_notes = cast(list[MarkdownNote], category_notes)
+
         category_note_dicts = [note.to_dict() for note in category_notes]
 
         return category_note_dicts
@@ -111,8 +110,9 @@ class FileSystemNoteRepository(AbstractNoteRepository):
     @property
     def categories(self) -> list[str]:
         if not self._category_files:
-            self.discover_notes()
-
+            # To populate _category_files we have to consume the iterable
+            for _ in self.discover_notes():
+                ...
         return list(self._category_files.keys())
 
     @property
@@ -124,10 +124,8 @@ class FileSystemNoteRepository(AbstractNoteRepository):
         if not value:
             self._current_category = None
             self._index = None
-
             return
         self._current_category = value
-        self._load_category_meta()
         self._index = NoteIndex(size=len(self._category_files[value]))
 
     def index_size(self):

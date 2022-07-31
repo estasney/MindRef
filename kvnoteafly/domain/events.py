@@ -1,10 +1,11 @@
 import abc
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Callable, Literal, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from domain.markdown_note import MarkdownNote
-    from adapters.notes.note_repository import NoteDiscovery
+    from domain.protocols import NoteDiscovery
 
 DISPLAY_STATE = Literal["choose", "display", "list", "edit", "add"]
 
@@ -51,16 +52,25 @@ class NoteFetchedEvent(Event):
 class NotesQueryEvent(Event):
     event_type = "notes_query"
     on_complete: Optional[Callable]
-    result: list["NoteDiscovery"] = field(default_factory=list)
 
 
 @dataclass
 class RefreshNotesEvent(Event):
     event_type = "refresh_notes"
-    on_complete: Callable[[None], None]
+    on_complete: Callable[[], None]
 
 
 @dataclass
 class BackButtonEvent(Event):
     event_type = "back_button"
     display_state: DISPLAY_STATE
+
+
+@dataclass
+class DiscoverCategoryEvent(Event):
+    """Event Emitted when a Category is detected"""
+
+    event_type = "discover_category"
+    category: str
+    image_path: Optional[Path]
+    notes: list[Path] = field(default_factory=list)

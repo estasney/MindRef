@@ -1,13 +1,15 @@
 from __future__ import annotations
 
-from adapters.editor.editor_repository import AbstractEditorRepository, NoteServiceApp
+from adapters.editor.editor_repository import (
+    AbstractEditorRepository,
+)
 from domain.editable import EditableNote
 from domain.markdown_note import MarkdownNote
 
 
 class FileSystemEditor(AbstractEditorRepository):
-    def __init__(self):
-        ...
+    def __init__(self, get_app):
+        super().__init__(get_app)
 
     def new_note(self, category: str, idx: int) -> EditableNote:
         """
@@ -37,6 +39,6 @@ class FileSystemEditor(AbstractEditorRepository):
         """
         ...
 
-    def edit_current_note(self, app: NoteServiceApp) -> EditableNote:
-        current = app.note_service.current_note()
+    def edit_current_note(self) -> EditableNote:
+        current = self.get_app().note_service.current_note()
         return self.edit_note(current)

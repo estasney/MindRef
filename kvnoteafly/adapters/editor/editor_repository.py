@@ -1,14 +1,32 @@
 from __future__ import annotations
 
 import abc
-from typing import Protocol
 
+from domain.protocols import AppRegistryProtocol, GetApp
 from adapters.notes.note_repository import AbstractNoteRepository
 from domain.editable import EditableNote
 from domain.markdown_note import MarkdownNote
 
 
+class NoteServiceAppProtocol(AppRegistryProtocol):
+    """
+    Protocol that defines a class with a Registry and note_service
+    """
+
+    note_service: "AbstractNoteRepository"
+
+
 class AbstractEditorRepository(abc.ABC):
+    def __init__(self, get_app: GetApp[NoteServiceAppProtocol]):
+        """
+
+        Parameters
+        ----------
+        get_app : Callable
+            Callable that returns an object implementing `NoteServiceAppProtocol`
+        """
+        self.get_app = get_app
+
     @abc.abstractmethod
     def new_note(self, category: str, idx: int) -> EditableNote:
         ...
@@ -22,9 +40,5 @@ class AbstractEditorRepository(abc.ABC):
         ...
 
     @abc.abstractmethod
-    def edit_current_note(self, app: NoteServiceApp) -> EditableNote:
+    def edit_current_note(self) -> EditableNote:
         ...
-
-
-class NoteServiceApp(Protocol):
-    note_service: "AbstractNoteRepository"

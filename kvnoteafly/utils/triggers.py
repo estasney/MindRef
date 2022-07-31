@@ -5,13 +5,13 @@ from kivy import Logger
 from kivy.clock import Clock
 
 if TYPE_CHECKING:
-    from kivy.uix.widget import Widget
+    from kivy.event import EventDispatcher
 
 V = TypeVar("V")
 
 
 def trigger_factory(
-    target: "Widget", prop_name: str, values: Sequence[V]
+    target: "EventDispatcher", prop_name: str, values: Sequence[V]
 ) -> Callable[[V], None]:
     """
     Generate functions for setting a property to a value

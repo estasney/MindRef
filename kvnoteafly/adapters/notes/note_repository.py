@@ -1,27 +1,31 @@
+from __future__ import annotations
 import abc
 from abc import ABC
 from pathlib import Path
-from typing import Optional, TypedDict, TYPE_CHECKING
+from typing import Generator, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from os import PathLike
     from domain.markdown_note import MarkdownNote
     from domain.editable import EditableNote
-
-
-class NoteDiscovery(TypedDict):
-    category: str
-    image_path: Optional[Path]
-    notes: list[Path]
+    from domain.protocols import GetApp, NoteDiscoveryProtocol
 
 
 class AbstractNoteRepository(ABC):
+    _index: Optional["NoteIndex"]
+    _current_category: Optional[str]
+    _storage_path: Optional[Path]
+
+    def __init__(self, get_app: "GetApp"):
+        self.get_app = get_app
+
     @property
     @abc.abstractmethod
     def storage_path(self):
         raise NotImplementedError
 
     @storage_path.setter
-    def storage_path(self, path):
+    def storage_path(self, path: "PathLike"):
         raise NotImplementedError
 
     @property
@@ -45,19 +49,19 @@ class AbstractNoteRepository(ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def discover_notes(self) -> list[NoteDiscovery]:
+    def discover_notes(self) -> Generator["NoteDiscoveryProtocol", None, None]:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def next_note(self):
+    def next_note(self) -> "MarkdownNote":
         raise NotImplementedError
 
     @abc.abstractmethod
-    def previous_note(self):
+    def previous_note(self) -> "MarkdownNote":
         raise NotImplementedError
 
     @abc.abstractmethod
-    def current_note(self):
+    def current_note(self) -> "MarkdownNote":
         raise NotImplementedError
 
     @abc.abstractmethod
