@@ -1,5 +1,8 @@
+import re
 from typing import NamedTuple
 
+from kivy import Logger
+from kivy.metrics import sp
 from kivy.clock import Clock
 from kivy.graphics import Color, RoundedRectangle
 from kivy.properties import (
@@ -72,6 +75,8 @@ class LabelHighlightInline(Label):
             fbind("refs", self.draw_ref_spans_trigger)
             fbind("size", self.draw_ref_spans_trigger)
             fbind("pos", self.draw_ref_spans_trigger)
+            fbind("padding_x", self.draw_ref_spans_trigger)
+            fbind("padding_y", self.draw_ref_spans_trigger)
 
         else:
             funbind("text_color", self.markup_text_trigger)
@@ -82,6 +87,8 @@ class LabelHighlightInline(Label):
             funbind("refs", self.draw_ref_spans_trigger)
             funbind("size", self.draw_ref_spans_trigger)
             funbind("pos", self.draw_ref_spans_trigger)
+            funbind("padding_x", self.draw_ref_spans_trigger)
+            funbind("padding_y", self.draw_ref_spans_trigger)
 
     def add_snippet(self, snippet: TextSnippet):
         self.snippets.append(snippet)
@@ -103,12 +110,17 @@ class LabelHighlightInline(Label):
     def markup_text(self, *args, **kwargs):
         """Update the markup within text to reflect new colors"""
 
+        # Add one additional whitespace for highlight snippets ending in 'newline'
+        RE_NEWLINE_PAD = re.compile(r"(?<=\S)(\n)|(\r\n)")
+
         texts = []
         for snippet in self.snippets:
-
             if snippet.highlight:
+                snippet_text = RE_NEWLINE_PAD.sub(" \n", escape_markup(snippet.text))
                 texts.append(
-                    f"[font={self.font_family_mono}][color={self.text_color_highlight}][ref=hl] {escape_markup(snippet.text)} [/ref][/color][/font]"
+                    f"[font={self.font_family_mono}]"
+                    f"[color={self.text_color_highlight}]"
+                    f"[ref=hl] {snippet_text} [/ref][/color][/font]"
                 )
             else:
                 texts.append(
@@ -119,21 +131,58 @@ class LabelHighlightInline(Label):
         self.text = "".join(texts)
         return True
 
+    def compute_ref_coords(
+        self, span: tuple[int, int, int, int]
+    ) -> tuple[float, float, float, float]:
+        """
+        Since spans are computed relative to texture, we want them in window form
+
+        Kivy's origin is (0,0) at bottom-left
+
+        Parameters
+        ----------
+        span
+
+        Returns
+        -------
+
+        """
+
+        # Window X coordinate of top left text texture
+        pX = self.x + self.padding_x
+
+        # Window Y coordinate of top left text texture
+        pY = self.y + self.padding_y + self.texture_size[1]
+        # pY = self.padding_y + self.y + self.height
+
+        x1, y1, x2, y2 = span
+        x1 += pX
+        y1 = pY - y1
+
+        x2 += pX
+        y2 = pY - y2
+
+        return x1, y1, x2, y2
+
     def draw_ref_spans(self, *args, **kwargs):
-        """Draw ref highlights"""
+        """
+        Draw ref highlights
+
+        Notes
+        ------
+        These have a bounding box at (x1, y1, x2, y2).
+        These coordinates are relative to the top left corner of the text, with the y value increasing downwards.
+        """
         if not self.refs:
+            with self.canvas.before:
+                self.canvas.before.clear()
             return
         with self.canvas.before:
             self.canvas.before.clear()
             Color(*self.highlight_color)
+
             for span in self.refs.get("hl"):
-                x1, y1, x2, y2 = span
+                x1, y1, x2, y2 = self.compute_ref_coords(span)
                 w = x2 - x1
                 h = y2 - y1
-                xp, yp = self.to_parent(x1, y2)
-                if w + self.x + xp >= self.width:
-                    w += 4
-
-                RoundedRectangle(
-                    pos=(self.x + xp, self.y + yp), size=(w, h), radius=(3,)
-                )
+                RoundedRectangle(pos=(x1, y1), size=(w, h), radius=(3,))
