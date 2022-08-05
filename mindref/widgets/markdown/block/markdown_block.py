@@ -4,12 +4,9 @@ from kivy.properties import (
     ObjectProperty,
     StringProperty,
 )
-from kivy.uix.boxlayout import BoxLayout
 
 from utils import import_kv
-from widgets.markdown.markdown_interceptor import (
-    InterceptingInlineWidgetMixin,
-)
+from widgets.markdown.base.base import MarkdownLabelBase
 
 import_kv(__file__)
 
@@ -19,17 +16,14 @@ if TYPE_CHECKING:
     pass
 
 
-class MarkdownHeading(BoxLayout, InterceptingInlineWidgetMixin):
-    label = ObjectProperty()
+class MarkdownHeading(MarkdownLabelBase):
     level = NumericProperty()
-    snippets = ListProperty()
-    open_bbcode_tag = StringProperty()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
 
-class MarkdownBlock(BoxLayout, InterceptingInlineWidgetMixin):
+class MarkdownBlock(MarkdownLabelBase):
     label = ObjectProperty()
     open_bbcode_tag = StringProperty()
     snippets = ListProperty()

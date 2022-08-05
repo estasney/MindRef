@@ -119,3 +119,7 @@ class DiscoverCategoryEvent(Event):
     category: str
     image_path: Optional[Path]
     notes: list[Path] = field(default_factory=list)
+
+    def __repr__(self):
+        img_path = self.image_path.name if self.image_path else "None"
+        return f"{self.__class__.__name__}(category={self.category}, image_path={img_path}, n_notes={len(self.notes)})"

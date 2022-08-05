@@ -20,9 +20,7 @@ class MarkdownDocument(ScrollView, MarkdownVisitor):
     text = StringProperty()
     title = StringProperty()
     document = ObjectProperty()
-    base_font_size = NumericProperty(31)
     content = ObjectProperty()
-    scatter = ObjectProperty()
 
     def __init__(self, content_data: dict, **kwargs):
         super(MarkdownDocument, self).__init__(**kwargs)

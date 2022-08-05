@@ -3,8 +3,6 @@ from typing import Callable, Iterable
 
 from toolz import curry
 from toolz.curried import get, compose_left
-from string import printable
-import random
 import pytest
 
 
@@ -36,7 +34,6 @@ def _get_expected(fp):
 
     _get_title = _getattr("title")
     _get_document = _getattr("document")
-    _get_sk = _getattr("shortcut_keys")
     _get_text = _getattr("text")
     _get_table_head = compose_left(
         _get_document, _get_table(0), get("children"), get(0), is_table_head
@@ -83,18 +80,8 @@ def _get_expected(fp):
         doc = _get_document(item)
         assert _has_table(doc) is val, f"Should {'Not' if False else ''} Have Table"
 
-    @curry
-    def _having_shortcut_keys(val: bool, item):
-        keys = _get_sk(item)
-        if val:
-            assert keys is not None, f"Shortcut Keys Should Be Set"
-        else:
-            assert keys is None, f"Shortcut Keys Should Be None"
-
     has_table = _having_table(True)
     no_table = _having_table(False)
-    has_sk_keys = _having_shortcut_keys(True)
-    no_sk_keys = _having_shortcut_keys(False)
     has_text_with = _having_text(True)
     no_text_with = _having_text(False)
 
@@ -103,18 +90,11 @@ def _get_expected(fp):
             no_table,
             has_title("Decorators"),
             has_block_code("python"),
-            no_sk_keys,
         ],
         "Pattern Matching Operators.md": [
             has_table,
             has_title("Pattern Matching Operators"),
             has_aligned_table(["left", "center"]),
-            no_sk_keys,
-        ],
-        "Accept suggestion.md": [
-            no_table,
-            has_title("Accept suggestion, with syntax fixing"),
-            has_sk_keys,
         ],
         "Zen.md": [
             no_table,
@@ -144,33 +124,6 @@ def category_folders(
         return expected, Path(tmpdir)
 
     return _category_folders
-
-
-@pytest.fixture()
-def markdown_generator():
-    """Spit out valid markdown"""
-
-    def _markdown_generator():
-        def random_line():
-            return "".join(random.choices(printable, k=random.randint(1, 255)))
-
-        while True:
-            strategy = random.choice(("text", "code", "heading"))
-            if strategy == "heading":
-                yield ("#" * random.randint(1, 4)) + random_line()
-                continue
-            if strategy == "code":
-                chunk = ["```python", random_line()]
-                while random.randint(0, 1) < 1:
-                    chunk.append(random_line())
-                chunk.append("```")
-                yield "\n".join(chunk)
-                continue
-            if strategy == "text":
-                yield "\n".join((random_line() for i in range(random.randint(1, 5))))
-                continue
-
-    return _markdown_generator
 
 
 @pytest.fixture

@@ -22,6 +22,8 @@ BLOCK_QUOTE = Literal["block_quote"]
 LIST = Literal["list"]
 LIST_ITEM = Literal["list_item"]
 PARAGRAPH = Literal["paragraph"]
+INLINE_HTML = Literal["inline_html"]
+INLINE_KBD = Literal["kbd"]
 
 MD_LIT_TYPES = Union[
     TEXT,
@@ -43,6 +45,8 @@ MD_LIT_TYPES = Union[
     LIST_ITEM,
     PARAGRAPH,
     LINK,
+    INLINE_HTML,
+    INLINE_KBD,
 ]
 
 
@@ -166,6 +170,16 @@ class MdTable(TypedDict):
     children: list[Union[MdTableHead, MdTableBody]]
 
 
+class MdInlineHTML(TypedDict):
+    type: INLINE_HTML
+    text: str
+
+
+class MdInlineKeyboard(TypedDict):
+    type: INLINE_KBD
+    text: str
+
+
 MD_TYPES = Union[
     MdListItem,
     MdListUnordered,
@@ -187,6 +201,8 @@ MD_TYPES = Union[
     MdTable,
     MdTableHeadCell,
     MdParagraph,
+    MdInlineHTML,
+    MdKeyboard,
 ]
 
 MD_DOCUMENT = list[MD_TYPES]
@@ -216,6 +232,8 @@ MD_BLOCK_TYPES = Union[
     MdParagraph,
 ]
 
-MD_LIT_INLINE_TYPES = Union[CODESPAN, STRONG, TEXT, EMPHASIS]
+MD_LIT_INLINE_TYPES = Union[CODESPAN, STRONG, TEXT, EMPHASIS, INLINE_HTML, INLINE_KBD]
 
-MD_INLINE_TYPES = Union[MdCodeSpan, MdTextStrong, MdText, MdTextEmphasis]
+MD_INLINE_TYPES = Union[
+    MdCodeSpan, MdTextStrong, MdText, MdTextEmphasis, MdInlineHTML, MdInlineKeyboard
+]

@@ -1,10 +1,10 @@
 import mistune
-from typing import TYPE_CHECKING
-
 from utils import Singleton
+from typing import TYPE_CHECKING
+from .kbd_plugin import plugin_kbd
 
 if TYPE_CHECKING:
-    from .md_parser_types import MD_DOCUMENT, MD_TYPES
+    from ..md_parser_types import MD_DOCUMENT, MD_TYPES
 
 
 class MarkdownParser(metaclass=Singleton):
@@ -12,7 +12,7 @@ class MarkdownParser(metaclass=Singleton):
 
     def __init__(self):
         self._parser = mistune.create_markdown(
-            renderer=mistune.AstRenderer(), plugins=["table"]
+            escape=False, renderer=mistune.AstRenderer(), plugins=["table", plugin_kbd]
         )
 
     def parse(self, text: str) -> "MD_DOCUMENT":

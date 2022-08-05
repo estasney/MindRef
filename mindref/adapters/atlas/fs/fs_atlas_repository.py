@@ -1,22 +1,18 @@
 from __future__ import annotations
 
-import asyncio
 import json
 import os
 import re
 import shutil
 import tempfile
 from _operator import itemgetter
-
 from pathlib import Path
 from typing import NamedTuple, NewType, Optional, Sequence, Union
 
 import PIL.Image
-from kivy import Logger
 from kivy.atlas import Atlas as KivyAtlas
 
 from adapters.atlas.atlas_repository import AbstractAtlasRepository
-from adapters.atlas.fs.utils import read_img_sizes
 from utils import EnvironContext, LazyLoaded
 
 ImgParamType = Union[str, Path, PIL.Image.Image]
@@ -43,7 +39,7 @@ class AtlasService(AbstractAtlasRepository):
     - Provides path for kivy usage
     """
 
-    builtin_atlases = {"icons", "category_img", "keys", "textures"}
+    builtin_atlases = {"icons", "textures"}
     atlases: LazyLoaded[list[AtlasItem]] = LazyLoaded()
     _storage_path: Optional[Path]
     _instance = None
@@ -264,30 +260,3 @@ class AtlasService(AbstractAtlasRepository):
     def uri_for(self, name: str, atlas_name: str):
         matched = self._match_atlas(atlas_name)
         return f"atlas://{matched.path.with_suffix('')}/{name}"
-
-    def category_image_listener(self, imgs: Sequence[tuple[str, Path]]):
-
-        new_imgs = [
-            (cname.lower(), img_path)
-            for cname, img_path in imgs
-            if f"category_img.{cname.lower()}" not in self
-        ]
-        if new_imgs:
-            Logger.info(f"Found new Images {new_imgs}")
-            img_sizes = asyncio.run(read_img_sizes([fp for _, fp in new_imgs]))
-            # Size the atlas to fit the largest image
-            k_large = max(
-                ((a, b) for a, b in img_sizes.values()), key=lambda x: x[0] * x[1]
-            )
-            # Add padding
-            k_large = max(k_large) + 4
-            names, paths = [], []
-            for cname, img_path in new_imgs:
-                names.append(cname.lower())
-                paths.append(img_path)
-            self.save_to_atlas(
-                images=paths,
-                image_names=names,
-                atlas_name="category_img",
-                atlas_size=(k_large, k_large),
-            )

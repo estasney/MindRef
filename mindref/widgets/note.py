@@ -13,7 +13,6 @@ from widgets.behavior.gesture_rec_behavior import GestureRecognizingBehavior
 
 import_kv(__file__)
 
-from widgets.keyboard import ContentKeyboard
 from widgets.markdown.markdown_document import MarkdownDocument
 
 if TYPE_CHECKING:
@@ -24,11 +23,7 @@ Cache.register("note_widget", limit=10, timeout=3600)
 
 @kivy_cache(cache_name="note_widget", key_func=cache_key_note)
 def get_cached_note(*, content_data: "MarkdownNoteDict", parent: "NoteContent"):
-    if content_data.get("has_shortcut", False):
-        result = ContentKeyboard(content_data=content_data)
-    else:
-        result = MarkdownDocument(content_data=content_data)
-    return result
+    return MarkdownDocument(content_data=content_data)
 
 
 class Note(BoxLayout, GestureRecognizingBehavior):
@@ -68,17 +63,11 @@ class NoteContent(BoxLayout):
         Logger.debug(
             f"NoteContent: {content_data['category']}, {content_data['title']}"
         )
-        if content_data.get("has_shortcut", False):
-            self._set_keyboard(content_data)
-        else:
-            self._set_markdown(content_data)
+
+        self._set_markdown(content_data)
 
     def clear(self):
         self.clear_widgets()
-
-    def _set_keyboard(self, content_data: "MarkdownNoteDict"):
-        widget = get_cached_note(content_data=content_data, parent=self)
-        self.add_widget(widget)
 
     def _set_markdown(self, content_data: "MarkdownNoteDict"):
         md_widget = get_cached_note(content_data=content_data, parent=self)

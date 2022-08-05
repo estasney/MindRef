@@ -95,17 +95,14 @@ class MindRefApp(App):
             "Gray-300": parse_color("#c7c8ca"),
             "Gray-400": parse_color("#9a9da1"),  # White text
             "Gray-500": parse_color("#6d7278"),
-            "Codespan": (0, 0, 0, 0.15),
+            "Codespan": parse_color("#00000026"),
+            "Keyboard": parse_color("#c4c4c4"),
+            "KeyboardShadow": parse_color("#656565"),
             "Primary": parse_color("#37464f"),
             "Dark": parse_color("#101f27"),
             "Accent-One": parse_color("#388fe5"),
             "Accent-Two": parse_color("#56e39f"),
-            "Warn": (
-                0.9803921568627451,
-                0.09803921568627451,
-                0.09803921568627451,
-                1.0,
-            ),  # fa1919
+            "Warn": parse_color("#fa1919"),
         }
     )
     """
@@ -122,7 +119,7 @@ class MindRefApp(App):
         editor_note: ObjectProperty
             Ephemeral note used by editor service
         note_category_meta: ListProperty
-            Metadata for notes associated with active Category. Info such as Title, and Shortcuts
+            Metadata for notes associated with active Category. Info such as Title and index
         next_note_scheduler: ObjectProperty
         display_state: OptionProperty
             One of ["choose", "display", "list", "edit", "add", "error"]

@@ -7,7 +7,7 @@ from os import PathLike
 from pathlib import Path
 from typing import Generator, Optional, Protocol, TYPE_CHECKING, TypedDict
 
-from domain.parser import MarkdownParser
+from domain.parser.markdown_parser import MarkdownParser
 
 if TYPE_CHECKING:
     from domain.md_parser_types import MD_DOCUMENT, MdHeading, MdBlockCode
@@ -28,8 +28,6 @@ class MarkdownNoteDict(TypedDict):
     idx: int
     filepath: Optional[Path]
     document: "MD_DOCUMENT"
-    has_shortcut: bool
-    shortcut_keys: Optional[tuple[str, ...]]
 
 
 @dataclass
@@ -42,8 +40,6 @@ class MarkdownNote:
     idx: int
     filepath: Optional[Path]
     document: "MD_DOCUMENT"
-    has_shortcut: bool
-    shortcut_keys: Optional[tuple[str, ...]]
 
     def to_dict(self) -> MarkdownNoteDict:
         return asdict(self, dict_factory=MarkdownNoteDict)
@@ -54,8 +50,6 @@ class MarkdownNote:
         text = filepath.read_text(encoding="utf-8")
         document = cls.parser.parse(text)
         document, doc_title = cls._get_title_from_doc(document)
-        shortcut_keys = cls._get_block_code_shortcut(document)
-        has_shortcut = bool(shortcut_keys)
         if not doc_title:
             doc_title = filepath.stem.title()
         return MarkdownNote(
@@ -65,8 +59,6 @@ class MarkdownNote:
             idx=idx,
             filepath=filepath,
             document=document,
-            has_shortcut=has_shortcut,
-            shortcut_keys=shortcut_keys,
         )
 
     @classmethod
@@ -81,8 +73,6 @@ class MarkdownNote:
         text = buffer.read()
         document = cls.parser.parse(text)
         document, doc_title = cls._get_title_from_doc(document)
-        shortcut_keys = cls._get_block_code_shortcut(document)
-        has_shortcut = bool(shortcut_keys)
         return MarkdownNote(
             category=category,
             text=text,
@@ -90,8 +80,6 @@ class MarkdownNote:
             idx=idx,
             filepath=filepath,
             document=document,
-            has_shortcut=has_shortcut,
-            shortcut_keys=shortcut_keys,
         )
 
     @classmethod
@@ -119,14 +107,3 @@ class MarkdownNote:
         cls, document: "MD_DOCUMENT"
     ) -> Generator["MdBlockCode", None, None]:
         return (node for node in document if node["type"] == "block_code")
-
-    @classmethod
-    def _get_block_code_shortcut(cls, document: "MD_DOCUMENT") -> Optional[tuple[str]]:
-        blocks = cls._get_block_code(document)
-        shortcut_block = next(
-            (node for node in blocks if node["info"] == "shortcut"), None
-        )
-        if not shortcut_block:
-            return None
-        key_chars = tuple((t.strip() for t in shortcut_block["text"].split(",")))
-        return key_chars

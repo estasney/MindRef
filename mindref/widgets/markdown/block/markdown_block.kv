@@ -1,7 +1,8 @@
 #:import parse_color kivy.parser.parse_color
 #:import LabelHighlightInline widgets.behavior.inline_behavior
+#:import MarkdownLabelBase widgets.markdown.base
 
-<MarkdownHeading>:
+<MarkdownHeading@MarkdownLabelBase>:
     orientation: 'horizontal'
     size_hint_y: None
     height: self.minimum_height
@@ -26,9 +27,7 @@
         padding: (0, 0)
 
 
-
-
-<MarkdownBlock>:
+<MarkdownBlock@MarkdownLabelBase>:
     orientation: 'horizontal'
     size_hint_y: None
     height: self.minimum_height
@@ -40,7 +39,6 @@
         bg_color: app.colors['Primary']
         highlight_color: app.colors['Codespan']
         text_threshold: 170
-
         valign: 'center'
         halign: 'left'
         height: self.texture_size[1]

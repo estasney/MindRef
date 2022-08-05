@@ -15,6 +15,7 @@ if TYPE_CHECKING:
         MdCodeSpan,
         MdTextStrong,
         MdTextEmphasis,
+        MdInlineKeyboard,
     )
 
 
@@ -28,59 +29,11 @@ class VisitorProtocol(Protocol):
 
 class InterceptingWidgetProtocol(Protocol):
     """
-    Protocol specifying expected methods for a Widget with InterceptingWidgetMixin or InterceptingWidgetInlineMixin
+    Protocol specifying expected methods for a Widget with InterceptingWidgetInlineMixin
     """
 
     def handle_intercept(self, node: "MD_INLINE_TYPES"):
         ...
-
-    def handle_intercept_exit(self):
-        ...
-
-
-class InterceptingWidgetMixin:
-    """
-    The purpose of this mixin class is to handle the imperfect mapping of Markdown AST to Kivy Layouts/Widgets.
-
-    For example, when we've encountered a Heading that is also a Codespan. In this case 3 nodes become 1 Widget:
-        - Heading -> Sizing, Bold
-        - CodeSpan -> Mono-size font, code highlighting
-        - Text -> Content
-
-    """
-
-    text: str
-    raw_text: str
-    is_codespan: bool
-    open_bbcode_tag: Optional[str]
-
-    def __init__(self):
-        for name in ("text", "raw_text", "is_codespan", "open_bbcode_tag"):
-            if not hasattr(self, name):
-                raise AttributeError(
-                    f"Expected {self.__class__.__name__} to have Property: '{name}'"
-                )
-
-    def handle_intercept(self, node: "MD_INLINE_TYPES"):
-        if node["type"] == "text":
-            node: "MdText"
-            self.raw_text = f"{self.raw_text} {node['text']}{self.open_bbcode_tag if self.open_bbcode_tag else ''}".strip()
-            self.open_bbcode_tag = ""
-        elif node["type"] == "codespan":
-            node: "MdCodeSpan"
-            self.is_codespan = True
-            self.raw_text = f"{self.raw_text} {node['text']}{self.open_bbcode_tag if self.open_bbcode_tag else ''}".strip()
-            self.open_bbcode_tag = ""
-        elif node["type"] == "strong":
-            node: "MdTextStrong"
-            self.raw_text = f"{self.raw_text} [b]".strip()
-            self.open_bbcode_tag = "[/b]"
-        elif node["type"] == "emphasis":
-            node: "MdTextEmphasis"
-            self.raw_text = f"{self.raw_text} [i]".strip()
-            self.open_bbcode_tag = "[/i]"
-        else:
-            Logger.warn(f"Unhandled node {node}")
 
     def handle_intercept_exit(self):
         ...
@@ -119,9 +72,9 @@ class InterceptingInlineWidgetMixin:
                 )
             else:
                 text = node["text"]
-            self.snippets.append(TextSnippet(text, highlight=False))
+            self.snippets.append(TextSnippet(text, highlight_tag=None))
             self.open_bbcode_tag = ""
-        elif node["type"] == "codespan":
+        elif node["type"] == "kbd":
             node: "MdCodeSpan"
             if self.open_bbcode_tag:
                 text = (
@@ -129,7 +82,17 @@ class InterceptingInlineWidgetMixin:
                 )
             else:
                 text = node["text"]
-            self.snippets.append(TextSnippet(text, highlight=True))
+            self.snippets.append(TextSnippet(text, highlight_tag="kbd"))
+            self.open_bbcode_tag = ""
+        elif node["type"] == "codespan":
+            node: "MdInlineKeyboard"
+            if self.open_bbcode_tag:
+                text = (
+                    f"[{self.open_bbcode_tag}]{node['text']}[/{self.open_bbcode_tag}]"
+                )
+            else:
+                text = node["text"]
+            self.snippets.append(TextSnippet(text, highlight_tag="hl"))
             self.open_bbcode_tag = ""
         elif node["type"] == "strong":
             node: "MdTextStrong"

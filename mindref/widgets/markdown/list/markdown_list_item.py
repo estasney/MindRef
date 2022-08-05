@@ -1,21 +1,23 @@
 from kivy.properties import NumericProperty, ObjectProperty, StringProperty
 from kivy.uix.gridlayout import GridLayout
 
+from widgets.behavior.inline_behavior import TextSnippet
+from widgets.markdown.base.base import MarkdownLabelBase
 from utils import import_kv
 
 import_kv(__file__)
 
 
-class MarkdownListItem(GridLayout):
+class MarkdownListItem(MarkdownLabelBase):
 
-    text = StringProperty(None)
-    content = ObjectProperty(None)
     level = NumericProperty(1)
 
-    def __init__(self, text: str, level: int, **kwargs):
+    def __init__(self, **kwargs):
         super(MarkdownListItem, self).__init__(**kwargs)
-        self.text = text
-        self.level = level
 
-    def on_text(self, instance, value):
-        self.content.text = f"{self.level * ' '}{chr(8226)} {value}"
+    def handle_intercept_exit(self):
+        # Include Bullet
+        prefix = "  " * self.level
+        prefix += f"{chr(8226)} "
+        snippets = [TextSnippet(text=prefix, highlight_tag=None), *self.snippets]
+        self.snippets = snippets

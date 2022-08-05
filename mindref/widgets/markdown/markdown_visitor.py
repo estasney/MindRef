@@ -5,13 +5,12 @@ from typing import TYPE_CHECKING, Union, overload
 
 from kivy import Logger
 
-
-from domain.parser import get_md_node_text
+from domain.parser.markdown_parser import get_md_node_text
 from widgets.markdown.code.code_span import MarkdownCodeSpan
 from widgets.markdown.code.markdown_code import MarkdownCode
 from widgets.markdown.list.markdown_list import MarkdownList
 from widgets.markdown.list.markdown_list_item import MarkdownListItem
-from widgets.markdown.markdown_block import MarkdownBlock, MarkdownHeading
+from widgets.markdown.block.markdown_block import MarkdownBlock, MarkdownHeading
 from widgets.markdown.markdown_interceptor import WidgetIntercept
 from widgets.markdown.paragraph.blocks import MarkdownBlockQuote
 from widgets.markdown.table.markdown_table import (
@@ -71,7 +70,7 @@ class MarkdownVisitor:
             self.current_list[-1].add_widget(widget)
             if isinstance(widget, Layout):
                 self.current_list.append(widget)
-                Logger.debug(
+                self.debug_nodes and Logger.debug(
                     f"Pushed-->: {widget.__class__.__name__} --> {self.current_list[-1].__class__.__name__}"
                 )
             else:
@@ -178,9 +177,14 @@ class MarkdownVisitor:
         return True
 
     def visit_list_item(self, node: "MdListItem", **kwargs) -> bool:
-        self.push(
-            MarkdownListItem(text=get_md_node_text(node), level=node["level"], **kwargs)
-        )
+        if not node["children"]:
+            return False
+        list_item = MarkdownListItem(level=node["level"])
+        with WidgetIntercept(visitor=self, widget=list_item):
+            for node in node["children"]:
+                self.visit(node, **kwargs)
+
+        self.push(list_item)
         return True
 
     def visit_block_code(self, node: "MdBlockCode", **kwargs) -> bool:
@@ -212,6 +216,12 @@ class MarkdownVisitor:
         self.push(MarkdownBlockQuote(text_content=get_md_node_text(node), **kwargs))
         return True
 
+    def visit_block_text(self, node: "MdBlockText", **kwargs) -> bool:
+        for child in node["children"]:
+            if self.visit(child, **kwargs):
+                self.pop()
+        return False
+
     def visit_newline(self, node: "MdNewLine", **kwargs) -> bool:
         return False
 
@@ -232,6 +242,10 @@ class MarkdownVisitor:
                 if self.visit(child, **kwargs):
                     self.pop()
             return True
+
+    def visit_kbd(self, node: "MdInlineKeyboard", **kwargs):
+        self.push(node)
+        return True
 
     def visit_generic(self, node, **kwargs):
         node_type = node.get("type")

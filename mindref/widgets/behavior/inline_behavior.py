@@ -1,8 +1,11 @@
 from __future__ import annotations
 
-from typing import Any, NamedTuple, Optional
+from typing import Any, Literal, NamedTuple, Optional
 from kivy.clock import Clock
+from kivy.core.image import Image
 from kivy.graphics import Color, RoundedRectangle
+from kivy.metrics import dp, sp
+from kivy.parser import parse_color
 from kivy.properties import (
     BooleanProperty,
     ColorProperty,
@@ -27,7 +30,7 @@ import_kv(__file__)
 
 class TextSnippet(NamedTuple):
     text: str
-    highlight: bool
+    highlight_tag: Optional[Literal["hl", "kbd"]]
 
 
 class LabelHighlightInline(Label):
@@ -41,6 +44,10 @@ class LabelHighlightInline(Label):
         Refers to the color it is drawn on top of
     highlight_color: ColorProperty
         Refers to the color applied for highlighting
+    kbd_color: ColorProperty
+        Refers to the color applied for highlighting `<kbd>` tags (keyboard)
+    kbd_shadow_color: ColorProperty
+        Refers to the shadow applied for <kbd> tags
     text_threshold: NumericProperty
         'Magic' number that determines when text should be black/white
     text_color: StringProperty
@@ -60,6 +67,8 @@ class LabelHighlightInline(Label):
 
     bg_color = ColorProperty()
     highlight_color = ColorProperty()
+    kbd_color = ColorProperty()
+    kbd_shadow_color = ColorProperty()
     text_threshold = NumericProperty(defaultvalue=186)
     text_color = StringProperty("#ffffff")
     text_color_highlight = StringProperty("#ffffff")
@@ -127,12 +136,19 @@ class LabelHighlightInline(Label):
         for snippet in self.snippets:
             # If our last snippet is highlighted we add additional
             snippet_text = snippet.text
-            if snippet.highlight:
+            if snippet.highlight_tag == "hl":
                 snippet_text = escape_markup(snippet_text)
                 texts.append(
-                    f"[font={self.font_family_mono}]"
+                    f" [font={self.font_family_mono}]"
                     f"[color={self.text_color_highlight}]"
-                    f"[ref=hl]{snippet_text}[/ref][/color][/font]"
+                    f"[ref=hl]{snippet_text}[/ref][/color][/font] "
+                )
+            elif snippet.highlight_tag == "kbd":
+                snippet_text = escape_markup(snippet_text)
+                texts.append(
+                    f" [font={self.font_family_mono}]"
+                    f"[color=#000000]"
+                    f"[ref=kbd]{snippet_text}[/ref][/color][/font] "
                 )
             else:
                 texts.append(
@@ -149,7 +165,26 @@ class LabelHighlightInline(Label):
         """
         Since spans are computed relative to texture, we want them in window form
 
-        Kivy's origin is (0,0) at bottom-left
+        Spans (x1, y1) references the top left corner of the texture
+        Spans y2 increases as it moves down
+
+        Kivy's typical origin is (0,0) at bottom-left.
+
+        ┌───────────────────────────────────────────────────────────────────────┐
+        │                                 Parent                                │
+        │   ┌───────────────────────────────────────────────────────────────┐   │
+        │   │                             Label                             │   │
+        │   │                                                               │   │
+        │   │   ┌────────────────────────────────────────────────────────┐  │   │
+        │   │   │                                                        │  │   │
+        │   │   │                        Texture                         │  │   │
+        │   │   └────────────────────────────────────────────────────────┘  │   │
+        │   │                                                               │   │
+        │   └───────────────────────────────────────────────────────────────┘   │
+        │                                                                       │
+        │                                                                       │
+        └───────────────────────────────────────────────────────────────────────┘
+
 
         Parameters
         ----------
@@ -159,25 +194,26 @@ class LabelHighlightInline(Label):
         -------
 
         """
+        # Window X coordinate of left edge of text texture
 
-        # Window X coordinate of top left text texture
-        pX = self.x + self.padding_x
+        pX = self.center_x - self.texture_size[0] / 2
 
-        # Window Y coordinate of top left text texture
-        pY = self.y + self.padding_y + self.texture_size[1]
+        # Window Y coordinate of bottom edge of text texture
+
+        pY = self.center_y - self.texture_size[1] / 2
 
         x1, y1, x2, y2 = span
-        x1 += pX
-        y1 = pY - y1
 
+        x1 += pX
+        y1 += pY
         x2 += pX
-        y2 = pY - y2
+        y2 += pY
 
         # Padding
         x1 -= self.highlight_padding_x
         x2 += self.highlight_padding_x
-        y1 -= self.highlight_padding_y
-        y2 += self.highlight_padding_y
+        y1 += self.highlight_padding_y
+        y2 -= self.highlight_padding_y
 
         return x1, y1, x2, y2
 
@@ -198,11 +234,31 @@ class LabelHighlightInline(Label):
             self.canvas.before.clear()
             Color(*self.highlight_color)
 
-            for span in self.refs.get("hl"):
+            for span in self.refs.get("hl", []):
                 x1, y1, x2, y2 = self.compute_ref_coords(span)
                 w = x2 - x1
                 h = y2 - y1
-                RoundedRectangle(pos=(x1, y1), size=(w, h), radius=(3,))
+                RoundedRectangle(pos=(x1, y1), size=(w, h), radius=(dp(3),))
+
+            kbd_inset_x = dp(1)
+            kbd_inset_y = dp(1)
+            for span in self.refs.get("kbd", []):
+                x1, y1, x2, y2 = self.compute_ref_coords(span)
+                w = x2 - x1
+                h = y2 - y1
+                # darker background
+                Color(*self.kbd_shadow_color)
+                RoundedRectangle(
+                    pos=(x1 - kbd_inset_x, y1 - kbd_inset_y),
+                    size=(w, h),
+                    radius=(sp(3),),
+                )
+                Color(*self.kbd_color)
+                RoundedRectangle(
+                    pos=(x1 + kbd_inset_x, y1 + kbd_inset_y),
+                    size=(w - kbd_inset_x, h - (1 * kbd_inset_y)),
+                    radius=(sp(3),),
+                )
 
 
 @kivy_cache(cache_name="text_contrast", key_func=cache_key_text_contrast)
