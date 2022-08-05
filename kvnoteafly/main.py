@@ -7,8 +7,6 @@ from kivy.config import Config
 
 __version__ = "0.0.1"
 
-from plugins import ScreenSaverPlugin
-
 
 def run_android():
     def start_app(*args):
@@ -25,12 +23,15 @@ def run_android():
         os.environ.update({"NOTES_PATH": str(notes_dir)})
         NoteAFly().run()
 
-    from android.storage import primary_external_storage_path  # noqa
+    # noinspection PyUnresolvedReferences
+    from android.storage import primary_external_storage_path
+
+    # noinspection PyUnresolvedReferences
     from android.permissions import (
         request_permissions,
         Permission,
         check_permission,
-    )  # noqa
+    )
 
     if not check_permission(Permission.WRITE_EXTERNAL_STORAGE):
         Logger.info(f"Requesting Permissions")

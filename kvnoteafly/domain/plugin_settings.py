@@ -1,6 +1,5 @@
 import json
 from functools import partial
-from itertools import chain
 from pathlib import Path
 from typing import Callable, Iterable, Optional
 

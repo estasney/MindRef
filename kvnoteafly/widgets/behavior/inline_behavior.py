@@ -1,8 +1,6 @@
-import re
-from typing import NamedTuple
+from __future__ import annotations
 
-from kivy import Logger
-from kivy.metrics import sp
+from typing import Any, NamedTuple, Optional
 from kivy.clock import Clock
 from kivy.graphics import Color, RoundedRectangle
 from kivy.properties import (
@@ -10,13 +8,19 @@ from kivy.properties import (
     ColorProperty,
     ListProperty,
     NumericProperty,
+    ReferenceListProperty,
     StringProperty,
 )
 from kivy.uix.label import Label
 from kivy.utils import escape_markup
+from kivy.cache import Cache
+
+Cache.register("color_norm", limit=1000)
+Cache.register("text_contrast", limit=1000)
+
+from utils.caching import cache_key_color_norm, cache_key_text_contrast, kivy_cache
 
 from utils import import_kv
-from widgets.behavior.label_behavior import get_cached_text_contrast
 
 import_kv(__file__)
 
@@ -45,6 +49,13 @@ class LabelHighlightInline(Label):
         Refers to the computed contrast color for highlighted text
     snippets: ListProperty
         List of `TextSnippet`
+    has_parent: BooleanProperty
+    highlight_padding_x : NumericProperty
+        Additional width to add to a highlighted text ref
+    highlight_padding_y: NumericProperty
+        Additional height to add to a highlighted text ref
+    highlight_padding: ReferenceListProperty
+        Additional width and height of a highlighted text ref's highlight
     """
 
     bg_color = ColorProperty()
@@ -56,6 +67,9 @@ class LabelHighlightInline(Label):
     font_family_mono = StringProperty()
     snippets: list[TextSnippet] = ListProperty()
     has_parent: BooleanProperty(defaultvalue=False)
+    highlight_padding_x = NumericProperty(defaultvalue=0)
+    highlight_padding_y = NumericProperty(defaultvalue=0)
+    highlight_padding = ReferenceListProperty(highlight_padding_x, highlight_padding_y)
 
     def __init__(self, **kwargs):
         super(LabelHighlightInline, self).__init__(**kwargs)
@@ -109,22 +123,20 @@ class LabelHighlightInline(Label):
 
     def markup_text(self, *args, **kwargs):
         """Update the markup within text to reflect new colors"""
-
-        # Add one additional whitespace for highlight snippets ending in 'newline'
-        RE_NEWLINE_PAD = re.compile(r"(?<=\S)(\n)|(\r\n)")
-
         texts = []
         for snippet in self.snippets:
+            # If our last snippet is highlighted we add additional
+            snippet_text = snippet.text
             if snippet.highlight:
-                snippet_text = RE_NEWLINE_PAD.sub(" \n", escape_markup(snippet.text))
+                snippet_text = escape_markup(snippet_text)
                 texts.append(
                     f"[font={self.font_family_mono}]"
                     f"[color={self.text_color_highlight}]"
-                    f"[ref=hl] {snippet_text} [/ref][/color][/font]"
+                    f"[ref=hl]{snippet_text}[/ref][/color][/font]"
                 )
             else:
                 texts.append(
-                    f"[color={self.text_color}]{escape_markup(snippet.text)}[/color]"
+                    f"[color={self.text_color}]{escape_markup(snippet_text)}[/color]"
                 )
 
         # Snippets preserve leading/trailing whitespace
@@ -153,7 +165,6 @@ class LabelHighlightInline(Label):
 
         # Window Y coordinate of top left text texture
         pY = self.y + self.padding_y + self.texture_size[1]
-        # pY = self.padding_y + self.y + self.height
 
         x1, y1, x2, y2 = span
         x1 += pX
@@ -161,6 +172,12 @@ class LabelHighlightInline(Label):
 
         x2 += pX
         y2 = pY - y2
+
+        # Padding
+        x1 -= self.highlight_padding_x
+        x2 += self.highlight_padding_x
+        y1 -= self.highlight_padding_y
+        y2 += self.highlight_padding_y
 
         return x1, y1, x2, y2
 
@@ -186,3 +203,73 @@ class LabelHighlightInline(Label):
                 w = x2 - x1
                 h = y2 - y1
                 RoundedRectangle(pos=(x1, y1), size=(w, h), radius=(3,))
+
+
+@kivy_cache(cache_name="text_contrast", key_func=cache_key_text_contrast)
+def get_cached_text_contrast(
+    *, background_color, threshold, highlight_color: Optional[Any] = None
+):
+    """
+    Set text as white or black depending on bg
+    """
+    if not highlight_color:
+        r, g, b, opacity = get_cached_color_norm(color=background_color)
+        brightness = (r * 0.299 + g * 0.587 + b * 0.114 + (1 - opacity)) * 255
+    else:
+        hl_norm = get_cached_color_norm(color=highlight_color)
+        bg_norm = get_cached_color_norm(color=background_color)
+
+        r_hl, g_hl, b_hl, opacity_hl = hl_norm
+        r_bg, g_bg, b_bg, opacity_bg = bg_norm
+
+        # https://stackoverflow.com/questions/726549/algorithm-for-additive-color-mixing-for-rgb-values
+        opacity = 1 - (1 - opacity_hl) * (1 - opacity_bg)
+        r = r_hl * opacity_hl / opacity + r_bg * opacity_bg * (1 - opacity_hl) / opacity
+        g = g_hl * opacity_hl / opacity + g_bg * opacity_bg * (1 - opacity_hl) / opacity
+        b = b_hl * opacity_hl / opacity + b_bg * opacity_bg * (1 - opacity_hl) / opacity
+
+        # https://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color
+        brightness = (r * 0.299 + g * 0.587 + b * 0.114 + (1 - opacity)) * 255
+    if brightness > threshold:
+        return "#000000"
+    else:
+        return "#ffffff"
+
+
+@kivy_cache(cache_name="color_norm", key_func=cache_key_color_norm)
+def get_cached_color_norm(color) -> tuple[float, float, float, float]:
+    def color_str_components(s: str) -> tuple[float, float, float, float]:
+        """Return hex as 1.0 * 4"""
+        s = s.removeprefix("#")
+        # Groups of two
+        components_hex = zip(*[iter(s)] * 2)
+        has_opacity = False
+        for i, comp in enumerate(components_hex):
+            if i == 3:
+                has_opacity = True
+                yield int("".join(comp), 16) / 255
+                continue
+            yield int("".join(comp), 16) / 255
+        if not has_opacity:
+            yield 1.0
+
+    def color_float_components(
+        s: tuple[int] | tuple[float],
+    ) -> tuple[float, float, float, float]:
+        """Return r, g, b (0.0-1.0) as (0-1) and opacity as (0-1)"""
+        has_opacity = False
+        for i, comp in enumerate(s):
+            if i == 3:
+                has_opacity = True
+                yield comp
+                continue
+            yield comp
+        if not has_opacity:
+            yield 1.0
+
+    if isinstance(color, str):
+        components = color_str_components(color)
+    else:
+        components = color_float_components(color)
+
+    return tuple(components)

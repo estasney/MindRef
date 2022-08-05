@@ -1,5 +1,5 @@
 #:import parse_color kivy.parser.parse_color
-#:import LabelAutoContrast widgets.behavior.label_behavior
+#:import BaseLabel widgets.style
 <MarkdownBlockQuote>:
     cols: 1
     size_hint_y: None
@@ -17,7 +17,7 @@
         Rectangle:
             pos: [self.pos[0], self.pos[1] + sp(5)]
             size: [sp(4), self.height - sp(10)]
-    LabelAutoContrast:
+    BaseLabel:
         id: content
         bg_color: app.colors['Gray-500']
         markup: False

@@ -1,4 +1,4 @@
-from copy import copy, deepcopy
+from itertools import cycle
 from itertools import cycle
 from typing import Callable, Literal, Optional, TYPE_CHECKING, Union
 
@@ -26,7 +26,7 @@ from kivy.uix.screenmanager import (
 from toolz import sliding_window
 
 from domain.events import CancelEditEvent, RefreshNotesEvent, SaveNoteEvent
-from utils import DottedDict, import_kv, sch_cb
+from utils import import_kv, sch_cb
 from utils.triggers import trigger_factory
 from widgets.app_menu import AppMenu
 from widgets.behavior.interact_behavior import InteractBehavior

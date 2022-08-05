@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Generator, Optional, TYPE_CHECKING, cast, NamedTuple
+from typing import Generator, NamedTuple, Optional, TYPE_CHECKING
 
 from toolz import groupby
 

@@ -4,7 +4,7 @@ from collections import deque
 from typing import TYPE_CHECKING, Union, overload
 
 from kivy import Logger
-from kivy.uix.label import Label
+
 
 from domain.parser import get_md_node_text
 from widgets.markdown.code.code_span import MarkdownCodeSpan
@@ -15,7 +15,7 @@ from widgets.markdown.markdown_block import MarkdownBlock, MarkdownHeading
 from widgets.markdown.markdown_interceptor import WidgetIntercept
 from widgets.markdown.paragraph.blocks import MarkdownBlockQuote
 from widgets.markdown.table.markdown_table import (
-    MarkdownCellLabel,
+    MarkdownCell,
     MarkdownRow,
     MarkdownTable,
 )
@@ -118,12 +118,12 @@ class MarkdownVisitor:
         cell_align = node["align"] if node["align"] else "center"
         cell_bold = node["is_head"]
         cell_label_kwargs.update({"halign": cell_align, "bold": cell_bold})
-        cell_widget = MarkdownCellLabel(**cell_label_kwargs)
+        cell_widget = MarkdownCell(**cell_label_kwargs)
         with WidgetIntercept(visitor=self, widget=cell_widget):
             for child in node["children"]:
                 self.visit(child, **cell_label_kwargs)
         self.push(cell_widget)
-        return False
+        return True
 
     def visit_table(self, node: "MdTable", **kwargs) -> bool:
         self.visiting_table = True
@@ -132,11 +132,12 @@ class MarkdownVisitor:
 
         # Table head row
         head_kwargs = {k: v for k, v in kwargs.items()}
-        head_kwargs.update({"bold": True, "font_hinting": None, "halign": "center"})
+        head_kwargs.update({"bold": True, "halign": "center"})
         self.push(MarkdownRow())
         for cell in table_head["children"]:
             if self.visit(cell, **head_kwargs):
                 self.pop()
+
         self.pop()
 
         self.debug_nodes and Logger.debug("Start Table Body")

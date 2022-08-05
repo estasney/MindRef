@@ -27,6 +27,10 @@ class VisitorProtocol(Protocol):
 
 
 class InterceptingWidgetProtocol(Protocol):
+    """
+    Protocol specifying expected methods for a Widget with InterceptingWidgetMixin or InterceptingWidgetInlineMixin
+    """
+
     def handle_intercept(self, node: "MD_INLINE_TYPES"):
         ...
 
@@ -88,17 +92,22 @@ class InterceptingInlineWidgetMixin:
 
     Internally, this assumes usage of `LabelHighlightInline`
 
+    Notes
+    -----
+    Subclasses must have an attribute 'snippets' as a ListProperty
+
     """
 
     snippets: list["TextSnippet"]
     open_bbcode_tag: str
 
-    def __init__(self):
+    def __new__(cls: InterceptingWidgetProtocol, *args, **kwargs):
         for name in ("snippets",):
-            if not hasattr(self, name):
-                raise AttributeError(
-                    f"Expected {self.__class__.__name__} to have Property: '{name}'"
-                )
+            if not hasattr(cls, name):
+                obj_name = kwargs.get("name", cls.__name__)
+                raise AttributeError(f"{obj_name} must have ")
+
+    def __init__(self):
         self.open_bbcode_tag = ""
 
     def handle_intercept(self, node: "MD_INLINE_TYPES"):
@@ -132,26 +141,27 @@ class InterceptingInlineWidgetMixin:
             Logger.warn(f"Unhandled node {node}")
 
     def handle_intercept_exit(self):
-        """
-        We append a newline
-        """
-        if not self.snippets:
-            return
-        if len(self.snippets) == 1:
-            snippets = []
-            last_snippet = self.snippets[0]
-        else:
-            snippets = self.snippets[:-1]
-            last_snippet = self.snippets[-1]
-
-        nl_snippet = TextSnippet(
-            text=f"{last_snippet.text}\n", highlight=last_snippet.highlight
-        )
-        snippets.append(nl_snippet)
-        self.snippets = snippets
+        ...
 
 
 class WidgetIntercept:
+    """
+    Context Manager managing InterceptingWidgets entry and exist
+
+    Examples
+    --------
+    ```python
+    some_widget = MarkdownHeading()  # Widget that follows InterceptingWidgetProtocol
+
+    with WidgetIntercept(visitor=self, widget=some_widget):
+        # Override `self`'s `visit` method
+        for node in node['children']:
+            self.visit(node)
+    # Restore original `visit` method
+    ```
+
+    """
+
     def __init__(self, visitor: VisitorProtocol, widget: InterceptingWidgetProtocol):
         self.visitor = visitor
         self.widget = widget

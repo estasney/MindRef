@@ -27,6 +27,7 @@ class PluginManager(EventDispatcher):
 
     def init_app(self, app: "App"):
         plugin_config = list(app.config["Plugins"].items())
+        # noinspection PyUnresolvedReferences
         app.fbind("on_config_change", self.config_change_handler)
         self.update_plugins(plugin_config)
 
@@ -78,6 +79,7 @@ class ScreenSaverPlugin(EventDispatcher):
         defaultvalue="/sys/class/backlight/rpi_backlight/bl_power"
     )
 
+    # noinspection PyUnresolvedReferences
     def __init__(self, *args, **kwargs):
         super(ScreenSaverPlugin, self).__init__(*args, **kwargs)
         # Every ~ 60 seconds

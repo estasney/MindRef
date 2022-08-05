@@ -48,9 +48,9 @@ def sch_cb(timeout: float = 0, *args):
 
     func_pipe = (f for f in args)
 
-    def _scheduled_func(*args, **kwargs):
+    def _scheduled_func(*s_args, **kwargs):
         func = kwargs.pop("func")
-        func(*args, **kwargs)
+        func(*s_args, **kwargs)
         next_func = next(func_pipe, None)
         if next_func:
             cb = partial(_scheduled_func, func=next_func)
@@ -152,10 +152,10 @@ class GenericLoggerMixin:
             self._log(msg, level)
         # Create the method on the fly
         if self.logger:
-            self._log = lambda msg, lvl: getattr(self.logger, lvl)(msg)
+            self._log = lambda log_msg, lvl: getattr(self.logger, lvl)(log_msg)
             self._log(msg, level)
         else:
-            self._log = lambda msg, lvl: print(msg)
+            self._log = lambda log_msg, lvl: print(log_msg)
             self._log(msg, level)
 
 

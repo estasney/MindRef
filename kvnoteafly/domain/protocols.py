@@ -5,14 +5,13 @@ from typing import Callable, Optional, Protocol, TypeVar
 
 from service.registry import Registry
 
-T = TypeVar("T")
 
-
-class AppRegistryProtocol(Protocol[T]):
+class AppRegistryProtocol(Protocol):
     registry: "Registry"
 
 
-GetApp = Callable[[], AppRegistryProtocol[T]]
+T = TypeVar("T", bound=AppRegistryProtocol)
+GetApp = Callable[[], T]
 
 
 class NoteDiscoveryProtocol(Protocol):

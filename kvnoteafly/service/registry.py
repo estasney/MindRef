@@ -1,6 +1,7 @@
 from collections import deque
 from pathlib import Path
-from typing import Optional, Type, Callable, TYPE_CHECKING, Protocol
+from typing import Callable, Optional, Protocol, TYPE_CHECKING
+
 from domain.events import DiscoverCategoryEvent, NoteFetchedEvent, NotesQueryEvent
 from utils import GenericLoggerMixin, LoggerProtocol
 

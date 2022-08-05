@@ -1,4 +1,5 @@
 #:import parse_color kivy.parser.parse_color
+#:import LabelHighlightInline widgets.behavior.inline_behavior
 
 <MarkdownTable>:
     size_hint_y: None
@@ -12,16 +13,19 @@
     height: self.minimum_height
 
 
-<MarkdownCellLabel>:
-    highlight: self.is_codespan
-    highlight_color: app.colors['Codespan']
-    bg_color: app.colors['Primary']
-    valign: 'top'
+<MarkdownCell>:
+    orientation: 'horizontal'
     size_hint_y: None
-    markup: True
-    mipmap: True
-    width: self.texture_size[0]
-    height: self.texture_size[1]
-    text_size: self.width, None
-    font_size: app.base_font_size - 1 if self.font_family == "RobotoMono" else app.base_font_size
-    padding: sp(4), sp(2)
+    height: self.minimum_height
+    size_hint_x: 1
+    label: label
+    LabelHighlightInline:
+        id: label
+        snippets: root.snippets
+        bg_color: app.colors['Primary']
+        highlight_color: app.colors['Codespan']
+        valign: 'center'
+        halign: 'left'
+        height: self.texture_size[1]
+        size_hint_y: None
+        font_size: sp(app.base_font_size)

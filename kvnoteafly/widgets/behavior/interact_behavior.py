@@ -1,4 +1,3 @@
-from kivy import Logger
 from kivy.uix.widget import Widget
 
 

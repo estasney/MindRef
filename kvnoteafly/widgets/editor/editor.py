@@ -1,14 +1,11 @@
-from kivy import Logger
+from typing import TYPE_CHECKING
+
 from kivy.properties import (
-    BooleanProperty,
     ObjectProperty,
     OptionProperty,
     StringProperty,
 )
 from kivy.uix.boxlayout import BoxLayout
-from typing import TYPE_CHECKING
-
-from kivy.uix.widget import Widget
 from pygments.lexers import get_lexer_by_name
 
 from utils import import_kv

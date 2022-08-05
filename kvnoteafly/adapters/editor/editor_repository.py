@@ -10,7 +10,7 @@ from domain.markdown_note import MarkdownNote
 
 class NoteServiceAppProtocol(AppRegistryProtocol):
     """
-    Protocol that defines a class with a Registry and note_service
+    Protocol that defines an App with a Registry and note_service
     """
 
     note_service: "AbstractNoteRepository"

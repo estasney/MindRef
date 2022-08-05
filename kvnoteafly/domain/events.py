@@ -5,7 +5,6 @@ from typing import Callable, Literal, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from domain.markdown_note import MarkdownNote
-    from domain.protocols import NoteDiscovery
 
 DISPLAY_STATE = Literal["choose", "display", "list", "edit", "add"]
 
