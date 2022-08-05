@@ -144,7 +144,7 @@ class NoteAFly(App):
         if new in {"edit", "add"}:
             self.play_state_trigger("pause")
         if new == "edit":
-            self.editor_note = self.editor_service.edit_current_note(self)
+            self.editor_note = self.editor_service.edit_current_note()
         elif new == "add":
             self.editor_note = self.editor_service.new_note(
                 category=self.note_category, idx=self.note_service.index_size()
