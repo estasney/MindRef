@@ -45,6 +45,7 @@ def run_desktop():
     if os.environ.get("ENVIRONMENT", "PRODUCTION") == "DEBUG":
         Config.set("modules", "inspector", "")
         Config.set("modules", "monitor", "")
+
     Config.set("input", "mouse", "mouse,disable_multitouch")
     from noteafly import NoteAFly
 

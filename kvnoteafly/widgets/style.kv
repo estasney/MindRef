@@ -4,11 +4,15 @@
 
 <SmallLabel@BaseLabel>:
     font_size: app.base_font_size - sp(2)
-    font_family: app.fonts['default']
 
 <LargeLabel@BaseLabel>:
     font_size: app.base_font_size + sp(2)
-    font_family: app.fonts['default']
+
+<XLargeLabel@BaseLabel>:
+    font_size: app.base_font_size + sp(3)
+
+<ExpandingLabel@BaseLabel>:
+    font_size: self.height / 2
 
 <TitleInput>:
     font_size: app.base_font_size
