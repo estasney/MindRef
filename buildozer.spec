@@ -47,7 +47,7 @@ requirements = python3==3.9.13,hostpython3==3.9.13,kivy,python-dotenv,toolz,pygm
 presplash.filename = %(source.dir)s/assets/presplash.png
 
 # (str) Icon of the application
-#icon.filename = %(source.dir)s/data/presplash.png
+icon.filename = %(source.dir)s/assets/logo.png
 
 # (str) Supported orientation (one of landscape, sensorLandscape, portrait or all)
 orientation = all
