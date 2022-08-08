@@ -37,13 +37,13 @@
     orientation: 'horizontal'
     size_hint_min_y: 1
     size_hint_x: None
-    height: btn.texture_size[1]
-    width: self.height*1.618
-
+    height: btn.texture_size[1] + dp(4)
+    width: self.height * 2
     Button:
         id: btn
         text: 'X'
         font_size: app.base_font_size + sp(8)
         halign: 'center'
         valign: 'center'
+        padding_x: dp(4)
         on_release: app.menu_open = not app.menu_open

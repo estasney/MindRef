@@ -1,5 +1,5 @@
 #:import Toolbar widgets.toolbar
-#:import SmallLabel widgets.style
+#:import LargeLabel widgets.style
 
 <CategoryScreenScrollWrapper>:
     chooser: chooser
@@ -13,22 +13,24 @@
     orientation: 'vertical'
     Toolbar:
         size_hint_y: None
-        padding: sp(20), sp(10), sp(10), sp(5)
+        padding: dp(20), dp(10), dp(10), dp(5)
         height: dp(50)
 
     GridLayout:
         size_hint_y: None
         height: self.minimum_height
         id: category_container
-        cols: int(self.width / sp(120))
+        cols: 4
         padding: dp(10)
-        spacing: dp(10)
+        spacing: dp(5)
 
 <NoteCategoryButton>:
     orientation: 'vertical'
-    padding: dp(10)
+    padding: dp(5)
+    spacing: dp(2)
     image: image
-    size_hint: 0.25, None
+    size_hint: 1, None
+    height: dp(128)
     canvas.before:
         BorderImage:
             pos: self.pos
@@ -41,7 +43,11 @@
         source: root.source
         mipmap: True
 
-    BaseLabel:
+    LargeLabel:
         text: root.text
+        text_size: (self.width, None)
+        halign: 'center'
+        valign: 'bottom'
         size_hint_x: 1
-        size_hint_y: 0.4
+        size_hint_y: None
+        height: self.texture_size[1]
