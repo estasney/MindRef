@@ -1,13 +1,13 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Pack Category" type="PythonConfigurationType" factoryName="Python" folderName="Atlas">
-    <module name="KVNoteAFly" />
+    <module name="MindRef" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
     <envs>
       <env name="PYTHONUNBUFFERED" value="1" />
     </envs>
     <option name="SDK_HOME" value="" />
-    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/kvnoteafly" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/mindref" />
     <option name="IS_MODULE_SDK" value="true" />
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
@@ -18,7 +18,7 @@
       <option name="useCurrentConnection" value="false" />
     </EXTENSION>
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/atlas_utils/atlas.py" />
-    <option name="PARAMETERS" value="pack -i ./static/category_icons/*.png -o ./static/category_icons/category-img -rm y" />
+    <option name="PARAMETERS" value="pack -i ./static/category_img/*.png -o ./static/category_img/category-img -rm y" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />

@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Make Textures" type="PythonConfigurationType" factoryName="Python" folderName="Atlas">
-    <module name="KVNoteAFly" />
+    <module name="MindRef" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
     <envs>

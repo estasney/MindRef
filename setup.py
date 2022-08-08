@@ -9,30 +9,22 @@ import os
 from setuptools import find_packages, setup
 
 # Package meta-data
-NAME = "kvnoteafly"
-DESCRIPTION = "Kivy Note App"
-URL = "https://github.com/estasney/KVNoteAFly"
+NAME = "MindRef"
+DESCRIPTION = "Cross-Platform Application for maintaining Markdown formatted notes"
+URL = "https://github.com/estasney/MindRef"
 EMAIL = "estasney@users.noreply.github.com"
 AUTHOR = "Eric Stasney"
 REQUIRES_PYTHON = ">=3.9.0"
-VERSION = "0.0.1"
 
 # What packages are required for this module to be executed?
-REQUIRED = [
-    "python-dotenv",
-    "toolz",
-    "Kivy[base]",
-    "Pygments",
-    "Pillow",
-    "click",
-    "pyperclip",
-]
+REQUIRED = ["python-dotenv", "toolz", "Kivy", "Pygments", "Pillow", "click", "mistune"]
 
 here = os.path.abspath(os.path.dirname(__file__))
 long_description = DESCRIPTION
 
 about = {}
-about["__version__"] = VERSION
+with open(os.path.join(here, "__version__.py"), "r") as fp:
+    exec(fp.read(), about)
 
 setup(
     name=NAME,
@@ -49,15 +41,20 @@ setup(
     data_files=[
         (
             "data",
-            ["kvnoteafly/db/noteafly.db", "kvnoteafly/static/category_img/*"],
+            [
+                "mindref/static/icons/*",
+                "mindref/static/keys/*",
+                "mindref/static/textures/*",
+            ],
         )
     ],
-    license="MIT",
+    license="LGPLv3+",
     classifiers=[
         # Trove classifiers
         # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
-        "License :: OSI Approved :: MIT License",
+        "Development Status :: 3 - Alpha",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.9",
+        "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
     ],
 )

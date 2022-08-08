@@ -5,12 +5,9 @@ from kivy.core.text import LabelBase
 from kivy.config import Config
 
 
-__version__ = "0.0.1"
-
-
 def run_android():
     def start_app(*args):
-        from noteafly import NoteAFly
+        from mindref import MindRefApp
         from android import loadingscreen  # noqa
         from kivy.clock import Clock
 
@@ -21,7 +18,7 @@ def run_android():
         notes_dir = Path(primary_external_storage_path()) / "kvnotes"
         notes_dir.mkdir(exist_ok=True)
         os.environ.update({"NOTES_PATH": str(notes_dir)})
-        NoteAFly().run()
+        MindRefApp().run()
 
     # noinspection PyUnresolvedReferences
     from android.storage import primary_external_storage_path
@@ -47,9 +44,9 @@ def run_desktop():
         Config.set("modules", "monitor", "")
 
     Config.set("input", "mouse", "mouse,disable_multitouch")
-    from noteafly import NoteAFly
+    from mindref import MindRefApp
 
-    app = NoteAFly()
+    app = MindRefApp()
 
     app.run()
 

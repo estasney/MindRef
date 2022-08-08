@@ -47,8 +47,8 @@ from utils.triggers import trigger_factory
 from widgets.screens import NoteAppScreenManager
 
 
-class NoteAFly(App):
-    APP_NAME = "NoteAFly"
+class MindRefApp(App):
+    APP_NAME = "MindRef"
     atlas_service = AtlasService(storage_path=Path("./static").resolve())
     note_service = FileSystemNoteRepository(get_app=App.get_running_app, new_first=True)
     editor_service = FileSystemEditor(get_app=App.get_running_app)
@@ -137,7 +137,7 @@ class NoteAFly(App):
         log_level: NumericProperty
         """
 
-    settings_cls = "KVNoteAFlySettings"
+    settings_cls = "MindRefSettings"
 
     def on_display_state(self, instance, new):
 
@@ -403,4 +403,4 @@ class NoteAFly(App):
 
 
 if __name__ == "__main__":
-    NoteAFly().run()
+    MindRefApp().run()

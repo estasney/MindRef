@@ -56,7 +56,7 @@ if __name__ == "__main__":
         main=Color("#37464f"), accent=Color("#101f27"), steps=5, size=64
     )
 
-    texture_path = Path(__file__).parent.parent / "kvnoteafly" / "static" / "textures"
+    texture_path = Path(__file__).parent.parent / "mindref" / "static" / "textures"
     for file in texture_path.iterdir():
         file.unlink()
 

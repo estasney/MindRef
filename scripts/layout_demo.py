@@ -105,7 +105,7 @@ if __name__ == "__main__":
         name="RobotoMono",
         fn_regular=str(
             Path(__file__).parent.parent
-            / "kvnoteafly"
+            / "mindref"
             / "assets"
             / "RobotoMono-Regular.ttf"
         ),

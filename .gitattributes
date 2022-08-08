@@ -1,4 +1,7 @@
 * text=auto
-*.db -text
 *.png binary
 *.atlas text
+
+.gitkeep export-ignore
+.gitignore export-ignore
+.gitattributes export-ignore

@@ -1,6 +1,6 @@
 import click
 from pathlib import Path
-from kvnoteafly.db.models import create_session, Note, NoteCategory, NoteType
+from mindref.db.models import create_session, Note, NoteCategory, NoteType
 
 
 @click.command()

@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="KivyCatalog" type="PythonConfigurationType" factoryName="Python">
-    <module name="KVNoteAFly" />
+    <module name="MindRef" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
     <envs>
@@ -18,7 +18,7 @@
       <option name="useCurrentConnection" value="false" />
     </EXTENSION>
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/venv/share/kivy-examples/demo/kivycatalog/main.py" />
-    <option name="PARAMETERS" value="./kvnoteafly/static/keys/keys.atlas" />
+    <option name="PARAMETERS" value="./mindref/static/keys/keys.atlas" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />
