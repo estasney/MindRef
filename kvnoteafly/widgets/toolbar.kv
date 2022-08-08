@@ -1,10 +1,5 @@
 #:import ExpandingLabel widgets.style
 #:import buttons widgets.buttons
-
-
-
-
-
 <Toolbar>:
     orientation: 'horizontal'
     padding: 0
@@ -15,5 +10,6 @@
             size: self.size
             pos: self.pos
     HamburgerIcon:
+        release_callback: lambda : setattr(app, 'menu_open', not getattr(app, 'menu_open'))
     ExpandingLabel:
         text: app.APP_NAME
