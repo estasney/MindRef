@@ -10,11 +10,15 @@
 
 <SaveButton>:
 <CancelButton>:
-<HamburgerIcon@BoxLayout>:
+<HamburgerIcon>:
     orientation: 'horizontal'
     size_hint_x: None
     width: self.height*1.618
+
     Button:
+        id: btn
+        background_color: [0,0,0,0]
+        on_release: root.release_callback()
         canvas:
             Color:
                 rgba: app.colors['White']
@@ -30,7 +34,7 @@
                 pos: ((self.x + self.center_x)/2, self.center_y + self.height/5)
                 size: self.width/2, dp(2)
                 radius: dp(2), dp(2)
-        on_release: app.menu_open = not app.menu_open
+
 
 <XButton@BoxLayout>:
     btn: btn

@@ -12,7 +12,9 @@ TextureParam = namedtuple("TextureParam", "main, accent, steps, size")
 ImgBox = namedtuple("ImgBox", "x,y,w,h")
 
 
-def gradient_texture(main: Color, accent: Color, steps: int, size):
+def gradient_texture(
+    main: Color, accent: Color, steps: int, size, opacity_padding: int = 2
+):
     """
     Generate 9-scaling texture image
 
@@ -23,16 +25,23 @@ def gradient_texture(main: Color, accent: Color, steps: int, size):
     main:
     accent:
     steps:
+    opacity_padding
+        Number of pixels to surround solid color with 50% opacity
     """
+
+    # Solid colors
+
     c_steps = list(accent.range_to(main, steps))
-    img = Image.new(mode="RGB", size=(size, size))
+    img = Image.new(mode="RGBA", size=(size, size))
     draw = ImageDraw.Draw(img)
 
-    px0 = 0
-    px1 = size - 1
+    px0 = opacity_padding
+    px1 = size - opacity_padding - 1
+
+    draw.rectangle((0, 0, size, size), fill=f"#00000032")
 
     for c in c_steps:
-        draw.rectangle((px0, px0, px1, px1), fill=c.hex_l)
+        draw.rectangle((px0, px0, px1, px1), fill=f"{c.hex_l}ff")
         px0 += 1
         px1 -= 1
 
@@ -41,7 +50,7 @@ def gradient_texture(main: Color, accent: Color, steps: int, size):
 
 if __name__ == "__main__":
     btn_down = TextureParam(
-        main=Color("#4a99e8"), accent=Color("#101f27"), steps=15, size=64
+        main=Color("#4a99e8"), accent=Color("#101f27"), steps=5, size=64
     )
     btn_normal = TextureParam(
         main=Color("#37464f"), accent=Color("#101f27"), steps=5, size=64

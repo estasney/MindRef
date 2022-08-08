@@ -2,8 +2,10 @@ from kivy.app import App
 from kivy.properties import (
     BooleanProperty,
     DictProperty,
+    ObjectProperty,
 )
 from kivy.uix.behaviors import ButtonBehavior
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.image import Image
 
 from utils import import_kv
@@ -88,3 +90,11 @@ class CancelButton(ImageButton):
 class AddButton(ImageButton):
     def __init__(self, *args, **kwargs):
         super(AddButton, self).__init__(src=get_uri("add"))
+
+
+class HamburgerIcon(BoxLayout):
+
+    release_callback = ObjectProperty()
+
+    def __init__(self, **kwargs):
+        super(HamburgerIcon, self).__init__(**kwargs)
