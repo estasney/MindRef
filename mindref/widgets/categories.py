@@ -1,5 +1,6 @@
 from functools import partial
 
+from kivy import Logger
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.core.image import Image
@@ -98,6 +99,7 @@ class NoteCategoryButton(ButtonBehavior, BoxLayout):
         self.load_category_img()
         self.load_texture("bg_normal")
         self.load_texture("bg_down")
+        self.img_loader = None
 
     def load_texture(self, name):
         get_uri = App.get_running_app().atlas_service.uri_for
@@ -106,6 +108,7 @@ class NoteCategoryButton(ButtonBehavior, BoxLayout):
         setattr(self, f"tx_{name}", tx)
 
     def _image_loaded(self, result):
+        Logger.debug(f"CategoryButton: Image Loaded for {self.text}")
         if result.image.texture:
             Clock.schedule_once(
                 lambda x: setattr(self.image, "texture", result.image.texture), 0.1
@@ -116,5 +119,5 @@ class NoteCategoryButton(ButtonBehavior, BoxLayout):
             self.image.texture = Loader.error_image.texture
             return
         self.image.texture = Loader.loading_image.texture
-        loader = Loader.image(self.source)
-        loader.bind(on_load=self._image_loaded)
+        self.img_loader = Loader.image(self.source)
+        self.img_loader.bind(on_load=self._image_loaded)
