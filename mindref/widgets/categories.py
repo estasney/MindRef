@@ -85,7 +85,6 @@ class NoteCategoryButton(ButtonBehavior, BoxLayout):
     source = StringProperty()
     text = StringProperty()
     image = ObjectProperty()
-    img_loader = ObjectProperty(None)
     tx_bg_normal = ObjectProperty()
     tx_bg_down = ObjectProperty()
 
