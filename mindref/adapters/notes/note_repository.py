@@ -90,6 +90,11 @@ class AbstractNoteRepository(ABC):
     def index_size(self) -> int:
         raise NotImplementedError
 
+    @abc.abstractmethod
+    def category_image_uri(self, category: str):
+        """Return URI for a Category Image"""
+        raise NotImplementedError
+
 
 class NoteIndex:
     """

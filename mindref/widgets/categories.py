@@ -12,7 +12,7 @@ from kivy.properties import (
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.scrollview import ScrollView
-
+from kivy.loader import Loader
 from utils import import_kv
 from widgets.effects.scrolling import RefreshOverscrollEffect
 
@@ -89,10 +89,13 @@ class NoteCategoryButton(ButtonBehavior, BoxLayout):
 
     def __init__(self, text, **kwargs):
         super().__init__(**kwargs)
-        self.source = App.get_running_app().atlas_service.uri_for(
-            text.lower(), "category_img"
+        self.source = (
+            str(uri)
+            if (uri := App.get_running_app().note_service.category_image_uri(text))
+            else ""
         )
         self.text = text
+        self.load_category_img()
         self.load_texture("bg_normal")
         self.load_texture("bg_down")
 
@@ -101,3 +104,17 @@ class NoteCategoryButton(ButtonBehavior, BoxLayout):
         img = Image(get_uri(name.lower(), "textures"))
         tx = img.texture
         setattr(self, f"tx_{name}", tx)
+
+    def _image_loaded(self, result):
+        if result.image.texture:
+            Clock.schedule_once(
+                lambda x: setattr(self.image, "texture", result.image.texture), 0.1
+            )
+
+    def load_category_img(self):
+        if not self.source:
+            self.image.texture = Loader.error_image.texture
+            return
+        self.image.texture = Loader.loading_image.texture
+        loader = Loader.image(self.source)
+        loader.bind(on_load=self._image_loaded)

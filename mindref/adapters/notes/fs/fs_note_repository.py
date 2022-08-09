@@ -29,6 +29,7 @@ class NoteDiscovery(NamedTuple):
 
 class FileSystemNoteRepository(AbstractNoteRepository):
     _category_files: dict[str, list[Path]]
+    _category_imgs: dict[str, Optional[Path]]
     _storage_path: Optional[Path]
 
     """
@@ -45,6 +46,7 @@ class FileSystemNoteRepository(AbstractNoteRepository):
         super().__init__(get_app)
         self.new_first = new_first
         self._category_files = {}
+        self._category_imgs = {}
         self._storage_path = None
         self._index = None
 
@@ -93,6 +95,7 @@ class FileSystemNoteRepository(AbstractNoteRepository):
             if category_img := category_files.get(False):
                 category_img = category_img[0]
             self._category_files[category_name] = category_note_files
+            self._category_imgs[category_name] = category_img
             yield NoteDiscovery(
                 category=category_name,
                 image_path=category_img,
@@ -194,3 +197,6 @@ class FileSystemNoteRepository(AbstractNoteRepository):
         if not self._index:
             raise Exception("No Index")
         return self.get_note(category=self.current_category, idx=self.index.current)
+
+    def category_image_uri(self, category: str) -> Optional[Path]:
+        return self._category_imgs.get(category)
