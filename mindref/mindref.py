@@ -408,6 +408,9 @@ class MindRefApp(App):
         )
 
     def on_config_change(self, config, section, key, value):
+
+        truthy = {True, 1, "1", "True"}
+
         if section == "Storage":
             if key == "NOTES_PATH":
                 self.note_service.storage_path = value
@@ -417,7 +420,9 @@ class MindRefApp(App):
             if key == "LOG_LEVEL":
                 self.log_level = value
             elif key == "NEW_FIRST":
-                ...  # No effect here, this is on first load
+                self.note_service.new_first = True if value in truthy else False
+                self.display_state_trigger("choose")
+                self.registry.push_event(RefreshNotesEvent(on_complete=None))
             elif key == "PLAY_STATE":
                 ...  # No effect here, this is on first load
             elif key == "TRANSITIONS":

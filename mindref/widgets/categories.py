@@ -85,6 +85,7 @@ class NoteCategoryButton(ButtonBehavior, BoxLayout):
     source = StringProperty()
     text = StringProperty()
     image = ObjectProperty()
+    img_loader = ObjectProperty(None)
     tx_bg_normal = ObjectProperty()
     tx_bg_down = ObjectProperty()
 
@@ -113,6 +114,8 @@ class NoteCategoryButton(ButtonBehavior, BoxLayout):
             Clock.schedule_once(
                 lambda x: setattr(self.image, "texture", result.image.texture), 0.1
             )
+        else:
+            Logger.debug(f"CategoryButton: No Texture {self.text}")
 
     def load_category_img(self):
         if not self.source:
@@ -121,3 +124,4 @@ class NoteCategoryButton(ButtonBehavior, BoxLayout):
         self.image.texture = Loader.loading_image.texture
         self.img_loader = Loader.image(self.source)
         self.img_loader.bind(on_load=self._image_loaded)
+        self.img_loader.bind(on_error=lambda x: Logger.debug("Img Loader Error"))
