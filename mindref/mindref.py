@@ -31,6 +31,7 @@ from domain.events import (
     EditNoteEvent,
     NoteFetchedEvent,
     NotesQueryEvent,
+    NotesQueryFailureEvent,
     RefreshNotesEvent,
     SaveNoteEvent,
 )
@@ -70,11 +71,12 @@ class MindRefApp(App):
     menu_open = BooleanProperty(False)
 
     display_state = OptionProperty(
-        "choose", options=["choose", "display", "list", "edit", "add"]
+        "choose", options=["choose", "display", "list", "edit", "add", "error"]
     )
     display_state_trigger: Callable[
         [Literal["choose", "display", "list", "edit", "add"]], None
     ]
+    error_message = StringProperty()
     play_state = OptionProperty("play", options=["play", "pause"])
     play_state_trigger: Callable[[Literal["play", "pause"]], None]
 
@@ -123,9 +125,15 @@ class MindRefApp(App):
             Metadata for notes associated with active Category. Info such as Title, and Shortcuts
         next_note_scheduler: ObjectProperty
         display_state: OptionProperty
-            One of [Display, Choose]
-            Choose:: Display all known categories
-            Display:: Iterate through notes matching `self.note_category`
+            One of ["choose", "display", "list", "edit", "add", "error"]
+                - choose: Display all known categories
+                - display: Iterate through notes matching `self.note_category`
+                - list: show a listing of notes in self.note_category
+                - edit: Open an editor for current note
+                - add: Open an editor for a new note
+                - error: Show an error screen
+        error_message: StringProperty
+            Message 
         play_state: OptionProperty
             One of [play, pause]
             play:: schedule pagination through notes
@@ -234,7 +242,7 @@ class MindRefApp(App):
     def process_edit_note_event(self, event: EditNoteEvent):
         data_note = self.registry.edit_note(category=event.category, idx=event.idx)
         update_edit_note = lambda x: setattr(self, "editor_note", data_note)
-        update_display_state = lambda x: setattr(self, "display_state", "edit")
+        update_display_state = lambda x: self.display_state_trigger("edit")
         sch_cb(0, update_edit_note, update_display_state)
 
     def process_add_note_event(self, event: AddNoteEvent):
@@ -270,6 +278,26 @@ class MindRefApp(App):
         if event.on_complete is not None:
             sch_cb(0.1, event.on_complete)
 
+    def process_notes_query_failure_event(self, event: NotesQueryFailureEvent):
+
+        if event.on_complete is not None:
+            sch_cb(0, event.on_complete)
+
+        if event.error in ("permission_error", "not_found"):
+            # Clear the bad entry from config
+            self.note_service.storage_path = None
+            app_config = Config.get_configparser("app")
+            # If android we have a special homedir available with NOTES_PATH
+            app_config.set(
+                "Storage",
+                "NOTES_PATH",
+                os.environ.get("NOTES_PATH", str(Path("~").expanduser())),
+            )
+            app_config.write()
+
+        self.error_message = event.message
+        self.display_state_trigger("error")
+
     def process_back_button_event(self, event: BackButtonEvent):
         # The display state when button was pressed
         ds = event.display_state
@@ -277,10 +305,10 @@ class MindRefApp(App):
             # Cannot go further back
             App.get_running_app().stop()
         elif ds == "display":
-            set_ds_choose = lambda dt: setattr(self, "display_state", "choose")
+            set_ds_choose = lambda dt: self.display_state_trigger("choose")
             sch_cb(0, set_ds_choose)
         elif ds == "list":
-            set_ds_display = lambda dt: setattr(self, "display_state", "display")
+            set_ds_display = lambda dt: self.display_state_trigger("display")
             sch_cb(0, set_ds_display)
         elif ds == "edit":
             self.registry.push_event(CancelEditEvent())
@@ -357,7 +385,11 @@ class MindRefApp(App):
 
     def build_config(self, config):
         get_environ = os.environ.get
-        config.setdefaults("Storage", {"NOTES_PATH": get_environ("NOTES_PATH", None)})
+        # If android we have a special homedir available with NOTES_PATH
+        config.setdefaults(
+            "Storage",
+            {"NOTES_PATH": get_environ("NOTES_PATH", str(Path("~").expanduser()))},
+        )
         config.setdefaults(
             "Display", {"BASE_FONT_SIZE": 16, "SCREEN_HEIGHT": 640, "SCREEN_WIDTH": 800}
         )
@@ -379,7 +411,8 @@ class MindRefApp(App):
         if section == "Storage":
             if key == "NOTES_PATH":
                 self.note_service.storage_path = value
-                self.note_categories = self.note_service.categories
+                self.display_state_trigger("choose")
+                self.registry.push_event(RefreshNotesEvent(on_complete=None))
         elif section == "Behavior":
             if key == "LOG_LEVEL":
                 self.log_level = value

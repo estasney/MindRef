@@ -4,6 +4,8 @@
 #:import Note widgets.note
 #:import Buttons widgets.buttons.buttons
 #:import e widgets.editor.editor
+#:import Toolbar widgets.toolbar
+#:import LargeLabel widgets.style
 
 <NoteAppScreenManager>:
     id: screen_manager
@@ -16,6 +18,9 @@
     NoteEditScreen:
         id: note_edit_screen
         name: 'note_edit_screen'
+    ErrorMessageScreen:
+        id: error_message_screen
+        name: 'error_message_screen'
 
 
 <NoteListViewScreen>:
@@ -58,3 +63,19 @@
         id: container
         NoteEditor:
             id: note_editor
+
+<ErrorMessageScreen>:
+    canvas.before:
+        Color:
+            rgba: app.colors['Dark']
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    BoxLayout:
+        orientation: 'vertical'
+        Toolbar:
+            size_hint_y: None
+            padding: dp(20), dp(10), dp(10), dp(5)
+            height: dp(50)
+        LargeLabel:
+            text: app.error_message

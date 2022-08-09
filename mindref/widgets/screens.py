@@ -160,6 +160,8 @@ class NoteAppScreenManager(InteractBehavior, ScreenManager):
             self.handle_notes_edit_view()
         elif new == "add":
             self.handle_notes_add_view()
+        elif new == "error":
+            self.handle_error_message()
 
         else:
             raise Exception(f"Unhandled display state {new}")
@@ -205,6 +207,10 @@ class NoteAppScreenManager(InteractBehavior, ScreenManager):
     def handle_notes_add_view(self, *args, **kwargs):
         Logger.debug("Switching to add view")
         update_screen = lambda x: setattr(self, "current", "note_edit_screen")
+        sch_cb(0, update_screen)
+
+    def handle_error_message(self, *args, **kwargs):
+        update_screen = lambda x: setattr(self, "current", "error_message_screen")
         sch_cb(0, update_screen)
 
 
@@ -344,3 +350,7 @@ class NoteEditScreen(InteractScreen):
 
         clear_self_text = lambda x: setattr(self, "init_text", "")
         Clock.schedule_once(clear_self_text, 0)
+
+
+class ErrorMessageScreen(InteractScreen):
+    ...

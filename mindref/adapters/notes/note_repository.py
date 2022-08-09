@@ -2,7 +2,7 @@ from __future__ import annotations
 import abc
 from abc import ABC
 from pathlib import Path
-from typing import Generator, Optional, TYPE_CHECKING
+from typing import Any, Generator, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from os import PathLike
@@ -14,10 +14,15 @@ if TYPE_CHECKING:
 class AbstractNoteRepository(ABC):
     _index: Optional["NoteIndex"]
     _current_category: Optional[str]
-    _storage_path: Optional[Path]
+    _storage_path: Optional[Any]
 
     def __init__(self, get_app: "GetApp"):
         self.get_app = get_app
+
+    @property
+    @abc.abstractmethod
+    def configured(self) -> bool:
+        raise NotImplementedError
 
     @property
     @abc.abstractmethod

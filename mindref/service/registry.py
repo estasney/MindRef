@@ -2,7 +2,13 @@ from collections import deque
 from pathlib import Path
 from typing import Callable, Optional, Protocol, TYPE_CHECKING
 
-from domain.events import DiscoverCategoryEvent, NoteFetchedEvent, NotesQueryEvent
+from domain.events import (
+    DiscoverCategoryEvent,
+    NoteFetchedEvent,
+    NotesQueryErrorFailureEvent,
+    NotesQueryEvent,
+    NotesQueryNotSetFailureEvent,
+)
 from utils import GenericLoggerMixin, LoggerProtocol
 
 if TYPE_CHECKING:
@@ -63,15 +69,39 @@ class Registry(GenericLoggerMixin):
 
         """
         note_repo = self.app.note_service
+        if not note_repo.configured:
+            self.push_event(NotesQueryNotSetFailureEvent(on_complete=on_complete))
+            return
         discover_pipeline = note_repo.discover_notes()
-        for discovery in discover_pipeline:
+        try:
+            for discovery in discover_pipeline:
+                self.push_event(
+                    DiscoverCategoryEvent(
+                        category=discovery.category,
+                        image_path=discovery.image_path,
+                        notes=discovery.notes,
+                    )
+                )
+        except FileNotFoundError as e:
+
             self.push_event(
-                DiscoverCategoryEvent(
-                    category=discovery.category,
-                    image_path=discovery.image_path,
-                    notes=discovery.notes,
+                NotesQueryErrorFailureEvent(
+                    on_complete=on_complete,
+                    error="not_found",
+                    message=f"Storage Path: '{e.filename}' not found",
                 )
             )
+            return
+        except PermissionError as e:
+
+            self.push_event(
+                NotesQueryErrorFailureEvent(
+                    on_complete=on_complete,
+                    error="permission_error",
+                    message=f"Permission Error: for Storage Path '{e.filename}'",
+                )
+            )
+            return
         self.push_event(NotesQueryEvent(on_complete=on_complete))
 
     def new_note(self, category: Optional[str], idx: Optional[int]) -> "EditableNote":

@@ -29,6 +29,7 @@ class NoteDiscovery(NamedTuple):
 
 class FileSystemNoteRepository(AbstractNoteRepository):
     _category_files: dict[str, list[Path]]
+    _storage_path: Optional[Path]
 
     """
     Categories are defined with directories
@@ -48,6 +49,10 @@ class FileSystemNoteRepository(AbstractNoteRepository):
         self._index = None
 
     @property
+    def configured(self) -> bool:
+        return self._storage_path is not None
+
+    @property
     def storage_path(self) -> Path:
         if not self._storage_path:
             raise AttributeError("Storage Path not set")
@@ -55,7 +60,10 @@ class FileSystemNoteRepository(AbstractNoteRepository):
 
     @storage_path.setter
     def storage_path(self, value: "PathLike"):
-        self._storage_path = Path(value)
+        if value is None:
+            self._storage_path = None
+        else:
+            self._storage_path = Path(value)
 
     def discover_notes(self, *args) -> Generator[NoteDiscovery, None, None]:
         """

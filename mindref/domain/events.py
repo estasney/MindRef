@@ -6,13 +6,21 @@ from typing import Callable, Literal, Optional, TYPE_CHECKING
 if TYPE_CHECKING:
     from domain.markdown_note import MarkdownNote
 
-DISPLAY_STATE = Literal["choose", "display", "list", "edit", "add"]
+DISPLAY_STATE = Literal["choose", "display", "list", "edit", "add", "error"]
+QUERY_FAILURE_TYPE = Literal["not_set", "not_found", "permission_error"]
 
 
 class Event(abc.ABC):
     @property
     @abc.abstractmethod
     def event_type(self):
+        raise NotImplementedError
+
+
+class EventFailure(abc.ABC):
+    @property
+    @abc.abstractmethod
+    def message(self) -> str:
         raise NotImplementedError
 
 
@@ -54,9 +62,33 @@ class NotesQueryEvent(Event):
 
 
 @dataclass
+class NotesQueryFailureEvent(EventFailure, NotesQueryEvent):
+    event_type = "notes_query_failure"
+    message = "To view notes, open Settings > Storage\n\nAnd set 'Note Storage'"
+    on_complete: Optional[Callable]
+    error: QUERY_FAILURE_TYPE
+
+
+@dataclass
+class NotesQueryNotSetFailureEvent(NotesQueryFailureEvent):
+    on_complete: Optional[Callable]
+    error: str = field(default="not_set")
+    message: str = field(
+        default="To view notes, open Settings > Storage\n\nAnd set 'Note Storage'"
+    )
+
+
+@dataclass
+class NotesQueryErrorFailureEvent(NotesQueryFailureEvent):
+    on_complete: Optional[Callable]
+    error: Literal["not_found", "permission_error"]
+    message: str
+
+
+@dataclass
 class RefreshNotesEvent(Event):
     event_type = "refresh_notes"
-    on_complete: Callable[[], None]
+    on_complete: Optional[Callable[[], None]]
 
 
 @dataclass

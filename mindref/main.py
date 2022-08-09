@@ -15,7 +15,7 @@ def run_android():
         Clock.schedule_once(hide_loading)
 
         # Create default folder
-        notes_dir = Path(primary_external_storage_path()) / "kvnotes"
+        notes_dir = Path(primary_external_storage_path()) / "mindref_notes"
         notes_dir.mkdir(exist_ok=True)
         os.environ.update({"NOTES_PATH": str(notes_dir)})
         MindRefApp().run()
