@@ -87,19 +87,24 @@ class NoteCategoryButton(ButtonBehavior, BoxLayout):
     image = ObjectProperty()
     tx_bg_normal = ObjectProperty()
     tx_bg_down = ObjectProperty()
+    tx_category = ObjectProperty(Loader.loading_image.texture)
 
     def __init__(self, text, **kwargs):
         super().__init__(**kwargs)
+        self.img_loader = None
+        self.load_category_tx_trigger = Clock.create_trigger(self.load_category_texture)
+        self.set_category_tx_trigger = Clock.create_trigger(
+            self.category_tx_loaded, timeout=0.1
+        )
+        self.fbind("source", self.load_category_tx_trigger)
         self.source = (
             str(uri)
             if (uri := App.get_running_app().note_service.category_image_uri(text))
             else ""
         )
         self.text = text
-        self.load_category_img()
         self.load_texture("bg_normal")
         self.load_texture("bg_down")
-        self.img_loader = None
 
     def load_texture(self, name):
         get_uri = App.get_running_app().atlas_service.uri_for
@@ -107,20 +112,13 @@ class NoteCategoryButton(ButtonBehavior, BoxLayout):
         tx = img.texture
         setattr(self, f"tx_{name}", tx)
 
-    def _image_loaded(self, result):
-        Logger.debug(f"CategoryButton: Image Loaded for {self.text}")
-        if result.image.texture:
-            Clock.schedule_once(
-                lambda x: setattr(self.image, "texture", result.image.texture), 0.1
-            )
-        else:
-            Logger.debug(f"CategoryButton: No Texture {self.text}")
+    def category_tx_loaded(self, *args):
+        self.tx_category = self.img_loader.texture
 
-    def load_category_img(self):
-        if not self.source:
-            self.image.texture = Loader.error_image.texture
-            return
-        self.image.texture = Loader.loading_image.texture
-        self.img_loader = Loader.image(self.source)
-        self.img_loader.bind(on_load=self._image_loaded)
-        self.img_loader.bind(on_error=lambda x: Logger.debug("Img Loader Error"))
+    def load_category_texture(self, *args):
+        if self.img_loader is None:
+            self.img_loader = Loader.image(self.source)
+        if self.img_loader.loaded:
+            self.tx_category = self.img_loader.texture
+        else:
+            self.img_loader.bind(on_load=lambda x: self.set_category_tx_trigger())
