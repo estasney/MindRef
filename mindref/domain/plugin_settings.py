@@ -27,6 +27,7 @@ def _has_rpi_backlight() -> bool:
 def _generate_screen_saver_dict(checker: Callable[[], bool]) -> list[dict]:
     if checker():
         return [
+            dict(type="title", title="Plugins"),
             dict(
                 type="bool",
                 title="ScreenSaver",
@@ -44,15 +45,15 @@ def _generate_screen_saver_dict(checker: Callable[[], bool]) -> list[dict]:
         ]
 
 
-def _generate_plugin_json(
+def _generate_plugin_data(
     plugin_generators: Iterable[Callable[[], Optional[list[dict]]]]
-) -> str:
+) -> list[dict]:
     data = []
     for p in plugin_generators:
         p_data = p()
         if p_data:
             data.extend(p_data)
-    return json.dumps(data)
+    return data
 
 
 def _load_plugin_settings():
@@ -63,18 +64,18 @@ def _load_plugin_settings():
     generate_screen_saver_dict = partial(
         _generate_screen_saver_dict, checker=_has_rpi_backlight
     )
-    generate_plugin_json = partial(
-        _generate_plugin_json, plugin_generators=(generate_screen_saver_dict,)
+    generate_plugin_data = partial(
+        _generate_plugin_data, plugin_generators=(generate_screen_saver_dict,)
     )
-    _SETTINGS_PLUGIN_DATA = generate_plugin_json()
+    _SETTINGS_PLUGIN_DATA = generate_plugin_data()
     return _SETTINGS_PLUGIN_DATA
 
 
 def __getattr__(name):
     if name == "SETTINGS_PLUGIN_DATA":
         return _load_plugin_settings()
-    elif name == "_generate_plugin_json":
-        return _generate_plugin_json
+    elif name == "_generate_plugin_data":
+        return _generate_plugin_data
     elif name == "_generate_screen_saver_dict":
         return _generate_screen_saver_dict
     elif name == "_has_rpi_backlight":

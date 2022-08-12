@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 from functools import partial
@@ -29,18 +30,16 @@ from domain.events import (
     CancelEditEvent,
     DiscoverCategoryEvent,
     EditNoteEvent,
+    NoteCategoryEvent,
+    NoteCategoryFailureEvent,
     NoteFetchedEvent,
     NotesQueryEvent,
     NotesQueryFailureEvent,
     RefreshNotesEvent,
     SaveNoteEvent,
 )
-from domain.plugin_settings import SETTINGS_PLUGIN_DATA
-from domain.settings import (
-    SETTINGS_BEHAVIOR_PATH,
-    SETTINGS_DISPLAY_PATH,
-    SETTINGS_STORAGE_PATH,
-)
+
+from domain.settings import app_settings
 from plugins import PluginManager
 from service.registry import Registry
 from utils import sch_cb
@@ -81,7 +80,6 @@ class MindRefApp(App):
     play_state_trigger: Callable[[Literal["play", "pause"]], None]
 
     paginate_interval = NumericProperty(15)
-    log_level = NumericProperty(logging.ERROR)
 
     screen_manager = ObjectProperty()
 
@@ -201,34 +199,10 @@ class MindRefApp(App):
 
     def on_note_category(self, instance, value: str):
         """
-        Category button pressed
+        Category button pressed, or we're loading straight to category at launch
         """
-        self.note_service.current_category = value
 
-        def return_to_category(dt):
-            self.note_category_meta = []
-            if self.next_note_scheduler:
-                self.next_note_scheduler.cancel()
-            self.display_state_trigger("choose")
-
-        def select_category(dt, category):
-            self.note_category_meta = self.note_service.category_meta
-            if not self.next_note_scheduler:
-                self.next_note_scheduler = Clock.schedule_interval(
-                    self.paginate_note, self.paginate_interval
-                )
-            if self.play_state == "pause":
-                self.next_note_scheduler.cancel()
-            else:
-                if self.play_state == "play":
-                    self.next_note_scheduler()
-            self.paginate_note(initial=True)
-
-        if not value:
-            sch_cb(0.1, return_to_category)
-        else:
-            func = partial(select_category, category=value)
-            sch_cb(0.1, func, lambda x: self.display_state_trigger("display"))
+        self.registry.set_note_category(self.note_category, on_complete=None)
 
     """
     Event Handlers for Registry
@@ -271,6 +245,47 @@ class MindRefApp(App):
         clear_categories = lambda x: setattr(self, "note_categories", [])
         run_query = lambda x: self.registry.query_all(on_complete=event.on_complete)
         sch_cb(0.5, clear_categories, run_query)
+
+    def process_note_category_event(self, event: NoteCategoryEvent):
+        """Note Category has been set"""
+
+        def return_to_category(dt):
+            self.note_category_meta = []
+            if self.next_note_scheduler:
+                self.next_note_scheduler.cancel()
+            self.display_state_trigger("choose")
+
+        if not event.value:
+            sch_cb(0.1, return_to_category)
+            return
+
+        def select_category(dt, category):
+            self.note_category_meta = self.note_service.category_meta
+            if not self.next_note_scheduler:
+                self.next_note_scheduler = Clock.schedule_interval(
+                    self.paginate_note, self.paginate_interval
+                )
+            if self.play_state == "pause":
+                self.next_note_scheduler.cancel()
+            else:
+                if self.play_state == "play":
+                    self.next_note_scheduler()
+            self.paginate_note(initial=True)
+
+        onsch_cb(0.1, partial(select_category, category=event.value))
+
+    def process_note_category_failure_event(self, event: NoteCategoryFailureEvent):
+        """Failed to set"""
+        Logger.error(event)
+        if self.config.get("Behavior", "CATEGORY_SELECTED") == event.value:
+            # Clear the config
+            app_config = Config.get_configparser("app")
+            app_config.set("Behavior", "CATEGORY_SELECTED", "")
+            app_config.write()
+
+        if self.next_note_scheduler:
+            self.next_note_scheduler.cancel()
+        self.note_category = ""
 
     def process_notes_query_event(self, event: NotesQueryEvent):
         """Notes have finished Querying"""
@@ -345,6 +360,9 @@ class MindRefApp(App):
     """Kivy"""
 
     def build(self):
+
+        truthy = {"1", "True"}
+
         self.registry.app = self
         self.play_state_trigger = trigger_factory(
             self, "play_state", self.__class__.play_state.options
@@ -360,14 +378,15 @@ class MindRefApp(App):
             self.registry.storage_path = storage_path
 
         self.note_service.new_first = (
-            True if self.config.get("Behavior", "NEW_FIRST") == "True" else False
+            True if self.config.get("Behavior", "NEW_FIRST") in truthy else False
         )
 
         sm = NoteAppScreenManager(self)
         self.screen_manager = sm
-        self.play_state = self.config.get("Behavior", "PLAY_STATE")
+        self.play_state = (
+            "play" if self.config.get("Behavior", "PLAY_STATE") in truthy else "pause"
+        )
         self.note_category = self.config.get("Behavior", "CATEGORY_SELECTED")
-        self.log_level = self.config.get("Behavior", "LOG_LEVEL")
         self.base_font_size = self.config.get("Display", "BASE_FONT_SIZE")
         self.registry.query_all()
         Clock.schedule_interval(self.process_event, 0.1)
@@ -378,10 +397,7 @@ class MindRefApp(App):
         return sm
 
     def build_settings(self, settings):
-        settings.add_json_panel("Storage", self.config, SETTINGS_STORAGE_PATH)
-        settings.add_json_panel("Display", self.config, SETTINGS_DISPLAY_PATH)
-        settings.add_json_panel("Behavior", self.config, SETTINGS_BEHAVIOR_PATH)
-        settings.add_json_panel("Plugins", self.config, data=SETTINGS_PLUGIN_DATA)
+        settings.add_json_panel("MindRef", self.config, data=json.dumps(app_settings))
 
     def build_config(self, config):
         get_environ = os.environ.get
@@ -397,9 +413,8 @@ class MindRefApp(App):
             "Behavior",
             {
                 "NEW_FIRST": True,
-                "PLAY_STATE": "play",
+                "PLAY_STATE": False,
                 "CATEGORY_SELECTED": "",
-                "LOG_LEVEL": int(get_environ("LOG_LEVEL", logging.INFO)),
                 "TRANSITIONS": "Slide",
             },
         )
@@ -430,12 +445,6 @@ class MindRefApp(App):
         elif section == "Display":
             if key == "BASE_FONT_SIZE":
                 self.base_font_size = value
-            elif key == "SCREEN_WIDTH":
-                Config.set("graphics", "width", value)
-                Config.write()
-            elif key == "SCREEN_HEIGHT":
-                Config.set("graphics", "height", value)
-                Config.write()
         elif section == "Plugins":
             return False
 

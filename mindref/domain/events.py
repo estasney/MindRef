@@ -56,6 +56,20 @@ class NoteFetchedEvent(Event):
 
 
 @dataclass
+class NoteCategoryEvent(Event):
+    event_type = "note_category"
+    value: str
+    on_complete: Optional[Callable]
+
+
+@dataclass
+class NoteCategoryFailureEvent(EventFailure, NoteCategoryEvent):
+    event_type = "note_category_failure"
+    message = "Could not find the category"
+    error = "not_found"
+
+
+@dataclass
 class NotesQueryEvent(Event):
     event_type = "notes_query"
     on_complete: Optional[Callable]

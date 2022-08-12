@@ -4,6 +4,8 @@ from typing import Callable, Optional, Protocol, TYPE_CHECKING
 
 from domain.events import (
     DiscoverCategoryEvent,
+    NoteCategoryEvent,
+    NoteCategoryFailureEvent,
     NoteFetchedEvent,
     NotesQueryErrorFailureEvent,
     NotesQueryEvent,
@@ -58,6 +60,24 @@ class Registry(GenericLoggerMixin):
 
     def push_event(self, event: "Event"):
         self.events.append(event)
+
+    def set_note_category(self, value: str, on_complete: Optional[Callable]):
+        """
+        Update note_service current category.
+
+        If Exception occurs (KeyError) push an error event
+        Returns
+        ------
+        """
+        try:
+            self.app.note_service.current_category = value
+        except KeyError as e:
+            self.app.note_service.current_category = None
+            self.push_event(
+                NoteCategoryFailureEvent(on_complete=on_complete, value=value)
+            )
+            return
+        self.push_event(NoteCategoryEvent(on_complete=on_complete, value=value))
 
     def query_all(self, on_complete: Optional[Callable] = None):
         """
