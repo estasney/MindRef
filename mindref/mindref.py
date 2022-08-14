@@ -272,7 +272,7 @@ class MindRefApp(App):
                     self.next_note_scheduler()
             self.paginate_note(initial=True)
 
-        onsch_cb(0.1, partial(select_category, category=event.value))
+        sch_cb(0.1, partial(select_category, category=event.value))
 
     def process_note_category_failure_event(self, event: NoteCategoryFailureEvent):
         """Failed to set"""
