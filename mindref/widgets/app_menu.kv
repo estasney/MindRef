@@ -3,9 +3,13 @@
 #: import effects widgets.effects
 #: import buttons widgets.buttons
 
-
-<GlowLine@HSeparator>:
-    color: app.colors['White']
+<GlowLine@EffectWidget>:
+    effects: [effects.PulsingEffect()]
+    size_hint_y: None
+    height: sep.height
+    HSeparator:
+        id: sep
+        color: app.colors['White']
 
 <AppMenu>:
     pos_hint: {'top': 1}
