@@ -4,12 +4,12 @@
 #: import buttons widgets.buttons
 
 <GlowLine@EffectWidget>:
-    effects: [effects.PulsingEffect()]
+    effects: [effects.PulsingEffect(pulse_period=-.5, pulse_width=0.6, min_color=0.9)]
     size_hint_y: None
     height: sep.height
     HSeparator:
         id: sep
-        color: app.colors['White']
+        color: app.colors['Accent-One']
 
 <AppMenu>:
     pos_hint: {'top': 1}
