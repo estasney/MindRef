@@ -61,4 +61,4 @@ app_settings = [
 ]
 
 if _SETTINGS_PLUGIN_DATA:
-    app_settings.append(_SETTINGS_PLUGIN_DATA)
+    app_settings.extend(_SETTINGS_PLUGIN_DATA)
