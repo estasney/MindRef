@@ -35,10 +35,11 @@
     PrimaryVSep:
     PlayStateButton:
         id: play_button
-        on_release: self.playing = not self.playing
+        on_release: self.handle_press(app)
+
     PrimaryVSep:
     ForwardButton:
         on_release: app.paginate(1)
     PrimaryVSep:
     ReturnButton:
-        on_release: app.note_category = ''
+        on_release: app.display_state_trigger('choose')

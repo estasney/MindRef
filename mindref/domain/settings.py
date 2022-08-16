@@ -29,6 +29,13 @@ app_settings = [
         "key": "PLAY_STATE",
     },
     {
+        "type": "numeric",
+        "title": "Autoplay Speed",
+        "desc": "When enabled, Autoplay, will wait this many seconds between notes",
+        "key": "PLAY_DELAY",
+        "section": "Behavior",
+    },
+    {
         "type": "string",
         "title": "Initial Category",
         "desc": "If set, skip the category selection screen and load this category when MindRef launches",

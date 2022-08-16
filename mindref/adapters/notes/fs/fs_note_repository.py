@@ -49,6 +49,7 @@ class FileSystemNoteRepository(AbstractNoteRepository):
         self._category_imgs = {}
         self._storage_path = None
         self._index = None
+        self._current_category = None
 
     @property
     def configured(self) -> bool:
@@ -104,7 +105,9 @@ class FileSystemNoteRepository(AbstractNoteRepository):
 
     @property
     def category_meta(self):
-        return self._load_category_meta()
+        if self.current_category:
+            return self._load_category_meta()
+        return []
 
     def _load_category_meta(self) -> list["MarkdownNoteDict"]:
         category_files = self._category_files[self.current_category]

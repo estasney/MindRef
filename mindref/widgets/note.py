@@ -17,7 +17,7 @@ from widgets.markdown.markdown_document import MarkdownDocument
 if TYPE_CHECKING:
     from domain.markdown_note import MarkdownNoteDict
 
-Cache.register("note_widget", limit=100, timeout=3600)
+Cache.register("note_widget", limit=10, timeout=3600)
 
 
 @kivy_cache(cache_name="note_widget", key_func=cache_key_note)

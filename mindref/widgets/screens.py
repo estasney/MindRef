@@ -25,7 +25,12 @@ from kivy.uix.screenmanager import (
 )
 from toolz import sliding_window
 
-from domain.events import CancelEditEvent, RefreshNotesEvent, SaveNoteEvent
+from domain.events import (
+    CancelEditEvent,
+    NoteCategoryEvent,
+    RefreshNotesEvent,
+    SaveNoteEvent,
+)
 from utils import import_kv, sch_cb
 from utils.triggers import trigger_factory
 from widgets.app_menu import AppMenu
@@ -58,19 +63,18 @@ class NoteAppScreenManager(InteractBehavior, ScreenManager):
     n_screens = BoundedNumericProperty(defaultvalue=2, min=1, max=2)
     screen_triggers: Callable[[str], None]
 
-    def __init__(self, app, **kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.note_screen_cycler = None
         self.fbind("n_screens", self.handle_n_screens)
         self.current = "chooser_screen"
-        self.app = app
         self.menu = None
         self.note_trigger = Clock.create_trigger(self.handle_notes)
-        app.bind(display_state=self.handle_app_display_state)
-        app.bind(note_data=self.note_trigger)
-        app.bind(play_state=self.setter("play_state"))
-        app.bind(screen_transitions=self.setter("screen_transitions"))
-        app.bind(menu_open=self.setter("menu_open"))
+        self.app.bind(display_state=self.handle_app_display_state)
+        self.app.bind(note_data=self.note_trigger)
+        self.app.bind(play_state=self.setter("play_state"))
+        self.app.bind(screen_transitions=self.setter("screen_transitions"))
+        self.app.bind(menu_open=self.setter("menu_open"))
         self.fbind("menu_open", self.handle_menu_state)
         self.screen_triggers = trigger_factory(self, "current", self.screen_names)
 
@@ -113,9 +117,7 @@ class NoteAppScreenManager(InteractBehavior, ScreenManager):
         self.screen_triggers = trigger_factory(self, "current", self.screen_names)
 
     def category_selected(self, category: "NoteCategoryButton"):
-        Clock.schedule_once(
-            lambda x: setattr(self.app, "note_category", category.text), 0
-        )
+        self.app.registry.set_note_category(category.text, on_complete=None)
 
     def handle_screen_transitions(self, instance, value: TR_OPTS):
         if value == "None":

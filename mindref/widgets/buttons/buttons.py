@@ -1,8 +1,11 @@
+from kivy import Logger
 from kivy.app import App
 from kivy.properties import (
     BooleanProperty,
     DictProperty,
     ObjectProperty,
+    OptionProperty,
+    StringProperty,
 )
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout
@@ -33,23 +36,34 @@ class DynamicImageButton(ImageButton):
 
 
 class PlayStateButton(DynamicImageButton):
-    playing = BooleanProperty(True)
+    icon_active = OptionProperty("play", options=["play", "pause"])
 
     def __init__(self, **kwargs):
-        self.fbind("playing", self.handle_play_state)
-        app_state = App.get_running_app().play_state
-        src = "play" if app_state == "pause" else "pause"
         super().__init__(
             sources=["play", "pause"],
             **kwargs,
         )
-        self.source = self.sources[src]
+        app = App.get_running_app()
+        app.bind(play_state=self.handle_play_state)
+        self.handle_play_state(app, app.play_state)
+        self.bind(icon_active=self.handle_icon_active)
+
+    def handle_icon_active(self, instance, value):
+        self.source = self.sources[self.icon_active]
 
     def handle_play_state(self, instance, value):
-        app = App.get_running_app()
-        app.play_state = "play" if self.playing else "pause"
-        self.source = self.sources["pause"] if self.playing else self.sources["play"]
-        return True
+        """When App's play_state is 'pause', we show a play icon"""
+        if instance.play_state == "pause":
+            self.icon_active = "play"
+
+        else:
+            self.icon_active = "pause"
+
+    def handle_press(self, app):
+        """
+        Our source of truth for whether the app is 'paused' or 'playing' is self.
+        """
+        app.play_state_trigger(self.icon_active)
 
 
 class BackButton(ImageButton):
@@ -93,7 +107,6 @@ class AddButton(ImageButton):
 
 
 class HamburgerIcon(BoxLayout):
-
     release_callback = ObjectProperty()
 
     def __init__(self, **kwargs):
