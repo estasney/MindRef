@@ -1,7 +1,7 @@
 from __future__ import annotations
+
 import abc
 from abc import ABC
-from pathlib import Path
 from typing import Any, Generator, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:

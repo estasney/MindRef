@@ -1,5 +1,4 @@
 from itertools import cycle
-from itertools import cycle
 from typing import Callable, Literal, Optional, TYPE_CHECKING, Union
 
 from kivy import Logger
@@ -27,7 +26,6 @@ from toolz import sliding_window
 
 from domain.events import (
     CancelEditEvent,
-    NoteCategoryEvent,
     RefreshNotesEvent,
     SaveNoteEvent,
 )

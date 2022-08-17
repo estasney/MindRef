@@ -1,5 +1,6 @@
 from kivy.uix.boxlayout import BoxLayout
-from domain.events import AddNoteEvent, BackButtonEvent, EditNoteEvent
+
+from domain.events import AddNoteEvent, EditNoteEvent
 from utils import import_kv
 
 import_kv(__file__)

@@ -1,9 +1,7 @@
-from functools import partial
-
-from kivy import Logger
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.core.image import Image
+from kivy.loader import Loader
 from kivy.properties import (
     BooleanProperty,
     ListProperty,
@@ -13,7 +11,7 @@ from kivy.properties import (
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.scrollview import ScrollView
-from kivy.loader import Loader
+
 from utils import import_kv
 from widgets.effects.scrolling import RefreshOverscrollEffect
 

@@ -1,11 +1,10 @@
 import json
-import logging
 import os
 from functools import partial
 from pathlib import Path
 from typing import Callable, Literal
 
-from kivy._clock import ClockEvent
+from kivy._clock import ClockEvent  # noqa
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.config import Config
@@ -39,7 +38,6 @@ from domain.events import (
     RefreshNotesEvent,
     SaveNoteEvent,
 )
-
 from domain.settings import app_settings
 from plugins import PluginManager
 from service.registry import Registry

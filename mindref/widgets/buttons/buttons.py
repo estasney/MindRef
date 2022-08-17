@@ -1,11 +1,8 @@
-from kivy import Logger
 from kivy.app import App
 from kivy.properties import (
-    BooleanProperty,
     DictProperty,
     ObjectProperty,
     OptionProperty,
-    StringProperty,
 )
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout
