@@ -45,6 +45,8 @@ from utils import sch_cb
 from utils.triggers import trigger_factory
 from widgets.screens import NoteAppScreenManager
 
+DISPLAY_STATES = Literal["choose", "display", "list", "edit", "add", "error"]
+
 
 class MindRefApp(App):
     APP_NAME = "MindRef"
@@ -71,9 +73,7 @@ class MindRefApp(App):
     display_state = OptionProperty(
         "choose", options=["choose", "display", "list", "edit", "add", "error"]
     )
-    display_state_trigger: Callable[
-        [Literal["choose", "display", "list", "edit", "add", "error"]], None
-    ]
+    display_state_trigger: Callable[[DISPLAY_STATES], None]
 
     play_state = OptionProperty("play", options=["play", "pause"])
     play_state_trigger: Callable[[Literal["play", "pause"]], None]
@@ -147,27 +147,24 @@ class MindRefApp(App):
 
     settings_cls = "MindRefSettings"
 
-    def on_display_state(self, instance, new):
-
-        if new in (
-            "edit",
-            "add",
-        ):
+    def on_display_state(self, instance, value: DISPLAY_STATES):
+        if value != "display":
             self.play_state_trigger("pause")
-        if new == "edit":
+        if value == "edit":
             self.editor_note = self.editor_service.edit_current_note()
-        elif new == "add":
+        elif value == "add":
             self.editor_note = self.editor_service.new_note(
                 category=self.note_category, idx=self.note_service.index_size()
             )
 
     def on_play_state(self, instance, value):
-        if value == "pause":
+        if self.play_state == "pause":
             self.paginate_timer.cancel()
         else:
             self.paginate_timer()
 
     def on_paginate_interval(self, instance, value):
+        """Interval for Autoplay has changed"""
         self.paginate_timer.cancel()
         self.paginate_timer = Clock.create_trigger(
             partial(self.paginate, value=1),
@@ -177,8 +174,8 @@ class MindRefApp(App):
         if self.play_state == "play":
             self.paginate_timer()
 
-    def select_index(self, value):
-
+    def select_index(self, value: int):
+        """Set `self.note_data` to the nth note"""
         set_index = lambda x: self.note_service.set_index(value)
         set_note_data = lambda x: setattr(
             self, "note_data", self.note_service.current_note().to_dict()

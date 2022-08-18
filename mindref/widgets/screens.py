@@ -197,21 +197,21 @@ class NoteAppScreenManager(InteractBehavior, ScreenManager):
 
     def handle_notes_list_view(self, *args, **kwargs):
         self.ids["list_view_screen"].set_note_list_view()
-        self.current = "list_view_screen"
+        self.screen_triggers("list_view_screen")
 
     def handle_notes_edit_view(self, *args, **kwargs):
-        Logger.debug("Switching to edit view")
-        update_screen = lambda x: setattr(self, "current", "note_edit_screen")
-        sch_cb(0, update_screen)
+        Logger.debug(f"{self.__class__.__name__} : Switching to note_edit_screen")
+        self.screen_triggers("note_edit_screen")
 
     def handle_notes_add_view(self, *args, **kwargs):
-        Logger.debug("Switching to add view")
-        update_screen = lambda x: setattr(self, "current", "note_edit_screen")
-        sch_cb(0, update_screen)
+        Logger.debug(
+            f"{self.__class__.__name__} : Switching to note_edit_screen - Adding Note"
+        )
+        self.screen_triggers("note_edit_screen")
 
     def handle_error_message(self, *args, **kwargs):
-        update_screen = lambda x: setattr(self, "current", "error_message_screen")
-        sch_cb(0, update_screen)
+        Logger.debug(f"{self.__class__.__name__} : Switching to error_message_screen")
+        self.screen_triggers("error_message_screen")
 
 
 class NoteCategoryChooserScreen(InteractScreen):
@@ -276,10 +276,11 @@ class NoteCategoryScreen(InteractScreen):
 
 
 class NoteListViewScreen(InteractScreen):
-    meta_notes = ListProperty()
+
+    note_list = ObjectProperty()
 
     def set_note_list_view(self, *args, **kwargs):
-        Clock.schedule_once(lambda dt: self.ids["scroller"].set(self.meta_notes), 0)
+        self.note_list.set(App.get_running_app().note_category_meta)
 
 
 class NoteEditScreen(InteractScreen):

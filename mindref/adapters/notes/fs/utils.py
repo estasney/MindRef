@@ -48,7 +48,7 @@ def _load_category_notes(
         for future in as_completed(pipeline):
             output.append(future.result())
 
-    return sorted(output, key=attrgetter("idx"), reverse=new_first)
+    return sorted(output, key=attrgetter("idx"), reverse=not new_first)
 
 
 def discover_folder_notes(

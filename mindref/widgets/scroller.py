@@ -21,15 +21,7 @@ import_kv(__file__)
 
 
 class ScrollingListView(ScrollView):
-    child_object = ObjectProperty()
-
-    def set(self, notes: list[dict], *args, **kwargs):
-        if not self.children:
-            layout = ListView(cols=1, size_hint=(None, None), width=Window.width)
-            layout.bind(minimum_height=layout.setter("height"))
-            self.add_widget(layout)
-            self.child_object = layout
-        self.children[0].set(notes)
+    ...
 
 
 class ListItem(GridLayout):

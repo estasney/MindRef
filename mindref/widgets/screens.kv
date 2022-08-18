@@ -1,6 +1,7 @@
 #:import NoteCategories widgets.categories
 #:import CategoryScreenScrollWrapper widgets.categories
 #:import ScrollingListView widgets.scroller
+#:import ListView widgets.scroller
 #:import Note widgets.note
 #:import Buttons widgets.buttons.buttons
 #:import e widgets.editor.editor
@@ -25,10 +26,15 @@
 
 
 <NoteListViewScreen>:
-    id: manager_screen
+    note_list: note_list
     meta_notes: app.note_category_meta
     ScrollingListView:
-        id: scroller
+        ListView:
+            id: note_list
+            size_hint: 1, None
+            height: self.minimum_height
+
+
 
 
 <NoteCategoryChooserScreen>:
