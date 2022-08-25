@@ -258,6 +258,7 @@ class MindRefApp(App):
             if self.play_state == "play":
                 self.paginate_timer()
             self.paginate_note(direction=0)
+            self.note_category = category
 
         sch_cb(
             0.1,
