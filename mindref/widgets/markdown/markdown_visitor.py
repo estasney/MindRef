@@ -101,7 +101,11 @@ class MarkdownVisitor:
 
     def visit(self, node: "MD_TYPES", **kwargs):
         node_type: Optional["MD_LIT_TYPES"] = node.get("type", "generic")
-        visit_func = getattr(self, f"visit_{node_type}")
+        try:
+            visit_func = getattr(self, f"visit_{node_type}")
+        except AttributeError:
+            Logger.warn(f"MarkdownVisitor: Unknown node type {node['type']}")
+            return False
         return visit_func(node, **kwargs)
 
     def visit_heading(self, node: "MdHeading", **kwargs) -> bool:
