@@ -238,10 +238,10 @@ class LabelHighlightInline(Label):
                 x1, y1, x2, y2 = self.compute_ref_coords(span)
                 w = x2 - x1
                 h = y2 - y1
-                RoundedRectangle(pos=(x1, y1), size=(w, h), radius=(dp(3),))
+                RoundedRectangle(pos=(x1, y1), size=(w, h), radius=(3,))
 
-            kbd_inset_x = dp(1)
-            kbd_inset_y = dp(1)
+            kbd_inset_x = dp(0.75)
+            kbd_inset_y = dp(0.75)
             for span in self.refs.get("kbd", []):
                 x1, y1, x2, y2 = self.compute_ref_coords(span)
                 w = x2 - x1
@@ -251,13 +251,13 @@ class LabelHighlightInline(Label):
                 RoundedRectangle(
                     pos=(x1 - kbd_inset_x, y1 - kbd_inset_y),
                     size=(w, h),
-                    radius=(sp(3),),
+                    radius=(3,),
                 )
                 Color(*self.kbd_color)
                 RoundedRectangle(
                     pos=(x1 + kbd_inset_x, y1 + kbd_inset_y),
                     size=(w - kbd_inset_x, h - (1 * kbd_inset_y)),
-                    radius=(sp(3),),
+                    radius=(3,),
                 )
 
 
