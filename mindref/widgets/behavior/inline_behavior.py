@@ -1,9 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Literal, NamedTuple, Optional, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from kivy.properties import ObservableList
+from typing import Any, Literal, NamedTuple, Optional
 
 from kivy.cache import Cache
 from kivy.clock import Clock
