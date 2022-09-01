@@ -1,11 +1,14 @@
 from __future__ import annotations
 
-from typing import Any, Literal, NamedTuple, Optional
+from typing import Any, Literal, NamedTuple, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from kivy.properties import ObservableList
+
+from kivy.cache import Cache
 from kivy.clock import Clock
-from kivy.core.image import Image
 from kivy.graphics import Color, RoundedRectangle
-from kivy.metrics import dp, sp
-from kivy.parser import parse_color
+from kivy.metrics import dp
 from kivy.properties import (
     BooleanProperty,
     ColorProperty,
@@ -16,7 +19,6 @@ from kivy.properties import (
 )
 from kivy.uix.label import Label
 from kivy.utils import escape_markup
-from kivy.cache import Cache
 
 Cache.register("color_norm", limit=1000)
 Cache.register("text_contrast", limit=1000)
@@ -263,7 +265,10 @@ class LabelHighlightInline(Label):
 
 @kivy_cache(cache_name="text_contrast", key_func=cache_key_text_contrast)
 def get_cached_text_contrast(
-    *, background_color, threshold, highlight_color: Optional[Any] = None
+    *,
+    background_color: tuple[float],
+    threshold: float,
+    highlight_color: Optional[Any] = None,
 ):
     """
     Set text as white or black depending on bg
