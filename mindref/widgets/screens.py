@@ -30,6 +30,7 @@ from domain.events import (
     SaveNoteEvent,
 )
 from utils import import_kv, sch_cb
+from utils.index import RollingIndex
 from utils.triggers import trigger_factory
 from widgets.app_menu import AppMenu
 from widgets.behavior.interact_behavior import InteractBehavior
@@ -54,17 +55,13 @@ class InteractScreen(InteractBehavior, Screen):
 class NoteAppScreenManager(InteractBehavior, ScreenManager):
     app = ObjectProperty()
     play_state = StringProperty()
-    screen_transitions = OptionProperty(
-        "slide", options=["None", "Slide", "Rise-In", "Card", "Fade", "Swap", "Wipe"]
-    )
     menu_open = BooleanProperty(False)
-    n_screens = BoundedNumericProperty(defaultvalue=2, min=1, max=2)
+    reversed_transition = BooleanProperty(False)
     screen_triggers: Callable[[str], None]
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.note_screen_cycler = None
-        self.fbind("n_screens", self.handle_n_screens)
+        self.note_screen_cycler = RollingIndex(size=2)
         self.current = "chooser_screen"
         self.menu = None
         self.note_trigger = Clock.create_trigger(self.handle_notes)
@@ -74,6 +71,7 @@ class NoteAppScreenManager(InteractBehavior, ScreenManager):
         self.app.bind(screen_transitions=self.setter("screen_transitions"))
         self.app.bind(menu_open=self.setter("menu_open"))
         self.fbind("menu_open", self.handle_menu_state)
+        self.fbind("reversed_transition", self.handle_reversed_transition)
         self.screen_triggers = trigger_factory(self, "current", self.screen_names)
 
     def handle_menu_state(self, instance, menu_open: bool):
@@ -98,55 +96,14 @@ class NoteAppScreenManager(InteractBehavior, ScreenManager):
         else:
             self.menu.dispatch("on_dismiss")
 
-    def handle_n_screens(self, instance, value):
-        """
-        Remove any existing note screens, create `n` note_screen(s) and create cycler
-        """
-        note_screen_ids = (s for s in self.ids if s.startswith("note_screen"))
-        for ns_id in note_screen_ids:
-            self.remove_widget(ns_id)
-        self.note_screen_cycler = None
-
-        for i in range(self.n_screens):
-            note_screen = NoteCategoryScreen(name=f"note_screen{i}")
-            self.add_widget(note_screen)
-
-        self.note_screen_cycler = sliding_window(2, cycle(range(self.n_screens)))
-        self.screen_triggers = trigger_factory(self, "current", self.screen_names)
-
     def category_selected(self, category: "NoteCategoryButton"):
         self.app.registry.set_note_category(category.text, on_complete=None)
 
-    def handle_screen_transitions(self, instance, value: TR_OPTS):
-        if value == "None":
-            self.n_screens = 1
-            return True
-        elif value == "Slide":
-            self.n_screens = 2
-            self.transition = SlideTransition()
-            return True
-        elif value == "Rise-In":
-            self.n_screens = 2
-            self.transition = RiseInTransition()
-            return True
-        elif value == "Card":
-            self.n_screens = 2
-            self.transition = CardTransition()
-            return True
-        elif value == "Fade":
-            self.n_screens = 2
-            self.transition = FadeTransition()
-            return True
-        elif value == "Swap":
-            self.n_screens = 2
-            self.transition = SwapTransition()
-            return True
-        elif value == "Wipe":
-            self.n_screens = 2
-            self.transition = WipeTransition()
-            return True
+    def handle_reversed_transition(self, instance, value):
+        if self.reversed_transition:
+            self.transition = SlideTransition(direction="right")
         else:
-            raise ValueError(f"Unhandled Transition {value}")
+            self.transition = SlideTransition(direction="left")
 
     def handle_app_display_state(self, instance, new):
         Logger.debug(f"ScreenManager: app_display_state : {new}")
@@ -170,11 +127,13 @@ class NoteAppScreenManager(InteractBehavior, ScreenManager):
         self.play_state = value
 
     def handle_notes(self, *args, **kwargs):
-        if not self.note_screen_cycler:
-            self.handle_n_screens(self, self.n_screens)
-        current_screen_idx, next_screen_idx = next(self.note_screen_cycler)
-        target_name = f"note_screen{next_screen_idx}"
-        current_name = f"note_screen{current_screen_idx}"
+
+        (
+            current_screen_idx,
+            next_screen_idx,
+        ) = self.note_screen_cycler.current, self.note_screen_cycler.next(peek=True)
+        target_name = f"note_screen_{next_screen_idx}"
+        current_name = f"note_screen_{current_screen_idx}"
         target_screen = next(
             screen for screen in self.screens if screen.name == target_name
         )
@@ -193,7 +152,10 @@ class NoteAppScreenManager(InteractBehavior, ScreenManager):
         # Clear note data from last screen
         clear_data = lambda dt: current_screen.set_note_content(None)
 
-        sch_cb(0, set_data, update_current_screen, clear_data)
+        # Advance index
+        advance_index = lambda dt: self.note_screen_cycler.next()
+
+        sch_cb(0, set_data, update_current_screen, clear_data, advance_index)
 
     def handle_notes_list_view(self, *args, **kwargs):
         self.ids["list_view_screen"].set_note_list_view()
@@ -276,7 +238,6 @@ class NoteCategoryScreen(InteractScreen):
 
 
 class NoteListViewScreen(InteractScreen):
-
     note_list = ObjectProperty()
 
     def set_note_list_view(self, *args, **kwargs):

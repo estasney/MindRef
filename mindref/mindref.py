@@ -194,13 +194,18 @@ class MindRefApp(App):
             sch_cb(0.1, partial(self.paginate_note, direction=value))
 
     def paginate_note(self, *args, **kwargs):
-        """Update our note_data"""
+        """
+        Update our note_data, and the direction transition for our ScreenManager
+        """
         direction = kwargs.get("direction", 1)
         if direction == -1:
+            self.screen_manager.reversed_transition = True
             self.note_data = self.note_service.previous_note().to_dict()
         elif direction == 0:
+            self.screen_manager.reversed_transition = False
             self.note_data = self.note_service.current_note().to_dict()
         elif direction == 1:
+            self.screen_manager.reversed_transition = False
             self.note_data = self.note_service.next_note().to_dict()
         else:
             raise NotImplementedError(f"Pagination of {direction} not supported")

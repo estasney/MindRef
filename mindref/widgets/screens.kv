@@ -7,13 +7,21 @@
 #:import e widgets.editor.editor
 #:import Toolbar widgets.toolbar
 #:import LargeLabel widgets.style
+#:import kivy_screen kivy.uix.screenmanager
 
 <NoteAppScreenManager>:
     id: screen_manager
     app: app
+    transition: kivy_screen.SlideTransition()
     NoteCategoryChooserScreen:
         id: chooser_screen
         name: 'chooser_screen'
+    NoteCategoryScreen:
+        id: note_screen_0
+        name: 'note_screen_0'
+    NoteCategoryScreen:
+        id: note_screen_1
+        name: 'note_screen_1'
     NoteListViewScreen:
         id: list_view_screen
         name: 'list_view_screen'
