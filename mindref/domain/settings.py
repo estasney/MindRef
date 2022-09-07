@@ -50,14 +50,6 @@ app_settings = [
         "section": "Display",
         "key": "BASE_FONT_SIZE",
     },
-    {
-        "type": "options",
-        "title": "Screen Transitions",
-        "desc": "Select screen transition animation",
-        "key": "TRANSITIONS",
-        "options": ["None", "Slide", "Rise-In", "Card", "Fade", "Swap", "Wipe"],
-        "section": "Behavior",
-    },
 ]
 
 if _SETTINGS_PLUGIN_DATA:
