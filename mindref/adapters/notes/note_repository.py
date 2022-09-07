@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 class AbstractNoteRepository(ABC):
-    _index: Optional["NoteIndex"]
+    _index: Optional["RollingIndex"]
     _current_category: Optional[str]
     _storage_path: Optional[Any]
 
@@ -83,7 +83,7 @@ class AbstractNoteRepository(ABC):
 
     @property
     @abc.abstractmethod
-    def index(self) -> "NoteIndex":
+    def index(self) -> "RollingIndex":
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -94,42 +94,3 @@ class AbstractNoteRepository(ABC):
     def category_image_uri(self, category: str):
         """Return URI for a Category Image"""
         raise NotImplementedError
-
-
-class NoteIndex:
-    """
-    Handles indexing notes so that we can always call `next` or `previous`
-
-    As with `range`, `end` is not inclusive
-    """
-
-    def __init__(self, size: int, current=0):
-        self.size = size
-        self.start = 0
-        self.end = max([0, (size - 1)])
-        self.current = current
-
-    def set_current(self, n: int):
-        if n >= self.size:
-            raise IndexError(f"{n} is greater the {self.size}")
-        self.current = n
-
-    def next(self) -> int:
-        if self.end == 0:
-            return 0
-        elif self.current == self.end:
-            self.current = 0
-            return self.current
-        else:
-            self.current += 1
-            return self.current
-
-    def previous(self) -> int:
-        if self.end == 0:
-            return 0
-        elif self.current == 0:
-            self.current = self.end
-            return self.current
-        else:
-            self.current -= 1
-            return self.current

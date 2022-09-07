@@ -11,8 +11,8 @@ from adapters.notes.fs.utils import (
 )
 from adapters.notes.note_repository import (
     AbstractNoteRepository,
-    NoteIndex,
 )
+from utils.index import RollingIndex
 from domain.markdown_note import MarkdownNote
 
 if TYPE_CHECKING:
@@ -140,7 +140,7 @@ class FileSystemNoteRepository(AbstractNoteRepository):
             self._index = None
             return
         self._current_category = value
-        self._index = NoteIndex(size=len(self._category_files[value]))
+        self._index = RollingIndex(size=len(self._category_files[value]))
 
     def index_size(self):
         if not self._index:
@@ -153,7 +153,7 @@ class FileSystemNoteRepository(AbstractNoteRepository):
         self._index.set_current(n)
 
     @property
-    def index(self) -> NoteIndex:
+    def index(self) -> RollingIndex:
         if not self._index:
             raise AttributeError("No Index")
         return self._index
