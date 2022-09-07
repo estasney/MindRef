@@ -410,7 +410,6 @@ class MindRefApp(App):
                 "PLAY_STATE": False,
                 "PLAY_DELAY": 15,
                 "CATEGORY_SELECTED": "",
-                "TRANSITIONS": "Slide",
             },
         )
         config.setdefaults(
@@ -435,8 +434,6 @@ class MindRefApp(App):
                 ...  # No effect here, this is on first load
             elif key == "PLAY_DELAY":
                 self.paginate_interval = int(value)
-            elif key == "TRANSITIONS":
-                self.screen_transitions = value
         elif section == "Display":
             if key == "BASE_FONT_SIZE":
                 self.base_font_size = value

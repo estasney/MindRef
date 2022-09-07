@@ -19,22 +19,41 @@ class RollingIndex:
             raise IndexError(f"{n} is greater the {self.size}")
         self.current = n
 
-    def next(self) -> int:
-        if self.end == 0:
-            return 0
-        elif self.current == self.end:
-            self.current = 0
-            return self.current
-        else:
-            self.current += 1
-            return self.current
+    def next(self, peek=False) -> int:
+        """
+        Get the next value
+        Parameters
+        ----------
+        peek : bool
+            If True, don't advance the index
 
-    def previous(self) -> int:
-        if self.end == 0:
-            return 0
-        elif self.current == 0:
-            self.current = self.end
-            return self.current
-        else:
-            self.current -= 1
-            return self.current
+        Returns
+        -------
+        """
+        next_index = self.current + 1
+        if next_index > self.end:
+            next_index = 0
+        if peek:
+            return next_index
+        self.current = next_index
+        return self.current
+
+    def previous(self, peek=False) -> int:
+        """
+        Get the previous value
+        Parameters
+        ----------
+        peek : bool
+            If True, don't move the index
+
+        Returns
+        -------
+
+        """
+        prev_index = self.current - 1
+        if prev_index < 0:
+            prev_index = self.end
+        if peek:
+            return prev_index
+        self.current = prev_index
+        return self.current
