@@ -1,20 +1,40 @@
 #:import btns widgets.buttons.buttons
 
+<NoteSpinnerOption>:
+    background_color: app.colors['Primary']
+    mipmap: True
+    font_size: app.base_font_size
 
-<NoteActionButtonBar>:
-    orientation: "horizontal"
 
+<NoteActionDropDown>:
     canvas:
         Color:
             rgb: app.colors['Primary']
         Line:
             rounded_rectangle: (self.pos[0], self.pos[1], self.size[0]+4, self.size[1], 4)
             width: dp(1)
-    AddButton:
-        on_release: root.push_add_event(app)
-    PrimaryVSep:
-    EditButton:
-        on_release: root.push_edit_event(app, app.note_category, app.note_data['idx'])
+    ThemedButton:
+        text: 'Edit'
+        size_hint_y: None
+        height: dp(40)
+        on_release: root.select('edit')
+    PrimaryHSep:
+        color: app.colors['Gray-400']
+    ThemedButton:
+        text: 'New'
+        size_hint_y: None
+        height: dp(40)
+        on_release: root.select('add')
+
+<NoteActionButton>:
+    canvas:
+        Color:
+            rgb: app.colors['Primary']
+        Line:
+            rounded_rectangle: (self.pos[0], self.pos[1], self.size[0]+4, self.size[1], 4)
+            width: dp(1)
+    text: 'Notes'
+
 
 
 <ControllerButtonBar>:

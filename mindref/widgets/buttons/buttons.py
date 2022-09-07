@@ -6,6 +6,7 @@ from kivy.properties import (
 )
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
 from kivy.uix.image import Image
 
 from utils import import_kv
@@ -16,6 +17,10 @@ import_kv(__file__)
 
 def get_uri(name):
     return App.get_running_app().atlas_service.uri_for(name, atlas_name="icons")
+
+
+class ThemedButton(Button):
+    ...
 
 
 class ImageButton(ButtonBehavior, Image, TrackParentPadding):

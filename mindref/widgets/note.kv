@@ -10,28 +10,27 @@
 
     BoxLayout:
         orientation: 'vertical'
-        NoteTitle:
+        NoteTitleBar:
             padding: 0, dp(5), 0, dp(5)
             id: note_title
             size_hint: 1, 0.1
-            size_hint_max_y: '45dp'
+            size_hint_max_y: dp(45)
         HSeparator:
             size_hint: 1, 0.01
-            size_hint_max_y: '2sp'
+            size_hint_max_y: dp(2)
         NoteContent:
             id: note_content
             size_hint: 1, 0.75
         HSeparator:
             size_hint: 1, 0.01
-            size_hint_max_y: '2sp'
+            size_hint_max_y: dp(2)
         NoteTags:
             id: note_tags
             size_hint: 1, 0.05
-            size_hint_max_y: '20dp'
+            size_hint_max_y: dp(20)
 
-<NoteTitle>:
+<NoteTitleBar>:
     id: note_title
-
     canvas:
         Color:
             rgba: app.colors['Dark']
@@ -39,12 +38,7 @@
             pos: self.pos
             size: self.size
     BoxLayout:
-        padding: '5sp', '1sp', '5sp', '0sp'
-        NoteActionButtonBar:
-            size_hint_min_y: 0.95
-            size_hint_x: 0.20
-            padding: '2dp'
-
+        padding: dp(5), dp(1), dp(5), dp(0)
         LargeLabel:
             id: note_title_label
             color: app.colors['White']
@@ -56,9 +50,12 @@
             halign: "center"
             valign: "center"
             mipmap: True
+        NoteActionButton:
+            size_hint_min_y: 0.95
+            size_hint_x: 0.20
         ControllerButtonBar:
             size_hint_min_y: 0.95
-            padding: '2dp'
+            padding: dp(2)
 
 
 

@@ -74,7 +74,7 @@ class NoteContent(BoxLayout):
         self.add_widget(md_widget)
 
 
-class NoteTitle(BoxLayout):
+class NoteTitleBar(BoxLayout):
     title_text = StringProperty()
     edit_button = ObjectProperty()
 

@@ -1,13 +1,23 @@
-#:import PrimaryVSep widgets.separator
+#:import seps widgets.separator
 
 <PrimaryVSep@VSeparator>:
     color: app.colors['Primary']
     width: dp(2)
 
+<PrimaryHSep@HSeparator>:
+    color: app.colors['Primary']
+    height: dp(2)
+
 <ImageButton>:
     color: app.colors['White'] if self.state == 'normal' else app.colors['Accent-One']
     mipmap: True
-
+<ThemedButton>:
+    color: app.colors['White'] if self.state == 'normal' else app.colors['Primary']
+    background_color: app.colors['Primary'] if self.state == 'normal' else app.colors['Accent-One']
+    mipmap: True
+    text_size: self.width, None
+    font_size: app.base_font_size
+    halign: 'center'
 <SaveButton>:
 <CancelButton>:
 <HamburgerIcon>:
