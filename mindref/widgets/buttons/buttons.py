@@ -78,16 +78,6 @@ class ForwardButton(ImageButton):
         super().__init__(src=get_uri("forward"))
 
 
-class ReturnButton(ImageButton):
-    def __init__(self, *args, **kwargs):
-        super().__init__(src=get_uri("back_arrow"))
-
-
-class ListViewButton(ImageButton):
-    def __init__(self, *args, **kwargs):
-        super().__init__(src=get_uri("list_view"))
-
-
 class EditButton(ImageButton):
     def __init__(self, *args, **kwargs):
         super(EditButton, self).__init__(src=get_uri("edit"))

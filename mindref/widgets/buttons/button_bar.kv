@@ -5,6 +5,15 @@
     mipmap: True
     font_size: app.base_font_size
 
+<DropDownButton@ThemedButton>:
+    canvas:
+        Color:
+            rgb: app.colors['Primary']
+        Line:
+            width: dp(1)
+            rectangle: (self.x, self.y, self.width, self.height)
+    size_hint_y: None
+    height: dp(40)
 
 <NoteActionDropDown>:
     canvas:
@@ -13,17 +22,19 @@
         Line:
             rounded_rectangle: (self.pos[0], self.pos[1], self.size[0]+4, self.size[1], 4)
             width: dp(1)
-    ThemedButton:
-        text: 'Edit'
-        size_hint_y: None
-        height: dp(40)
-        on_release: root.select('edit')
+    DropDownButton:
+        text: 'Back'
+        on_release: root.select('back')
+    DropDownButton:
+        text: 'List View'
+        on_release: root.select('list')
     PrimaryHSep:
-        color: app.colors['Gray-400']
-    ThemedButton:
+        color: app.colors['Gray-300']
+    DropDownButton:
+        text: 'Edit'
+        on_release: root.select('edit')
+    DropDownButton:
         text: 'New'
-        size_hint_y: None
-        height: dp(40)
         on_release: root.select('add')
 
 <NoteActionButton>:
@@ -47,9 +58,6 @@
         Line:
             rounded_rectangle: (self.pos[0], self.pos[1], self.size[0]+4, self.size[1], 4)
             width: dp(1)
-    ListViewButton:
-        on_release: app.display_state_trigger('list')
-    PrimaryVSep:
     BackButton:
         on_release: app.paginate(-1)
     PrimaryVSep:
@@ -60,6 +68,3 @@
     PrimaryVSep:
     ForwardButton:
         on_release: app.paginate(1)
-    PrimaryVSep:
-    ReturnButton:
-        on_release: app.display_state_trigger('choose')

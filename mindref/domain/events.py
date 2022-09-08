@@ -108,7 +108,12 @@ class RefreshNotesEvent(Event):
 @dataclass
 class BackButtonEvent(Event):
     event_type = "back_button"
-    display_state: DISPLAY_STATE
+    current_display_state: DISPLAY_STATE
+
+
+@dataclass
+class ListViewButtonEvent(Event):
+    event_type = "list_view"
 
 
 @dataclass

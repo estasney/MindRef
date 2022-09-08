@@ -30,6 +30,7 @@ from domain.events import (
     CancelEditEvent,
     DiscoverCategoryEvent,
     EditNoteEvent,
+    ListViewButtonEvent,
     NoteCategoryEvent,
     NoteCategoryFailureEvent,
     NoteFetchedEvent,
@@ -121,7 +122,7 @@ class MindRefApp(App):
         note_category_meta: ListProperty
             Metadata for notes associated with active Category. Info such as Title and index
         next_note_scheduler: ObjectProperty
-        display_state: OptionProperty
+        current_display_state: OptionProperty
             One of ["choose", "display", "list", "edit", "add", "error"]
                 - choose: Display all known categories
                 - display: Iterate through notes matching `self.note_category`
@@ -252,6 +253,10 @@ class MindRefApp(App):
         run_query = lambda x: self.registry.query_all(on_complete=event.on_complete)
         sch_cb(0.5, clear_categories, run_query)
 
+    def process_list_view_event(self, event: ListViewButtonEvent):
+        """List Button was pressed"""
+        self.display_state_trigger("list")
+
     def process_note_category_event(self, event: NoteCategoryEvent):
         """Note Category has been set via registry"""
 
@@ -308,7 +313,7 @@ class MindRefApp(App):
 
     def process_back_button_event(self, event: BackButtonEvent):
         # The display state when button was pressed
-        ds = event.display_state
+        ds = event.current_display_state
         if ds == "choose":
             # Cannot go further back
             App.get_running_app().stop()

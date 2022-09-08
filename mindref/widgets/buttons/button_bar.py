@@ -4,7 +4,12 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.dropdown import DropDown
 from kivy.uix.spinner import Spinner, SpinnerOption
 
-from domain.events import AddNoteEvent, EditNoteEvent
+from domain.events import (
+    AddNoteEvent,
+    BackButtonEvent,
+    EditNoteEvent,
+    ListViewButtonEvent,
+)
 from utils import import_kv
 from widgets.buttons.buttons import ThemedButton
 
@@ -39,6 +44,10 @@ class NoteActionButton(ThemedButton):
             app.registry.push_event(
                 EditNoteEvent(category=app.note_category, idx=app.note_data["idx"])
             )
+        elif value == "list":
+            app.registry.push_event(ListViewButtonEvent())
+        elif value == "back":
+            app.registry.push_event(BackButtonEvent(current_display_state="display"))
         else:
             Logger.warn(f"NoteActionButton: Unknown Event {value}")
 
