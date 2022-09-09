@@ -350,7 +350,9 @@ class MindRefApp(App):
     def key_input(self, window, key, scancode, codepoint, modifier):
         if key == 27:  # Esc Key
             # Back Button Event
-            self.registry.push_event(BackButtonEvent(display_state=self.display_state))
+            self.registry.push_event(
+                BackButtonEvent(current_display_state=self.display_state)
+            )
             return True
         else:
             return False

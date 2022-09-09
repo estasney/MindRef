@@ -1,40 +1,68 @@
 #:import LargeLabel widgets.style
 #:import BaseLabel widgets.style
+#:import ThemedButton widgets.buttons
+<ListView>:
+    cols: 1
+    height: self.minimum_height
+    size_hint_y: None
+
 
 <ScrollingListView>:
     do_scroll_x: False
     do_scroll_y: True
-
-<ListView>:
-    cols: 1
+    content: content
+    Scatter:
+        size_hint_y: None
+        height: content.minimum_height
+        width: root.width
+        scale: 1
+        do_translation: False, False
+        do_scale: False
+        do_rotation: False
+        ListView:
+            meta_notes: root.meta_notes
+            size_hint_y: None
+            id: content
+            cols: 1
+            height: self.minimum_height
+            width: root.width
 
 <ListItem>:
-    padding: [5, 5, 5, 5]
+    padding: dp(5)
     canvas:
         Color:
-            rgba: 1, 1, 1, 0.8
+            rgba: app.colors['Gray-200']
         Line:
-            width: 1
+            width: dp(1)
             rectangle: (self.x, self.y, self.width, self.height)
-    cols: 2
+        Color:
+            rgba: app.colors['Primary']
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    orientation: 'horizontal'
+    height: dp(40)
+    size_hint_y: None
+    size_hint_x: 1
     BaseLabel:
         text: root.title_text
-        size_hint_x: 0.95
+        size_hint_x: 0.9
+        size_hint_y: 1
         mipmap: True
-        text_size: self.size[0], None
-        padding_x: 5
+        text_size: self.width, None
+        font_size: app.base_font_size
+        padding_x: dp(5)
         valign: 'middle'
         halign: 'left'
-    Button:
+    ThemedButton:
+        padding: dp(5), dp(5)
         canvas:
             Color:
-                rgba: 1, 1, 1, 1
+                rgba: app.colors['Gray-100']
             Line:
-                width: 2
-                points: [(self.x + self.width * 0.75), (self.y + self.height * 0.65), (self.x + self.width * 0.90), (self.y + self.height * 0.5), (self.x + self.width * 0.75), (self.y + self.height * 0.35)]
-        background_color: app.colors['Dark']
-        background_normal: ''
-        opacity: 1 if self.state == 'normal' else 0.6
+                width: dp(2)
+                points: [(self.center_x - self.width * .3), (self.y + self.height * 0.75), (self.x + self.width * 0.90), self.center_y, (self.center_x - self.width * 0.3), (self.y + self.height * 0.25)]
+
         size_hint_x: 0.05
 
         mipmap: True

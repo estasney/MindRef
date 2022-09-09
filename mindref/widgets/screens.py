@@ -158,7 +158,6 @@ class NoteAppScreenManager(InteractBehavior, ScreenManager):
         sch_cb(0, set_data, update_current_screen, clear_data, advance_index)
 
     def handle_notes_list_view(self, *args, **kwargs):
-        self.ids["list_view_screen"].set_note_list_view()
         self.screen_triggers("list_view_screen")
 
     def handle_notes_edit_view(self, *args, **kwargs):
@@ -238,10 +237,7 @@ class NoteCategoryScreen(InteractScreen):
 
 
 class NoteListViewScreen(InteractScreen):
-    note_list = ObjectProperty()
-
-    def set_note_list_view(self, *args, **kwargs):
-        self.note_list.set(App.get_running_app().note_category_meta)
+    ...
 
 
 class NoteEditScreen(InteractScreen):

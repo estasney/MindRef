@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from typing import Literal, Optional, TypedDict, Union
 
 TEXT = Literal["text"]
@@ -202,7 +203,6 @@ MD_TYPES = Union[
     MdTableHeadCell,
     MdParagraph,
     MdInlineHTML,
-    MdKeyboard,
 ]
 
 MD_DOCUMENT = list[MD_TYPES]
