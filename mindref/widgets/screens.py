@@ -32,14 +32,14 @@ from domain.events import (
 from utils import import_kv, sch_cb
 from utils.index import RollingIndex
 from utils.triggers import trigger_factory
-from widgets.app_menu import AppMenu
+from widgets.app_menu.app_menu import AppMenu
 from widgets.behavior.interact_behavior import InteractBehavior
 from widgets.effects.scrolling import RefreshSymbol
 
 TR_OPTS = Literal["None", "Slide", "Rise-In", "Card", "Fade", "Swap", "Wipe"]
 
 if TYPE_CHECKING:
-    from widgets.categories import NoteCategoryButton
+    from widgets.buttons.category import NoteCategoryButton
     from widgets.editor.editor import NoteEditor
     from domain.markdown_note import MarkdownNoteDict
     from domain.editable import EditableNote

@@ -31,7 +31,7 @@
     padding: dp(5)
     canvas:
         Color:
-            rgba: app.colors['Gray-200']
+            rgba: (*app.colors['Gray-400'][:3], 0.6)
         Line:
             width: dp(1.2)
             rectangle: (self.x, self.y, self.width, self.height)

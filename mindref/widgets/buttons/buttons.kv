@@ -8,9 +8,6 @@
     color: app.colors['Primary']
     height: dp(2)
 
-<ImageButton>:
-    color: app.colors['White'] if self.state == 'normal' else app.colors['Accent-One']
-    mipmap: True
 <ThemedButton>:
     background_color: app.colors['Dark'] if self.state == 'normal' else app.colors['Accent-One']
     background_normal: ''
@@ -18,8 +15,6 @@
     text_size: self.width, None
     font_size: app.base_font_size
     halign: 'center'
-<SaveButton>:
-<CancelButton>:
 <HamburgerIcon>:
     orientation: 'horizontal'
     size_hint_x: None
@@ -44,8 +39,6 @@
                 pos: ((self.x + self.center_x)/2, self.center_y + self.height/5)
                 size: self.width/2, dp(2)
                 radius: dp(2), dp(2)
-
-
 <XButton@BoxLayout>:
     btn: btn
     orientation: 'horizontal'

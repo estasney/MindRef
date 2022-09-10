@@ -1,7 +1,7 @@
 #:import NoteCategories widgets.categories
 #:import CategoryScreenScrollWrapper widgets.categories
-#:import ScrollingListView widgets.scroller
-#:import ListView widgets.scroller
+#:import ScrollingListView widgets.list_view.list_view
+#:import ListView widgets.list_view.list_view
 #:import Note widgets.note
 #:import Buttons widgets.buttons.buttons
 #:import e widgets.editor.editor
@@ -34,6 +34,12 @@
 
 
 <NoteListViewScreen>:
+    canvas:
+        Color:
+            rgba: app.colors['Dark']
+        Rectangle:
+            size: self.size
+            pos: self.pos
     ScrollingListView:
         meta_notes: app.note_category_meta
 

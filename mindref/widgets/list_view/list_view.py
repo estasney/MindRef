@@ -1,7 +1,3 @@
-from copy import deepcopy
-from typing import Sequence, TYPE_CHECKING
-
-from kivy.core.window import Window
 from kivy.properties import (
     ListProperty,
     NumericProperty,
@@ -14,9 +10,11 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
 
 from utils import import_kv, sch_cb
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from domain.markdown_note import MarkdownNoteDict
+
 
 import_kv(__file__)
 
