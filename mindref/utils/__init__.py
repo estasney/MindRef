@@ -8,8 +8,12 @@ from kivy import Logger
 from kivy.clock import Clock
 from kivy.lang import Builder
 
-
 _LOG_LEVEL = None
+
+
+def mindref_path() -> Path:
+    # find our module location
+    return Path(__file__).parent.parent.resolve()
 
 
 def import_kv(path: Union[Path, str]):
@@ -168,7 +172,6 @@ class DottedDict(dict, Generic[K, V]):
         super().__init__()
 
     def __getattr__(self, item: K) -> V:
-
         return self[item]
 
     def __setattr__(self, key: K, value: V):

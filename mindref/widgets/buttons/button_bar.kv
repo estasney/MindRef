@@ -1,28 +1,16 @@
-#:import btns widgets.buttons.image
+#:import TexturedButton widgets.buttons.buttons
 
-<NoteSpinnerOption>:
-    background_color: app.colors['Primary']
-    mipmap: True
-    font_size: app.base_font_size
 
-<DropDownButton@ThemedButton>:
-    canvas:
-        Color:
-            rgb: app.colors['Primary']
-        Line:
-            width: dp(1)
-            rectangle: (self.x, self.y, self.width, self.height)
+<DropDownButton@TexturedButton>:
+    text: ''
     size_hint_y: None
+    size: dp(40), dp(40)
     font_size: app.base_font_size + sp(4)
-    height: dp(40)
+    BaseLabel:
+        text: root.text
 
 <NoteActionDropDown>:
-    canvas:
-        Color:
-            rgb: app.colors['Primary']
-        Line:
-            rounded_rectangle: (self.pos[0], self.pos[1], self.size[0]+4, self.size[1], 4)
-            width: dp(1)
+
     DropDownButton:
         text: 'Back'
         on_release: root.select('back')
@@ -45,8 +33,9 @@
         Line:
             rounded_rectangle: (self.pos[0], self.pos[1], self.size[0]+4, self.size[1], 4)
             width: dp(1)
-    text: 'Notes'
-    font_size: app.base_font_size + sp(4)
+    BaseLabel:
+        text: 'Notes'
+        font_size: app.base_font_size + sp(4)
 
 
 
@@ -54,12 +43,6 @@
     orientation: "horizontal"
     play_button: play_button
 
-    canvas:
-        Color:
-            rgb: app.colors['Primary']
-        Line:
-            rounded_rectangle: (self.pos[0], self.pos[1], self.size[0]+4, self.size[1], 4)
-            width: dp(1)
     BackButton:
         on_release: app.paginate(-1)
     PrimaryVSep:

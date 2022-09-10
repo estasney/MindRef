@@ -1,33 +1,6 @@
-#:import StyledLabels widgets.style
-#:import btns widgets.buttons.buttons
-#:import bar widgets.buttons.button_bar
-
-<Note>:
-    id: note_container
-    note_title: note_title
-    note_content: note_content
-    note_tags: note_tags
-
-    BoxLayout:
-        orientation: 'vertical'
-        NoteTitleBar:
-            padding: 0, dp(5), 0, dp(5)
-            id: note_title
-            size_hint: 1, 0.1
-            size_hint_max_y: dp(45)
-        HSeparator:
-            size_hint: 1, 0.01
-            size_hint_max_y: dp(2)
-        NoteContent:
-            id: note_content
-            size_hint: 1, 0.75
-        HSeparator:
-            size_hint: 1, 0.01
-            size_hint_max_y: dp(2)
-        NoteTags:
-            id: note_tags
-            size_hint: 1, 0.05
-            size_hint_max_y: dp(20)
+#:import LargeLabel widgets.style
+#:import NoteActionButton widgets.buttons.button_bar
+#:import ControllerButtonBar widgets.buttons.button_bar
 
 <NoteTitleBar>:
     id: note_title
@@ -53,10 +26,7 @@
         NoteActionButton:
             size_hint_min_y: 0.95
             size_hint_x: 0.15
-        ControllerButtonBar:
-            size_hint_x: 0.3
-            size_hint_min_y: 0.95
-            padding: dp(2)
+
 
 
 
@@ -72,18 +42,50 @@
             size: self.size
 
 
-<NoteTags>:
+<NoteControlBar@BoxLayout>:
     id: note_tags
+    orientation: 'vertical'
+    height: self.minimum_height
     canvas:
         Color:
             rgba: app.colors['Dark']
         Rectangle:
             pos: self.pos
             size: self.size
+    padding: dp(2)
+    ControllerButtonBar:
+        pos_hint: {"right": 1}
+        size_hint_y: None
+        height: dp(25)
+        canvas:
+            Color:
+                rgb: app.colors['Accent-One']
+
+
+
+
+<Note>:
+    id: note_container
+    note_title: note_title
+    note_content: note_content
+    note_control: note_control
+
     BoxLayout:
         orientation: 'vertical'
-        SmallLabel:
-            id: note_tag_label
-            color: hex('#000000')
-            text: ''
-            mipmap: True
+        NoteTitleBar:
+            padding: 0, dp(5), 0, dp(5)
+            id: note_title
+            size_hint: 1, 0.1
+            size_hint_max_y: dp(45)
+        HSeparator:
+            size_hint: 1, 0.01
+            size_hint_max_y: dp(2)
+        NoteContent:
+            id: note_content
+            size_hint: 1, 0.75
+        HSeparator:
+            size_hint: 1, 0.01
+            size_hint_max_y: dp(2)
+        NoteControlBar:
+            id: note_control
+            size_hint: 1, None

@@ -86,3 +86,8 @@ class CancelButton(ImageButton):
 class AddButton(ImageButton):
     def __init__(self, *args, **kwargs):
         super(AddButton, self).__init__(src=get_uri("add"))
+
+
+class FileButton(ImageButton):
+    def __init__(self, *args, **kwargs):
+        super(FileButton, self).__init__(src=get_uri("file"))

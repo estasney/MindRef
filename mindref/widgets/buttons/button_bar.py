@@ -1,8 +1,7 @@
-from kivy import Logger
 from kivy.app import App
+from kivy.logger import Logger
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.dropdown import DropDown
-from kivy.uix.spinner import Spinner, SpinnerOption
 
 from domain.events import (
     AddNoteEvent,
@@ -11,7 +10,7 @@ from domain.events import (
     ListViewButtonEvent,
 )
 from utils import import_kv
-from widgets.buttons.buttons import ThemedButton
+from widgets.buttons.buttons import TexturedButton
 
 import_kv(__file__)
 
@@ -20,15 +19,11 @@ class ControllerButtonBar(BoxLayout):
     ...
 
 
-class NoteSpinnerOption(SpinnerOption):
-    ...
-
-
 class NoteActionDropDown(DropDown):
     ...
 
 
-class NoteActionButton(ThemedButton):
+class NoteActionButton(TexturedButton):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.dd = None

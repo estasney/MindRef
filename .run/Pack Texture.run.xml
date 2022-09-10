@@ -18,7 +18,7 @@
       <option name="useCurrentConnection" value="false" />
     </EXTENSION>
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/atlas_utils/atlas.py" />
-    <option name="PARAMETERS" value="pack -i ./static/textures/*.png -o ./static/textures/textures --size 400 -rm y" />
+    <option name="PARAMETERS" value="pack -i ./static/textures/*.png -o ./static/textures/textures --size 600 -rm y" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />

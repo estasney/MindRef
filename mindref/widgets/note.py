@@ -29,7 +29,7 @@ def get_cached_note(*, content_data: "MarkdownNoteDict", parent: "NoteContent"):
 class Note(BoxLayout, GestureRecognizingBehavior):
     note_title = ObjectProperty()
     note_content = ObjectProperty()
-    note_tags = ObjectProperty()
+    note_control = ObjectProperty()
 
     def __init__(self, **kwargs):
         super(Note, self).__init__(**kwargs)
@@ -91,7 +91,3 @@ class NoteTitleBar(BoxLayout):
         Logger.debug("Edit")
         self.parent.handle_edit()
         return True
-
-
-class NoteTags(BoxLayout):
-    pass

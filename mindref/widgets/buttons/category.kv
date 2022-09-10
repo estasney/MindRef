@@ -1,0 +1,23 @@
+#:import LargeLabel widgets.style
+<NoteCategoryButton>:
+    orientation: 'vertical'
+    padding: dp(8)
+    spacing: dp(2)
+    image: image
+    size_hint: 1, None
+    height: dp(128)
+
+
+    Image:
+        id: image
+        mipmap: True
+        texture: root.tx_category
+
+    LargeLabel:
+        text: root.text
+        text_size: (self.width, None)
+        halign: 'center'
+        valign: 'bottom'
+        size_hint_x: 1
+        size_hint_y: None
+        height: self.texture_size[1]

@@ -1,12 +1,5 @@
 #:import Toolbar widgets.toolbar
-#:import LargeLabel widgets.style
 
-<CategoryScreenScrollWrapper>:
-    chooser: chooser
-    NoteCategories:
-        id: chooser
-        categories: app.note_categories
-        size_hint_y: None
 
 <NoteCategories>:
     category_container: category_container
@@ -23,31 +16,3 @@
         cols: 4
         padding: dp(10)
         spacing: dp(5)
-
-<NoteCategoryButton>:
-    orientation: 'vertical'
-    padding: dp(5)
-    spacing: dp(2)
-    image: image
-    size_hint: 1, None
-    height: dp(128)
-    canvas.before:
-        BorderImage:
-            pos: self.pos
-            size: self.size
-            border: (dp(5), dp(5), dp(5), dp(5))
-            texture: self.tx_bg_normal if self.state == 'normal' else self.tx_bg_down
-
-    Image:
-        id: image
-        mipmap: True
-        texture: root.tx_category
-
-    LargeLabel:
-        text: root.text
-        text_size: (self.width, None)
-        halign: 'center'
-        valign: 'bottom'
-        size_hint_x: 1
-        size_hint_y: None
-        height: self.texture_size[1]

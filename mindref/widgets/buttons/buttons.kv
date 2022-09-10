@@ -8,13 +8,23 @@
     color: app.colors['Primary']
     height: dp(2)
 
-<ThemedButton>:
-    background_color: app.colors['Dark'] if self.state == 'normal' else app.colors['Accent-One']
-    background_normal: ''
-    mipmap: True
-    text_size: self.width, None
-    font_size: app.base_font_size
-    halign: 'center'
+<-TexturedButton>:
+    state_image: self.background_normal if self.state == 'normal' else self.background_down
+    background_color: app.colors['Gray-500'] if self.state == 'normal' else app.colors['Accent-One']
+    orientation: 'vertical'
+    padding: dp(5)
+    spacing: dp(2)
+
+    canvas:
+        Color:
+            rgba: self.background_color
+        BorderImage:
+            border:  [dp(16), dp(16), dp(16), dp(16)]
+            pos: self.pos
+            size: self.size
+            source: self.state_image
+
+
 <HamburgerIcon>:
     orientation: 'horizontal'
     size_hint_x: None

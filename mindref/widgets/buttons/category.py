@@ -1,13 +1,16 @@
 from kivy.app import App
 from kivy.clock import Clock
-from kivy.core.image import Image
 from kivy.loader import Loader
-from kivy.properties import ObjectProperty, StringProperty
-from kivy.uix.behaviors import ButtonBehavior
-from kivy.uix.boxlayout import BoxLayout
+from kivy.metrics import dp
+from kivy.properties import ListProperty, ObjectProperty, StringProperty
+
+from utils import import_kv
+from widgets.buttons.buttons import TexturedButton
+
+import_kv(__file__)
 
 
-class NoteCategoryButton(ButtonBehavior, BoxLayout):
+class NoteCategoryButton(TexturedButton):
     source = StringProperty()
     text = StringProperty()
     image = ObjectProperty()
@@ -29,14 +32,6 @@ class NoteCategoryButton(ButtonBehavior, BoxLayout):
             else ""
         )
         self.text = text
-        self.load_texture("bg_normal")
-        self.load_texture("bg_down")
-
-    def load_texture(self, name):
-        get_uri = App.get_running_app().atlas_service.uri_for
-        img = Image(get_uri(name.lower(), "textures"))
-        tx = img.texture
-        setattr(self, f"tx_{name}", tx)
 
     def category_tx_loaded(self, *args):
         self.tx_category = self.img_loader.texture

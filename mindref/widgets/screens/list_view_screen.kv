@@ -1,0 +1,10 @@
+#:import ScrollingListView widgets.list_view.list_view
+<NoteListViewScreen>:
+    canvas:
+        Color:
+            rgba: app.colors['Dark']
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    ScrollingListView:
+        meta_notes: app.note_category_meta

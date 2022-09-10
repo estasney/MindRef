@@ -44,7 +44,7 @@ from plugins import PluginManager
 from service.registry import Registry
 from utils import sch_cb
 from utils.triggers import trigger_factory
-from widgets.screens import NoteAppScreenManager
+from widgets.screens.manager import NoteAppScreenManager
 
 DISPLAY_STATES = Literal["choose", "display", "list", "edit", "add", "error"]
 

@@ -1,0 +1,21 @@
+#:import NoteCategories widgets.categories
+
+<CategoryScreenScrollWrapper>:
+    chooser: chooser
+    NoteCategories:
+        id: chooser
+        categories: app.note_categories
+        size_hint_y: None
+
+<NoteCategoryChooserScreen>:
+    id: category_screen
+    chooser: chooser
+    canvas.before:
+        Color:
+            rgba: app.colors['Dark']
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    CategoryScreenScrollWrapper:
+        screen: category_screen
+        id: chooser
