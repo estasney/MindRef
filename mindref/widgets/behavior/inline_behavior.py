@@ -21,10 +21,14 @@ Cache.register("color_norm", limit=1000)
 Cache.register("text_contrast", limit=1000)
 
 from utils.caching import cache_key_color_norm, cache_key_text_contrast, kivy_cache
-
 from utils import import_kv
 
 import_kv(__file__)
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from kivy.properties import ObservableList
 
 
 class TextSnippet(NamedTuple):
@@ -312,7 +316,7 @@ def get_cached_color_norm(color) -> tuple[float, float, float, float]:
             yield 1.0
 
     def color_float_components(
-        s: tuple[int] | tuple[float],
+        s: tuple[int] | tuple[float] | "ObservableList",
     ) -> tuple[float, float, float, float]:
         """Return r, g, b (0.0-1.0) as (0-1) and opacity as (0-1)"""
         has_opacity = False

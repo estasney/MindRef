@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from domain.markdown_note import MarkdownNote
     from domain.editable import EditableNote
     from domain.protocols import GetApp, NoteDiscoveryProtocol
+    from utils.index import RollingIndex
 
 
 class AbstractNoteRepository(ABC):

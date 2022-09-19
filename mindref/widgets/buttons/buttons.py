@@ -1,8 +1,5 @@
-from pathlib import Path
-
 from kivy.app import App
 from kivy.properties import (
-    BooleanProperty,
     ColorProperty,
     DictProperty,
     ObjectProperty,

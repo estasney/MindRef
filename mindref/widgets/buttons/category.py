@@ -1,8 +1,7 @@
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.loader import Loader
-from kivy.metrics import dp
-from kivy.properties import ListProperty, ObjectProperty, StringProperty
+from kivy.properties import ObjectProperty, StringProperty
 
 from utils import import_kv
 from widgets.buttons.buttons import TexturedButton

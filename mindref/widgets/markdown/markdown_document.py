@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING
 
 from kivy.properties import (
-    NumericProperty,
     ObjectProperty,
     StringProperty,
 )

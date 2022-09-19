@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, Protocol, TYPE_CHECKING
+from typing import Protocol, TYPE_CHECKING
 
 from kivy import Logger
 from kivy.uix.layout import Layout

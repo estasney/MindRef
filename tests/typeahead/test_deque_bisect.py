@@ -1,8 +1,5 @@
-import random
-import string
 from bisect import bisect
 from collections import deque
-from string import ascii_uppercase, ascii_lowercase
 
 import pytest
 

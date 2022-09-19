@@ -1,9 +1,10 @@
+from functools import partial
+
 from kivy.properties import (
     ListProperty,
     NumericProperty,
     ObjectProperty,
     StringProperty,
-    partial,
 )
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout

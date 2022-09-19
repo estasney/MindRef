@@ -1,9 +1,8 @@
-from kivy.properties import NumericProperty, ObjectProperty, StringProperty
-from kivy.uix.gridlayout import GridLayout
+from kivy.properties import NumericProperty
 
+from utils import import_kv
 from widgets.behavior.inline_behavior import TextSnippet
 from widgets.markdown.base.base import MarkdownLabelBase
-from utils import import_kv
 
 import_kv(__file__)
 

@@ -1,9 +1,7 @@
 from typing import Optional
 
 from kivy.properties import ObjectProperty
-from kivy.uix.screenmanager import SlideTransition
 
-SlideTransition
 from domain.markdown_note import MarkdownNoteDict
 from utils import import_kv
 from widgets.note import Note

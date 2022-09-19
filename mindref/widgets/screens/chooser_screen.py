@@ -31,7 +31,7 @@ class NoteCategoryChooserScreen(InteractScreen):
 
     def handle_refresh_icon(self, dt):
         """
-        Child can notify us to display refresh icon but we want to handle it's clearing
+        Child can notify us to display refresh icon, but screen will control when it clears
         """
         if (
             self.refresh_triggered
