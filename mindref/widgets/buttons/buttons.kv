@@ -11,6 +11,7 @@
 <-TexturedButton>:
     state_image: self.background_normal if self.state == 'normal' else self.background_down
     background_color: app.colors['Primary'] if self.state == 'normal' else app.colors['Accent-One']
+    border_size: dp(8)
     orientation: 'vertical'
     padding: dp(5)
     spacing: dp(2)
@@ -19,7 +20,7 @@
         Color:
             rgba: self.background_color
         BorderImage:
-            border:  [dp(8), dp(8), dp(8), dp(8)]
+            border:  root.border_size
             pos: self.pos
             size: self.size
             source: self.state_image

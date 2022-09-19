@@ -5,6 +5,7 @@ from kivy.properties import (
     ObjectProperty,
     OptionProperty,
     StringProperty,
+    VariableListProperty,
 )
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout
@@ -27,6 +28,7 @@ class TexturedButton(ButtonBehavior, BoxLayout):
     background_normal = StringProperty(f"{texture_atlas}/bg_normal")
     background_down = StringProperty(f"{texture_atlas}/bg_down")
     background_color = ColorProperty()
+    border_size = VariableListProperty()
 
     def __init__(self, **kwargs):
         super(TexturedButton, self).__init__(**kwargs)
