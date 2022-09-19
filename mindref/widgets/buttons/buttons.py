@@ -1,11 +1,21 @@
 from pathlib import Path
-from kivy.properties import ColorProperty, ObjectProperty, StringProperty
+
+from kivy.app import App
+from kivy.properties import (
+    BooleanProperty,
+    ColorProperty,
+    DictProperty,
+    ObjectProperty,
+    OptionProperty,
+    StringProperty,
+)
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout
 
 from utils import import_kv, mindref_path
 
 texture_atlas = "atlas://" + str(mindref_path() / "static" / "textures" / "textures")
+icon_atlas = "atlas://" + str(mindref_path() / "static" / "icons" / "icons")
 import_kv(__file__)
 
 
@@ -23,3 +33,88 @@ class TexturedButton(ButtonBehavior, BoxLayout):
 
     def __init__(self, **kwargs):
         super(TexturedButton, self).__init__(**kwargs)
+
+
+class ImageButton(TexturedButton):
+    source = StringProperty()
+
+    def __init__(self, **kwargs):
+        super(ImageButton, self).__init__(**kwargs)
+
+
+class BackButton(ImageButton):
+    source = StringProperty(f"{icon_atlas}/back")
+
+    def __init__(self, **kwargs):
+        super(BackButton, self).__init__(**kwargs)
+
+
+class ForwardButton(ImageButton):
+    source = StringProperty(f"{icon_atlas}/forward")
+
+    def __init__(self, **kwargs):
+        super(ForwardButton, self).__init__(**kwargs)
+
+
+class EditButton(ImageButton):
+    source = StringProperty(f"{icon_atlas}/edit")
+
+    def __init__(self, **kwargs):
+        super(EditButton, self).__init__(**kwargs)
+
+
+class SaveButton(ImageButton):
+    source = StringProperty(f"{icon_atlas}/save")
+
+    def __init__(self, **kwargs):
+        super(SaveButton, self).__init__(**kwargs)
+
+
+class CancelButton(ImageButton):
+    source = StringProperty(f"{icon_atlas}/cancel")
+
+    def __init__(self, **kwargs):
+        super(CancelButton, self).__init__(**kwargs)
+
+
+class AddButton(ImageButton):
+    source = StringProperty(f"{icon_atlas}/add")
+
+    def __init__(self, **kwargs):
+        super(AddButton, self).__init__(**kwargs)
+
+
+class FileButton(ImageButton):
+    source = StringProperty(f"{icon_atlas}/file")
+
+    def __init__(self, **kwargs):
+        super(FileButton, self).__init__(**kwargs)
+
+
+class PlayStateButton(ImageButton):
+    source = StringProperty(f"{icon_atlas}/play")
+    icon_active = OptionProperty("play", options=["play", "pause"])
+    sources = DictProperty(
+        {"play": f"{icon_atlas}/play", "pause": f"{icon_atlas}/pause"}
+    )
+
+    def __init__(self, **kwargs):
+        super(PlayStateButton, self).__init__(**kwargs)
+        app = App.get_running_app()
+        app.bind(play_state=self.handle_play_state)
+
+    def handle_icon_active(self, instance, value):
+        self.source = self.sources[self.icon_active]
+
+    def handle_play_state(self, instance, value):
+        """When App's play_state is 'pause', we show a play icon"""
+        if instance.play_state == "pause":
+            self.icon_active = "play"
+        else:
+            self.icon_active = "pause"
+
+    def handle_press(self, app):
+        """
+        Our source of truth for whether the app is 'paused' or 'playing' is self.
+        """
+        app.play_state_trigger(self.icon_active)

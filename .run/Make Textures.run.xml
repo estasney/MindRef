@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Make Textures" type="CompoundRunConfigurationType">
+    <toRun name="Make Texture" type="PythonConfigurationType" />
+    <toRun name="Pack Texture" type="PythonConfigurationType" />
+    <method v="2" />
+  </configuration>
+</component>

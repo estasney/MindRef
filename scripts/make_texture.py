@@ -83,13 +83,13 @@ if __name__ == "__main__":
         opacity_padding=2,
     )
     btn_normal = TextureParam(
-        main=Color("#c7c8ca"),
+        main=Color("#ffffff"),
         accent=Color("#000000"),
         steps=5,
         size=64 * 4,
         step_size=1,
         radius=4,
-        opacity_padding=2,
+        opacity_padding=4,
     )
 
     texture_path = Path(__file__).parent.parent / "mindref" / "static" / "textures"

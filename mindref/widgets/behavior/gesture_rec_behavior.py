@@ -30,6 +30,8 @@ class GestureRecognizingBehavior(Layout):
     def on_touch_up(self, touch):
         # Convert to gesture and check for match
         gesture_obj = make_ud_gesture(touch)
+        if not gesture_obj:
+            return
         gesture_match = self.gdb.find(gesture_obj, minscore=0.8)
         if gesture_match:
             if gesture_match[1].name.startswith("swipe"):

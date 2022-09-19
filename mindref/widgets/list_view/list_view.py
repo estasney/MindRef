@@ -5,6 +5,7 @@ from kivy.properties import (
     StringProperty,
     partial,
 )
+from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
@@ -40,7 +41,7 @@ class ListView(GridLayout):
         sch_cb(0.1, clear, *add_widgets)
 
 
-class ListItem(BoxLayout):
+class ListItem(ButtonBehavior, BoxLayout):
     title_text = StringProperty()
     index = NumericProperty()
 

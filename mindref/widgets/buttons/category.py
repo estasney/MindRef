@@ -14,8 +14,6 @@ class NoteCategoryButton(TexturedButton):
     source = StringProperty()
     text = StringProperty()
     image = ObjectProperty()
-    tx_bg_normal = ObjectProperty()
-    tx_bg_down = ObjectProperty()
     tx_category = ObjectProperty(Loader.loading_image.texture)
 
     def __init__(self, text, **kwargs):

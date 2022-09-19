@@ -1,4 +1,4 @@
-from typing import Protocol, TypedDict
+from typing import Optional, Protocol, TypedDict
 
 from kivy.gesture import Gesture, GestureDatabase
 
@@ -21,12 +21,16 @@ def make_gesture(data: dict) -> Gesture:
     return gesture_obj
 
 
-def make_ud_gesture(touch: TouchUserData) -> Gesture:
+def make_ud_gesture(touch: TouchUserData) -> Optional[Gesture]:
     """Given list of points create a Gesture for matching database"""
-    gesture_obj = Gesture()
-    gesture_obj.add_stroke(point_list=touch.ud["points"])
-    gesture_obj.normalize()
-    return gesture_obj
+    try:
+        gesture_obj = Gesture()
+
+        gesture_obj.add_stroke(point_list=touch.ud["points"])
+        gesture_obj.normalize()
+        return gesture_obj
+    except KeyError:
+        return None
 
 
 swipes_data = [

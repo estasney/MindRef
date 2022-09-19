@@ -10,7 +10,7 @@
 
 <-TexturedButton>:
     state_image: self.background_normal if self.state == 'normal' else self.background_down
-    background_color: app.colors['Gray-500'] if self.state == 'normal' else app.colors['Accent-One']
+    background_color: app.colors['Primary'] if self.state == 'normal' else app.colors['Accent-One']
     orientation: 'vertical'
     padding: dp(5)
     spacing: dp(2)
@@ -19,10 +19,30 @@
         Color:
             rgba: self.background_color
         BorderImage:
-            border:  [dp(16), dp(16), dp(16), dp(16)]
+            border:  [dp(8), dp(8), dp(8), dp(8)]
             pos: self.pos
             size: self.size
             source: self.state_image
+
+<-ImageButton>:
+    state_image: self.background_normal if self.state == 'normal' else self.background_down
+    background_color: app.colors['Primary'] if self.state == 'normal' else app.colors['Accent-One']
+    orientation: 'vertical'
+    padding: dp(5)
+    spacing: dp(2)
+
+    canvas:
+        Color:
+            rgba: self.background_color
+        BorderImage:
+            border:  [dp(8), dp(8), dp(8), dp(8)]
+            pos: self.pos
+            size: self.size
+            source: self.state_image
+
+    Image:
+        mipmap: True
+        source: root.source
 
 
 <HamburgerIcon>:
