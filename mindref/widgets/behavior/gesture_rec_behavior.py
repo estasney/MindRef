@@ -21,7 +21,10 @@ class GestureRecognizingBehavior(Layout):
     def on_touch_move(self, touch):
         super(GestureRecognizingBehavior, self).on_touch_move(touch)
         userdata = touch.ud
-        userdata["points"] += [(touch.x, touch.y)]
+        try:
+            userdata["points"] += [(touch.x, touch.y)]
+        except KeyError:
+            userdata["points"] = [(touch.x, touch.y)]
         return True
 
     def on_touch_up(self, touch):
