@@ -17,7 +17,16 @@ AUTHOR = "Eric Stasney"
 REQUIRES_PYTHON = ">=3.9.0"
 
 # What packages are required for this module to be executed?
-REQUIRED = ["python-dotenv", "toolz", "Kivy", "Pygments", "Pillow", "click", "mistune"]
+REQUIRED = [
+    "python-dotenv",
+    "toolz",
+    "Kivy",
+    "Pygments",
+    "Pillow",
+    "click",
+    "mistune",
+    "sortedcontainers",
+]
 
 here = os.path.abspath(os.path.dirname(__file__))
 long_description = DESCRIPTION

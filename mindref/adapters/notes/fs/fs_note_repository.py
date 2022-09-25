@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+from collections import namedtuple
+from functools import cache
+from operator import attrgetter, itemgetter
 from pathlib import Path
-from typing import Generator, NamedTuple, Optional, TYPE_CHECKING
+from typing import Generator, Iterable, NamedTuple, Optional, TYPE_CHECKING
 
 from toolz import groupby
 
@@ -12,8 +15,9 @@ from adapters.notes.fs.utils import (
 from adapters.notes.note_repository import (
     AbstractNoteRepository,
 )
-from utils.index import RollingIndex
 from domain.markdown_note import MarkdownNote
+from utils.index import RollingIndex
+from widgets.typeahead.typeahead_dropdown import Suggestion
 
 if TYPE_CHECKING:
     from os import PathLike
@@ -106,11 +110,65 @@ class FileSystemNoteRepository(AbstractNoteRepository):
     @property
     def category_meta(self):
         if self.current_category:
-            return self._load_category_meta()
+            return self._load_category_meta(category=self.current_category)
         return []
 
-    def _load_category_meta(self) -> list["MarkdownNoteDict"]:
-        category_files = self._category_files[self.current_category]
+    def query_notes(self, category: str, query: str) -> Optional[list[Suggestion]]:
+        query = query.lower()
+        notes = self._load_category_meta(category=category)
+        QueryDoc = namedtuple("QueryDoc", "idx, title, text, score")
+
+        def note_pipeline(note_inner) -> Iterable[QueryDoc]:
+            field_getter = itemgetter("idx", "title", "text")
+            fields = (field_getter(note) for note in note_inner)
+            fields = (QueryDoc(f[0], f[1], f[2], 0) for f in fields)
+            yield from fields
+
+        def note_search_pipeline(note_inner: QueryDoc) -> QueryDoc:
+            """
+            Binary test for string presence
+            """
+            field_getter = attrgetter("title", "text")
+            query_score = sum(
+                (query in field.lower() for field in field_getter(note_inner))
+            )
+            score = query_score
+            return QueryDoc(note_inner.idx, *field_getter(note_inner), score)
+
+        def requires_tie_breaker(note_inner: Iterable[QueryDoc]):
+            """Test if we have multiples of a score"""
+            needs_breaker = False
+            seen = set()
+            for q_doc in note_inner:
+                if q_doc.score in seen:
+                    return True
+                seen.add(q_doc.score)
+            return needs_breaker
+
+        def count_fields(note_inner: QueryDoc) -> int:
+            matched_title_count = note_inner.title.lower().count(query)
+            matched_text_count = note_inner.text.lower().count(query)
+            return note_inner.score + matched_title_count + matched_text_count
+
+        note_haystacks = note_pipeline(notes)
+        note_binary = (note_search_pipeline(stack) for stack in note_haystacks)
+        note_binary_matches = [note for note in note_binary if note.score > 0]
+
+        if not note_binary_matches:
+            return None
+
+        results = []
+        if not requires_tie_breaker(note_binary_matches):
+            note_binary_matches.sort(key=attrgetter("score"), reverse=True)
+        else:
+            note_binary_matches.sort(key=count_fields, reverse=True)
+        for match in note_binary_matches:
+            results.append(Suggestion(title=match.title, index=match.idx))
+        return results
+
+    @cache
+    def _load_category_meta(self, category: str) -> list["MarkdownNoteDict"]:
+        category_files = self._category_files[category]
         category_notes = _load_category_notes(
             category=self.current_category,
             note_paths=category_files,

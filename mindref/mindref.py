@@ -1,3 +1,4 @@
+import gc
 import json
 import os
 from functools import partial
@@ -38,6 +39,7 @@ from domain.events import (
     NotesQueryFailureEvent,
     RefreshNotesEvent,
     SaveNoteEvent,
+    TypeAheadQueryEvent,
 )
 from domain.settings import app_settings
 from plugins import PluginManager
@@ -337,6 +339,13 @@ class MindRefApp(App):
         if event_category not in self.note_categories:
             Logger.debug(f"NoteDiscoveryEvent: {event_category}")
             self.note_categories.append(event_category)
+
+    def process_typeahead_query_event(self, event: TypeAheadQueryEvent):
+        self.registry.query_category(
+            category=self.note_category,
+            query=event.query,
+            on_complete=event.on_complete,
+        )
 
     def process_event(self, dt):
         if len(self.registry.events) == 0:

@@ -17,9 +17,6 @@ from kivy.properties import (
 from kivy.uix.label import Label
 from kivy.utils import escape_markup
 
-Cache.register("color_norm", limit=1000)
-Cache.register("text_contrast", limit=1000)
-
 from utils.caching import cache_key_color_norm, cache_key_text_contrast, kivy_cache
 from utils import import_kv
 
@@ -264,7 +261,7 @@ class LabelHighlightInline(Label):
                 )
 
 
-@kivy_cache(cache_name="text_contrast", key_func=cache_key_text_contrast)
+@kivy_cache(cache_name="text_contrast", key_func=cache_key_text_contrast, limit=1000)
 def get_cached_text_contrast(
     *,
     background_color: tuple[float],
@@ -298,7 +295,7 @@ def get_cached_text_contrast(
         return "#ffffff"
 
 
-@kivy_cache(cache_name="color_norm", key_func=cache_key_color_norm)
+@kivy_cache(cache_name="color_norm", key_func=cache_key_color_norm, limit=1000)
 def get_cached_color_norm(color) -> tuple[float, float, float, float]:
     def color_str_components(s: str) -> tuple[float, float, float, float]:
         """Return hex as 1.0 * 4"""

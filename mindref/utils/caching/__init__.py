@@ -12,7 +12,12 @@ if TYPE_CHECKING:
     InnerCallable = Callable[PInner, TInner]
 
 
-def kivy_cache(cache_name: str, key_func: "KeyedCallable") -> "InnerCallable":
+def kivy_cache(
+    cache_name: str,
+    key_func: "KeyedCallable",
+    limit: Optional[int] = None,
+    timeout: Optional[int] = None,
+) -> "InnerCallable":
     """
     Used as decorator to wrap a function in a Kivy Cache
 
@@ -22,7 +27,11 @@ def kivy_cache(cache_name: str, key_func: "KeyedCallable") -> "InnerCallable":
         Cache namespace that is accessed with `Cache.get(cache_name, key)`
     key_func: Callable[..., str]
         Function that accepts *args, **kwargs that generates a key to lookup in cache
+    limit : Passed to Cache.Register
+    timeout
     """
+    if not Cache._categories.get(cache_name):
+        Cache.register(cache_name, limit=limit, timeout=timeout)
 
     def dec_kivy_cache(func: "InnerCallable"):
         @wraps(func)

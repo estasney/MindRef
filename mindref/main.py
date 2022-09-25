@@ -41,7 +41,11 @@ def run_desktop():
     load_dotenv()
     if os.environ.get("ENVIRONMENT", "PRODUCTION") == "DEBUG":
         Config.set("modules", "inspector", "")
-        Config.set("modules", "monitor", "")
+        # Config.set("modules", "monitor", "")
+        # Config.set("modules", "webdebugger", "")
+    else:
+        Config.remove_option("modules", "monitor")
+        Config.remove_option("modules", "inspector")
 
     Config.set("input", "mouse", "mouse,disable_multitouch")
     from mindref import MindRefApp

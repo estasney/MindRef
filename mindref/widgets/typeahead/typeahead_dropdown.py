@@ -1,26 +1,38 @@
-from bisect import bisect
-from collections import deque
 from dataclasses import dataclass
-from operator import attrgetter
-from typing import Callable, Optional, cast
+from dataclasses import dataclass
+from typing import Callable
 
+from kivy import Logger
 from kivy.metrics import dp
-from kivy.properties import AliasProperty, NumericProperty
-from kivy.uix.button import Button
+from kivy.properties import ListProperty, NumericProperty, StringProperty
 from kivy.uix.dropdown import DropDown
+from kivy.weakproxy import WeakProxy
+
+from utils import import_kv
+from widgets.buttons.buttons import TexturedButton
+
+import_kv(__file__)
 
 
 @dataclass
 class Suggestion:
     title: str
-    score: float
     index: int
+
+
+class SuggestionButton(TexturedButton):
+    index = NumericProperty()
+    text = StringProperty()
+
+    def __init__(self, **kwargs):
+        super(SuggestionButton, self).__init__(**kwargs)
 
 
 class TypeAheadDropDown(DropDown):
     sel_idx = NumericProperty(defaultvalue=0)
     last_idx = NumericProperty(defaultvalue=0)
     max_suggestions = NumericProperty(defaultvalue=3)
+    suggestions = ListProperty()
 
     """
     Custom Dropdown that implements search suggestions
@@ -32,63 +44,18 @@ class TypeAheadDropDown(DropDown):
     last_idx: NumericProperty
         Last idx selected
     max_suggestions: NumericProperty
-        The maximum number of suggestions to show 
+        The maximum number of suggestions to show
+    suggestion_idx: DictProperty
+        Lookup suggestion object from physical index
         
     
     """
 
-    __events__ = ("on_select", "on_dismiss", "on_items")
-    _items_keys: Optional[list[float]]
-    items_: deque[Suggestion]
+    __events__ = ("on_select", "on_dismiss")
+    items_score_getter_: Callable[[Suggestion], float]
 
     def __init__(self, **kwargs):
         super(TypeAheadDropDown, self).__init__(**kwargs)
-        self.items_ = deque(maxlen=self.max_suggestions)
-        self.items_score_getter_ = cast(
-            attrgetter("score"), Callable[[Suggestion], float]
-        )
-        self._items_keys = None
-        self._items_keys_expired = False
-        self.register_event_type("on_items")
-        self.item_widgets = []
-
-    def get_items(self):
-        return list(self.items_)
-
-    def _compute_item_keys(self) -> list[float]:
-        self._items_keys = sorted(
-            [self.items_score_getter_(i) for i in self.items_], reverse=True
-        )
-        self._items_keys_expired = False
-        return self._items_keys
-
-    @property
-    def items_keys(self):
-        if self._items_keys:
-            if self._items_keys_expired:
-                return self._compute_item_keys()
-            return self._items_keys
-        return self._compute_item_keys()
-
-    def add_item(self, item: Suggestion):
-        item_idx = bisect(self.items_keys, self.items_score_getter_(item))
-        if item_idx == 0:
-            # Ignored
-            return
-        # Remove smallest if at maxlen
-        self._items_keys_expired = True
-        if self.items_.maxlen == len(self.items_):
-            self.items_.popleft()
-            item_idx -= 1
-        if item_idx == 0:
-            self.items_.appendleft(item)
-            self.dispatch("on_items", self, self.items)
-            return
-        r = len(self.items_) - item_idx
-        self.items_.rotate(r)
-        self.items_.append(item)
-        self.items_.rotate(-r)
-        self.dispatch("on_items", self, self.items)
 
     def on_sel_idx(self, instance, val):
         if self.last_idx > 0:
@@ -103,28 +70,52 @@ class TypeAheadDropDown(DropDown):
     def handle_scroll(self, val):
         self.last_idx = self.sel_idx
         if val == "up":
-            self.sel_idx = max((self.sel_idx - 1), 0)
+            self.sel_idx = max((self.sel_idx - 1), -1)
         else:
             self.sel_idx = min(self.max_suggestions, self.sel_idx + 1)
+        Logger.debug(f"Idx: {self.sel_idx}, last: {self.last_idx}")
 
-    def handle_select(self, idx):
+    def handle_select(self, *args, **kwargs):
+        idx = kwargs.get("idx")
         if idx is None:
-            btn_text = self.ids.get(f"item-{self.sel_idx}").text
-        else:
-            btn_text = self.ids.get(idx).text
+            idx = self.sel_idx
 
-        return self.select(btn_text)
+        # We're given physical index, look up corresponding note index from selected widget
+        item_widget = self.ids[f"item-{idx}"]
+        matched_suggestion = Suggestion(title=item_widget.text, index=item_widget.index)
+        return self.select(matched_suggestion)
 
-    def on_items(self, instance, items):
-        for i, v in enumerate(items, start=1):
-            child_key = f"item-{i}"
-            child_v = self.ids.get(child_key)
-            if not child_v:
-                item_widget = Button(text=v, size_hint_y=None, height=dp(40))
+    def on_suggestions(self, instance, suggestions: list[Suggestion]):
+        """We maintain an index wrt the note's position in the category and the physical index, in case we need to do
+        something like, "select the 3rd button"
+        """
+
+        # Try to recycle suggestion button widgets, creating / destroying as needed to accommodate number of suggestions
+        n_suggest = min(len(suggestions), self.max_suggestions)
+        Logger.debug(f"Dropdown: {n_suggest} Suggestions")
+
+        for i in range(1, self.max_suggestions + 1):
+            # Use 1 indexed
+            child_widget_key = f"item-{i}"
+            if i >= n_suggest + 1 and child_widget_key in self.ids:
+                # We have more buttons than needed
+                item_widget = self.ids[child_widget_key]
+                item_widget.funbind("on_release", self.handle_select, idx=i)
+                self.remove_widget(item_widget)
+                del self.ids[child_widget_key]
+                Logger.debug(f"Removed {child_widget_key}")
+            elif i < n_suggest + 1 and child_widget_key not in self.ids:
+                # We create a button
+                item_widget = SuggestionButton(text="", size_hint_y=None, height=dp(40))
+                item_widget.fbind("on_release", self.handle_select, idx=i)
+                item_proxy = WeakProxy(item_widget)
                 self.add_widget(item_widget)
-                item_widget.fbind("on_release", lambda x: self.handle_select(child_key))
-                self.ids[child_key] = item_widget
-                continue
-            child_v.text = v
+                self.ids[child_widget_key] = item_proxy
+                Logger.debug(f"Added {child_widget_key}")
 
-    items = AliasProperty(get_items, setter=None)
+        for i, suggestion in enumerate(suggestions[: self.max_suggestions], start=1):
+            # Pick the corresponding physical key for button
+            child_widget_key = f"item-{i}"
+            item_widget = self.ids[child_widget_key]
+            item_widget.text = suggestion.title
+            item_widget.index = suggestion.index

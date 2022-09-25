@@ -12,6 +12,7 @@ from domain.events import (
     NotesQueryNotSetFailureEvent,
 )
 from utils import GenericLoggerMixin, LoggerProtocol
+from widgets.typeahead.typeahead_dropdown import Suggestion
 
 if TYPE_CHECKING:
     from adapters.notes.note_repository import AbstractNoteRepository
@@ -78,6 +79,22 @@ class Registry(GenericLoggerMixin):
             )
             return
         self.push_event(NoteCategoryEvent(on_complete=on_complete, value=value))
+
+    def query_category(
+        self,
+        category: str,
+        query: str,
+        on_complete: Callable[[Optional[list[Suggestion]]], None],
+    ):
+        """
+        String search for a category
+        """
+        note_repo = self.app.note_service
+        if not note_repo.configured:
+            self.push_event(NotesQueryNotSetFailureEvent(on_complete=on_complete))
+            return
+        result = note_repo.query_notes(category=category, query=query)
+        on_complete(result)
 
     def query_all(self, on_complete: Optional[Callable] = None):
         """

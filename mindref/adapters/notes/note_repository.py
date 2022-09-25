@@ -4,6 +4,8 @@ import abc
 from abc import ABC
 from typing import Any, Generator, Optional, TYPE_CHECKING
 
+from widgets.typeahead.typeahead_dropdown import Suggestion
+
 if TYPE_CHECKING:
     from os import PathLike
     from domain.markdown_note import MarkdownNote
@@ -94,4 +96,9 @@ class AbstractNoteRepository(ABC):
     @abc.abstractmethod
     def category_image_uri(self, category: str):
         """Return URI for a Category Image"""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def query_notes(self, category: str, query: str) -> Optional[list[Suggestion]]:
+        """String query"""
         raise NotImplementedError

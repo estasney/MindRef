@@ -3,6 +3,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Literal, Optional, TYPE_CHECKING
 
+from widgets.typeahead.typeahead_dropdown import Suggestion
+
 if TYPE_CHECKING:
     from domain.markdown_note import MarkdownNote
 
@@ -128,3 +130,12 @@ class DiscoverCategoryEvent(Event):
     def __repr__(self):
         img_path = self.image_path.name if self.image_path else "None"
         return f"{self.__class__.__name__}(category={self.category}, image_path={img_path}, n_notes={len(self.notes)})"
+
+
+@dataclass
+class TypeAheadQueryEvent(Event):
+    """Event emitted by TypeAhead Query"""
+
+    event_type = "typeahead_query"
+    query: str
+    on_complete: Callable[[Optional[list[Suggestion]]], None]
