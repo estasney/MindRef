@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import Any, Literal, NamedTuple, Optional
 
-from kivy.cache import Cache
 from kivy.clock import Clock
 from kivy.graphics import Color, RoundedRectangle
 from kivy.metrics import dp
