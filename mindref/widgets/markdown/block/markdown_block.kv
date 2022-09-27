@@ -43,3 +43,17 @@
         halign: 'left'
         height: self.texture_size[1]
         size_hint_y: None
+
+<MarkdownThematicBreak>:
+    orientation: 'vertical'
+    size_hint_y: None
+    height: sp(20)
+    size_hint_x: 1
+
+    canvas:
+        Color:
+            rgba: app.colors['Gray-100']
+        RoundedRectangle:
+            pos: self.x, self.center_y
+            size: self.width, sp(1)
+            radius: dp(1),dp(1)

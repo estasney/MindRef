@@ -4,6 +4,7 @@ from kivy.properties import (
     ObjectProperty,
     StringProperty,
 )
+from kivy.uix.boxlayout import BoxLayout
 
 from utils import import_kv
 from widgets.markdown.base.base import MarkdownLabelBase
@@ -30,3 +31,10 @@ class MarkdownBlock(MarkdownLabelBase):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+
+class MarkdownThematicBreak(BoxLayout):
+    ...
+
+    def __init__(self, **kwargs):
+        super(MarkdownThematicBreak, self).__init__(**kwargs)

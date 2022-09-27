@@ -10,7 +10,11 @@ from widgets.markdown.code.code_span import MarkdownCodeSpan
 from widgets.markdown.code.markdown_code import MarkdownCode
 from widgets.markdown.list.markdown_list import MarkdownList
 from widgets.markdown.list.markdown_list_item import MarkdownListItem
-from widgets.markdown.block.markdown_block import MarkdownBlock, MarkdownHeading
+from widgets.markdown.block.markdown_block import (
+    MarkdownBlock,
+    MarkdownHeading,
+    MarkdownThematicBreak,
+)
 from widgets.markdown.markdown_interceptor import WidgetIntercept
 from widgets.markdown.paragraph.blocks import MarkdownBlockQuote
 from widgets.markdown.table.markdown_table import (
@@ -245,6 +249,10 @@ class MarkdownVisitor:
 
     def visit_kbd(self, node: "MdInlineKeyboard", **kwargs):
         self.push(node)
+        return True
+
+    def visit_thematic_break(self, node: "MdThematicBreak"):
+        self.push(MarkdownThematicBreak())
         return True
 
     def visit_generic(self, node, **kwargs):
