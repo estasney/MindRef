@@ -3,7 +3,6 @@
 #:import NoteActionButton widgets.buttons.button_bar
 #:import TypeAhead widgets.typeahead.typeahead
 <ListViewBar@BoxLayout>:
-    id: note_title
     canvas:
         Color:
             rgba: app.colors['Dark']
@@ -13,6 +12,7 @@
     BoxLayout:
         padding: dp(5), dp(1), dp(5), dp(0)
         TypeAhead:
+            id: typeahead
 
 
 
@@ -27,7 +27,7 @@
         orientation: 'vertical'
         ListViewBar:
             padding: 0, dp(5), 0, dp(5)
-            id: note_title
+            id: list_view_bar
             size_hint: 1, 0.1
             size_hint_max_y: dp(45)
         ScrollingListView:

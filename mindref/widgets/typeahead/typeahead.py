@@ -6,7 +6,7 @@ from kivy.properties import NumericProperty, ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
 
 from domain.events import TypeAheadQueryEvent
-from utils import import_kv
+from utils import import_kv, sch_cb
 from widgets.typeahead.typeahead_dropdown import Suggestion, TypeAheadDropDown
 
 import_kv(__file__)
@@ -49,15 +49,25 @@ class TypeAhead(BoxLayout):
         self.dd.dismiss()
         self.dd.unbind(on_select=self.handle_select)
         self.dd = None
-        self.typer.text = ""
         Logger.debug(f"TypeAhead: Selecting App Index {value.index}")
-        App.get_running_app().select_index(value.index)
+
+        app = App.get_running_app()
+        clear_text = lambda dt: setattr(self.typer, "text", "")
+        set_index = lambda dt: app.select_index(value.index)
+
+        sch_cb(0.1, clear_text, set_index)
+
+    def handle_dismissed_dd(self, *args, **kwargs):
+        """Dropdown was dismissed ensure we reflect that"""
+        self.dd.unbind(on_select=self.handle_select)
+        self.dd = None
 
     def handle_suggestions(self, suggestions: Optional[list[Suggestion]]):
         Logger.debug("TypeAhead: Handle Suggestions")
         if not self.dd:
             self.dd = TypeAheadDropDown()
             self.dd.bind(on_select=self.handle_select)
+            self.dd.bind(on_dismiss=self.handle_dismissed_dd)
             self.dd.open(self.typer)
         if not suggestions:
             self.dd.suggestions = []
