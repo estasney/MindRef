@@ -59,8 +59,9 @@ class TypeAhead(BoxLayout):
 
     def handle_dismissed_dd(self, *args, **kwargs):
         """Dropdown was dismissed ensure we reflect that"""
-        self.dd.unbind(on_select=self.handle_select)
-        self.dd = None
+        if self.dd:
+            self.dd.unbind(on_select=self.handle_select)
+            self.dd = None
 
     def handle_suggestions(self, suggestions: Optional[list[Suggestion]]):
         Logger.debug("TypeAhead: Handle Suggestions")
