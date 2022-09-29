@@ -71,8 +71,6 @@ class CategoryScreenScrollWrapper(ScrollView):
     chooser = ObjectProperty()
     refresh_triggered = BooleanProperty(False)
 
-    effect_cls = RefreshOverscrollEffect
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 

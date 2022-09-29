@@ -1,8 +1,10 @@
 #:import parse_color kivy.parser.parse_color
+#:import es kivy.effects.scroll
 
 <MarkdownDocument>:
     content: content
     do_scroll_x: False
+    effect_y: es.ScrollEffect(drag_threshold=dp(20))
     canvas:
         Color:
             rgba: app.colors['Primary']
