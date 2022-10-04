@@ -7,7 +7,7 @@ from kivy.uix.scrollview import ScrollView
 from domain.events import RefreshNotesEvent
 from utils import import_kv
 from widgets.buttons.category import NoteCategoryButton
-from widgets.effects.scrolling import RefreshOverscrollEffect, RefreshSymbol
+from widgets.effects.scrolling import RefreshSymbol
 from widgets.screens import InteractScreen
 
 import_kv(__file__)

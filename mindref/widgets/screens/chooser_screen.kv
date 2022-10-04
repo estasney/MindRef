@@ -1,5 +1,6 @@
 #:import NoteCategories widgets.categories
 #:import roe widgets.effects.scrolling
+#:import Toolbar widgets.toolbar
 
 <CategoryScreenScrollWrapper>:
     chooser: chooser
@@ -17,8 +18,14 @@
         Rectangle:
             size: self.size
             pos: self.pos
-    CategoryScreenScrollWrapper:
-        screen: category_screen
-        id: chooser
-        do_scroll_x: False
-        effect_y: roe.RefreshOverscrollEffect(edge_damping=.5, min_overscroll=dp(50))
+    BoxLayout:
+        orientation: 'vertical'
+        Toolbar:
+            size_hint_y: None
+            padding: dp(20), dp(10), dp(10), dp(5)
+            height: dp(50)
+        CategoryScreenScrollWrapper:
+            screen: category_screen
+            id: chooser
+            do_scroll_x: False
+            effect_y: roe.RefreshOverscrollEffect(edge_damping=.5, min_overscroll=dp(50))
