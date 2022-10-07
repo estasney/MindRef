@@ -63,7 +63,10 @@ def discover_folder_notes(
     new_first : bool, defaults to True
         If True, newer files appear first
     """
-    notes = ((f, f.lstat().st_mtime_ns) for f in folder.iterdir() if f.is_file())
-    sorted_notes = sorted(notes, key=itemgetter(1), reverse=new_first)
-    for note, _ in sorted_notes:
-        yield note
+    if new_first:
+        notes = ((f, f.lstat().st_mtime_ns) for f in folder.iterdir() if f.is_file())
+        sorted_notes = sorted(notes, key=itemgetter(1), reverse=new_first)
+        for note, _ in sorted_notes:
+            yield note
+    else:
+        yield from folder.iterdir()

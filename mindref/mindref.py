@@ -369,7 +369,7 @@ class MindRefApp(App):
 
     def build(self):
 
-        truthy = {"1", "True"}
+        truthy = {True, 1, "1", "True"}
 
         self.registry.app = self
         self.play_state_trigger = trigger_factory(
