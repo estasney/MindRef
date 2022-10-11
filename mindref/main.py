@@ -32,10 +32,10 @@ def run_android():
 
     permissions_needed = []
     if not check_permission(Permission.WRITE_EXTERNAL_STORAGE):
-        Logger.warn("Requesting WRITE_EXTERNAL_STORAGE")
+        Logger.info("Requesting WRITE_EXTERNAL_STORAGE")
         permissions_needed.append(Permission.WRITE_EXTERNAL_STORAGE)
     if not check_permission(Permission.READ_EXTERNAL_STORAGE):
-        Logger.warn("Requesting READ_EXTERNAL_STORAGE")
+        Logger.info("Requesting READ_EXTERNAL_STORAGE")
         permissions_needed.append(Permission.READ_EXTERNAL_STORAGE)
     if permissions_needed:
         request_permissions(permissions_needed, start_app)
