@@ -1,18 +1,11 @@
 from pathlib import Path
+from kivy import platform
 
 SETTINGS_BEHAVIOR_PATH = Path(__file__).parent / "settings" / "app_settings.json"
 
 from .plugin_settings import SETTINGS_PLUGIN_DATA as _SETTINGS_PLUGIN_DATA
 
-app_settings = [
-    {"type": "title", "title": "Storage"},
-    {
-        "type": "path",
-        "title": "Note Storage",
-        "desc": "Directory containing note categories",
-        "section": "Storage",
-        "key": "NOTES_PATH",
-    },
+_common_settings = [
     {"type": "title", "title": "Behavior"},
     {
         "type": "bool",
@@ -52,5 +45,33 @@ app_settings = [
     },
 ]
 
-if _SETTINGS_PLUGIN_DATA:
-    app_settings.extend(_SETTINGS_PLUGIN_DATA)
+_storage_settings = [
+    {"type": "title", "title": "Storage"},
+    {
+        "type": "path",
+        "title": "Note Storage",
+        "desc": "Directory containing note categories",
+        "section": "Storage",
+        "key": "NOTES_PATH",
+    },
+]
+_storage_settings_android = [
+    {"type": "title", "title": "Storage"},
+    {
+        "type": "android_path",
+        "title": "Note Storage",
+        "desc": "Directory containing note categories",
+        "section": "Storage",
+        "key": "NOTES_PATH",
+    },
+]
+
+match (platform, _SETTINGS_PLUGIN_DATA):
+    case ("android", _):
+        app_settings = [*_storage_settings_android, *_common_settings]
+    case (_, None):
+        app_settings = [*_storage_settings, *_common_settings]
+    case (_, list()):
+        app_settings = [*_storage_settings, *_common_settings, *_SETTINGS_PLUGIN_DATA]
+    case _:
+        raise AssertionError(f"Unhandled settings {platform} {_SETTINGS_PLUGIN_DATA}")

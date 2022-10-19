@@ -5,63 +5,57 @@ from kivy.properties import BooleanProperty, ObjectProperty
 from kivy.uix.scrollview import ScrollView
 
 from domain.events import RefreshNotesEvent
-from utils import import_kv
+from utils import def_cb, import_kv
 from widgets.buttons.category import NoteCategoryButton
-from widgets.effects.scrolling import RefreshSymbol
-from widgets.screens import InteractScreen
+from widgets.screens import RefreshableScreen
 
 import_kv(__file__)
 
 
-class NoteCategoryChooserScreen(InteractScreen):
+class NoteCategoryChooserScreen(RefreshableScreen):
     chooser = ObjectProperty()
     refresh_triggered = BooleanProperty(False)
-    refresh_running = BooleanProperty(False)
+    refresh_dispatched = BooleanProperty(False)
+
+    """
+    Attributes
+    ----------
+    chooser
+    refresh_triggered
+        Set to true when a refresh is triggered with the overscroll effect
+    
+    """
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.refresh_icon = None
-        self.handle_refresh_running_trigger = Clock.create_trigger(
-            self.handle_refresh_running
-        )
-        self.fbind("refresh_running", self.handle_refresh_running_trigger)
+        self.dispatch_refresh_trigger = Clock.create_trigger(self._dispatch_refresh)
+
+    def on_refresh(self, state: bool):
+        Logger.info(f"{self.__class__.__name__} : on_refresh {state}")
+        if state:
+            self.add_refresh_symbol_trigger()
+        else:
+            self.remove_refresh_symbol_trigger()
+        return True
 
     def category_selected(self, category_btn: "NoteCategoryButton"):
         self.manager.category_selected(category_btn)
 
-    def handle_refresh_icon(self, dt):
-        """
-        Child can notify us to display refresh icon, but screen will control when it clears
-        """
-        if (
-            self.refresh_triggered
-            and not self.refresh_icon
-            and not self.refresh_running
-        ):
-            self.refresh_running = True
-            self.refresh_icon = RefreshSymbol(
-                pos_hint={"center_x": 0.5, "center_y": 0.5}
-            )
-            self.add_widget(self.refresh_icon)
-
-    def clear_refresh_icon(self, *args, **kwargs):
-        if self.refresh_icon:
-            self.remove_widget(self.refresh_icon)
-            del self.refresh_icon
-            self.refresh_icon = None
-        self.refresh_running = False
-
-    def handle_refresh_running(self, *args):
-        """Call the NoteService and ask for refresh"""
-        if self.refresh_running:
-            Logger.info("Refreshing")
+    def _dispatch_refresh(self, *args):
+        if not self.refresh_dispatched:
+            self.refresh_dispatched = True
+            Logger.info(f"{self.__class__.__name__} : Dispatching Refresh Event")
             app = App.get_running_app()
-            app.registry.push_event(
-                RefreshNotesEvent(on_complete=self.clear_refresh_icon)
+            cb = def_cb(
+                self.remove_refresh_symbol_trigger,
+                lambda dt: setattr(self, "refresh_dispatched", False),
             )
+            app.registry.push_event(RefreshNotesEvent(on_complete=cb))
 
     def on_refresh_triggered(self, instance, value):
-        Clock.schedule_once(self.handle_refresh_icon)
+        if self.refresh_triggered:
+            self.add_refresh_symbol_trigger()
+            self.dispatch_refresh_trigger()
 
 
 class CategoryScreenScrollWrapper(ScrollView):

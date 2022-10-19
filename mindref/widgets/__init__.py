@@ -1,1 +1,1 @@
-from .settings_panel import MindRefSettings
+from .settings_panel import *

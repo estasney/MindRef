@@ -1,46 +1,18 @@
 from pathlib import Path
+
 from dotenv import load_dotenv
 from kivy import Logger
-from kivy.core.text import LabelBase
 from kivy.config import Config
+from kivy.core.text import LabelBase
+from kivy import platform
 
 
 def run_android():
-    def start_app(*args):
-        from mindref import MindRefApp
-        from android import loadingscreen  # noqa
-        from kivy.clock import Clock
+    Logger.info("Running Android")
+    from mindref import MindRefApp
 
-        hide_loading = lambda x: loadingscreen.hide_loading_screen()
-        Clock.schedule_once(hide_loading)
-
-        # Create default folder
-        notes_dir = Path(primary_external_storage_path()) / "mindref_notes"
-        notes_dir.mkdir(exist_ok=True)
-        os.environ.update({"NOTES_PATH": str(notes_dir)})
-        MindRefApp().run()
-
-    # noinspection PyUnresolvedReferences
-    from android.storage import primary_external_storage_path
-
-    # noinspection PyUnresolvedReferences
-    from android.permissions import (
-        request_permissions,
-        Permission,
-        check_permission,
-    )
-
-    permissions_needed = []
-    if not check_permission(Permission.WRITE_EXTERNAL_STORAGE):
-        Logger.info("Requesting WRITE_EXTERNAL_STORAGE")
-        permissions_needed.append(Permission.WRITE_EXTERNAL_STORAGE)
-    if not check_permission(Permission.READ_EXTERNAL_STORAGE):
-        Logger.info("Requesting READ_EXTERNAL_STORAGE")
-        permissions_needed.append(Permission.READ_EXTERNAL_STORAGE)
-    if permissions_needed:
-        request_permissions(permissions_needed, start_app)
-    else:
-        start_app()
+    app = MindRefApp()
+    app.run()
 
 
 def run_desktop():
@@ -69,7 +41,8 @@ if __name__ == "__main__":
         fn_regular=str(Path(__file__).parent / "assets" / "RobotoMono-Regular.ttf"),
     )
 
-    if os.environ.get("ANDROID_ENTRYPOINT", None):
-        run_android()
-    else:
-        run_desktop()
+    match platform:
+        case "android":
+            run_android()
+        case _:
+            run_desktop()

@@ -48,13 +48,13 @@ class Note(BoxLayout, GestureRecognizingBehavior):
         set_title = lambda x: self.note_title.set({"title": title})
         data = deepcopy(note_data)
         set_content = lambda x: self.note_content.set(data)
-        sch_cb(0, set_title, set_content)
+        sch_cb(set_title, set_content)
 
     def clear_note_content(self):
         clear_title = lambda x: self.note_title.set({"title": ""})
         self.note_title.set({"title": ""})
         clear_content = lambda x: self.note_content.clear()
-        sch_cb(0, clear_title, clear_content)
+        sch_cb(clear_title, clear_content)
 
 
 class NoteContent(BoxLayout):

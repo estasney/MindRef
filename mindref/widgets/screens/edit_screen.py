@@ -67,7 +67,7 @@ class NoteEditScreen(InteractScreen):
         app.registry.push_event(CancelEditEvent)
         clear_self_text = lambda x: setattr(self, "init_text", "")
 
-        sch_cb(0, clear_self_text)
+        sch_cb(clear_self_text)
 
     def handle_save(self, *args, **kwargs):
         app = App.get_running_app()

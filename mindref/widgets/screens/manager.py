@@ -10,12 +10,13 @@ from utils.index import RollingIndex
 from utils.triggers import trigger_factory
 from widgets.app_menu.app_menu import AppMenu
 from widgets.behavior.interact_behavior import InteractBehavior
+from widgets.behavior.refresh_behavior import RefreshBehavior
 from widgets.buttons.category import NoteCategoryButton
 
 import_kv(__file__)
 
 
-class NoteAppScreenManager(InteractBehavior, ScreenManager):
+class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
     app = ObjectProperty()
     play_state = StringProperty()
     menu_open = BooleanProperty(False)
@@ -36,6 +37,10 @@ class NoteAppScreenManager(InteractBehavior, ScreenManager):
         self.fbind("menu_open", self.handle_menu_state)
         self.fbind("reversed_transition", self.handle_reversed_transition)
         self.screen_triggers = trigger_factory(self, "current", self.screen_names)
+
+    def on_refresh(self, state: bool):
+        self.dispatch_children("on_refresh", state)
+        return True
 
     def handle_menu_state(self, instance, menu_open: bool):
         def resume_temp_pause(*args):
@@ -118,7 +123,7 @@ class NoteAppScreenManager(InteractBehavior, ScreenManager):
         # Advance index
         advance_index = lambda dt: self.note_screen_cycler.next()
 
-        sch_cb(0, set_data, update_current_screen, clear_data, advance_index)
+        sch_cb(set_data, update_current_screen, clear_data, advance_index)
 
     def handle_notes_list_view(self, *args, **kwargs):
         self.screen_triggers("list_view_screen")

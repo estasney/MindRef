@@ -4,8 +4,9 @@ from collections import namedtuple
 from functools import cache
 from operator import attrgetter, itemgetter
 from pathlib import Path
-from typing import Generator, Iterable, NamedTuple, Optional, TYPE_CHECKING
+from typing import Callable, Iterable, NamedTuple, Optional, TYPE_CHECKING
 
+from kivy import Logger
 from toolz import groupby
 
 from adapters.notes.fs.utils import (
@@ -15,7 +16,9 @@ from adapters.notes.fs.utils import (
 from adapters.notes.note_repository import (
     AbstractNoteRepository,
 )
+from domain.events import NotesDiscoverCategoryEvent, NotesDiscoveryEvent
 from domain.markdown_note import MarkdownNote
+from utils import def_cb
 from utils.index import RollingIndex
 from widgets.typeahead.typeahead_dropdown import Suggestion
 
@@ -47,13 +50,24 @@ class FileSystemNoteRepository(AbstractNoteRepository):
     """
 
     def __init__(self, get_app, new_first: bool):
-        super().__init__(get_app)
+        super().__init__(get_app, new_first)
         self.new_first = new_first
         self._category_files = {}
         self._category_imgs = {}
         self._storage_path = None
         self._index = None
         self._current_category = None
+
+    def get_categories(self, on_complete: Optional[Callable[[Iterable[str]], None]]):
+        """Query for categories"""
+        category_folders = (f for f in self.storage_path.iterdir() if f.is_dir())
+        categories = (f.name for f in category_folders)
+        on_complete(categories)
+
+    def get_category_meta(
+        self, on_complete: Optional[Callable[[list["MarkdownNoteDict"]], None]]
+    ):
+        pass
 
     @property
     def configured(self) -> bool:
@@ -72,19 +86,7 @@ class FileSystemNoteRepository(AbstractNoteRepository):
         else:
             self._storage_path = Path(value)
 
-    def discover_notes(self, *args) -> Generator[NoteDiscovery, None, None]:
-        """
-        Read `self.storage_path` looking for category folders, their notes, and optional image
-
-        Notes
-        -----
-        Does not read the notes, only gathers a listing of them
-
-        Yields
-        -------
-        NoteDiscovery
-        """
-
+    def note_discovery_result(self):
         category_folders = (f for f in self.storage_path.iterdir() if f.is_dir())
 
         def is_md(p: Path):
@@ -107,13 +109,55 @@ class FileSystemNoteRepository(AbstractNoteRepository):
                 notes=category_note_files,
             )
 
+    def discover_notes(self, on_complete: Optional[Callable[[], None]], *args):
+        """
+        Find Categories, and associated Note Files
+        For Each Category, Found, Pushes a NotesDiscoverCategoryEvent
+
+        """
+
+        def is_md(p: Path):
+            return p.suffix == ".md"
+
+        def after_get_categories(categories: Iterable[str]):
+            app = self.get_app()
+            for category_name in categories:
+                category_folder = Path(self.storage_path) / category_name
+                category_files = list(
+                    discover_folder_notes(category_folder, new_first=self.new_first)
+                )
+
+                category_files = groupby(is_md, category_files)
+                category_note_files = category_files.get(True, [])
+                if category_img := category_files.get(False):
+                    category_img = category_img[0]
+                Logger.info(category_img)
+                self._category_files[category_name] = category_note_files
+                self._category_imgs[category_name] = category_img
+                app.registry.push_event(
+                    NotesDiscoverCategoryEvent(
+                        category=category_name,
+                        image_path=category_img,
+                        notes=category_note_files,
+                    )
+                )
+
+        if on_complete:
+            post_get_cat = def_cb(after_get_categories, on_complete)
+        else:
+            post_get_cat = after_get_categories
+
+        self.get_categories(post_get_cat)
+
     @property
     def category_meta(self):
         if self.current_category:
             return self._load_category_meta(category=self.current_category)
         return []
 
-    def query_notes(self, category: str, query: str) -> Optional[list[Suggestion]]:
+    def query_notes(
+        self, category: str, query: str, on_complete
+    ) -> Optional[list[Suggestion]]:
         query = query.lower()
         notes = self._load_category_meta(category=category)
         QueryDoc = namedtuple("QueryDoc", "idx, title, text, score")
@@ -180,14 +224,6 @@ class FileSystemNoteRepository(AbstractNoteRepository):
         return category_note_dicts
 
     @property
-    def categories(self) -> list[str]:
-        if not self._category_files:
-            # To populate _category_files we have to consume the iterable
-            for _ in self.discover_notes():
-                ...
-        return list(self._category_files.keys())
-
-    @property
     def current_category(self) -> Optional[str]:
         return self._current_category
 
@@ -216,7 +252,7 @@ class FileSystemNoteRepository(AbstractNoteRepository):
             raise AttributeError("No Index")
         return self._index
 
-    def get_note(self, category: str, idx: int) -> MarkdownNote:
+    def get_note(self, category: str, idx: int, on_complete) -> MarkdownNote:
         note_file = self._category_files[category][idx]
         return MarkdownNote.from_file(
             category=category,
@@ -224,7 +260,7 @@ class FileSystemNoteRepository(AbstractNoteRepository):
             fp=note_file,
         )
 
-    def save_note(self, note: "EditableNote") -> MarkdownNote:
+    def save_note(self, note: "EditableNote", on_complete) -> MarkdownNote:
         note_is_new = bool(note.edit_title)
 
         if note_is_new:
@@ -233,7 +269,7 @@ class FileSystemNoteRepository(AbstractNoteRepository):
                 ".md"
             )
             fp.write_text(note.edit_text, encoding="utf-8")
-            self.discover_notes()
+
             return MarkdownNote.from_file(note.category, note.idx, fp)
 
         else:
@@ -242,22 +278,28 @@ class FileSystemNoteRepository(AbstractNoteRepository):
             md_note.filepath.write_text(md_note.text, encoding="utf-8")
         return MarkdownNote.from_file(md_note.category, md_note.idx, md_note.filepath)
 
-    def next_note(self) -> MarkdownNote:
+    def get_next_note(self, on_complete) -> MarkdownNote:
         if not self._index:
             raise Exception(f"No Index")
         self._index.next()
-        return self.get_note(category=self.current_category, idx=self.index.current)
+        return self.get_note(
+            category=self.current_category, idx=self.index.current, on_complete=None
+        )
 
-    def previous_note(self) -> MarkdownNote:
+    def get_previous_note(self, on_complete) -> MarkdownNote:
         if not self._index:
             raise Exception("No Index")
         self._index.previous()
-        return self.get_note(category=self.current_category, idx=self.index.current)
+        return self.get_note(
+            category=self.current_category, idx=self.index.current, on_complete=None
+        )
 
-    def current_note(self) -> MarkdownNote:
+    def get_current_note(self, on_complete) -> MarkdownNote:
         if not self._index:
             raise Exception("No Index")
-        return self.get_note(category=self.current_category, idx=self.index.current)
+        return self.get_note(
+            category=self.current_category, idx=self.index.current, on_complete=None
+        )
 
     def category_image_uri(self, category: str) -> Optional[Path]:
         return self._category_imgs.get(category)

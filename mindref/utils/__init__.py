@@ -47,8 +47,23 @@ def log_run_time(func):
     return wrapped_log_run_time
 
 
-def sch_cb(timeout: float = 0, *args):
-    """Chain functions that sequentially call the next"""
+def sch_cb(*args, timeout: float = 0):
+    """
+    Chain functions that sequentially call the next
+
+    Passed to Clock to schedule
+    """
+
+    head_func = def_cb(timeout=timeout, *args)
+    Clock.schedule_once(head_func, timeout=timeout)
+
+
+def def_cb(*args, timeout: float = 0) -> Callable[[], None]:
+    """
+    Chain functions that sequentially call the next
+
+    Defers passing to clock to schedule
+    """
 
     func_pipe = (f for f in args)
 
@@ -61,8 +76,7 @@ def sch_cb(timeout: float = 0, *args):
             Clock.schedule_once(cb, timeout)
 
     head_func = partial(_scheduled_func, func=next(func_pipe))
-
-    Clock.schedule_once(head_func, timeout=timeout)
+    return head_func
 
 
 class EnvironContext:

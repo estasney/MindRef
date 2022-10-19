@@ -2,6 +2,7 @@
 #: import ew kivy.uix.effectwidget
 #: import effects widgets.effects
 #: import buttons widgets.buttons
+#:import TexturedButton widgets.buttons.buttons
 
 <GlowLine@EffectWidget>:
     effects: [effects.PulsingEffect(pulse_period=-.5, pulse_width=0.6, min_color=0.9)]
@@ -11,7 +12,19 @@
         id: sep
         color: app.colors['Accent-One']
 
+
+
+<MenuButton@TexturedButton>:
+    text: ''
+    size_hint_y: None
+    size: dp(40), dp(40)
+    font_size: app.base_font_size + sp(4)
+    BaseLabel:
+        text: root.text
+
 <AppMenu>:
+    platform_android: app.platform_android
+    btnroot: btnroot
     pos_hint: {'top': 1}
     size_hint_y: 0.9
     size_hint_x: 0.3
@@ -31,10 +44,6 @@
         GlowLine:
             size_hint_y: None
             size_hint_x: 1
-        Button:
-            padding: [0, dp(4)]
-            text: "Settings"
-            size_hint_y: None
-            pos_hint: {"right": 1}
-            height: self.texture_size[1]
+        MenuButton:
+            text: 'Settings'
             on_release: app.open_settings()

@@ -39,7 +39,7 @@ class ListView(GridLayout):
         add_widgets = [
             partial(self.add_item, note_data=note) for note in self.meta_notes
         ]
-        sch_cb(0.1, clear, *add_widgets)
+        sch_cb(clear, *add_widgets, timeout=0.1)
 
 
 class ListItem(ButtonBehavior, BoxLayout):

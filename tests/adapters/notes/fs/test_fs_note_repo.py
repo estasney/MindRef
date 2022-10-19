@@ -89,7 +89,7 @@ def test_query_notes(matching, notes, title_query_generator, monkeypatch):
         return [note.to_dict() for note in notes]
 
     monkeypatch.setattr(fs, "_load_category_meta", patch_meta)
-    result = fs.query_notes("test", q)
+    result = fs.query_notes("test", q, None)
     for suggestion in result:
         assert suggestion.title in (n.title for n in match_notes)
         if unmatched_notes:

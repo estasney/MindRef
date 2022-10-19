@@ -1,12 +1,13 @@
 import abc
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Callable, Literal, Optional, TYPE_CHECKING
+from typing import Any, Callable, Generator, Literal, Optional, TYPE_CHECKING
 
 from widgets.typeahead.typeahead_dropdown import Suggestion
 
 if TYPE_CHECKING:
     from domain.markdown_note import MarkdownNote
+    from domain.protocols import NoteDiscoveryProtocol
 
 DISPLAY_STATE = Literal["choose", "display", "list", "edit", "add", "error"]
 QUERY_FAILURE_TYPE = Literal["not_set", "not_found", "permission_error"]
@@ -78,6 +79,27 @@ class NotesQueryEvent(Event):
 
 
 @dataclass
+class NotesDiscoveryEvent(Event):
+    event_type = "notes_discovery"
+    payload: "NoteDiscoveryProtocol"
+    on_complete: Optional[Callable[[Any], None]]
+
+
+@dataclass
+class NotesDiscoverCategoryEvent(Event):
+    """Event Emitted when a Category is detected"""
+
+    event_type = "notes_discover_category"
+    category: str
+    image_path: Optional[Path]
+    notes: list[Path] = field(default_factory=list)
+
+    def __repr__(self):
+        img_path = self.image_path.name if self.image_path else "None"
+        return f"{self.__class__.__name__}(category={self.category}, image_path={img_path}, n_notes={len(self.notes)})"
+
+
+@dataclass
 class NotesQueryFailureEvent(EventFailure, NotesQueryEvent):
     event_type = "notes_query_failure"
     message = "To view notes, open Settings > Storage\n\nAnd set 'Note Storage'"
@@ -116,20 +138,6 @@ class BackButtonEvent(Event):
 @dataclass
 class ListViewButtonEvent(Event):
     event_type = "list_view"
-
-
-@dataclass
-class DiscoverCategoryEvent(Event):
-    """Event Emitted when a Category is detected"""
-
-    event_type = "discover_category"
-    category: str
-    image_path: Optional[Path]
-    notes: list[Path] = field(default_factory=list)
-
-    def __repr__(self):
-        img_path = self.image_path.name if self.image_path else "None"
-        return f"{self.__class__.__name__}(category={self.category}, image_path={img_path}, n_notes={len(self.notes)})"
 
 
 @dataclass

@@ -1,14 +1,59 @@
+from kivy import Logger, platform
 from kivy.factory import Factory
-from kivy.uix.settings import SettingsWithSpinner
+from kivy.properties import StringProperty
+from kivy.uix.settings import SettingPath, SettingsWithSpinner
 
+from adapters.notes.android.interface import AndroidStorageManager
 from widgets.behavior.interact_behavior import InteractBehavior
 
 
-class MindRefSettings(InteractBehavior, SettingsWithSpinner):
-    """Extends `SettingsWithSpinner` to fire the 'interact' event"""
+class MindRefSettingsNative(InteractBehavior, SettingsWithSpinner):
+    """
+    Extends `SettingsWithSpinner` to fire the 'interact' event
+    """
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, *args, **kwargs):
+        super(InteractBehavior, self).__init__(**kwargs)
+        super(SettingsWithSpinner).__init__(*args, **kwargs)
 
 
-Factory.register("MindRefSettings", cls=MindRefSettings)
+class AndroidSettingPath(SettingPath):
+    value = StringProperty()
+
+    def on_panel(self, instance, value):
+        if value is None:
+            return
+        self.fbind("on_release", self._create_popup)
+
+    def select_folder_callback(self, uri: str):
+        Logger.info(f"Settings: selected {uri}")
+        self.value = uri
+
+    def _create_popup(self, *args):
+        AndroidStorageManager.select_folder(self.select_folder_callback)
+
+
+class MindRefSettingsAndroid(SettingsWithSpinner):
+    """
+    Overrides FilePicker on Android to use DocumentProvider
+    """
+
+    ...
+
+    def __init__(self, *args, **kwargs):
+        super(MindRefSettingsAndroid, self).__init__(*args, **kwargs)
+        # override type
+
+    def create_json_panel(self, title, config, filename=None, data=None):
+        self.register_type("android_path", AndroidSettingPath)
+        Logger.info(f"{self.__class__.__name__}: Creating JSON Panel")
+        return super(MindRefSettingsAndroid, self).create_json_panel(
+            title, config, filename, data
+        )
+
+
+match platform:
+    case "android":
+        Factory.register("MindRefSettings", cls=MindRefSettingsAndroid)
+    case _:
+        Factory.register("MindRefSettings", cls=MindRefSettingsNative)

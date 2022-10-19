@@ -6,6 +6,10 @@
 **/mindref.ini
 **/static/category_img/**
 **/venv
+**/benchmarks
+**/parse_md_ast.py
+**/*.apk
+**/*.aar
 .buildozer
 .idea
 bin
