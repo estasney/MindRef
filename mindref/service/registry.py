@@ -13,6 +13,7 @@ from domain.events import (
     NotesQueryNotSetFailureEvent,
 )
 from utils import GenericLoggerMixin, LoggerProtocol, def_cb
+from utils.caching import kivy_cache
 from widgets.typeahead.typeahead_dropdown import Suggestion
 
 if TYPE_CHECKING:
@@ -52,11 +53,10 @@ class Registry(GenericLoggerMixin):
 
     @app.setter
     def app(self, app: "AppServiceProtocol"):
-        self.log(f"{self.__class__.__name__} setting app", "info")
         self._app = app
 
     def set_note_storage_path(self, path: Path | str):
-        self.log(f"{self.__class__.__name__} setting storage_path : {path!r}", "info")
+        self.log(f"{self.__class__.__name__} : setting storage_path - {path!r}", "info")
         self.app.note_service.storage_path = path
 
     def push_event(self, event: "Event"):
@@ -154,6 +154,13 @@ class Registry(GenericLoggerMixin):
                 "on_refresh", False
             )
         note_repo.discover_notes(chained_complete)
+
+    def clear_caches(self):
+        from kivy.cache import Cache
+
+        categories_seen = getattr(kivy_cache, "categories_seen")
+        for category in categories_seen:
+            Cache.remove(category, key=None)
 
     def new_note(self, category: Optional[str], idx: Optional[int]) -> "EditableNote":
         category = category if category else self.app.note_category

@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from collections import namedtuple
-from functools import cache
+from functools import cache, partial
 from operator import attrgetter, itemgetter
 from pathlib import Path
-from typing import Callable, Iterable, NamedTuple, Optional, TYPE_CHECKING
+from typing import Callable, Iterable, Optional, TYPE_CHECKING
 
 from kivy import Logger
 from toolz import groupby
@@ -16,9 +16,10 @@ from adapters.notes.fs.utils import (
 from adapters.notes.note_repository import (
     AbstractNoteRepository,
 )
-from domain.events import NotesDiscoverCategoryEvent, NotesDiscoveryEvent
+from domain.events import NotesDiscoverCategoryEvent, NotesQueryNotSetFailureEvent
 from domain.markdown_note import MarkdownNote
-from utils import def_cb
+from utils import def_cb, sch_cb
+from utils.caching import kivy_cache
 from utils.index import RollingIndex
 from widgets.typeahead.typeahead_dropdown import Suggestion
 
@@ -28,10 +29,8 @@ if TYPE_CHECKING:
     from domain.markdown_note import MarkdownNoteDict
 
 
-class NoteDiscovery(NamedTuple):
-    category: str
-    image_path: Optional[Path]
-    notes: list[Path]
+def category_meta_key_func(*args, **kwargs):
+    return kwargs.get("category")
 
 
 class FileSystemNoteRepository(AbstractNoteRepository):
@@ -41,12 +40,9 @@ class FileSystemNoteRepository(AbstractNoteRepository):
 
     """
     Categories are defined with directories
-    Individual notes defined as markdown files within their respective categories
-    
-    Notifies
-    --------
-    self._discover_notes -> note_files : tuple[category_name, img_path]
-        Images in category folders
+    Categories Contain
+        - .md Note Files
+        - .png Category Image File, Optional
     """
 
     def __init__(self, get_app, new_first: bool):
@@ -60,14 +56,45 @@ class FileSystemNoteRepository(AbstractNoteRepository):
 
     def get_categories(self, on_complete: Optional[Callable[[Iterable[str]], None]]):
         """Query for categories"""
+        if not self.configured:
+            Logger.error(f"{self.__class__.__name__} : not configured")
+            self.get_app().registry.push_event(NotesQueryNotSetFailureEvent(None))
+            if on_complete:
+                return on_complete([])
+
         category_folders = (f for f in self.storage_path.iterdir() if f.is_dir())
         categories = (f.name for f in category_folders)
         on_complete(categories)
 
+    @kivy_cache(cache_name="category_meta", key_func=category_meta_key_func)
+    def _get_category_meta(self, category, *args):
+
+        category_files = self._category_files[category]
+        category_notes = _load_category_notes(
+            category=self.current_category,
+            note_paths=category_files,
+            new_first=self.new_first,
+        )
+
+        category_note_dicts = [note.to_dict() for note in category_notes]
+
+        return category_note_dicts
+
     def get_category_meta(
-        self, on_complete: Optional[Callable[[list["MarkdownNoteDict"]], None]]
+        self,
+        category: str,
+        on_complete: Optional[Callable[[list["MarkdownNoteDict"]], None]],
     ):
-        pass
+        def scheduled(dt, cat, cb):
+            # Simple wrapper to pass result of _get_category_meta to callback
+            result = self._get_category_meta(category=cat)
+            cb(result)
+
+        if on_complete:
+            task = partial(scheduled, cat=category, cb=on_complete)
+        else:
+            task = partial(self._get_category_meta, category=category)
+        sch_cb(task, timeout=0.1)
 
     @property
     def configured(self) -> bool:
@@ -85,29 +112,6 @@ class FileSystemNoteRepository(AbstractNoteRepository):
             self._storage_path = None
         else:
             self._storage_path = Path(value)
-
-    def note_discovery_result(self):
-        category_folders = (f for f in self.storage_path.iterdir() if f.is_dir())
-
-        def is_md(p: Path):
-            return p.suffix == ".md"
-
-        for category_folder in category_folders:
-            category_name = category_folder.name
-            category_files = list(
-                discover_folder_notes(category_folder, new_first=self.new_first)
-            )
-            category_files = groupby(is_md, category_files)
-            category_note_files = category_files.get(True, [])
-            if category_img := category_files.get(False):
-                category_img = category_img[0]
-            self._category_files[category_name] = category_note_files
-            self._category_imgs[category_name] = category_img
-            yield NoteDiscovery(
-                category=category_name,
-                image_path=category_img,
-                notes=category_note_files,
-            )
 
     def discover_notes(self, on_complete: Optional[Callable[[], None]], *args):
         """
@@ -149,17 +153,11 @@ class FileSystemNoteRepository(AbstractNoteRepository):
 
         self.get_categories(post_get_cat)
 
-    @property
-    def category_meta(self):
-        if self.current_category:
-            return self._load_category_meta(category=self.current_category)
-        return []
-
     def query_notes(
         self, category: str, query: str, on_complete
     ) -> Optional[list[Suggestion]]:
         query = query.lower()
-        notes = self._load_category_meta(category=category)
+        notes = self._get_category_meta(category=category)
         QueryDoc = namedtuple("QueryDoc", "idx, title, text, score")
 
         def note_pipeline(note_inner) -> Iterable[QueryDoc]:
@@ -209,19 +207,6 @@ class FileSystemNoteRepository(AbstractNoteRepository):
         for match in note_binary_matches:
             results.append(Suggestion(title=match.title, index=match.idx))
         return results
-
-    @cache
-    def _load_category_meta(self, category: str) -> list["MarkdownNoteDict"]:
-        category_files = self._category_files[category]
-        category_notes = _load_category_notes(
-            category=self.current_category,
-            note_paths=category_files,
-            new_first=self.new_first,
-        )
-
-        category_note_dicts = [note.to_dict() for note in category_notes]
-
-        return category_note_dicts
 
     @property
     def current_category(self) -> Optional[str]:

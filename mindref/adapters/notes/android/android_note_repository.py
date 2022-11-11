@@ -9,7 +9,7 @@ from toolz import groupby
 from adapters.notes.android.interface import AndroidStorageManager
 from adapters.notes.fs.fs_note_repository import FileSystemNoteRepository
 from adapters.notes.fs.utils import discover_folder_notes
-from domain.events import NotesDiscoverCategoryEvent
+from domain.events import NotesDiscoverCategoryEvent, NotesQueryNotSetFailureEvent
 from utils import def_cb
 
 if TYPE_CHECKING:
@@ -32,13 +32,16 @@ class AndroidNoteRepository(FileSystemNoteRepository):
     def __init__(self, get_app, new_first: bool):
         super().__init__(get_app, new_first)
         self._native_path = None
-        self._index = None
-        self._current_category = None
 
     def get_categories(self, on_complete: Optional[Callable[[Iterable[str]], None]]):
+        """Query for categories. We don't check filesystem until after invoking Android Storage
+        which will copy category folders and their images to local storage
+        """
         if not self.configured:
             Logger.error(f"{self.__class__.__name__} : not configured")
-            return
+            self.get_app().registry.push_event(NotesQueryNotSetFailureEvent(None))
+            if on_complete:
+                return on_complete([])
         Logger.info(
             f"{self.__class__.__name__} : get_categories from {self._native_path}"
         )
@@ -73,7 +76,7 @@ class AndroidNoteRepository(FileSystemNoteRepository):
 
     def _copy_storage(self, callback: Callable[[Any], None]):
         Logger.info(
-            f"{self.__class__.__name__} : _copy_storage from {self._native_path}"
+            f"{self.__class__.__name__} : Invoking AndroidStorageManager to copy_storage from {self._native_path} to {self._storage_path}"
         )
         src_doc = AndroidStorageManager.get_document_file(self._native_path)
         AndroidStorageManager.copy_storage(src_doc, self._storage_path, callback)
@@ -91,9 +94,11 @@ class AndroidNoteRepository(FileSystemNoteRepository):
         get_categories -> copy_storage -> emit NotesDiscoverCategoryEvents
         """
 
-        def discovery_factory(categories: Iterable[str]):
-            """Called as on_complete from self.get_categories"""
-            Logger.info(f"{self.__class__.__name__} : discovery_factory")
+        def discovery_pipeline(categories: Iterable[str]):
+            """
+            Called as on_complete from self.get_categories
+            """
+            Logger.info(f"{self.__class__.__name__} : discovery_pipeline")
 
             # We need to call self._copy_storage, but need to bind our categories to a callback first
 
@@ -129,8 +134,6 @@ class AndroidNoteRepository(FileSystemNoteRepository):
             app = self.get_app()
             # We can display the categories as we have name and image
             for category_name in categories:
-                Logger.info(f"Early Process Category {category_name}")
-                Logger.info(f"Image? {self.storage_path / category_name}")
                 category_path = self.storage_path / category_name
                 category_img = next(category_path.glob("*.png"))
                 category_notes = Path(self.storage_path, category_name).glob("*.md")
@@ -145,10 +148,8 @@ class AndroidNoteRepository(FileSystemNoteRepository):
                         notes=self._category_files[category_name],
                     )
                 )
+            if on_complete:
+                proc_categories = def_cb(proc_categories, on_complete)
             self._copy_storage(proc_categories)
 
-        if on_complete:
-            post_get_cat = def_cb(discovery_factory, on_complete)
-        else:
-            post_get_cat = discovery_factory
-        self.get_categories(post_get_cat)
+        self.get_categories(discovery_pipeline)

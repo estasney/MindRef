@@ -74,8 +74,9 @@ class AbstractNoteRepository(ABC):
         raise NotImplementedError
 
     def get_category_meta(
-        self, on_complete: Optional[Callable[[list["MarkdownNoteDict"]], None]]
+        self, category: str, on_complete: [Callable[[list["MarkdownNoteDict"]], None]]
     ):
+        """For self.current_category, get MarkdownNoteDict for all files in category"""
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -138,10 +139,13 @@ class AbstractNoteRepository(ABC):
         query: str,
         on_complete: Optional[Callable[[Optional[list[Suggestion]]], None]],
     ):
-        """String query
+        """Search Notes
 
         Parameters
         ----------
+        category: str
+        query: str
+            String query to search
         on_complete
         """
         raise NotImplementedError

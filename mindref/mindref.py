@@ -254,8 +254,9 @@ class MindRefApp(App):
 
     def process_refresh_notes_event(self, event: RefreshNotesEvent):
         clear_categories = lambda x: setattr(self, "note_categories", [])
+        clear_caches = lambda x: self.registry.clear_caches()
         run_query = lambda x: self.registry.query_all(on_complete=event.on_complete)
-        sch_cb(clear_categories, run_query, timeout=0.5)
+        sch_cb(clear_categories, clear_caches, run_query, timeout=0.5)
 
     def process_list_view_event(self, event: ListViewButtonEvent):
         """List Button was pressed"""
@@ -264,12 +265,17 @@ class MindRefApp(App):
     def process_note_category_event(self, event: NoteCategoryEvent):
         """Note Category has been set via registry"""
 
-        def select_category(dt, category):
-            self.note_category_meta = self.note_service.category_meta
-            if self.play_state == "play":
-                self.paginate_timer()
-            self.paginate_note(direction=0)
+        def category_meta_loaded(meta: list["MarkdownNoteDict"], category: str, *args):
+            self.note_category_meta = meta
             self.note_category = category
+            self.paginate_note(direction=0)
+
+        def select_category(dt, category):
+            # Note Service will set note_category_meta when loaded
+            self.note_service.get_category_meta(
+                category=event.value,
+                on_complete=partial(category_meta_loaded, category=event.value),
+            )
 
         sch_cb(
             partial(select_category, category=event.value),

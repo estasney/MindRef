@@ -37,11 +37,11 @@ class MarkdownCode(GridLayout):
         self.lexer_name = lexer.strip() if lexer else "markdown"
         try:
             self.lexer = (
-                lexers.get_lexer_by_name(lexer.strip())
+                lexers.get_lexer_by_name(self.lexer_name)
                 if lexer
                 else lexers.get_lexer_by_name("markdown")
             )
         except ClassNotFound as e:
-            Logger.warn(f"Unknown lexer {self.lexer} - falling back to markdown")
+            Logger.warn(f"Unknown lexer {self.lexer_name} - falling back to markdown")
             self.lexer = lexers.get_lexer_by_name("markdown")
         self.background_color = self.styler.background_color

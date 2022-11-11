@@ -30,17 +30,21 @@ def kivy_cache(
     limit : Passed to Cache.Register
     timeout
     """
-    if not Cache._categories.get(cache_name):
+
+    categories_seen = getattr(kivy_cache, "categories_seen", set())
+    if cache_name not in categories_seen:
         Cache.register(cache_name, limit=limit, timeout=timeout)
+        categories_seen.add(cache_name)
+    setattr(kivy_cache, "categories_seen", categories_seen)
 
     def dec_kivy_cache(func: "InnerCallable"):
         @wraps(func)
-        def wrapped_func(**kwargs: "PInner.kwargs") -> "TInner":
+        def wrapped_func(*args: "PInner.args", **kwargs: "PInner.kwargs") -> "TInner":
             key = key_func(**kwargs)
             cached_result: "TInner" = Cache.get(cache_name, key)
             if cached_result is not None:
                 return cached_result
-            result = func(**kwargs)
+            result = func(*args, **kwargs)
             Cache.append(cache_name, key, result)
             return result
 
