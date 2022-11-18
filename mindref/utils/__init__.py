@@ -79,6 +79,25 @@ def def_cb(*args, timeout: float = 0) -> Callable[[], None]:
     return head_func
 
 
+def attrsetter(instance, attr: str, value):
+    """
+    Set an attribute of an instance operator style
+    Parameters
+    ----------
+    instance
+    attr
+    value
+
+    Returns
+    -------
+    """
+
+    def attrsetter_inner(*args):
+        setattr(instance, attr, value)
+
+    return attrsetter_inner
+
+
 class EnvironContext:
     def __init__(self, vals: dict[str, str]):
         self.vals = vals
