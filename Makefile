@@ -23,15 +23,18 @@ clean-bytecode :
 .PHONY : clean-bytecode
 
 clean-builds :
-	p4a clean builds
+	. venv10/bin/activate \
+	&& python -m pythonforandroid.entrypoints clean builds
 .PHONY : clean-builds
 
 clean-dists :
-	p4a clean dists
+	. venv10/bin/activate \
+	&& python -m pythonforandroid.entrypoints clean builds
 .PHONY : clean-dists
 
 clean-all : clean-aar clean-apk clean-bytecode clean-builds clean-dists
-	@echo clean all
+	. venv10/bin/activate \
+	&& python -m pythonforandroid.entrypoints clean-all
 .PHONY : clean-all
 
 *.aar : clean-aar
@@ -50,14 +53,13 @@ build-apk :  *.aar
   	--dist-name=$(PROJECT_ROOT) \
   	--sdk-dir ~/Android/Sdk \
   	--ndk-dir ~/Android/android-ndk-r25 \
-  	--ndk-api 26 \
+  	--ndk-api 29 \
   	--android-api 33 \
   	--requirements=$(PROJECT_REQUIREMENTS) \
   	--arch arm64-v8a \
+  	--arch x86_64 \
   	--presplash ./$(PROJECT_ROOT)/assets/presplash.png \
   	--icon ./$(PROJECT_ROOT)/assets/logo.png \
-  	--enable-androidx \
-  	--depend "androidx.documentfile:documentfile:1.0.1" \
   	--depend "com.google.guava:guava:31.1-android" \
   	--depend "org.apache.commons:commons-io:1.3.2" \
   	--add-aar $(HERE)/mindrefutils-debug.aar
