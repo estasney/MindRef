@@ -58,6 +58,7 @@ build-apk :  *.aar
   	--requirements=$(PROJECT_REQUIREMENTS) \
   	--arch arm64-v8a \
   	--arch x86_64 \
+  	--enable-androidx \
   	--presplash ./$(PROJECT_ROOT)/assets/presplash.png \
   	--icon ./$(PROJECT_ROOT)/assets/logo.png \
   	--depend "com.google.guava:guava:31.1-android" \
