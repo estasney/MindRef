@@ -12,6 +12,7 @@ from kivy.core.window import Window
 from kivy.logger import Logger
 from kivy.parser import parse_color
 from kivy.properties import (
+    AliasProperty,
     BooleanProperty,
     DictProperty,
     ListProperty,
@@ -75,10 +76,13 @@ class MindRefApp(App):
     )
     menu_open = BooleanProperty(False)
 
-    display_state = OptionProperty(
+    display_state_last = OptionProperty(
         "choose", options=["choose", "display", "list", "edit", "add", "error"]
     )
-    display_state_trigger: Callable[[DISPLAY_STATES], None]
+    display_state_current = OptionProperty(
+        "choose", options=["choose", "display", "list", "edit", "add", "error"]
+    )
+    display_state_trigger: Callable[["DISPLAY_STATES"], None]
 
     play_state = OptionProperty("play", options=["play", "pause"])
     play_state_trigger: Callable[[Literal["play", "pause"]], None]
@@ -149,7 +153,23 @@ class MindRefApp(App):
 
     settings_cls = "MindRefSettings"
 
-    def on_display_state(self, instance, value: DISPLAY_STATES):
+    def get_display_state(self):
+        return self.display_state_last, self.display_state_current
+
+    def set_display_state(self, value: "DISPLAY_STATES"):
+        self.display_state_last = self.display_state_current
+        self.display_state_current = value
+
+    display_state = AliasProperty(
+        get_display_state,
+        set_display_state,
+        bind=("display_state_last", "display_state_current"),
+        cache=True,
+    )
+
+    def on_display_state(self, _, value: "DISPLAY_STATE"):
+        _, value = value
+
         if value != "display":
             self.play_state_trigger("pause")
         if value == "edit":
