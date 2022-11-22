@@ -28,15 +28,15 @@ from domain.events import (
     AddNoteEvent,
     BackButtonEvent,
     CancelEditEvent,
-    NotesDiscoverCategoryEvent,
+    DiscoverCategoryEvent,
     EditNoteEvent,
     ListViewButtonEvent,
     NoteCategoryEvent,
     NoteCategoryFailureEvent,
     NoteFetchedEvent,
-    NotesDiscoveryEvent,
     NotesQueryEvent,
     NotesQueryFailureEvent,
+    PaginationEvent,
     RefreshNotesEvent,
     SaveNoteEvent,
     TypeAheadQueryEvent,
@@ -168,13 +168,17 @@ class MindRefApp(App):
     def on_paginate_interval(self, *_args):
         """Interval for Autoplay has changed"""
         self.paginate_timer.cancel()
+        pagination = caller(self, "paginate_note", direction=1)
         self.paginate_timer = Clock.create_trigger(
-            partial(self.paginate, value=1),
+            pagination,
             timeout=self.paginate_interval,
             interval=True,
         )
         if self.play_state == "play":
             self.paginate_timer()
+
+    def on_paginate(self, *args, **kwargs):
+        ...
 
     def select_index(self, value: int):
         """Set `self.note_data` to the nth note"""
@@ -188,17 +192,16 @@ class MindRefApp(App):
         sch_cb(set_index, set_note_data, pause_state, display_state_display)
 
     def paginate(self, value):
+        paginate = caller(self, "paginate_note", direction=value)
         if self.play_state == "play":
             self.paginate_timer.cancel()
-            sch_cb(
-                partial(self.paginate_note, direction=value),
-                lambda dt: self.paginate_timer(),
-                timeout=0.1,
-            )
-        else:
-            sch_cb(partial(self.paginate_note, direction=value), timeout=0.1)
 
-    def paginate_note(self, *args, **kwargs):
+            setup_timer = caller(self, "paginate_timer")
+            sch_cb(paginate, setup_timer, timeout=0.1)
+        else:
+            sch_cb(paginate, timeout=0.1)
+
+    def paginate_note(self, direction=1):
         """
         Update our note_data, and the direction transition for our ScreenManager
         """
@@ -219,7 +222,11 @@ class MindRefApp(App):
     Event Handlers for Registry
     """
 
-    def process_cancel_edit_event(self, event: CancelEditEvent):
+    def process_pagination_event(self, event: PaginationEvent):
+        registry_paginate = caller(
+            self.registry, "paginate_note", direction=event.direction
+        )
+        Clock.schedule_once(registry_paginate)
 
         clear_edit_note = lambda x: setattr(self, "editor_note", None)
         sch_cb(lambda x: self.display_state_trigger("display"), clear_edit_note)

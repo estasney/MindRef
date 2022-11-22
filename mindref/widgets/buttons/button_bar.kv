@@ -1,5 +1,5 @@
 #:import TexturedButton widgets.buttons.buttons
-
+#:import e domain.events
 
 <DropDownButton@TexturedButton>:
     text: ''
@@ -46,7 +46,7 @@
     BackButton:
         padding: [0, dp(8), 0, dp(8)]
         border_size: 0
-        on_release: app.paginate(-1)
+        on_release: app.registry.push_event(e.PaginationEvent(direction=-1))
     PrimaryVSep:
     PlayStateButton:
         padding: [0, dp(8), 0, dp(8)]
@@ -57,4 +57,4 @@
     ForwardButton:
         padding: [0, dp(8), 0, dp(8)]
         border_size: 0
-        on_release: app.paginate(1)
+        on_release: app.registry.push_event(e.PaginationEvent(direction=1))

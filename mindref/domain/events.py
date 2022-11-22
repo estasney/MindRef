@@ -1,16 +1,15 @@
 import abc
 from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Any, Callable, Generator, Literal, Optional, TYPE_CHECKING
-
-from widgets.typeahead.typeahead_dropdown import Suggestion
+from typing import Any, Callable, Literal, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from domain.markdown_note import MarkdownNote
     from domain.protocols import NoteDiscoveryProtocol
+    from mindref.mindref import DISPLAY_STATES
+    from widgets.typeahead.typeahead_dropdown import Suggestion
 
-DISPLAY_STATE = Literal["choose", "display", "list", "edit", "add", "error"]
-QUERY_FAILURE_TYPE = Literal["not_set", "not_found", "permission_error"]
+    QUERY_FAILURE_TYPE = Literal["not_set", "not_found", "permission_error"]
+    PAGINATION_DIRECTION = Literal[-1, 0, 1]
 
 
 class Event(abc.ABC):
@@ -25,6 +24,14 @@ class EventFailure(abc.ABC):
     @abc.abstractmethod
     def message(self) -> str:
         raise NotImplementedError
+
+
+@dataclass
+class PaginationEvent(Event):
+    """Emitted when we want to display a note_screen"""
+
+    event_type = "pagination"
+    direction: "PAGINATION_DIRECTION"
 
 
 @dataclass
@@ -49,7 +56,7 @@ class SaveNoteEvent(Event):
     event_type = "save_note"
     text: str
     title: Optional[str]
-    category: int
+    category: str
 
 
 @dataclass
@@ -86,17 +93,14 @@ class NotesDiscoveryEvent(Event):
 
 
 @dataclass
-class NotesDiscoverCategoryEvent(Event):
+class DiscoverCategoryEvent(Event):
     """Event Emitted when a Category is detected"""
 
-    event_type = "notes_discover_category"
+    event_type = "discover_category"
     category: str
-    image_path: Optional[Path]
-    notes: list[Path] = field(default_factory=list)
 
     def __repr__(self):
-        img_path = self.image_path.name if self.image_path else "None"
-        return f"{self.__class__.__name__}(category={self.category}, image_path={img_path}, n_notes={len(self.notes)})"
+        return f"{self.__class__.__name__}(category={self.category})"
 
 
 @dataclass
@@ -104,7 +108,7 @@ class NotesQueryFailureEvent(EventFailure, NotesQueryEvent):
     event_type = "notes_query_failure"
     message = "To view notes, open Settings > Storage\n\nAnd set 'Note Storage'"
     on_complete: Optional[Callable]
-    error: QUERY_FAILURE_TYPE
+    error: "QUERY_FAILURE_TYPE"
 
 
 @dataclass
@@ -132,7 +136,7 @@ class RefreshNotesEvent(Event):
 @dataclass
 class BackButtonEvent(Event):
     event_type = "back_button"
-    current_display_state: DISPLAY_STATE
+    current_display_state: "DISPLAY_STATES"
 
 
 @dataclass
@@ -146,4 +150,4 @@ class TypeAheadQueryEvent(Event):
 
     event_type = "typeahead_query"
     query: str
-    on_complete: Callable[[Optional[list[Suggestion]]], None]
+    on_complete: Callable[[Optional[list["Suggestion"]]], None]
