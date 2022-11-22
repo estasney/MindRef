@@ -31,7 +31,7 @@ class MarkdownDocument(ScrollView, MarkdownVisitor):
         self.do_scroll_x = False
         self.do_scroll_y = True
 
-    def on_document(self, instance, value: "MarkdownNoteDict"):
+    def on_document(self, _, _value: "MarkdownNoteDict"):
         self.content.clear_widgets()
         for child in self.document:
             if self.visit(child):

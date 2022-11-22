@@ -159,13 +159,13 @@ class MindRefApp(App):
                 category=self.note_category, idx=self.note_service.index_size()
             )
 
-    def on_play_state(self, instance, value):
+    def on_play_state(self, *_args):
         if self.play_state == "pause":
             self.paginate_timer.cancel()
         else:
             self.paginate_timer()
 
-    def on_paginate_interval(self, instance, value):
+    def on_paginate_interval(self, *_args):
         """Interval for Autoplay has changed"""
         self.paginate_timer.cancel()
         self.paginate_timer = Clock.create_trigger(
@@ -230,7 +230,7 @@ class MindRefApp(App):
         update_display_state = lambda x: self.display_state_trigger("edit")
         sch_cb(update_edit_note, update_display_state)
 
-    def process_add_note_event(self, event: AddNoteEvent):
+    def process_add_note_event(self, _: AddNoteEvent):
         data_note = self.registry.new_note(category=self.note_category, idx=None)
         update_edit_note = lambda x: setattr(self, "editor_note", data_note)
         update_display_mode = lambda x: self.display_state_trigger("add")
@@ -258,7 +258,7 @@ class MindRefApp(App):
         run_query = lambda x: self.registry.query_all(on_complete=event.on_complete)
         sch_cb(clear_categories, clear_caches, run_query, timeout=0.5)
 
-    def process_list_view_event(self, event: ListViewButtonEvent):
+    def process_list_view_event(self, _: ListViewButtonEvent):
         """List Button was pressed"""
         self.display_state_trigger("list")
 
@@ -360,11 +360,7 @@ class MindRefApp(App):
             on_complete=event.on_complete,
         )
 
-    def process_notes_discovery_event(self, event: NotesDiscoveryEvent):
-        # self.registry.handle_note_discovery(event)
-        ...
-
-    def process_event(self, dt):
+    def process_event(self, *_args):
         if len(self.registry.events) == 0:
             return
         event = self.registry.events.popleft()
@@ -373,7 +369,7 @@ class MindRefApp(App):
         func = getattr(self, f"process_{event_type}_event")
         return func(event)
 
-    def key_input(self, window, key, scancode, codepoint, modifier):
+    def key_input(self, _window, key, _scancode, _codepoint, _modifier):
         if key == 27:  # Esc Key
             # Back Button Event
             self.registry.push_event(

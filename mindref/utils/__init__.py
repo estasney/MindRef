@@ -92,7 +92,7 @@ def attrsetter(instance, attr: str, value):
     -------
     """
 
-    def attrsetter_inner(*args):
+    def attrsetter_inner(*_args):
         setattr(instance, attr, value)
 
     return attrsetter_inner

@@ -55,7 +55,7 @@ class GetCategoriesCallback(PythonJavaClass):
         self.callback(categories)
 
 
-# noinspection PyPep8Naming
+# noinspection PyPep8Naming,PyUnusedLocal
 class OnDocumentCallback(PythonJavaClass):
     """PythonActivity calls this after User has selected folder with Android Document Picker"""
 

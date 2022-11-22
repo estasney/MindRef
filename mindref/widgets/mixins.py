@@ -11,7 +11,7 @@ class TrackParentPadding(Widget):
 
         super().__init__(**kwargs)
 
-    def on_parent(self, instance, value):
+    def on_parent(self, _, value):
 
         self.parent_padding = self._get_parent_pad(value)
 

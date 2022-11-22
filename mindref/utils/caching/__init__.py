@@ -61,7 +61,7 @@ def cache_key_text_extents(**kwargs) -> str:
     return f"{text}-{opts['font_size']}-{opts['font_family']}"
 
 
-def cache_key_text_contrast(*args, **kwargs) -> tuple[tuple, int, Optional[tuple]]:
+def cache_key_text_contrast(*_args, **kwargs) -> tuple[tuple, int, Optional[tuple]]:
     """Generate key for 'text_contrast'"""
     background_color = kwargs.get("background_color")
     threshold = kwargs.get("threshold")
@@ -73,11 +73,11 @@ def cache_key_text_contrast(*args, **kwargs) -> tuple[tuple, int, Optional[tuple
     )
 
 
-def cache_key_color_norm(*args, **kwargs) -> tuple:
+def cache_key_color_norm(*_args, **kwargs) -> tuple:
     return tuple(kwargs.get("color"))
 
 
-def cache_key_note(*args, **kwargs) -> str:
+def cache_key_note(*_args, **kwargs) -> str:
     content_data = kwargs.get("content_data")
     parent = kwargs.pop("parent")
     return f"{content_data['filepath']}-{content_data['text']}-{hash(parent)}"

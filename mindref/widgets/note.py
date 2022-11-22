@@ -35,7 +35,7 @@ class Note(BoxLayout, GestureRecognizingBehavior):
         super(Note, self).__init__(**kwargs)
         self.bind(on_swipe=self.handle_swipe)
 
-    def handle_swipe(self, instance, score, gesture):
+    def handle_swipe(self, _instance, _score, gesture):
         app = App.get_running_app()
         if gesture.name == "swipe-left":
             app.paginate(-1)
@@ -83,8 +83,8 @@ class NoteTitleBar(BoxLayout):
             self.title_text = kwargs.pop("note_title")
         super().__init__(**kwargs)
 
-    def set(self, title_data):
-        self.title_text = title_data["title"]
+    def handle_button_bind(self, *_args):
+        self.action_button.bind(on_select=self.handle_select)
 
     def handle_edit(self):
         """Pass this to screen manager"""

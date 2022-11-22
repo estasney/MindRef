@@ -28,7 +28,7 @@ class RefreshableScreen(InteractBehavior, RefreshBehavior, Screen):
         self.register_event_type("on_refresh")
         self.refresh_icon = None
 
-    def _add_refresh_symbol(self, dt):
+    def _add_refresh_symbol(self, *_args):
         """
         Add a refresh Icon, if we don't have one already
         """
@@ -38,7 +38,7 @@ class RefreshableScreen(InteractBehavior, RefreshBehavior, Screen):
             )
             self.add_widget(self.refresh_icon)
 
-    def _clear_refresh_symbol(self, *args, **kwargs):
+    def _clear_refresh_symbol(self, *_args):
         if self.refresh_icon:
             self.remove_widget(self.refresh_icon)
             del self.refresh_icon

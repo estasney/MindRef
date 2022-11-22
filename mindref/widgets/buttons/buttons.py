@@ -102,10 +102,10 @@ class PlayStateButton(ImageButton):
         app = App.get_running_app()
         app.bind(play_state=self.handle_play_state)
 
-    def handle_icon_active(self, instance, value):
+    def handle_icon_active(self, *_args):
         self.source = self.sources[self.icon_active]
 
-    def handle_play_state(self, instance, value):
+    def handle_play_state(self, instance, _):
         """When App's play_state is 'pause', we show a play icon"""
         if instance.play_state == "pause":
             self.icon_active = "play"

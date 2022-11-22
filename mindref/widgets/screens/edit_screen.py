@@ -39,18 +39,19 @@ class NoteEditScreen(InteractScreen):
         app.bind(editor_note=self.handle_app_editor_note)
         app.bind(display_state=self.handle_app_display_state)
 
-    def handle_app_display_state(self, instance, value):
-        if value in {"add", "edit"}:
+    def handle_app_display_state(self, _, value: "DISPLAY_STATE"):
+        _, new = value
+        if new in {"add", "edit"}:
             Logger.debug(f"App Changed Mode : {value}")
             self.mode = value
 
-    def on_note_editor(self, instance, value):
+    def on_note_editor(self, *_args):
         self.note_editor.bind(on_save=self.handle_save)
         self.note_editor.bind(on_cancel=self.handle_cancel)
         self.bind(init_text=self.note_editor.setter("init_text"))
         self.bind(mode=self.note_editor.setter("mode"))
 
-    def handle_app_editor_note(self, instance, value: Union["EditableNote", "None"]):
+    def handle_app_editor_note(self, _, value: Union["EditableNote", "None"]):
         """
         Tracks App.editor_note
         """
@@ -60,16 +61,13 @@ class NoteEditScreen(InteractScreen):
 
         self.init_text = value.edit_text
 
-    def handle_cancel(self, *args, **kwargs):
-        Logger.debug("Cancel Edit")
-
+    def handle_cancel(self, *_args):
+        Logger.debug(f"{self.__class__.__name__}: Cancel Edit")
         app = App.get_running_app()
         app.registry.push_event(CancelEditEvent)
         clear_self_text = lambda x: setattr(self, "init_text", "")
 
-        sch_cb(clear_self_text)
-
-    def handle_save(self, *args, **kwargs):
+    def handle_save(self, *_args, **kwargs):
         app = App.get_running_app()
         text = kwargs.get("text")
         title = kwargs.get("title")

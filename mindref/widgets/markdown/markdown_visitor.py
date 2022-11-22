@@ -207,7 +207,7 @@ class MarkdownVisitor:
             self.push(MarkdownCodeSpan(text=node["text"], **kwargs))
         return True
 
-    def visit_text(self, node: "MdText", **kwargs) -> bool:
+    def visit_text(self, node: "MdText", **_kwargs) -> bool:
         if self.has_intercept:
             self.push(node)
             return False
@@ -226,7 +226,7 @@ class MarkdownVisitor:
                 self.pop()
         return False
 
-    def visit_newline(self, node: "MdNewLine", **kwargs) -> bool:
+    def visit_newline(self, _node: "MdNewLine", **_kwargs) -> bool:
         return False
 
     def visit_strong(self, node: "MdTextStrong", **kwargs):
@@ -247,14 +247,14 @@ class MarkdownVisitor:
                     self.pop()
             return True
 
-    def visit_kbd(self, node: "MdInlineKeyboard", **kwargs):
+    def visit_kbd(self, node: "MdInlineKeyboard", **_kwargs):
         self.push(node)
         return True
 
-    def visit_thematic_break(self, node: "MdThematicBreak"):
+    def visit_thematic_break(self, _node: "MdThematicBreak"):
         self.push(MarkdownThematicBreak())
         return True
 
-    def visit_generic(self, node, **kwargs):
+    def visit_generic(self, node, **_kwargs):
         node_type = node.get("type")
         Logger.info(f"Skipping {node_type if node_type else node} - No Handler")

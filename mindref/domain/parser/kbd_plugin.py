@@ -1,7 +1,7 @@
 KBD_PATTERN = "(?:<kbd>)(.+?)(?:</kbd>)"
 
 
-def parse_kbd(inline, m, state):
+def parse_kbd(_inline, m, _state):
     text = m.group(1)
     return "kbd", text
 

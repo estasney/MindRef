@@ -30,10 +30,10 @@ class NoteCategoryButton(TexturedButton):
         )
         self.text = text
 
-    def category_tx_loaded(self, *args):
+    def category_tx_loaded(self, *_args):
         self.tx_category = self.img_loader.texture
 
-    def load_category_texture(self, *args):
+    def load_category_texture(self, *_args):
         if self.img_loader is None:
             self.img_loader = Loader.image(self.source)
         if self.img_loader.loaded:

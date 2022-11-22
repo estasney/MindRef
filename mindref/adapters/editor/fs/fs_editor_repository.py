@@ -40,5 +40,5 @@ class FileSystemEditor(AbstractEditorRepository):
         ...
 
     def edit_current_note(self) -> EditableNote:
-        current = self.get_app().note_service.get_current_note(None)
+        current = self.get_app().note_service.get_current_note(on_complete=None)
         return self.edit_note(current)

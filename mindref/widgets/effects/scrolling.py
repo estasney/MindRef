@@ -33,7 +33,7 @@ class RefreshSymbol(FloatLayout):
         super(RefreshSymbol, self).__init__(**kwargs)
         self._scheduler = None
 
-    def on_parent(self, instance, value):
+    def on_parent(self, *_args):
         if self._scheduler:
             self._scheduler.cancel()
             self._scheduler = None
@@ -62,24 +62,24 @@ class RefreshOverscrollEffect(OpacityScrollEffect):
         self.refresh_scheduler = None
         self.bind(refresh_triggered_=self.schedule_refresh_check)
 
-    def on_target_widget(self, instance, value):
+    def on_target_widget(self, *_args):
         self.bind(
             refresh_triggered=self.target_widget.parent.setter("refresh_triggered")
         )
         self.bind(refresh_triggered_=self.refresh_unset)
 
-    def refresh_unset(self, instance, value):
+    def refresh_unset(self, *_args):
         if not self.refresh_triggered_:
             Logger.debug("Refresh Triggered -> False")
             self.refresh_triggered = False
 
-    def refresh_hold_callback(self, dt):
+    def refresh_hold_callback(self, *_args):
         """Check if refresh_triggered_ is still True after delay"""
         if self.refresh_triggered_:
             self.refresh_triggered = True
         return False
 
-    def schedule_refresh_check(self, instance, value):
+    def schedule_refresh_check(self, *_args):
         if self.refresh_scheduler:
             self.refresh_scheduler.cancel()
             self.refresh_scheduler = None

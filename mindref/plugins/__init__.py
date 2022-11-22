@@ -31,7 +31,7 @@ class PluginManager(EventDispatcher):
         app.fbind("on_config_change", self.config_change_handler)
         self.update_plugins(plugin_config)
 
-    def config_change_handler(self, *args, **kwargs):
+    def config_change_handler(self, *args):
 
         value, key, section, *rest = list(reversed(args))
 
@@ -94,7 +94,7 @@ class ScreenSaverPlugin(EventDispatcher):
             Logger.debug(f"ScreenSaverPlugin: elapsed_minutes - {self.elapsed_minutes}")
             self.screen_saved = False
 
-    def handle_enabled(self, instance, value):
+    def handle_enabled(self, *_args):
         if not self.enabled:
             self.trigger.cancel()
         else:
@@ -109,7 +109,7 @@ class ScreenSaverPlugin(EventDispatcher):
         else:
             self.screen_saved = False
 
-    def save_screen(self, dt):
+    def save_screen(self, *_args):
         if self.screen_saved:
             # Power off screen
             Path(self.sys_fs_path).write_text("1", encoding="ascii")

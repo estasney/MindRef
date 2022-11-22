@@ -42,12 +42,12 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
         self.dispatch_children("on_refresh", state)
         return True
 
-    def handle_menu_state(self, instance, menu_open: bool):
-        def resume_temp_pause(*args):
+    def handle_menu_state(self, _, menu_open: bool):
+        def resume_temp_pause(*_args):
             Logger.debug("Resume Temp Pause")
             self.app.play_state = "play"
 
-        def remove_from_screen(*args):
+        def remove_from_screen(*_args):
             Logger.debug("Remove Menu")
             self.current_screen.remove_widget(self.menu)
             self.menu = None
@@ -67,7 +67,7 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
     def category_selected(self, category: "NoteCategoryButton"):
         self.app.registry.set_note_category(category.text, on_complete=None)
 
-    def handle_reversed_transition(self, instance, value):
+    def handle_reversed_transition(self, *_args):
         if self.reversed_transition:
             self.transition = SlideTransition(direction="right")
         else:
@@ -88,10 +88,7 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
         elif new == "error":
             self.handle_error_message()
 
-        else:
-            raise Exception(f"Unhandled display state {new}")
-
-    def handle_app_play_state(self, instance, value):
+    def handle_app_play_state(self, _, value):
         self.play_state = value
 
     def handle_notes(self, *args, **kwargs):
@@ -128,16 +125,16 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
     def handle_notes_list_view(self, *args, **kwargs):
         self.screen_triggers("list_view_screen")
 
-    def handle_notes_edit_view(self, *args, **kwargs):
+    def handle_notes_edit_view(self, *_args):
         Logger.debug(f"{self.__class__.__name__} : Switching to note_edit_screen")
         self.screen_triggers("note_edit_screen")
 
-    def handle_notes_add_view(self, *args, **kwargs):
+    def handle_notes_add_view(self, *_args):
         Logger.debug(
             f"{self.__class__.__name__} : Switching to note_edit_screen - Adding Note"
         )
         self.screen_triggers("note_edit_screen")
 
-    def handle_error_message(self, *args, **kwargs):
+    def handle_error_message(self, *_args):
         Logger.debug(f"{self.__class__.__name__} : Switching to error_message_screen")
         self.screen_triggers("error_message_screen")

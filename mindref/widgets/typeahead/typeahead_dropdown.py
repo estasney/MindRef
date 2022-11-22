@@ -56,7 +56,7 @@ class TypeAheadDropDown(DropDown):
     def __init__(self, **kwargs):
         super(TypeAheadDropDown, self).__init__(**kwargs)
 
-    def on_sel_idx(self, instance, val):
+    def on_sel_idx(self, *_args):
         if self.last_idx > 0:
             last_key = f"item-{self.last_idx}"
             child_btn = self.ids.get(last_key)
@@ -74,7 +74,7 @@ class TypeAheadDropDown(DropDown):
             self.sel_idx = min(self.max_suggestions, self.sel_idx + 1)
         Logger.debug(f"Idx: {self.sel_idx}, last: {self.last_idx}")
 
-    def handle_select(self, *args, **kwargs):
+    def handle_select(self, *_args, **kwargs):
         idx = kwargs.get("idx")
         if idx is None:
             idx = self.sel_idx
@@ -84,7 +84,7 @@ class TypeAheadDropDown(DropDown):
         matched_suggestion = Suggestion(title=item_widget.text, index=item_widget.index)
         return self.select(matched_suggestion)
 
-    def on_suggestions(self, instance, suggestions: list[Suggestion]):
+    def on_suggestions(self, _instance, suggestions: list[Suggestion]):
         """We maintain an index wrt the note's position in the category and the physical index, in case we need to do
         something like, "select the 3rd button"
         """

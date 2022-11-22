@@ -40,11 +40,11 @@ class MarkdownRow(BoxLayout):
         fbind("height", draw)
         fbind("children", draw)
 
-    def schedule_draw(self, instance, value):
+    def schedule_draw(self, *_args):
         Clock.schedule_once(self.draw_cell_border)
         return True
 
-    def draw_cell_border(self, dt):
+    def draw_cell_border(self, *_args):
         with self.canvas.before:
             self.canvas.before.clear()
             Color(rgba=App.get_running_app().colors["Dark"])
@@ -71,7 +71,7 @@ class MarkdownCell(BoxLayout, InterceptingInlineWidgetMixin):
         fbind("valign", label.setter("valign"))
         fbind("bold", self.handle_bold)
 
-    def handle_bold(self, *args):
+    def handle_bold(self, *_args):
         if self.bold:
             self.open_bbcode_tag = "b"
         else:

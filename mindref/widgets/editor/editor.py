@@ -43,11 +43,11 @@ class NoteEditor(BoxLayout):
         self.register_event_type("on_save")
         self.register_event_type("on_cancel")
 
-    def handle_init_text(self, instance, value):
+    def handle_init_text(self, *_args):
         editor: "CodeInput" = self.editor
         editor.text = self.init_text
 
-    def on_mode(self, instance, value):
+    def on_mode(self, *_args):
 
         if self.mode == "add":
             self.add_widget(self.title_widget, len(self.children))
@@ -55,11 +55,11 @@ class NoteEditor(BoxLayout):
             self.title_widget.input_widget.text = ""
             self.remove_widget(self.title_widget)
 
-    def handle_press_save(self, *args, **kwargs):
+    def handle_press_save(self, *_args):
         if self.mode == "add":
             self.dispatch(
                 "on_save",
-                **{"text": self.editor.text, "title": self.title_widget.title}
+                **{"text": self.editor.text, "title": self.title_widget.title},
             )
         else:
             self.dispatch("on_save", **{"text": self.editor.text, "title": None})

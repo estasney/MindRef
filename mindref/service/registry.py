@@ -73,7 +73,7 @@ class Registry(GenericLoggerMixin):
         """
         try:
             self.app.note_service.current_category = value
-        except KeyError as e:
+        except KeyError:
             self.app.note_service.current_category = None
             self.push_event(
                 NoteCategoryFailureEvent(on_complete=on_complete, value=value)

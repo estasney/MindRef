@@ -85,7 +85,7 @@ class LabelHighlightInline(Label):
         self.handle_contrast_trigger = Clock.create_trigger(self.handle_contrast)
         self.draw_ref_spans_trigger = Clock.create_trigger(self.draw_ref_spans)
 
-    def on_parent(self, instance, value):
+    def on_parent(self, *_args):
         fbind = self.fbind
         funbind = self.funbind
         if self.parent:
@@ -115,7 +115,7 @@ class LabelHighlightInline(Label):
     def add_snippet(self, snippet: TextSnippet):
         self.snippets.append(snippet)
 
-    def handle_contrast(self, *args, **kwargs):
+    def handle_contrast(self, *_args):
         """Update computed text_colors"""
         self.text_color = get_cached_text_contrast(
             background_color=self.bg_color,
@@ -129,7 +129,7 @@ class LabelHighlightInline(Label):
         )
         return True
 
-    def markup_text(self, *args, **kwargs):
+    def markup_text(self, *_args, **_kwargs):
         """Update the markup within text to reflect new colors"""
         texts = []
         for snippet in self.snippets:
@@ -216,7 +216,7 @@ class LabelHighlightInline(Label):
 
         return x1, y1, x2, y2
 
-    def draw_ref_spans(self, *args, **kwargs):
+    def draw_ref_spans(self, *_args, **_kwargs):
         """
         Draw ref highlights
 

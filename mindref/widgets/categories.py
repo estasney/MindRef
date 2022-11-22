@@ -24,7 +24,7 @@ class NoteCategories(BoxLayout):
     def category_callback(self, instance: "NoteCategoryButton"):
         self.parent.category_selected(instance)
 
-    def draw_categories(self, dt):
+    def draw_categories(self, *_args):
 
         container = self.category_container
 

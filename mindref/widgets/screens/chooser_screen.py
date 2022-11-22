@@ -41,7 +41,7 @@ class NoteCategoryChooserScreen(RefreshableScreen):
     def category_selected(self, category_btn: "NoteCategoryButton"):
         self.manager.category_selected(category_btn)
 
-    def _dispatch_refresh(self, *args):
+    def _dispatch_refresh(self, *_args):
         if not self.refresh_dispatched:
             self.refresh_dispatched = True
             Logger.info(f"{self.__class__.__name__} : Dispatching Refresh Event")
@@ -52,7 +52,7 @@ class NoteCategoryChooserScreen(RefreshableScreen):
             )
             app.registry.push_event(RefreshNotesEvent(on_complete=cb))
 
-    def on_refresh_triggered(self, instance, value):
+    def on_refresh_triggered(self, *_args):
         if self.refresh_triggered:
             self.add_refresh_symbol_trigger()
             self.dispatch_refresh_trigger()
@@ -68,10 +68,10 @@ class CategoryScreenScrollWrapper(ScrollView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def on_chooser(self, instance, value):
+    def on_chooser(self, *_args):
         self.chooser.bind(minimum_height=self.chooser.setter("height"))
 
-    def on_screen(self, instance, value):
+    def on_screen(self, *_args):
         self.bind(refresh_triggered=self.screen.setter("refresh_triggered"))
 
     def category_selected(self, instance: "NoteCategoryButton"):

@@ -33,7 +33,6 @@ class MarkdownNoteDict(TypedDict):
 @dataclass
 class MarkdownNote:
     parser = MarkdownParser()
-
     category: str
     text: str
     title: str

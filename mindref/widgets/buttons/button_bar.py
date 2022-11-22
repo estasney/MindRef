@@ -28,25 +28,19 @@ class NoteActionButton(TexturedButton):
         super().__init__(**kwargs)
         self.dd = None
         fbind = self.fbind
-
         fbind("on_release", self.open_dropdown)
+        self.register_event_type("on_select")
 
-    def handle_select(self, instance, value):
-        app = App.get_running_app()
-        if value == "add":
-            app.registry.push_event(AddNoteEvent())
-        elif value == "edit":
-            app.registry.push_event(
-                EditNoteEvent(category=app.note_category, idx=app.note_data["idx"])
-            )
-        elif value == "list":
-            app.registry.push_event(ListViewButtonEvent())
-        elif value == "back":
-            app.registry.push_event(BackButtonEvent(current_display_state="display"))
-        else:
-            Logger.warn(f"NoteActionButton: Unknown Event {value}")
+    def on_select(self, value):
+        ...
 
-    def open_dropdown(self, dt):
+    def handle_select(self, _, value):
+
+        Logger.info(f"{self.__class__.__name__}: Pushing Note Event {value}")
+        self.dispatch("on_select", value)
+        return True
+
+    def open_dropdown(self, *_args):
         self.dd = NoteActionDropDown()
         self.dd.bind(on_select=self.handle_select)
         self.dd.open(self)

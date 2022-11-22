@@ -29,7 +29,7 @@ class ScrollingListView(ScrollView):
 class ListView(GridLayout):
     meta_notes = ListProperty()
 
-    def add_item(self, *args, **kwargs):
+    def add_item(self, *_args, **kwargs):
         note_data = kwargs.get("note_data")
         widget = ListItem(content_data=note_data)
         self.add_widget(widget)

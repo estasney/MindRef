@@ -54,6 +54,7 @@ class FileDescriptorProtocol(Protocol):
     ...
 
 
+# noinspection PyUnusedLocal
 class AutoCloseInputStreamProtocol(Protocol):
     def __init__(self, pfd: "ParcelFileDescriptorProtocol"):
         ...
@@ -120,6 +121,7 @@ class MindRefGetCategoriesCallbackProtocol(Protocol):
     onComplete: Callable[[list[str]], None]
 
 
+# noinspection PyUnusedLocal
 class MindRefUtilsProtocol(Protocol):
     setStorageCallback: Callable[[MindRefCopyStorageCallbackProtocol], None]
     copyToAppStorage: Callable[[DocumentProtocol, str, ContentResolverProtocol], None]

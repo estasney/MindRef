@@ -20,7 +20,7 @@ class MarkdownCodeSpan(GridLayout):
         self.background_color = self.styler.background_color
         self.raw_text = text
 
-    def on_raw_text(self, previous, new):
+    def on_raw_text(self, _, new):
         # Wrap in BBCode
         bb_text = f"[color={self.styler.styles[Token.Text]}]{new}[/color]"
         self.text = bb_text

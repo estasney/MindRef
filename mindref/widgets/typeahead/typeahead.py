@@ -25,7 +25,7 @@ class TypeAhead(BoxLayout):
         super().__init__(**kwargs)
         self.dd = None
 
-    def handle_text(self, instance, val):
+    def handle_text(self, _, val):
         if val and len(val) >= self.min_query_length:
             Logger.debug(f"TypeAhead: Query {val}")
             App.get_running_app().registry.push_event(
@@ -57,7 +57,7 @@ class TypeAhead(BoxLayout):
 
         sch_cb(clear_text, set_index, timeout=0.1)
 
-    def handle_dismissed_dd(self, *args, **kwargs):
+    def handle_dismissed_dd(self, *_args):
         """Dropdown was dismissed ensure we reflect that"""
         if self.dd:
             self.dd.unbind(on_select=self.handle_select)
