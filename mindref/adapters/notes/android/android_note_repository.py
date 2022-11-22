@@ -89,75 +89,78 @@ class AndroidNoteRepository(FileSystemNoteRepository):
             self._native_path, self._storage_path, callback
         )
 
-    def discover_notes(self, on_complete: Optional[Callable[[], None]], *args):
+    def discover_categories(self, on_complete: Optional[Callable[[], None]], *args):
         """
         Find Categories, and associated Note Files
-        For Each Category, Found, Pushes a NotesDiscoverCategoryEvent.
-        This implementation copies from the Android Storage Manager, before operating as usual
+        For Each Category, Found, Pushes a DiscoverCategoryEvent.
+        This implementation invokes Android Storage Manager, ensuring App Storage reflects External Storage
 
         Notes
         -----
         Several chained callbacks
 
+        get_external_storage_categories:
+            Syncs External Storage to App Storage (Limited to Directories and Images)
+        get_categories:
+            Read Categories from App Storage, Emits DiscoverCategoryEvent.
+        discover_category:
+            For each category, create a `CategoryResourceFiles` instance
+
+
         get_categories -> copy_storage -> emit NotesDiscoverCategoryEvents
         """
 
-        def discovery_pipeline(categories: Iterable[str]):
-            """
-            Called as on_complete from self.get_categories
-            """
-            Logger.info(f"{self.__class__.__name__} : discovery_pipeline")
-
-            # We need to call self._copy_storage, but need to bind our categories to a callback first
-
-            def is_md(p: Path):
-                return p.suffix == ".md"
-
-            def after_get_categories(result: bool, d_categories):
-                # Run after copying to local storage
-                # result is not used but is passed from callback
-                app_inner = self.get_app()
-                for category_name_inner in d_categories:
-                    category_folder = Path(self.storage_path) / category_name_inner
-                    category_files = list(
-                        discover_folder_notes(category_folder, new_first=self.new_first)
-                    )
-
-                    category_files = groupby(is_md, category_files)
-                    category_note_files = category_files.get(True, [])
-                    if category_img_inner := category_files.get(False):
-                        category_img_inner = category_img_inner[0]
-
-                    self._category_files[category_name_inner] = category_note_files
-                    self._category_imgs[category_name_inner] = category_img_inner
-                    app_inner.registry.push_event(
-                        NotesDiscoverCategoryEvent(
-                            category=category_name_inner,
-                            image_path=category_img_inner,
-                            notes=category_note_files,
-                        )
-                    )
-
-            proc_categories = partial(after_get_categories, d_categories=categories)
+        def after_get_categories(
+            categories: Iterable[str], on_complete_inner: Optional[Callable], *_iargs
+        ):
             app = self.get_app()
-            # We can display the categories as we have name and image
             for category_name in categories:
-                category_path = self.storage_path / category_name
-                category_img = next(category_path.glob("*.png"))
-                category_notes = Path(self.storage_path, category_name).glob("*.md")
-                self._category_files[category_name] = list(category_notes)
-                self._category_imgs[category_name] = category_img
-
-                # The list of notes will soon be updated as part of another callback soon after
+                category_resource = self.discover_category(
+                    category=category_name, on_complete=None
+                )
+                self.category_files[category_name] = category_resource
                 app.registry.push_event(
-                    NotesDiscoverCategoryEvent(
+                    DiscoverCategoryEvent(
                         category=category_name,
-                        image_path=category_img,
-                        notes=self._category_files[category_name],
                     )
                 )
-            if on_complete:
-                proc_categories = def_cb(proc_categories, on_complete)
-            self._copy_storage(proc_categories)
+            Logger.info(
+                f"{self.__class__.__name__}: after_get_categories - Found App Storage Categories, Created "
+                f"CategoryResourceFiles, Emitted Discovery "
+            )
+            if on_complete_inner:
+                on_complete_inner()
 
-        self.get_categories(discovery_pipeline)
+        def after_get_external_storage_categories(_categories: Iterable[str]):
+            Logger.info(
+                f"{self.__class__.__name__}: after_get_external_storage_categories - External Storage Categories Copied"
+            )
+
+            action = partial(after_get_categories, on_complete_inner=on_complete)
+            get_categories_with_cb = caller(self, "get_categories", on_complete=action)
+            Clock.schedule_once(get_categories_with_cb)
+
+        self.category_files.clear()
+        discover_action = caller(
+            self,
+            "get_external_storage_categories",
+            on_complete=after_get_external_storage_categories,
+        )
+        Clock.schedule_once(discover_action)
+
+    def save_note(self, note: "EditableNote", on_complete):
+        Logger.info(f"{self.__class__.__name__} : Saving Note : {note}")
+
+        def store_to_external(md_note: MarkdownNote):
+            Logger.info(
+                f"{self.__class__.__name__} : storing {md_note.title}.md to external storage"
+            )
+            note_fp = md_note.filepath
+            AndroidStorageManager.copy_to_external_storage(
+                note_fp,
+                str(self.storage_path),
+                self._native_path,
+                lambda dt: on_complete(md_note),
+            )
+
+        super().save_note(note, store_to_external)
