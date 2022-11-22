@@ -1,7 +1,6 @@
 import json
-from functools import partial
 from pathlib import Path
-from typing import Callable, Literal
+from typing import Callable, Literal, TYPE_CHECKING
 
 from kivy import platform
 from kivy._clock import ClockEvent  # noqa
@@ -45,11 +44,13 @@ from domain.events import (
 from domain.settings import app_settings
 from plugins import PluginManager
 from service.registry import Registry
-from utils import sch_cb
+from utils import attrsetter, caller, ps, sch_cb
 from utils.triggers import trigger_factory
 from widgets.screens.manager import NoteAppScreenManager
 
-DISPLAY_STATES = Literal["choose", "display", "list", "edit", "add", "error"]
+if TYPE_CHECKING:
+    DISPLAY_STATES = Literal["choose", "display", "list", "edit", "add", "error"]
+    DISPLAY_STATE = tuple[DISPLAY_STATES, DISPLAY_STATES]
 
 
 class MindRefApp(App):
@@ -61,15 +62,13 @@ class MindRefApp(App):
     editor_service = FileSystemEditor(get_app=App.get_running_app)
     plugin_manager = PluginManager()
     platform_android = BooleanProperty(defaultvalue=False)
-    registry = Registry(logger=Logger)
+    registry = Registry()
 
     note_categories = ListProperty()
     note_category = StringProperty("")
-    note_data = DictProperty(rebind=True)
+    note_category_meta = ListProperty()
 
     editor_note = ObjectProperty(allownone=True)
-
-    note_category_meta = ListProperty()
 
     screen_transitions = OptionProperty(
         "slide", options=["None", "Slide", "Rise-In", "Card", "Fade", "Swap", "Wipe"]
@@ -123,8 +122,6 @@ class MindRefApp(App):
             All known note categories
         note_category: StringProperty
             The active Category. If no active category, value is empty string
-        note_data: DictProperty
-            The active Note belonging to active Category
         editor_note: ObjectProperty
             Ephemeral note used by editor service
         note_category_meta: ListProperty
@@ -201,15 +198,7 @@ class MindRefApp(App):
         ...
 
     def select_index(self, value: int):
-        """Set `self.note_data` to the nth note"""
-        set_index = lambda x: self.note_service.set_index(value)
-        set_note_data = lambda x: setattr(
-            self, "note_data", self.note_service.get_current_note(None).to_dict()
-        )
-        pause_state = lambda x: self.play_state_trigger("pause")
-        display_state_display = lambda x: self.display_state_trigger("display")
-
-        sch_cb(set_index, set_note_data, pause_state, display_state_display)
+        self.registry.set_note_index(value)
 
     def paginate(self, value):
         paginate = caller(self, "paginate_note", direction=value)
@@ -248,41 +237,58 @@ class MindRefApp(App):
         )
         Clock.schedule_once(registry_paginate)
 
-        clear_edit_note = lambda x: setattr(self, "editor_note", None)
-        sch_cb(lambda x: self.display_state_trigger("display"), clear_edit_note)
+    def process_cancel_edit_event(self, _: CancelEditEvent):
+
+        trigger_display = caller(self, "display_state_trigger", "display")
+        registry_paginate = caller(self.registry, "paginate_note", direction=0)
+        remove_edit_note = attrsetter(self, "editor_note", None)
+        sch_cb(trigger_display, registry_paginate, remove_edit_note, timeout=0.1)
 
     def process_edit_note_event(self, event: EditNoteEvent):
         data_note = self.registry.edit_note(category=event.category, idx=event.idx)
-        update_edit_note = lambda x: setattr(self, "editor_note", data_note)
-        update_display_state = lambda x: self.display_state_trigger("edit")
-        sch_cb(update_edit_note, update_display_state)
+        add_edit_note_widget = attrsetter(self, "editor_note", data_note)
+        trigger_display_edit = caller(self, "display_state_trigger", "edit")
+        sch_cb(add_edit_note_widget, trigger_display_edit, timeout=0.1)
 
     def process_add_note_event(self, _: AddNoteEvent):
         data_note = self.registry.new_note(category=self.note_category, idx=None)
-        update_edit_note = lambda x: setattr(self, "editor_note", data_note)
-        update_display_mode = lambda x: self.display_state_trigger("add")
-        sch_cb(update_edit_note, update_display_mode)
+        add_edit_note_widget = attrsetter(self, "editor_note", data_note)
+        trigger_display_add = caller(self, "display_state_trigger", "add")
+        sch_cb(add_edit_note_widget, trigger_display_add, timeout=0.1)
 
     def process_save_note_event(self, event: SaveNoteEvent):
-        note_is_new = self.display_state == "add"
+        """
+        Save Button Was Pressed in the Editor
+
+        Parameters
+        ----------
+        event
+
+        Returns
+        -------
+
+        """
+        note_is_new = self.display_state_current == "add"
         data_note = self.editor_note
         data_note.edit_text = event.text
         if note_is_new:
             data_note.edit_title = event.title
-        update_edit_note = lambda x: setattr(self, "editor_note", None)
-        update_display_state = lambda x: self.display_state_trigger("display")
-        persist_note = lambda x: self.registry.save_note(data_note)
-        sch_cb(update_display_state, persist_note, update_edit_note, timeout=1)
+        data_note.category = data_note.category
+        remove_edit_note_widget = attrsetter(self, "editor_note", None)
+        # update_display_state = lambda dt: self.display_state_trigger("display")
+        persist_note = caller(self.registry, "save_note", note=data_note)
+        sch_cb(persist_note, remove_edit_note_widget, timeout=0.1)
 
     def process_note_fetched_event(self, event: NoteFetchedEvent):
         note_data = event.note.to_dict()
-        update_data = lambda x: setattr(self, "note_data", note_data)
-        sch_cb(update_data, timeout=0.1)
+        update_data = attrsetter(self, "note_data", note_data)
+        refresh_note = caller(self, "paginate_note", direction=0)
+        sch_cb(update_data, refresh_note, timeout=0.1)
 
     def process_refresh_notes_event(self, event: RefreshNotesEvent):
-        clear_categories = lambda x: setattr(self, "note_categories", [])
-        clear_caches = lambda x: self.registry.clear_caches()
-        run_query = lambda x: self.registry.query_all(on_complete=event.on_complete)
+        clear_categories = attrsetter(self, "note_categories", [])
+        clear_caches = caller(self.registry, "clear_caches")
+        run_query = caller(self.registry, "query_all", on_complete=event.on_complete)
         sch_cb(clear_categories, clear_caches, run_query, timeout=0.5)
 
     def process_list_view_event(self, _: ListViewButtonEvent):
@@ -294,21 +300,28 @@ class MindRefApp(App):
 
         def category_meta_loaded(meta: list["MarkdownNoteDict"], category: str, *args):
             self.note_category_meta = meta
-            self.note_category = category
-            self.paginate_note(direction=0)
-
-        def select_category(dt, category):
-            # Note Service will set note_category_meta when loaded
-            self.note_service.get_category_meta(
-                category=event.value,
-                on_complete=partial(category_meta_loaded, category=event.value),
+            sch_cb(
+                set_note_category, refresh_note_page, trigger_display_state, timeout=0.1
             )
 
-        sch_cb(
-            partial(select_category, category=event.value),
-            lambda dt: self.display_state_trigger("display"),
-            timeout=0.1,
+        # Query Category Meta, on_complete - Set App note_category_meta to result
+        get_category_meta = caller(
+            self.note_service,
+            "get_category_meta",
+            category=event.value,
+            on_complete=set_note_category_meta,
         )
+
+        # Set note category attribute
+        set_note_category = attrsetter(self, "note_category", event.value)
+
+        # Paginate the note
+        refresh_note_page = caller(self, "paginate_note", direction=0)
+
+        # Display the notes
+        trigger_display_state = caller(self, "display_state_trigger", "display")
+
+        sch_cb(get_category_meta, timeout=0.1)
 
     def process_note_category_failure_event(self, event: NoteCategoryFailureEvent):
         """Failed to set"""
@@ -360,11 +373,11 @@ class MindRefApp(App):
             # Cannot go further back
             App.get_running_app().stop()
         elif ds == "display":
-            set_ds_choose = lambda dt: self.display_state_trigger("choose")
-            sch_cb(set_ds_choose)
+            trigger_display_choose = caller(self, "display_state_trigger", "choose")
+            sch_cb(trigger_display_choose)
         elif ds == "list":
-            set_ds_display = lambda dt: self.display_state_trigger("display")
-            sch_cb(set_ds_display)
+            trigger_display = caller(self, "display_state_trigger", "display")
+            sch_cb(trigger_display)
         elif ds == "edit":
             self.registry.push_event(CancelEditEvent())
         elif ds == "add":
@@ -374,10 +387,12 @@ class MindRefApp(App):
                 f"Unknown display state encountered when handling back button: {ds}"
             )
 
-    def process_notes_discover_category_event(self, event: NotesDiscoverCategoryEvent):
+    def process_discover_category_event(self, event: DiscoverCategoryEvent):
         event_category = event.category
         if event_category not in self.note_categories:
-            Logger.debug(f"NoteDiscoverCategoryEvent: {event_category}")
+            Logger.info(
+                f"{self.__class__.__name__}: Found New Category - {ps(event, 'category')}"
+            )
             self.note_categories.append(event_category)
 
     def process_typeahead_query_event(self, event: TypeAheadQueryEvent):
@@ -410,13 +425,15 @@ class MindRefApp(App):
 
     def build(self):
         truthy = {True, 1, "1", "True"}
+        # noinspection PyUnresolvedReferences
+        self.register_event_type("on_paginate")
         self.platform_android = platform == "android"
         self.registry.app = self
         self.play_state_trigger = trigger_factory(
             self, "play_state", self.__class__.play_state.options
         )
         self.display_state_trigger = trigger_factory(
-            self, "display_state", self.__class__.display_state.options
+            self, "display_state", self.__class__.display_state_current.options
         )
         self.paginate_timer = Clock.create_trigger(
             self.paginate_note, timeout=self.paginate_interval, interval=True
@@ -425,7 +442,7 @@ class MindRefApp(App):
         storage_path = (
             np if (np := self.config.get("Storage", "NOTES_PATH")) != "None" else None
         )
-        Logger.info(f"Storage Path : {storage_path}")
+
         if storage_path:
             self.registry.set_note_storage_path(storage_path)
         self.note_service.new_first = (
@@ -445,6 +462,7 @@ class MindRefApp(App):
         sm.fbind(
             "on_interact", lambda x: self.plugin_manager.plugin_event("on_interact")
         )
+
         return sm
 
     def build_settings(self, settings):
