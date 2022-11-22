@@ -4,16 +4,19 @@ from typing import Any, Callable, Iterable, Optional, TYPE_CHECKING
 
 from kivy import Logger
 from kivy.app import App
-from toolz import groupby
+from kivy.clock import Clock
 
 from adapters.notes.android.interface import AndroidStorageManager
-from adapters.notes.fs.fs_note_repository import FileSystemNoteRepository
-from adapters.notes.fs.utils import discover_folder_notes
-from domain.events import NotesDiscoverCategoryEvent, NotesQueryNotSetFailureEvent
-from utils import def_cb
+from adapters.notes.fs.fs_note_repository import (
+    FileSystemNoteRepository,
+    TGetCategoriesCallback,
+)
+from domain.events import DiscoverCategoryEvent
+from domain.markdown_note import MarkdownNote
+from utils import caller, ps
 
 if TYPE_CHECKING:
-    pass
+    from domain.editable import EditableNote
 
 
 class AndroidNoteRepository(FileSystemNoteRepository):
@@ -33,20 +36,23 @@ class AndroidNoteRepository(FileSystemNoteRepository):
         super().__init__(get_app, new_first)
         self._native_path = None
 
-    def get_categories(self, on_complete: Optional[Callable[[Iterable[str]], None]]):
-        """Query for categories. We don't check filesystem until after invoking Android Storage
-        which will copy category folders and their images to local storage
+    def get_external_storage_categories(
+        self, on_complete: TGetCategoriesCallback
+    ) -> None:
         """
-        if not self.configured:
-            Logger.error(f"{self.__class__.__name__} : not configured")
-            self.get_app().registry.push_event(NotesQueryNotSetFailureEvent(None))
-            if on_complete:
-                return on_complete([])
+        Invoke AndroidStorageManager which will ensure App Storage categories reflect External Storage categories.
+
+        Parameters
+        ----------
+        on_complete
+            A callable which should accept a list of categories
+        """
         Logger.info(
-            f"{self.__class__.__name__} : get_categories from {self._native_path}"
+            f"{self.__class__.__name__}: get_external_storage_categories - {ps(self, '_native_path', '_storage_path')}"
         )
-        src_doc = AndroidStorageManager.get_document_file(self._native_path)
-        AndroidStorageManager.get_categories(src_doc, self._storage_path, on_complete)
+        AndroidStorageManager.get_categories(
+            self._native_path, self._storage_path, on_complete
+        )
 
     @property
     def configured(self) -> bool:
@@ -54,7 +60,7 @@ class AndroidNoteRepository(FileSystemNoteRepository):
 
     @property
     def storage_path(self):
-        return self._storage_path
+        return super().storage_path
 
     @storage_path.setter
     def storage_path(self, value: str):
