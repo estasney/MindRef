@@ -70,11 +70,7 @@ class OnDocumentCallback(PythonJavaClass):
     def onActivityResult(
         self, requestCode: int, resultCode: ActivityResultCode, result_data
     ):
-        # uri.toString() - content://com.android.externalstorage.documents/tree/primary%3Amindref_notes
-        # uri.getPath() - /tree/primary:mindref_notes
-        # tree_uri looks like content://tree...
-        # ontent://com.android.externalstorage.documents/tree/primary%3Amindref_notes - /tree/primary:mindref_notes
-        # we can't use this as a path and have to go through Storage Access Framework
+
         tree_uri: UriProtocol = result_data.getData()
         Logger.debug(
             f"OnDocumentCallback: Selected uri - {tree_uri.toString()} - {tree_uri.getPath()}"
@@ -91,24 +87,52 @@ class AndroidStorageManager:
     _java_cb_copy_storage = None
     _java_cb_get_categories = None
     _lock = threading.Lock()
-    _callbacks: dict[int, Callable] = {
+    _utils_cls_static: Optional[Type[MindRefUtilsProtocol]] = None
+    _utils_cls: Optional[MindRefUtilsProtocol] = None
+    _callbacks: dict[int, Callable[[Any], None]] = {
         OPEN_DOCUMENT_TREE: None,
         COPY_STORAGE: None,
         GET_CATEGORIES: None,
     }
 
     @classmethod
-    def _get_mindref_utils_cls(cls) -> MindRefUtilsProtocol:
-        if cls._java_mindref_utils_cls is not None:
-            return cls._java_mindref_utils_cls
+    def _get_mindref_utils_cls(
+        cls, externalStorageRoot: str, appStorageRoot: str, context: ContextProtocol
+    ) -> MindRefUtilsProtocol:
+        if cls._utils_cls is None:
+            mrUtilsCls = cls._get_mindref_utils_static_cls()
+            mrUtils = mrUtilsCls(externalStorageRoot, appStorageRoot, context)
+            cls._utils_cls = mrUtils
+            return cls._utils_cls
+        else:
+            # See if our cached instance has same parameters
+            cs = cls._utils_cls
+            if not all(
+                operator.eq(getattr(cs, attr), val)
+                for attr, val in (
+                    ("externalStorageRoot", externalStorageRoot),
+                    ("appStorageRoot", appStorageRoot),
+                )
+            ):
+                cls._utils_cls = None
+                return cls._get_mindref_utils_cls(
+                    externalStorageRoot, appStorageRoot, context
+                )
+            return cls._utils_cls
 
-        mrUtils: MindRefUtilsProtocol = autoclass(MINDREF_CLASS_NAME)()
-        cls._java_mindref_utils_cls = mrUtils
-        return cls._java_mindref_utils_cls
+    @classmethod
+    def _get_mindref_utils_static_cls(cls) -> Type[MindRefUtilsProtocol]:
+        if cls._utils_cls_static is None:
+            cls._utils_cls_static = autoclass(MINDREF_CLASS_NAME)
+        return cls._utils_cls_static
 
     @classmethod
     def _get_activity(cls) -> ActivityProtocol:
         return autoclass(ACTIVITY_CLASS_NAME).mActivity
+
+    @classmethod
+    def _get_context(cls, activity: ActivityProtocol):
+        return activity.getContext()
 
     @classmethod
     def _get_resolver(cls, activity: ActivityProtocol) -> ContentResolverProtocol:
@@ -125,26 +149,39 @@ class AndroidStorageManager:
         activity.registerActivityResultListener(cls._java_cb_open_document_tree)
 
     @classmethod
-    def _register_copy_storage_callback(cls):
+    def _register_copy_storage_callback(
+        cls, source: str, target: str, context: ContextProtocol
+    ):
         """Register a Java native on_complete with MindRefUtils that in turn calls our python on_complete and then finally
-        calls user python callbacks"""
+        calls user python callbacks
+
+        Parameters
+        ----------
+        source
+        target
+        context"""
         cls._java_cb_copy_storage = OnCopyAppStorageCallback(
             cls._python_copy_storage_callback
         )
 
-        mrUtils = cls._get_mindref_utils_cls()
+        mrUtils = cls._get_mindref_utils_cls(source, target, context)
         mrUtils.setStorageCallback(cls._java_cb_copy_storage)
 
     @classmethod
-    def _register_get_categories_callback(cls):
+    def _register_get_categories_callback(
+        cls, source: str, target: str, context: ContextProtocol
+    ):
         """Register a Java native on_complete with MindRefUtils that in turn calls our python on_complete and then finally
-        calls user python callbacks"""
+        calls user python callbacks
+
+        Parameters
+        ----------"""
         cls._java_cb_get_categories = GetCategoriesCallback(
             cls._python_get_categories_callback
         )
 
-        mrUtils = cls._get_mindref_utils_cls()
-        mrUtils.setGetCategoriesCallback(cls._java_cb_get_categories)
+        mrUtilsStatic = cls._get_mindref_utils_cls(source, target, context)
+        mrUtilsStatic.setGetCategoriesCallback(cls._java_cb_get_categories)
 
     @classmethod
     def _take_persistable_permission(cls, uri: str | UriProtocol):
@@ -152,7 +189,7 @@ class AndroidStorageManager:
         Intent: IntentProtocol = autoclass("android.content.Intent")
         pyActivity: ActivityProtocol = cls._get_activity()
         resolver: ContentResolverProtocol = cls._get_resolver(pyActivity)
-        uri_native: UriProtocol = cls._ensure_uri_type(uri, UriProtocol)
+        uri_native: UriProtocol = cls.ensure_uri_type(uri, UriProtocol)
         resolver.takePersistableUriPermission(
             uri_native,
             Intent.FLAG_GRANT_READ_URI_PERMISSION
@@ -222,19 +259,6 @@ class AndroidStorageManager:
                 Logger.debug("Unmatched")
 
     @classmethod
-    def get_document_file(cls, uri: str | UriProtocol) -> DocumentProtocol:
-        """
-        Get a DocumentFile class, given uri. Required for usage with `cls.copy_storage`
-        """
-        DocumentFile: DocumentProtocol = autoclass(
-            "androidx.documentfile.provider.DocumentFile"
-        )
-        activity = cls._get_activity()
-        app = activity.getApplication()
-        uri_native: UriProtocol = cls._ensure_uri_type(uri, UriProtocol)
-        return DocumentFile.fromTreeUri(app, uri_native)
-
-    @classmethod
     def select_folder(cls, callback: Callable[[str], None]):
         """
         Use Android System Document Picker to have user select a folder
@@ -256,35 +280,38 @@ class AndroidStorageManager:
     @classmethod
     def get_categories(
         cls,
-        source: DocumentProtocol,
+        source: str,
         target: str | Path,
-        callback: Callable[[list[str]], None],
+        callback: "TGetCategoriesCallback",
     ):
+        target = str(target)
         cls._callbacks[cls.GET_CATEGORIES] = callback
         with cls._lock:
-            if not cls._java_cb_get_categories:
-                cls._register_get_categories_callback()
             activity = cls._get_activity()
-            content_resolver: ContentResolverProtocol = cls._get_resolver(activity)
-            mrUtils = cls._get_mindref_utils_cls()
-        mrUtils.getNoteCategories(source, str(target), content_resolver)
+            context: ContextProtocol = cls._get_context(activity)
+            if not cls._java_cb_get_categories:
+                cls._register_get_categories_callback(source, target, context)
+
+            mrUtils = cls._get_mindref_utils_cls(source, target, context)
+        mrUtils.getNoteCategories()
 
     @classmethod
-    def copy_storage(
+    def clone_external_storage(
         cls,
-        source: DocumentProtocol,
+        source: str,
         target: str | Path,
         callback: Callable[[bool], None],
     ):
-        """Copy source directory to target directory with Android"""
+        """Copy externalStorage to target directory with Android"""
+        target = str(target)
         cls._callbacks[cls.COPY_STORAGE] = callback
         with cls._lock:
-            if not cls._java_cb_copy_storage:
-                cls._register_copy_storage_callback()
             activity = cls._get_activity()
-            content_resolver: ContentResolverProtocol = cls._get_resolver(activity)
-            mrUtils = cls._get_mindref_utils_cls()
-        mrUtils.copyToAppStorage(source, str(target), content_resolver)
+            context: ContextProtocol = cls._get_context(activity)
+            if not cls._java_cb_copy_storage:
+                cls._register_copy_storage_callback(source, target, context)
+            mrUtils = cls._get_mindref_utils_cls(source, target, context)
+        mrUtils.copyToAppStorage()
 
     @classmethod
     def to_native_uri(cls, uri: str) -> UriProtocol:

@@ -84,8 +84,10 @@ class AndroidNoteRepository(FileSystemNoteRepository):
         Logger.info(
             f"{self.__class__.__name__} : Invoking AndroidStorageManager to copy_storage from {self._native_path} to {self._storage_path}"
         )
-        src_doc = AndroidStorageManager.get_document_file(self._native_path)
-        AndroidStorageManager.copy_storage(src_doc, self._storage_path, callback)
+
+        AndroidStorageManager.clone_external_storage(
+            self._native_path, self._storage_path, callback
+        )
 
     def discover_notes(self, on_complete: Optional[Callable[[], None]], *args):
         """
