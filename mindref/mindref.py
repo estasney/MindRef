@@ -214,18 +214,8 @@ class MindRefApp(App):
         """
         Update our note_data, and the direction transition for our ScreenManager
         """
-        direction = kwargs.get("direction", 1)
-        if direction == -1:
-            self.screen_manager.reversed_transition = True
-            self.note_data = self.note_service.get_previous_note(None).to_dict()
-        elif direction == 0:
-            self.screen_manager.reversed_transition = False
-            self.note_data = self.note_service.get_current_note(None).to_dict()
-        elif direction == 1:
-            self.screen_manager.reversed_transition = False
-            self.note_data = self.note_service.get_next_note(None).to_dict()
-        else:
-            raise NotImplementedError(f"Pagination of {direction} not supported")
+
+        return self.registry.paginate_note(direction)
 
     """
     Event Handlers for Registry
