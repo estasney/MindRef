@@ -288,7 +288,7 @@ class MindRefApp(App):
     def process_note_category_event(self, event: NoteCategoryEvent):
         """Note Category has been set via registry"""
 
-        def category_meta_loaded(meta: list["MarkdownNoteDict"], category: str, *args):
+        def set_note_category_meta(meta):
             self.note_category_meta = meta
             sch_cb(
                 set_note_category, refresh_note_page, trigger_display_state, timeout=0.1
