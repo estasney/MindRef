@@ -2,13 +2,11 @@ from __future__ import annotations
 
 import abc
 from abc import ABC
-from typing import Any, Callable, Iterable, Literal, Optional, TYPE_CHECKING, Type
-
-from widgets.typeahead.typeahead_dropdown import Suggestion
+from typing import Callable, Literal, Optional, Protocol, TYPE_CHECKING, Type
 
 if TYPE_CHECKING:
     from os import PathLike
-    from domain.markdown_note import MarkdownNote, MarkdownNoteDict
+    from domain.markdown_note import MarkdownNote
     from domain.editable import EditableNote
     from domain.protocols import GetApp
     from utils.index import RollingIndex
@@ -16,9 +14,15 @@ if TYPE_CHECKING:
     PLATFORM = Literal["win", "linux", "android", "macosx", "ios", "unknown"]
 
 
+# noinspection PyUnusedLocal
+class NoteRepositoryInitProtocol(Protocol):
+    def __init__(self, get_app: "GetApp", new_first: bool):
+        ...
+
+
 class NoteRepositoryFactory:
     @classmethod
-    def get_repo(cls) -> Type["AbstractNoteRepository"]:
+    def get_repo(cls) -> Type["AbstractNoteRepository", NoteRepositoryInitProtocol]:
         """
         Dynamic Class returned based on platform.
         """
@@ -38,14 +42,6 @@ class NoteRepositoryFactory:
 
 
 class AbstractNoteRepository(ABC):
-    _index: Optional["RollingIndex"]
-    _current_category: Optional[str]
-    _storage_path: Optional[Any]
-
-    def __init__(self, get_app: "GetApp", new_first: bool):
-        self.get_app = get_app
-        self.new_first = new_first
-
     @property
     @abc.abstractmethod
     def configured(self) -> bool:
@@ -60,7 +56,7 @@ class AbstractNoteRepository(ABC):
     def storage_path(self, path: "PathLike"):
         raise NotImplementedError
 
-    def get_categories(self, on_complete: Optional[Callable[[Iterable[str]], None]]):
+    def get_categories(self, on_complete: Callable) -> list[str]:
         raise NotImplementedError
 
     @property
@@ -70,47 +66,48 @@ class AbstractNoteRepository(ABC):
 
     @current_category.setter
     @abc.abstractmethod
-    def current_category(self, value):
+    def current_category(self, value: str):
         raise NotImplementedError
 
-    def get_category_meta(
-        self, category: str, on_complete: [Callable[[list["MarkdownNoteDict"]], None]]
-    ):
-        """For self.current_category, get MarkdownNoteDict for all files in category"""
-        raise NotImplementedError
+    def get_category_meta(self, category: str, on_complete: Callable, refresh=False):
+        """For self.current_category, get MarkdownNoteDict for all files in category
 
-    @abc.abstractmethod
-    def discover_notes(self, on_complete: Optional[Callable[[], None]], *args) -> None:
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def get_next_note(self, on_complete: Optional[Callable[["MarkdownNote"], None]]):
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def get_previous_note(
-        self, on_complete: Optional[Callable[["MarkdownNote"], None]]
-    ):
+        Parameters
+        ----------
+        category
+        on_complete
+        refresh : bool
+            If False, (default) don't force-reload of MarkdownNotes
+            If True, force-reload
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_current_note(self, on_complete: Optional[Callable[["MarkdownNote"], None]]):
+    def discover_categories(self, on_complete: Callable) -> None:
+        """Discover all categories and emit a DiscoverCategoryEvent"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_note(
-        self,
-        category: str,
-        idx: int,
-        on_complete: Optional[Callable[["MarkdownNote"], None]],
-    ):
+    def get_next_note(self, on_complete: Optional[Callable]) -> "MarkdownNote":
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def get_previous_note(self, on_complete: Optional[Callable]) -> "MarkdownNote":
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def get_current_note(self, on_complete: Optional[Callable]):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def get_note(self, category: str, idx: int, on_complete: Optional[Callable]):
         raise NotImplementedError
 
     @abc.abstractmethod
     def save_note(
         self,
         note: "EditableNote",
-        on_complete: Optional[Callable[["MarkdownNote"], None]],
+        on_complete: Callable,
     ):
         raise NotImplementedError
 
@@ -137,7 +134,7 @@ class AbstractNoteRepository(ABC):
         self,
         category: str,
         query: str,
-        on_complete: Optional[Callable[[Optional[list[Suggestion]]], None]],
+        on_complete: Optional[Callable],
     ):
         """Search Notes
 
