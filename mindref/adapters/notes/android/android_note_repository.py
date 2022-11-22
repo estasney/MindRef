@@ -77,7 +77,7 @@ class AndroidNoteRepository(FileSystemNoteRepository):
         self._storage_path = Path(App.get_running_app().user_data_dir) / "notes"
         self._storage_path.mkdir(exist_ok=True, parents=True)
         Logger.info(
-            f"{self.__class__.__name__}: set storage path : {self._storage_path}"
+            f"{self.__class__.__name__}: set storage path : {self._storage_path!s}"
         )
 
     def _copy_storage(self, callback: Callable[[Any], None]):

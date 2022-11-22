@@ -29,8 +29,13 @@ def trigger_factory(
 
     triggers = {}
 
-    def trigger_runner(dt, prop, v):
-        Logger.debug(f"{target}: {prop} {getattr(target, prop_name)}--> {v}")
+    def trigger_runner(_dt, prop, v):
+        if hasattr(target, "__class__"):
+            Logger.debug(
+                f"{target.__class__.__name__}: {prop} {getattr(target, prop_name)}--> {v}"
+            )
+        else:
+            Logger.debug(f"{target}: {prop} {getattr(target, prop_name)}--> {v}")
         setattr(target, prop_name, v)
 
     def trigger_outer(value_set: V):
