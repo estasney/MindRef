@@ -4,6 +4,7 @@
 
 <NoteTitleBar>:
     id: note_title
+    action_button: action_button
     canvas:
         Color:
             rgba: app.colors['Dark']
@@ -15,7 +16,7 @@
         LargeLabel:
             id: note_title_label
             color: app.colors['White']
-            text: note_title.title_text
+            text: root.title
             bold: True
             text_size: sp(self.size[0]*0.9), None
             pos_hint: {"x": 0, "y": 0}
@@ -24,6 +25,7 @@
             valign: "center"
             mipmap: True
         NoteActionButton:
+            id: action_button
             size_hint_min_y: 0.95
             size_hint_x: 0.15
 
