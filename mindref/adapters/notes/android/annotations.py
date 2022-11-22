@@ -4,7 +4,6 @@ from typing import (
     Callable,
     Literal,
     NewType,
-    Optional,
     Protocol,
     TYPE_CHECKING,
     runtime_checkable,
@@ -74,11 +73,11 @@ class ContentResolverProtocol(Protocol):
     openFile: Callable[[UriProtocol, str, None], ParcelFileDescriptorProtocol]
 
 
-class ApplicationProtocol(Protocol):
-    ...
-
-
 class ContextProtocol(Protocol):
+    getContentResolver: Callable[[ContentResolverProtocol], None]
+
+
+class ApplicationProtocol(Protocol):
     ...
 
 
@@ -92,26 +91,6 @@ class ActivityProtocol(Protocol):
     startActivityForResult: Callable[[IntentProtocol, int], None]
 
 
-class DocumentProtocol(Protocol):
-    canRead: Callable[[], bool]
-    canWrite: Callable[[], bool]
-    createDirectory: Callable[[DISPLAY_NAME_TYPE], "DocumentProtocol"]
-    createFile: Callable[[MIME_TYPE, DISPLAY_NAME_TYPE], Optional["DocumentProtocol"]]
-    delete: Callable[[], bool]
-    exists: Callable[[], bool]
-    findFile: Callable[[DISPLAY_NAME_TYPE], Optional["DocumentProtocol"]]
-    fromSingleUri: Callable[[ContextProtocol, UriProtocol], "DocumentProtocol"]
-    fromTreeUri: Callable[[ApplicationProtocol, UriProtocol], "DocumentProtocol"]
-    getName: Callable[[], DISPLAY_NAME_TYPE]
-    getParentFile: Callable[[], Optional["DocumentProtocol"]]
-    getType: Callable[[], Optional[MIME_TYPE]]
-    getUri: Callable[[], UriProtocol]
-    isDirectory: Callable[[], bool]
-    lastModified: Callable[[], int]
-    length: Callable[[], int]
-    listFiles: Callable[[], list["DocumentProtocol"]]
-
-
 class MindRefCopyStorageCallbackProtocol(Protocol):
     onCopyStorageResult: Callable[[bool], None]
     onCopyStorageDirectoryResult: Callable[[str], None]
@@ -123,9 +102,23 @@ class MindRefGetCategoriesCallbackProtocol(Protocol):
 
 # noinspection PyUnusedLocal
 class MindRefUtilsProtocol(Protocol):
+    externalStorageRoot: str
+    appStorageRoot: str
+
     setStorageCallback: Callable[[MindRefCopyStorageCallbackProtocol], None]
-    copyToAppStorage: Callable[[DocumentProtocol, str, ContentResolverProtocol], None]
+    copyToAppStorage: Callable[[], None]
     setGetCategoriesCallback: Callable[[MindRefGetCategoriesCallbackProtocol], None]
-    getNoteCategories: Callable[[DocumentProtocol, str, ContentResolverProtocol], None]
+    getNoteCategories: Callable[[], None]
     haveGetCategoriesCallback: bool
     haveStorageCallback: bool
+    haveWriteDocumentCallback: bool
+
+    def __init__(
+        self, externalStorageRoot: str, appStorageRoot: str, context: ContextProtocol
+    ):
+        ...
+
+    def copyToExternalStorage(
+        self, sourcePath: str, category: str, name: str, mimeType: str
+    ):
+        ...

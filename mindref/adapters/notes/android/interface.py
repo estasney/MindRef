@@ -11,13 +11,16 @@ from adapters.notes.android.annotations import (
     ActivityProtocol,
     ActivityResultCode,
     ContentResolverProtocol,
-    DocumentProtocol,
+    ContextProtocol,
     IntentProtocol,
     MINDREF_CLASS_NAME,
     MINDREF_CLASS_NAMESPACE,
     MindRefUtilsProtocol,
     UriProtocol,
 )
+
+if TYPE_CHECKING:
+    from adapters.notes.fs.fs_note_repository import TGetCategoriesCallback
 
 
 # noinspection PyPep8Naming
@@ -78,11 +81,27 @@ class OnDocumentCallback(PythonJavaClass):
         return self.callback(tree_uri.toString())
 
 
+# noinspection PyPep8Naming
+class WriteDocumentManagerCallback(PythonJavaClass):
+    """PythonActivity calls this after we have written to Android Storage"""
+
+    __javainterfaces__ = [ACTIVITY_CLASS_NAMESPACE + "$WriteDocumentManagerCallback"]
+    __javacontext__ = "app"
+
+    def __init__(self, callback: Callable[[bool], None]):
+        super().__init__()
+        self.callback = callback
+
+    @java_method("(Z)V")
+    def onComplete(self, result: bool):
+        Logger.debug(f"{self.__class__.__name__} : 'onComplete - {result}")
+        self.callback(result)
+
+
 class AndroidStorageManager:
     OPEN_DOCUMENT_TREE = 1
     COPY_STORAGE = 2
     GET_CATEGORIES = 3
-    _java_mindref_utils_cls: Optional[MindRefUtilsProtocol] = None
     _java_cb_open_document_tree = None
     _java_cb_copy_storage = None
     _java_cb_get_categories = None
@@ -237,7 +256,7 @@ class AndroidStorageManager:
             )
 
     @classmethod
-    def _ensure_uri_type(
+    def ensure_uri_type(
         cls, uri: str | UriProtocol, target: Type[str] | Type[UriProtocol]
     ):
         match (uri, target):
@@ -314,5 +333,35 @@ class AndroidStorageManager:
         mrUtils.copyToAppStorage()
 
     @classmethod
-    def to_native_uri(cls, uri: str) -> UriProtocol:
-        return cls._ensure_uri_type(uri, UriProtocol)
+    def copy_to_external_storage(
+        cls,
+        filePath: str | Path,
+        appStorageRoot: str,
+        externalStorageRoot: str,
+        callback: Callable[[bool], None],
+    ):
+        """Persist a file to external storage on Android"""
+        cls._callbacks[cls.COPY_STORAGE] = callback
+        with cls._lock:
+            activity = cls._get_activity()
+            context = cls._get_context(activity)
+            if not cls._java_cb_copy_storage:
+                cls._register_copy_storage_callback(
+                    externalStorageRoot, appStorageRoot, context
+                )
+            mrUtils = cls._get_mindref_utils_cls(
+                externalStorageRoot, appStorageRoot, context
+            )
+        source = Path(filePath)
+        source_ext = source.suffix
+        match source_ext:
+            case ".md":
+                source_mime = "text/markdown"
+            case ".png":
+                source_mime = "image/png"
+            case _:
+                Logger.error(f"Unknown mime type from source extension: {source_ext}")
+                source_mime = ""
+        mrUtils.copyToExternalStorage(
+            str(source), source.parent.stem, source.stem, source_mime
+        )
