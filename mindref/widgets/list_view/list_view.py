@@ -43,7 +43,7 @@ class ListItem(ButtonBehavior, BoxLayout):
     title_text = StringProperty()
     index = NumericProperty()
 
-    def __init__(self, content_data: "MarkdownNoteDict", *args, **kwargs):
+    def __init__(self, content_data: "MarkdownNoteDict", **kwargs):
+        super().__init__(**kwargs)
         self.title_text = content_data["title"]
         self.index = content_data["idx"]
-        super().__init__(**kwargs)
