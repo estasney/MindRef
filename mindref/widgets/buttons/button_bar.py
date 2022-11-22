@@ -1,14 +1,7 @@
-from kivy.app import App
 from kivy.logger import Logger
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.dropdown import DropDown
 
-from domain.events import (
-    AddNoteEvent,
-    BackButtonEvent,
-    EditNoteEvent,
-    ListViewButtonEvent,
-)
 from utils import import_kv
 from widgets.buttons.buttons import TexturedButton
 
