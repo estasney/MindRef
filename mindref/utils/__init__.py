@@ -1,8 +1,16 @@
 import os
 from datetime import datetime
 from functools import partial, wraps
+from operator import itemgetter
 from pathlib import Path
-from typing import Any, Callable, Generic, Literal, Optional, Protocol, TypeVar, Union
+from typing import (
+    Callable,
+    Generic,
+    Optional,
+    ParamSpec,
+    Protocol,
+    TypeVar,
+)
 
 from kivy import Logger
 from kivy.clock import Clock
@@ -10,13 +18,18 @@ from kivy.lang import Builder
 
 _LOG_LEVEL = None
 
+T = TypeVar("T")
+P = ParamSpec("P")
+K = TypeVar("K", bound=str)
+V = TypeVar("V")
+
 
 def mindref_path() -> Path:
     # find our module location
     return Path(__file__).parent.parent.resolve()
 
 
-def import_kv(path: Union[Path, str]):
+def import_kv(path: str | Path):
     base_path = Path(path).resolve()
     kv_path = base_path.with_suffix(".kv")
     if kv_path.exists() and (sp := str(kv_path)) not in Builder.files:
@@ -24,20 +37,9 @@ def import_kv(path: Union[Path, str]):
         Builder.load_file(sp, rulesonly=True)
 
 
-def get_log_level():
-    global _LOG_LEVEL
-    if _LOG_LEVEL:
-        return _LOG_LEVEL
-    from kivy.app import App
-
-    _LOG_LEVEL = App.get_running_app().log_level
-
-    return _LOG_LEVEL
-
-
-def log_run_time(func):
+def log_run_time(func: Callable[P, T]) -> Callable[P, T]:
     @wraps(func)
-    def wrapped_log_run_time(*args, **kwargs):
+    def wrapped_log_run_time(*args: P.args, **kwargs: P.kwargs) -> T:
         start_time = datetime.utcnow()
         result = func(*args, **kwargs)
         end_time = datetime.utcnow()
@@ -47,7 +49,7 @@ def log_run_time(func):
     return wrapped_log_run_time
 
 
-def sch_cb(*args, timeout: float = 0):
+def sch_cb(*args: Callable[P, T], timeout: float = 0) -> None:
     """
     Chain functions that sequentially call the next
 
@@ -58,17 +60,21 @@ def sch_cb(*args, timeout: float = 0):
     Clock.schedule_once(head_func, timeout=timeout)
 
 
-def def_cb(*args, timeout: float = 0) -> Callable[[], None]:
+def def_cb(*args: Callable[P, T], timeout: float = 0) -> Callable[[], None]:
     """
     Chain functions that sequentially call the next
 
     Defers passing to clock to schedule
+
+    Returns
+    -------
+    Returns a partial object that once called, starts a chain of events
     """
 
     func_pipe = (f for f in args)
 
-    def _scheduled_func(*s_args, **kwargs):
-        func = kwargs.pop("func")
+    def _scheduled_func(*s_args: P.args, **kwargs: P.kwargs):
+        func: Callable[P, T] = kwargs.pop("func")
         func(*s_args, **kwargs)
         next_func = next(func_pipe, None)
         if next_func:
@@ -79,7 +85,7 @@ def def_cb(*args, timeout: float = 0) -> Callable[[], None]:
     return head_func
 
 
-def attrsetter(instance, attr: str, value):
+def attrsetter(instance, attr: str, value) -> Callable[[], None]:
     """
     Set an attribute of an instance operator style
     Parameters
@@ -87,9 +93,6 @@ def attrsetter(instance, attr: str, value):
     instance
     attr
     value
-
-    Returns
-    -------
     """
 
     def attrsetter_inner(*_args):
@@ -126,9 +129,6 @@ class Singleton(type):
             return cls.__instance
 
 
-T = TypeVar("T")
-
-
 class LazyLoaded(Generic[T]):
     def __init__(self, default: "Optional[Callable]" = None):
         self.default = default if default is None else default()
@@ -154,50 +154,6 @@ class LazyLoaded(Generic[T]):
         """Register a loader function"""
         self.loader = func.__name__
         return func
-
-
-class LoggerProtocol(Protocol):
-    def debug(self, msg: Any):
-        ...
-
-    def info(self, msg: Any):
-        ...
-
-    def warning(self, msg: Any):
-        ...
-
-    def error(self, msg: Any):
-        ...
-
-    def exception(self, msg: Any):
-        ...
-
-
-LOG_LEVEL = Literal["debug", "info", "warning", "error", "exception"]
-
-
-class GenericLoggerMixin:
-    logger: Optional[LoggerProtocol]
-    _log: Optional[Callable[[Any, LOG_LEVEL], None]]
-
-    def __init__(self):
-
-        self._log = None
-
-    def log(self, msg: Any, level: LOG_LEVEL):
-        if self._log:
-            self._log(msg, level)
-        # Create the method on the fly
-        if self.logger:
-            self._log = lambda log_msg, lvl: getattr(self.logger, lvl)(log_msg)
-            self._log(msg, level)
-        else:
-            self._log = lambda log_msg, lvl: print(log_msg)
-            self._log(msg, level)
-
-
-K = TypeVar("K", bound=str)
-V = TypeVar("V")
 
 
 class DottedDict(dict, Generic[K, V]):
