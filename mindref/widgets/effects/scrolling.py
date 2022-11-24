@@ -1,11 +1,9 @@
-from functools import partial
+from math import sin
 
 from kivy import Logger
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.effects.opacityscroll import OpacityScrollEffect
-from kivy.metrics import dp
-from math import sin
 from kivy.properties import (
     BooleanProperty,
     NumericProperty,
@@ -94,10 +92,8 @@ class RefreshOverscrollEffect(OpacityScrollEffect):
         if self.target_widget and self.target_widget.height != 0:
             if self.overscroll > 50:
                 self.refresh_triggered_ = False
-                # self.target_widget.opacity = 1
             elif -5 <= self.overscroll <= 5:
                 self.refresh_triggered_ = False
-                # self.target_widget.opacity = 1
             else:
                 ratio = abs(self.overscroll / self.target_widget.height)
 
@@ -107,4 +103,3 @@ class RefreshOverscrollEffect(OpacityScrollEffect):
                     self.refresh_triggered_ = True
                 else:
                     self.refresh_triggered_ = False
-            # self.trigger_velocity_update()
