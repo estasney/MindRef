@@ -14,19 +14,27 @@ DESCRIPTION = "Cross-Platform Application for maintaining Markdown formatted not
 URL = "https://github.com/estasney/MindRef"
 EMAIL = "estasney@users.noreply.github.com"
 AUTHOR = "Eric Stasney"
-REQUIRES_PYTHON = ">=3.9.0"
+REQUIRES_PYTHON = ">=3.10"
 
 # What packages are required for this module to be executed?
 REQUIRED = [
+    "click",
+    "Cython",
+    "Kivy",
+    "mistune",
+    "Pillow",
+    "Pygments",
     "python-dotenv",
     "toolz",
-    "Kivy",
-    "Pygments",
-    "Pillow",
-    "click",
-    "mistune",
-    "sortedcontainers",
 ]
+
+EXTRAS = {
+    "dev": [
+        "pre-commit" "pytest",
+        "PyYAML",
+    ],
+    "android": ["python-for-android", "pyjnius"],
+}
 
 here = os.path.abspath(os.path.dirname(__file__))
 long_description = DESCRIPTION
@@ -46,6 +54,7 @@ setup(
     url=URL,
     packages=find_packages(exclude=("tests",)),
     install_requires=REQUIRED,
+    extras_require=EXTRAS,
     include_package_data=True,
     data_files=[
         (
