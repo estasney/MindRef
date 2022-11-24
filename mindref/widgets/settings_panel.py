@@ -32,7 +32,7 @@ class AndroidSettingPath(SettingPath):
         AndroidStorageManager.select_folder(self.select_folder_callback)
 
 
-class MindRefSettingsAndroid(SettingsWithSpinner):
+class MindRefSettingsAndroid(InteractBehavior, SettingsWithSpinner):
     """
     Overrides FilePicker on Android to use DocumentProvider
     """
