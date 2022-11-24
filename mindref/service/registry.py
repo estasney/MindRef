@@ -2,17 +2,15 @@ from collections import deque
 from pathlib import Path
 from typing import Callable, Optional, Protocol, TYPE_CHECKING
 
+from kivy import Logger
+
 from domain.events import (
-    NotesDiscoverCategoryEvent,
     NoteCategoryEvent,
     NoteCategoryFailureEvent,
     NoteFetchedEvent,
-    NotesDiscoveryEvent,
-    NotesQueryErrorFailureEvent,
-    NotesQueryEvent,
     NotesQueryNotSetFailureEvent,
 )
-from utils import GenericLoggerMixin, LoggerProtocol, def_cb
+from utils import caller, def_cb, ks, ps, sch_cb
 from utils.caching import kivy_cache
 from widgets.typeahead.typeahead_dropdown import Suggestion
 
@@ -20,6 +18,7 @@ if TYPE_CHECKING:
     from adapters.notes.note_repository import AbstractNoteRepository
     from adapters.atlas.atlas_repository import AbstractAtlasRepository
     from adapters.editor.editor_repository import AbstractEditorRepository
+    from domain.markdown_note import MarkdownNote, MarkdownNoteDict
     from domain.events import Event
     from domain.editable import EditableNote
     from kivy.uix.screenmanager import ScreenManager
@@ -31,18 +30,19 @@ class AppServiceProtocol(Protocol):
     editor_service: "AbstractEditorRepository"
     screen_manager: "ScreenManager"
     note_category: str
+    note_category_meta: list["MarkdownNoteDict"]
+    note_data: dict
 
 
-class Registry(GenericLoggerMixin):
+class Registry:
     """Orchestration"""
 
     _app: Optional["AppServiceProtocol"]
     events: deque["Event"]
 
-    def __init__(self, logger: Optional[LoggerProtocol]):
+    def __init__(self):
         super().__init__()
         self._app = None
-        self.logger = logger
         self.events = deque([])
 
     @property
@@ -56,11 +56,100 @@ class Registry(GenericLoggerMixin):
         self._app = app
 
     def set_note_storage_path(self, path: Path | str):
-        self.log(f"{self.__class__.__name__} : setting storage_path - {path!r}", "info")
         self.app.note_service.storage_path = path
+        Logger.info(
+            f"{self.__class__.__name__}: Set Note Service Storage Path - {path!s}"
+        )
 
     def push_event(self, event: "Event"):
         self.events.append(event)
+
+    def paginate_note(self, direction: int):
+        """
+        Increment our index, show a note transition and update app.note_data
+
+        Then we emit an on_paginate event
+
+        Parameters
+        ----------
+        direction
+
+        Returns
+        -------
+        """
+
+        def after_note_fetched(note: "MarkdownNote"):
+            """Callback from note_service"""
+            note_data = note.to_dict()
+            Logger.info(
+                f"{self.__class__.__name__}: after_note_fetched - Set App Note Data to {ps(note, 'category', 'title', 'idx')}"
+            )
+            trigger_pause_state = caller(self.app, "play_state_trigger", "pause")
+            trigger_display = caller(self.app, "display_state_trigger", "display")
+            emit_paginate = caller(
+                self.app, "dispatch", "on_paginate", (direction, note_data)
+            )
+            sch_cb(trigger_pause_state, trigger_display, emit_paginate, timeout=0.1)
+
+        match direction:
+            case 0:
+                return self.set_note_index(self.app.note_service.index.current)
+            case 1:
+                fetch_note = caller(
+                    self.app.note_service,
+                    "get_next_note",
+                    on_complete=after_note_fetched,
+                )
+                sch_cb(fetch_note)
+                Logger.info(f"{self.__class__.__name__}: paginate_note - forwards")
+            case -1:
+                fetch_note = caller(
+                    self.app.note_service,
+                    "get_previous_note",
+                    on_complete=after_note_fetched,
+                )
+                sch_cb(fetch_note)
+                Logger.info(f"{self.__class__.__name__}: paginate_note - backwards")
+            case _:
+                raise NotImplementedError(f"Pagination of {direction} not supported")
+
+    def set_note_index(self, value: int):
+
+        """
+        Manually set note_index and orchestrate backend
+
+        Parameters
+        ----------
+        value : int
+            The note index
+
+        Notes
+        -------
+        - Clear Note Data
+        - Call App.note_service.set_index
+        - Get Note Data
+        - Set It
+        """
+
+        set_note_index = caller(self.app.note_service, "set_index", value)
+
+        def after_note_fetched(note: "MarkdownNote"):
+            """Callback from note_service"""
+            note_data = note.to_dict()
+            Logger.info(
+                f"{self.__class__.__name__}: after_note_fetched - "
+                f"Set App Note Data to {ks(note_data, 'category', 'title', 'idx')}"
+            )
+            trigger_pause_state = caller(self.app, "play_state_trigger", "pause")
+            trigger_display = caller(self.app, "display_state_trigger", "display")
+            emit_paginate = caller(self.app, "dispatch", "on_paginate", (0, note_data))
+            sch_cb(trigger_pause_state, trigger_display, emit_paginate, timeout=0.1)
+
+        fetch_note = caller(
+            self.app.note_service, "get_current_note", on_complete=after_note_fetched
+        )
+        sch_cb(set_note_index, fetch_note)
+        Logger.info(f"{self.__class__.__name__}: set_note_index - {value}")
 
     def set_note_category(self, value: str, on_complete: Optional[Callable]):
         """
@@ -97,41 +186,6 @@ class Registry(GenericLoggerMixin):
         result = note_repo.query_notes(category=category, query=query, on_complete=None)
         on_complete(result)
 
-    def handle_note_discovery(self, event: NotesDiscoveryEvent):
-        """
-        Handles the on_complete from `self.query_all`
-        """
-        discover_pipeline = event.payload()
-        try:
-            for discovery in discover_pipeline:
-                self.push_event(
-                    NotesDiscoverCategoryEvent(
-                        category=discovery.category,
-                        image_path=discovery.image_path,
-                        notes=discovery.notes,
-                    )
-                )
-        except FileNotFoundError as e:
-            self.log(f"FileNotFoundError {e}", "warning")
-            self.push_event(
-                NotesQueryErrorFailureEvent(
-                    on_complete=event.on_complete,
-                    error="not_found",
-                    message=f"Storage Path: '{e.filename}' not found",
-                )
-            )
-            return
-        except PermissionError as e:
-            self.push_event(
-                NotesQueryErrorFailureEvent(
-                    on_complete=event.on_complete,
-                    error="permission_error",
-                    message=f"Permission Error: for Storage Path '{e.filename}'",
-                )
-            )
-            return
-        self.push_event(NotesQueryEvent(on_complete=event.on_complete))
-
     def query_all(self, on_complete: Optional[Callable] = None):
         """
         Returns immediately after invoking note_repo.discover_notes
@@ -139,21 +193,22 @@ class Registry(GenericLoggerMixin):
         note_repo.discover_notes will push a NotesDiscoveryEvent with results
         """
         self.app.screen_manager.dispatch("on_refresh", True)
+        Logger.debug(f"{self.__class__.__name__}: query_all - Dispatched 'on_refresh'")
         note_repo = self.app.note_service
         if not note_repo.configured:
+            e = NotesQueryNotSetFailureEvent(on_complete=on_complete)
             self.push_event(NotesQueryNotSetFailureEvent(on_complete=on_complete))
+            Logger.info(
+                f"{self.__class__.__name__}: query_all - app.note_service not configured. Pushed {ps(e, 'event_type')}"
+            )
             return
 
+        clear_refresh = caller(self.app.screen_manager, "dispatch", "on_refresh", False)
         if on_complete:
-            chained_complete = def_cb(
-                on_complete,
-                lambda dt: self.app.screen_manager.dispatch("on_refresh", False),
-            )
+            chained_complete = def_cb(on_complete, clear_refresh)
         else:
-            chained_complete = lambda dt: self.app.screen_manager.dispatch(
-                "on_refresh", False
-            )
-        note_repo.discover_notes(chained_complete)
+            chained_complete = clear_refresh
+        note_repo.discover_categories(chained_complete)
 
     def clear_caches(self):
         from kivy.cache import Cache
@@ -161,6 +216,11 @@ class Registry(GenericLoggerMixin):
         categories_seen = getattr(kivy_cache, "categories_seen")
         for category in categories_seen:
             Cache.remove(category, key=None)
+
+    def clear_cache(self, category, key=None):
+        from kivy.cache import Cache
+
+        Cache.remove(category, key)
 
     def new_note(self, category: Optional[str], idx: Optional[int]) -> "EditableNote":
         category = category if category else self.app.note_category
@@ -178,5 +238,30 @@ class Registry(GenericLoggerMixin):
         return data_note
 
     def save_note(self, note: "EditableNote"):
-        md_note = self.app.note_service.save_note(note, None)
-        self.push_event(NoteFetchedEvent(note=md_note))
+        """
+        We need to persist the note, and either add or modify its data in category metadata
+
+        - Store Note To Disk
+        - Add or Replace Note Data
+        - Add or Replace Note Metadata
+        - Change App display state to 'display'
+        """
+
+        def update_app_meta(meta: list["MarkdownNoteDict"]):
+            self.app.note_category_meta = meta
+
+        def push_fetched_event(md_note: "MarkdownNote"):
+            Logger.info(f"{self.__class__.__name__} : Note Service says note was saved")
+            self.clear_cache("category_meta")
+            self.clear_cache("note_widget")
+            self.push_event(NoteFetchedEvent(note=md_note))
+            # We can leave refresh as False, the note was refreshed by note service
+            self.app.note_service.get_category_meta(
+                self.app.note_category, on_complete=update_app_meta, refresh=False
+            )
+
+        # store note to disk
+        self.app.note_service.save_note(note, on_complete=push_fetched_event)
+        Logger.info(
+            f"{self.__class__.__name__}: save_note - {ps(note, 'category', 'edit_title')}"
+        )
