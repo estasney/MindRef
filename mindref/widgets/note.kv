@@ -68,15 +68,14 @@
 
 <Note>:
     id: note_container
-    note_title: note_title
-    note_content: note_content
     note_control: note_control
 
     BoxLayout:
         orientation: 'vertical'
         NoteTitleBar:
+            title: note_container.note_title
+            index: note_container.note_index
             padding: 0, dp(5), 0, dp(5)
-            id: note_title
             size_hint: 1, 0.1
             size_hint_max_y: dp(45)
         HSeparator:
@@ -84,6 +83,7 @@
             size_hint_max_y: dp(2)
         NoteContent:
             id: note_content
+            content: note_container.note_content
             size_hint: 1, 0.75
         HSeparator:
             size_hint: 1, 0.01
