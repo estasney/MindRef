@@ -362,7 +362,7 @@ class FileSystemNoteRepository(AbstractNoteRepository):
             category=self.current_category,
             idx=self.index.current,
             on_complete=on_complete,
-        ).to_dict()
+        )
 
     def get_previous_note(self, on_complete) -> MarkdownNote:
         if not self._index:
