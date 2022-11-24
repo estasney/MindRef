@@ -13,8 +13,7 @@ class MindRefSettingsNative(InteractBehavior, SettingsWithSpinner):
     """
 
     def __init__(self, *args, **kwargs):
-        super(InteractBehavior, self).__init__(**kwargs)
-        super(SettingsWithSpinner).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 class AndroidSettingPath(SettingPath):
