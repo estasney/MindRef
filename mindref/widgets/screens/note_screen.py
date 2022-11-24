@@ -14,7 +14,4 @@ class NoteCategoryScreen(InteractScreen):
     current_note: "Note" = ObjectProperty()
 
     def set_note_content(self, note_data: Optional["MarkdownNoteDict"]):
-        if note_data:
-            self.current_note.set_note_content(note_data)
-        else:
-            self.current_note.clear_note_content()
+        self.current_note.set_note_content(note_data)
