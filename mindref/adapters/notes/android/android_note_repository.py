@@ -36,24 +36,6 @@ class AndroidNoteRepository(FileSystemNoteRepository):
         super().__init__(get_app, new_first)
         self._native_path = None
 
-    def get_external_storage_categories(
-        self, on_complete: TGetCategoriesCallback
-    ) -> None:
-        """
-        Invoke AndroidStorageManager which will ensure App Storage categories reflect External Storage categories.
-
-        Parameters
-        ----------
-        on_complete
-            A callable which should accept a list of categories
-        """
-        Logger.info(
-            f"{self.__class__.__name__}: get_external_storage_categories - {ps(self, '_native_path', '_storage_path')}"
-        )
-        AndroidStorageManager.get_categories(
-            self._native_path, self._storage_path, on_complete
-        )
-
     @property
     def configured(self) -> bool:
         return self._storage_path is not None and self._native_path is not None
@@ -80,13 +62,13 @@ class AndroidNoteRepository(FileSystemNoteRepository):
             f"{self.__class__.__name__}: set storage path : {self._storage_path!s}"
         )
 
-    def _copy_storage(self, callback: Callable[[Any], None]):
+    def _copy_storage(self, on_complete: Callable[[Any], None]):
         Logger.info(
             f"{self.__class__.__name__} : Invoking AndroidStorageManager to copy_storage from {self._native_path} to {self._storage_path}"
         )
 
         AndroidStorageManager.clone_external_storage(
-            self._native_path, self._storage_path, callback
+            self._native_path, self._storage_path, on_complete
         )
 
     def discover_categories(self, on_complete: Optional[Callable[[], None]], *args):
@@ -110,7 +92,7 @@ class AndroidNoteRepository(FileSystemNoteRepository):
         get_categories -> copy_storage -> emit NotesDiscoverCategoryEvents
         """
 
-        def after_get_categories(
+        def after_reflect_external_storage_files(
             categories: Iterable[str], on_complete_inner: Optional[Callable], *_iargs
         ):
             app = self.get_app()
@@ -133,20 +115,60 @@ class AndroidNoteRepository(FileSystemNoteRepository):
 
         def after_get_external_storage_categories(_categories: Iterable[str]):
             Logger.info(
-                f"{self.__class__.__name__}: after_get_external_storage_categories - External Storage Categories Copied"
+                f"{self.__class__.__name__}:"
+                f" after_get_external_storage_categories - External Storage Categories Copied"
             )
 
-            action = partial(after_get_categories, on_complete_inner=on_complete)
-            get_categories_with_cb = caller(self, "get_categories", on_complete=action)
-            Clock.schedule_once(get_categories_with_cb)
+            # Reflect Markdown Files
+
+            # Emit App Storage Categories
+            emit_app_categories = partial(
+                after_reflect_external_storage_files, on_complete_inner=on_complete
+            )
+            get_categories_with_cb = caller(
+                self, "get_categories", on_complete=emit_app_categories
+            )
+
+            # Sync Markdown Files
+            sync_external = caller(
+                self, "_copy_storage", on_complete=get_categories_with_cb
+            )
+
+            Clock.schedule_once(sync_external)
 
         self.category_files.clear()
-        discover_action = caller(
+        # Discover Categories
+        reflect_categories = caller(
             self,
             "get_external_storage_categories",
-            on_complete=after_get_external_storage_categories,
+            on_complete=caller(
+                self, "_copy_storage", after_get_external_storage_categories
+            ),
         )
-        Clock.schedule_once(discover_action)
+
+        Clock.schedule_once(reflect_categories)
+
+    def get_external_storage_categories(
+        self, on_complete: TGetCategoriesCallback
+    ) -> None:
+        """
+        Invoke AndroidStorageManager which will ensure App Storage categories reflect External Storage categories.
+
+        Parameters
+        ----------
+        on_complete
+            A callable which should accept a list of categories
+
+        Notes
+        -----
+        This reflects directories and *.png files *only*
+        """
+        Logger.info(
+            f"{self.__class__.__name__}: get_external_storage_categories - {ps(self, '_native_path', '_storage_path')}"
+        )
+        AndroidStorageManager.get_categories(
+            self._native_path, self._storage_path, on_complete
+        )
 
     def save_note(self, note: "EditableNote", on_complete):
         Logger.info(f"{self.__class__.__name__} : Saving Note : {note}")
