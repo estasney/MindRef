@@ -5,7 +5,7 @@ from typing import Any, Callable, Literal, Optional, TYPE_CHECKING
 if TYPE_CHECKING:
     from domain.markdown_note import MarkdownNote
     from domain.protocols import NoteDiscoveryProtocol
-    from mindref.mindref import DISPLAY_STATES
+    from mindref.mindref import DISPLAY_STATE
     from widgets.typeahead.typeahead_dropdown import Suggestion
 
     QUERY_FAILURE_TYPE = Literal["not_set", "not_found", "permission_error"]
@@ -136,7 +136,7 @@ class RefreshNotesEvent(Event):
 @dataclass
 class BackButtonEvent(Event):
     event_type = "back_button"
-    current_display_state: "DISPLAY_STATES"
+    display_state: "DISPLAY_STATE"
 
 
 @dataclass

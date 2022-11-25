@@ -358,24 +358,23 @@ class MindRefApp(App):
 
     def process_back_button_event(self, event: BackButtonEvent):
         # The display state when button was pressed
-        ds = event.current_display_state
-        if ds == "choose":
-            # Cannot go further back
-            App.get_running_app().stop()
-        elif ds == "display":
-            trigger_display_choose = caller(self, "display_state_trigger", "choose")
-            sch_cb(trigger_display_choose)
-        elif ds == "list":
-            trigger_display = caller(self, "display_state_trigger", "display")
-            sch_cb(trigger_display)
-        elif ds == "edit":
-            self.registry.push_event(CancelEditEvent())
-        elif ds == "add":
-            self.registry.push_event(CancelEditEvent())
-        else:
-            Logger.warning(
-                f"Unknown display state encountered when handling back button: {ds}"
-            )
+        old, new = event.display_state
+        match (old, new):
+            case _, "choose":
+                # Cannot go further back
+                App.get_running_app().stop()
+            case _, "display":
+                trigger_display_choose = caller(self, "display_state_trigger", "choose")
+                sch_cb(trigger_display_choose)
+            case _, "list":
+                trigger_display = caller(self, "display_state_trigger", "display")
+                sch_cb(trigger_display)
+            case _, "edit" | "add":
+                self.registry.push_event(CancelEditEvent())
+            case _:
+                Logger.warning(
+                    f"Unknown display state encountered when handling back button: {old},{new}"
+                )
 
     def process_discover_category_event(self, event: DiscoverCategoryEvent):
         event_category = event.category
@@ -404,9 +403,7 @@ class MindRefApp(App):
     def key_input(self, _window, key, _scancode, _codepoint, _modifier):
         if key == 27:  # Esc Key
             # Back Button Event
-            self.registry.push_event(
-                BackButtonEvent(current_display_state=self.display_state)
-            )
+            self.registry.push_event(BackButtonEvent(display_state=self.display_state))
             return True
         else:
             return False
