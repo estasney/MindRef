@@ -37,7 +37,7 @@ class OnCopyAppStorageCallback(PythonJavaClass):
 
     @java_method("(Z)V")
     def onCopyStorageResult(self, result: bool):
-        Logger.debug(f"{self.__class__.__name__} : 'onCopyStorageResult - {result}")
+        Logger.debug(f"{type(self).__name__} : 'onCopyStorageResult - {result}")
         self.callback(result)
 
 
@@ -95,7 +95,7 @@ class WriteDocumentManagerCallback(PythonJavaClass):
 
     @java_method("(Z)V")
     def onComplete(self, result: bool):
-        Logger.debug(f"{self.__class__.__name__} : 'onComplete - {result}")
+        Logger.debug(f"{type(self).__name__} : 'onComplete - {result}")
         self.callback(result)
 
 

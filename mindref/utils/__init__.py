@@ -1,7 +1,6 @@
 import os
 from datetime import datetime
 from functools import partial, wraps
-from operator import itemgetter
 from pathlib import Path
 from typing import (
     Callable,
@@ -128,9 +127,11 @@ def caller(
     return caller_inner
 
 
-def ps(instance, *attr) -> str:
+def fmt_attrs(instance, *attr) -> str:
     """
-    Build a param string formatted for logging with getattr
+    Build a param string formatted for logging with form
+    [attr=getattr(instance, attr)]
+
     Returns
     -------
     """
@@ -143,19 +144,6 @@ def ps(instance, *attr) -> str:
 class SupportsGetItem(Protocol):
     def __getitem__(self, item):
         ...
-
-
-def ks(instance: SupportsGetItem, *keys) -> str:
-    """
-    Build a param string formatted for logging with itemgetter
-    Returns
-    -------
-    """
-    vals = itemgetter(*keys)(instance)
-    params = ((k, v) for k, v in zip(keys, vals))
-    fmt_params = (f"{a!s}={v!s}" for a, v in params if v)
-    param_str = ", ".join(fmt_params)
-    return f"[{param_str}]"
 
 
 class EnvironContext:

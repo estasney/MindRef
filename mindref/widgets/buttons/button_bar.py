@@ -29,7 +29,7 @@ class NoteActionButton(TexturedButton):
 
     def handle_select(self, _, value):
 
-        Logger.info(f"{self.__class__.__name__}: Pushing Note Event {value}")
+        Logger.info(f"{type(self).__name__}: Pushing Note Event {value}")
         self.dispatch("on_select", value)
         return True
 

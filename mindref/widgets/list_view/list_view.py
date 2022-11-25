@@ -33,7 +33,7 @@ class ListView(GridLayout):
         self.add_widget(widget)
 
     def on_meta_notes(self, _, value: list["MarkdownNoteDict"]):
-        Logger.info(f"{self.__class__.__name__} : on_meta_notes")
+        Logger.info(f"{type(self).__name__} : on_meta_notes")
         clear_widgets = caller(self, "clear_widgets")
         add_widgets = [caller(self, "add_item", note_data=note) for note in value[::]]
         sch_cb(clear_widgets, *add_widgets, timeout=0.1)

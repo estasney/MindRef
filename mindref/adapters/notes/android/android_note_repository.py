@@ -13,7 +13,7 @@ from adapters.notes.fs.fs_note_repository import (
 )
 from domain.events import DiscoverCategoryEvent
 from domain.markdown_note import MarkdownNote
-from utils import caller, ps
+from utils import caller, fmt_attrs
 
 if TYPE_CHECKING:
     from domain.editable import EditableNote
@@ -54,17 +54,15 @@ class AndroidNoteRepository(FileSystemNoteRepository):
         value : str
             E.g. content://com.android.externalstorage.documents/tree/primary:
         """
-        Logger.info(f"{self.__class__.__name__} : set native path :  {value}")
+        Logger.info(f"{type(self).__name__} : set native path :  {value}")
         self._native_path = str(value)
         self._storage_path = Path(App.get_running_app().user_data_dir) / "notes"
         self._storage_path.mkdir(exist_ok=True, parents=True)
-        Logger.info(
-            f"{self.__class__.__name__}: set storage path : {self._storage_path!s}"
-        )
+        Logger.info(f"{type(self).__name__}: set storage path : {self._storage_path!s}")
 
     def _copy_storage(self, on_complete: Callable[[Any], None]):
         Logger.info(
-            f"{self.__class__.__name__} : Invoking AndroidStorageManager to copy_storage from {self._native_path} to {self._storage_path}"
+            f"{type(self).__name__} : Invoking AndroidStorageManager to copy_storage from {self._native_path} to {self._storage_path}"
         )
 
         AndroidStorageManager.clone_external_storage(
@@ -107,7 +105,7 @@ class AndroidNoteRepository(FileSystemNoteRepository):
                     )
                 )
             Logger.info(
-                f"{self.__class__.__name__}: after_get_categories - Found App Storage Categories, Created "
+                f"{type(self).__name__}: after_get_categories - Found App Storage Categories, Created "
                 f"CategoryResourceFiles, Emitted Discovery "
             )
             if on_complete_inner:
@@ -115,7 +113,7 @@ class AndroidNoteRepository(FileSystemNoteRepository):
 
         def after_get_external_storage_categories(_categories: Iterable[str]):
             Logger.info(
-                f"{self.__class__.__name__}:"
+                f"{type(self).__name__}:"
                 f" after_get_external_storage_categories - External Storage Categories Copied"
             )
 
@@ -164,18 +162,18 @@ class AndroidNoteRepository(FileSystemNoteRepository):
         This reflects directories and *.png files *only*
         """
         Logger.info(
-            f"{self.__class__.__name__}: get_external_storage_categories - {ps(self, '_native_path', '_storage_path')}"
+            f"{type(self).__name__}: get_external_storage_categories - {fmt_attrs(self, '_native_path', '_storage_path')}"
         )
         AndroidStorageManager.get_categories(
             self._native_path, self._storage_path, on_complete
         )
 
     def save_note(self, note: "EditableNote", on_complete):
-        Logger.info(f"{self.__class__.__name__} : Saving Note : {note}")
+        Logger.info(f"{type(self).__name__} : Saving Note : {note}")
 
         def store_to_external(md_note: MarkdownNote):
             Logger.info(
-                f"{self.__class__.__name__} : storing {md_note.title}.md to external storage"
+                f"{type(self).__name__} : storing {md_note.title}.md to external storage"
             )
             note_fp = md_note.filepath
             AndroidStorageManager.copy_to_external_storage(

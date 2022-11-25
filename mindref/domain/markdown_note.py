@@ -40,6 +40,10 @@ class MarkdownNote:
     filepath: Optional[Path]
     document: "MD_DOCUMENT"
 
+    def __repr__(self):
+        attrs = ("category", "title", "idx", "filepath")
+        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+
     def to_dict(self) -> MarkdownNoteDict:
         return asdict(self, dict_factory=MarkdownNoteDict)
 

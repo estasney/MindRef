@@ -64,7 +64,7 @@ class NoteEditScreen(InteractScreen):
         self.init_text = value.edit_text
 
     def handle_cancel(self, *_args):
-        Logger.debug(f"{self.__class__.__name__}: Cancel Edit")
+        Logger.debug(f"{type(self).__name__}: Cancel Edit")
         app = App.get_running_app()
         app.registry.push_event(CancelEditEvent())
 
@@ -72,9 +72,7 @@ class NoteEditScreen(InteractScreen):
         app = App.get_running_app()
         text = kwargs.get("text")
         title = kwargs.get("title")
-        Logger.info(
-            f"{self.__class__.__name__}: Save Note - {title} = {app.note_category}"
-        )
+        Logger.info(f"{type(self).__name__}: Save Note - {title} = {app.note_category}")
         if text is None:
             raise ValueError("Expected text")
 

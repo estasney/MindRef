@@ -57,7 +57,7 @@ class FileSystemNoteRepository(AbstractNoteRepository):
         on_complete : GetCategoriesCallback
         """
         if not self.configured:
-            Logger.error(f"{self.__class__.__name__} : not configured")
+            Logger.error(f"{type(self).__name__} : not configured")
             self.get_app().registry.push_event(
                 NotesQueryNotSetFailureEvent(on_complete=None)
             )
@@ -68,7 +68,7 @@ class FileSystemNoteRepository(AbstractNoteRepository):
         categories = [f.name for f in category_folders]
         on_complete(categories)
         Logger.info(
-            f"{self.__class__.__name__}: get_categories - called {on_complete} with {len(categories)} categories"
+            f"{type(self).__name__}: get_categories - called {on_complete} with {len(categories)} categories"
         )
         return categories
 
@@ -94,7 +94,7 @@ class FileSystemNoteRepository(AbstractNoteRepository):
         else:
             task = partial(self._get_category_meta, category=category)
         Logger.info(
-            f"{self.__class__.__name__}: get_category_meta - [category={category}, on_complete={on_complete!r}]"
+            f"{type(self).__name__}: get_category_meta - [category={category}, on_complete={on_complete!r}]"
         )
         sch_cb(task, timeout=0.1)
 
@@ -256,7 +256,7 @@ class FileSystemNoteRepository(AbstractNoteRepository):
         self._index = RollingIndex(
             size=len(self.category_files[self.current_category].notes)
         )
-        Logger.info(f"{self.__class__.__name__}: _resize_index")
+        Logger.info(f"{type(self).__name__}: _resize_index")
 
     def save_note(
         self,
@@ -264,7 +264,7 @@ class FileSystemNoteRepository(AbstractNoteRepository):
         on_complete: Optional[Callable[["MarkdownNote"], None]],
     ):
         note_is_new = note.md_note is None
-        Logger.info(f"{self.__class__.__name__} : save_note {note}")
+        Logger.info(f"{type(self).__name__} : save_note {note}")
 
         def after_write_new_note(_, category, note_path, callback):
             note_resource = self.category_files[category].add_note_from_path(note_path)
@@ -299,7 +299,7 @@ class FileSystemNoteRepository(AbstractNoteRepository):
                     callback=None,
                 )
                 sch_cb(write_note, after_write)
-                Logger.info(f"{self.__class__.__name__}: save_note - new note")
+                Logger.info(f"{type(self).__name__}: save_note - new note")
             case True, _ as cb:
                 fp = (self.storage_path / note.category / note.edit_title).with_suffix(
                     ".md"
@@ -315,7 +315,7 @@ class FileSystemNoteRepository(AbstractNoteRepository):
                 )
 
                 sch_cb(write_note, after_write)
-                Logger.info(f"{self.__class__.__name__}: save_note - new note")
+                Logger.info(f"{type(self).__name__}: save_note - new note")
             case False, None:
 
                 fp = note.md_note.filepath
@@ -329,7 +329,7 @@ class FileSystemNoteRepository(AbstractNoteRepository):
                     callback=None,
                 )
                 sch_cb(write_note, after_write)
-                Logger.info(f"{self.__class__.__name__}: save_note - edit note")
+                Logger.info(f"{type(self).__name__}: save_note - edit note")
             case False, _ as cb:
                 fp = note.md_note.filepath
                 write_note = caller(
@@ -342,7 +342,7 @@ class FileSystemNoteRepository(AbstractNoteRepository):
                     callback=cb,
                 )
                 sch_cb(write_note, after_write)
-                Logger.info(f"{self.__class__.__name__}: save_note - edit note")
+                Logger.info(f"{type(self).__name__}: save_note - edit note")
             case _:
                 raise Exception("Logic Error")
 

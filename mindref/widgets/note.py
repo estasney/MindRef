@@ -113,5 +113,5 @@ class NoteTitleBar(BoxLayout):
                 return True
             case _:
                 Logger.warning(
-                    f"{self.__class__.__name__}: handle_select - Unhandled value {value}"
+                    f"{type(self).__name__}: handle_select - Unhandled value {value}"
                 )

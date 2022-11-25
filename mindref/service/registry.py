@@ -10,7 +10,7 @@ from domain.events import (
     NoteFetchedEvent,
     NotesQueryNotSetFailureEvent,
 )
-from utils import caller, def_cb, ks, ps, sch_cb
+from utils import caller, def_cb, sch_cb
 from utils.caching import kivy_cache
 from widgets.typeahead.typeahead_dropdown import Suggestion
 
@@ -57,9 +57,7 @@ class Registry:
 
     def set_note_storage_path(self, path: Path | str):
         self.app.note_service.storage_path = path
-        Logger.info(
-            f"{self.__class__.__name__}: Set Note Service Storage Path - {path!s}"
-        )
+        Logger.info(f"{type(self).__name__}: Set Note Service Storage Path - {path!s}")
 
     def push_event(self, event: "Event"):
         self.events.append(event)
@@ -82,7 +80,7 @@ class Registry:
             """Callback from note_service"""
             note_data = note.to_dict()
             Logger.info(
-                f"{self.__class__.__name__}: after_note_fetched - Set App Note Data to {ps(note, 'category', 'title', 'idx')}"
+                f"{type(self).__name__}: after_note_fetched - Set App Note Data to {note!r}"
             )
             trigger_pause_state = caller(self.app, "play_state_trigger", "pause")
             trigger_display = caller(self.app, "display_state_trigger", "display")
@@ -101,7 +99,7 @@ class Registry:
                     on_complete=after_note_fetched,
                 )
                 sch_cb(fetch_note)
-                Logger.info(f"{self.__class__.__name__}: paginate_note - forwards")
+                Logger.info(f"{type(self).__name__}: paginate_note - forwards")
             case -1:
                 fetch_note = caller(
                     self.app.note_service,
@@ -109,7 +107,7 @@ class Registry:
                     on_complete=after_note_fetched,
                 )
                 sch_cb(fetch_note)
-                Logger.info(f"{self.__class__.__name__}: paginate_note - backwards")
+                Logger.info(f"{type(self).__name__}: paginate_note - backwards")
             case _:
                 raise NotImplementedError(f"Pagination of {direction} not supported")
 
@@ -137,8 +135,8 @@ class Registry:
             """Callback from note_service"""
             note_data = note.to_dict()
             Logger.info(
-                f"{self.__class__.__name__}: after_note_fetched - "
-                f"Set App Note Data to {ks(note_data, 'category', 'title', 'idx')}"
+                f"{type(self).__name__}: after_note_fetched - "
+                f"Set App Note Data to {note!r}"
             )
             trigger_pause_state = caller(self.app, "play_state_trigger", "pause")
             trigger_display = caller(self.app, "display_state_trigger", "display")
@@ -149,7 +147,7 @@ class Registry:
             self.app.note_service, "get_current_note", on_complete=after_note_fetched
         )
         sch_cb(set_note_index, fetch_note)
-        Logger.info(f"{self.__class__.__name__}: set_note_index - {value}")
+        Logger.info(f"{type(self).__name__}: set_note_index - {value}")
 
     def set_note_category(self, value: str, on_complete: Optional[Callable]):
         """
@@ -193,13 +191,13 @@ class Registry:
         note_repo.discover_notes will push a NotesDiscoveryEvent with results
         """
         self.app.screen_manager.dispatch("on_refresh", True)
-        Logger.debug(f"{self.__class__.__name__}: query_all - Dispatched 'on_refresh'")
+        Logger.debug(f"{type(self).__name__}: query_all - Dispatched 'on_refresh'")
         note_repo = self.app.note_service
         if not note_repo.configured:
             e = NotesQueryNotSetFailureEvent(on_complete=on_complete)
             self.push_event(NotesQueryNotSetFailureEvent(on_complete=on_complete))
             Logger.info(
-                f"{self.__class__.__name__}: query_all - app.note_service not configured. Pushed {ps(e, 'event_type')}"
+                f"{type(self).__name__}: query_all - app.note_service not configured. Pushed {e!r}"
             )
             return
 
@@ -251,7 +249,7 @@ class Registry:
             self.app.note_category_meta = meta
 
         def push_fetched_event(md_note: "MarkdownNote"):
-            Logger.info(f"{self.__class__.__name__} : Note Service says note was saved")
+            Logger.info(f"{type(self).__name__} : Note Service says note was saved")
             self.clear_cache("category_meta")
             self.clear_cache("note_widget")
             self.push_event(NoteFetchedEvent(note=md_note))
@@ -262,6 +260,4 @@ class Registry:
 
         # store note to disk
         self.app.note_service.save_note(note, on_complete=push_fetched_event)
-        Logger.info(
-            f"{self.__class__.__name__}: save_note - {ps(note, 'category', 'edit_title')}"
-        )
+        Logger.info(f"{type(self).__name__}: save_note - {note!r}")

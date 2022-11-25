@@ -132,9 +132,7 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
         funcs = []
         match direction:
             case -1 | 1:
-                Logger.info(
-                    f"{self.__class__.__name__}: handle_pagination - {direction}"
-                )
+                Logger.info(f"{type(self).__name__}: handle_pagination - {direction}")
                 self.reversed_transition = direction < 0
                 target_screen = self.get_screen(
                     f"note_screen_{self.note_screen_cycler.next(peek=True)}"
@@ -143,7 +141,7 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
                 funcs.append(advance_index)
             case 0:
                 Logger.info(
-                    f"{self.__class__.__name__}: handle_pagination - update current screen"
+                    f"{type(self).__name__}: handle_pagination - update current screen"
                 )
                 self.reversed_transition = False
                 target_screen = self.get_screen(
@@ -173,7 +171,7 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
         """
 
         data = {k: v for k, v in self.app.note_data.items()}
-        Logger.info(f"{self.__class__.__name__}: dispatch_note_date")
+        Logger.info(f"{type(self).__name__}: dispatch_note_date")
 
         current_screen = self.note_screen_cycler.current
         current_screen_name = f"note_screen_{current_screen}"
@@ -188,15 +186,15 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
         self.screen_triggers("list_view_screen")
 
     def handle_notes_edit_view(self, *_args):
-        Logger.debug(f"{self.__class__.__name__} : Switching to note_edit_screen")
+        Logger.debug(f"{type(self).__name__} : Switching to note_edit_screen")
         self.screen_triggers("note_edit_screen")
 
     def handle_notes_add_view(self, *_args):
         Logger.debug(
-            f"{self.__class__.__name__} : Switching to note_edit_screen - Adding Note"
+            f"{type(self).__name__} : Switching to note_edit_screen - Adding Note"
         )
         self.screen_triggers("note_edit_screen")
 
     def handle_error_message(self, *_args):
-        Logger.debug(f"{self.__class__.__name__} : Switching to error_message_screen")
+        Logger.debug(f"{type(self).__name__} : Switching to error_message_screen")
         self.screen_triggers("error_message_screen")

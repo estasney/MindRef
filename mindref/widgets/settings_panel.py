@@ -45,7 +45,7 @@ class MindRefSettingsAndroid(InteractBehavior, SettingsWithSpinner):
 
     def create_json_panel(self, title, config, filename=None, data=None):
         self.register_type("android_path", AndroidSettingPath)
-        Logger.info(f"{self.__class__.__name__}: Creating JSON Panel")
+        Logger.info(f"{type(self).__name__}: Creating JSON Panel")
         return super(MindRefSettingsAndroid, self).create_json_panel(
             title, config, filename, data
         )

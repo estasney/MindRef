@@ -44,7 +44,7 @@ from domain.events import (
 from domain.settings import app_settings
 from plugins import PluginManager
 from service.registry import Registry
-from utils import attrsetter, caller, ps, sch_cb
+from utils import attrsetter, caller, sch_cb
 from utils.triggers import trigger_factory
 from widgets.screens.manager import NoteAppScreenManager
 
@@ -379,9 +379,7 @@ class MindRefApp(App):
     def process_discover_category_event(self, event: DiscoverCategoryEvent):
         event_category = event.category
         if event_category not in self.note_categories:
-            Logger.info(
-                f"{self.__class__.__name__}: Found New Category - {ps(event, 'category')}"
-            )
+            Logger.info(f"{type(self).__name__}: Found New Category - {event!r}")
             self.note_categories.append(event_category)
 
     def process_typeahead_query_event(self, event: TypeAheadQueryEvent):

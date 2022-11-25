@@ -31,7 +31,7 @@ class NoteCategoryChooserScreen(RefreshableScreen):
         self.dispatch_refresh_trigger = Clock.create_trigger(self._dispatch_refresh)
 
     def on_refresh(self, state: bool):
-        Logger.debug(f"{self.__class__.__name__} : on_refresh {state}")
+        Logger.debug(f"{type(self).__name__} : on_refresh {state}")
         if state:
             self.add_refresh_symbol_trigger()
         else:
@@ -44,7 +44,7 @@ class NoteCategoryChooserScreen(RefreshableScreen):
     def _dispatch_refresh(self, *_args):
         if not self.refresh_dispatched:
             self.refresh_dispatched = True
-            Logger.info(f"{self.__class__.__name__} : Dispatching Refresh Event")
+            Logger.info(f"{type(self).__name__} : Dispatching Refresh Event")
             app = App.get_running_app()
             cb = def_cb(
                 self.remove_refresh_symbol_trigger,

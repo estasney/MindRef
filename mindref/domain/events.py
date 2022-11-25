@@ -33,15 +33,27 @@ class PaginationEvent(Event):
     event_type = "pagination"
     direction: "PAGINATION_DIRECTION"
 
+    def __repr__(self):
+        attrs = ("event_type", "direction")
+        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+
 
 @dataclass
 class CancelEditEvent(Event):
     event_type = "cancel_edit"
 
+    def __repr__(self):
+        attrs = ("event_type",)
+        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+
 
 @dataclass
 class AddNoteEvent(Event):
     event_type = "add_note"
+
+    def __repr__(self):
+        attrs = ("event_type",)
+        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
 
 
 @dataclass
@@ -49,6 +61,10 @@ class EditNoteEvent(Event):
     event_type = "edit_note"
     category: str
     idx: int
+
+    def __repr__(self):
+        attrs = ("event_type", "category", "idx")
+        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
 
 
 @dataclass
@@ -58,11 +74,19 @@ class SaveNoteEvent(Event):
     title: Optional[str]
     category: str
 
+    def __repr__(self):
+        attrs = ("event_type", "title", "category")
+        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+
 
 @dataclass
 class NoteFetchedEvent(Event):
     event_type = "note_fetched"
     note: "MarkdownNote"
+
+    def __repr__(self):
+        attrs = ("event_type", "note")
+        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
 
 
 @dataclass
@@ -71,6 +95,10 @@ class NoteCategoryEvent(Event):
     value: str
     on_complete: Optional[Callable]
 
+    def __repr__(self):
+        attrs = ("event_type", "value", "on_complete")
+        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+
 
 @dataclass
 class NoteCategoryFailureEvent(EventFailure, NoteCategoryEvent):
@@ -78,11 +106,19 @@ class NoteCategoryFailureEvent(EventFailure, NoteCategoryEvent):
     message = "Could not find the category"
     error = "not_found"
 
+    def __repr__(self):
+        attrs = ("event_type", "error")
+        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+
 
 @dataclass
 class NotesQueryEvent(Event):
     event_type = "notes_query"
     on_complete: Optional[Callable]
+
+    def __repr__(self):
+        attrs = ("event_type", "on_complete")
+        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
 
 
 @dataclass
@@ -90,6 +126,10 @@ class NotesDiscoveryEvent(Event):
     event_type = "notes_discovery"
     payload: "NoteDiscoveryProtocol"
     on_complete: Optional[Callable[[Any], None]]
+
+    def __repr__(self):
+        attrs = ("event_type", "payload", "on_complete")
+        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
 
 
 @dataclass
@@ -100,7 +140,8 @@ class DiscoverCategoryEvent(Event):
     category: str
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(category={self.category})"
+        attrs = ("event_type", "category")
+        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
 
 
 @dataclass
@@ -109,6 +150,10 @@ class NotesQueryFailureEvent(EventFailure, NotesQueryEvent):
     message = "To view notes, open Settings > Storage\n\nAnd set 'Note Storage'"
     on_complete: Optional[Callable]
     error: "QUERY_FAILURE_TYPE"
+
+    def __repr__(self):
+        attrs = ("event_type", "on_complete", "error")
+        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
 
 
 @dataclass
@@ -119,6 +164,10 @@ class NotesQueryNotSetFailureEvent(NotesQueryFailureEvent):
         default="To view notes, open Settings > Storage\n\nAnd set 'Note Storage'"
     )
 
+    def __repr__(self):
+        attrs = ("event_type", "error", "on_complete")
+        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+
 
 @dataclass
 class NotesQueryErrorFailureEvent(NotesQueryFailureEvent):
@@ -126,11 +175,19 @@ class NotesQueryErrorFailureEvent(NotesQueryFailureEvent):
     error: Literal["not_found", "permission_error"]
     message: str
 
+    def __repr__(self):
+        attrs = ("error", "on_complete")
+        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+
 
 @dataclass
 class RefreshNotesEvent(Event):
     event_type = "refresh_notes"
     on_complete: Optional[Callable[[], None]]
+
+    def __repr__(self):
+        attrs = ("event_type", "on_complete")
+        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
 
 
 @dataclass
@@ -138,10 +195,18 @@ class BackButtonEvent(Event):
     event_type = "back_button"
     display_state: "DISPLAY_STATE"
 
+    def __repr__(self):
+        attrs = ("event_type", "display_state")
+        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+
 
 @dataclass
 class ListViewButtonEvent(Event):
     event_type = "list_view"
+
+    def __repr__(self):
+        attrs = ("event_type",)
+        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
 
 
 @dataclass
@@ -151,3 +216,7 @@ class TypeAheadQueryEvent(Event):
     event_type = "typeahead_query"
     query: str
     on_complete: Callable[[Optional[list["Suggestion"]]], None]
+
+    def __repr__(self):
+        attrs = ("event_type", "query", "on_complete")
+        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"

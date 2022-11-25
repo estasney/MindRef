@@ -15,6 +15,10 @@ class EditableNote:
     edit_title: str = field(default="")
     edit_text: str = field(default="")
 
+    def __repr__(self):
+        attrs = ("category", "idx", "edit_title")
+        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+
     @classmethod
     def from_markdown_note(cls, note: "MarkdownNote"):
         return EditableNote(
