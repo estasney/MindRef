@@ -1,0 +1,22 @@
+--- ./a/pathlib.py	2022-11-25 15:35:38.761626284 -0500
++++ ./b/pathlib.py	2022-11-25 15:35:38.769626175 -0500
+@@ -17,7 +17,7 @@
+ from os.path import expanduser
+ from os.path import expandvars
+ from os.path import isabs
+-from os.path import sep
++from os import sep
+ from pathlib import Path
+ from pathlib import PurePath
+ from posixpath import sep as posix_sep
+@@ -544,8 +544,8 @@
+ 
+         if module_file.endswith((".pyc", ".pyo")):
+             module_file = module_file[:-1]
+-        if module_file.endswith(os.path.sep + "__init__.py"):
+-            module_file = module_file[: -(len(os.path.sep + "__init__.py"))]
++        if module_file.endswith(os.sep + "__init__.py"):
++            module_file = module_file[: -(len(os.sep + "__init__.py"))]
+ 
+         try:
+             is_same = _is_same(str(path), module_file)

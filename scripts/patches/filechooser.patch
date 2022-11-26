@@ -1,0 +1,13 @@
+--- a/filechooser.py	2022-11-25 15:14:40.744913349 -0500
++++ b/filechooser.py	2022-11-25 15:14:11.965782022 -0500
+@@ -102,9 +102,9 @@
+     StringProperty, ListProperty, BooleanProperty, ObjectProperty,
+     NumericProperty, AliasProperty)
+ import collections.abc
+-from os import listdir
++from os import listdir, sep
+ from os.path import (
+-    basename, join, sep, normpath, expanduser, altsep,
++    basename, join, normpath, expanduser, altsep,
+     splitdrive, realpath, getsize, isdir, abspath, isfile, dirname)
+ from fnmatch import fnmatch

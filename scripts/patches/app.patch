@@ -1,0 +1,12 @@
+--- ./a/app.py	2022-11-25 15:37:07.316448713 -0500
++++ ./b/app.py	2022-11-25 15:37:07.308448818 -0500
+@@ -411,7 +411,8 @@
+ 
+ import os
+ from inspect import getfile
+-from os.path import dirname, join, exists, sep, expanduser, isfile
++from os import sep
++from os.path import dirname, join, exists, expanduser, isfile
+ from kivy.config import ConfigParser
+ from kivy.base import runTouchApp, async_runTouchApp, stopTouchApp
+ from kivy.compat import string_types
