@@ -8,7 +8,7 @@ ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 PROJECT_ROOT:=$(ROOT_DIR)/$(PROJECT_NAME)
 
 # APK
-VERSION ?= 0.0.1
+APK_VERSION ?= $(shell sed -e '1s/__version__ = //g' -e '1s/"//g' -e '2,//d' mindref/__version__.py)
 NDK_VERSION ?= 29
 SDK_VERSION ?= 33
 
@@ -61,7 +61,7 @@ build-apk :  *.aar
 	&& python -m pythonforandroid.entrypoints apk --private $(PROJECT_ROOT) \
   	--package=org.test.mindref \
   	--name "MindRef" \
-  	--version $(VERSION) \
+  	--version $(APK_VERSION) \
   	--bootstrap=sdl2 \
   	--dist-name=$(PROJECT_NAME) \
   	--sdk-dir ~/Android/Sdk \

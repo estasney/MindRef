@@ -1,5 +1,7 @@
 **.pyc
 **/.coverage
+.coverage
+htmlcov/
 **/.env
 **/.pytest_cache
 **/__pycache__
@@ -9,8 +11,9 @@
 **/benchmarks
 **/parse_md_ast.py
 **/*.apk
+*.apk
 **/*.aar
-.buildozer
+*.aar
 .idea
 bin
 tests/**/*.png
