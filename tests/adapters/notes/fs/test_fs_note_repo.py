@@ -5,6 +5,7 @@ from itertools import product
 from operator import and_, attrgetter
 from typing import Callable, Optional, TYPE_CHECKING
 
+
 if TYPE_CHECKING:
     from domain.note_resource import CategoryResourceFiles
     from widgets.typeahead.typeahead_dropdown import Suggestion
@@ -242,3 +243,32 @@ def test_get_note(n_notes, cat_selected, note_repo_factory):
             fs.get_note("0", 0, None)
     else:
         assert type(fs.get_note("0", 0, None)) == MarkdownNote
+
+
+@pytest.mark.parametrize("platform", ["android", "other"])
+def test_note_repo_factory(platform, monkeypatch):
+    """
+    Given a platform
+    Use NoteRepositoryFactory to get the correct Repo for platform
+    Check that the correct repo is returned
+
+    Returns
+    -------
+    """
+    import kivy
+
+    monkeypatch.setattr(kivy, "platform", platform)
+
+    from adapters.notes.android.android_note_repository import AndroidNoteRepository
+    from adapters.notes.note_repository import (
+        AbstractNoteRepository,
+        NoteRepositoryFactory,
+    )
+
+    repo = NoteRepositoryFactory().get_repo()
+    assert issubclass(repo, AbstractNoteRepository)
+    match platform:
+        case "android":
+            assert issubclass(repo, (AbstractNoteRepository, AndroidNoteRepository))
+        case _:
+            assert issubclass(repo, (AbstractNoteRepository, FileSystemNoteRepository))
