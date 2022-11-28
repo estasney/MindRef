@@ -17,6 +17,7 @@ from utils import caller, fmt_attrs
 
 if TYPE_CHECKING:
     from domain.editable import EditableNote
+    from domain.protocols import GetApp
 
 
 class AndroidNoteRepository(FileSystemNoteRepository):
@@ -32,7 +33,7 @@ class AndroidNoteRepository(FileSystemNoteRepository):
     _storage_path: Optional[Path]
     _native_path: Optional[str]
 
-    def __init__(self, get_app, new_first: bool):
+    def __init__(self, get_app: "GetApp", new_first: bool):
         super().__init__(get_app, new_first)
         self._native_path = None
 

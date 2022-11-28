@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import abc
 from abc import ABC
-from typing import Callable, Literal, Optional, Protocol, TYPE_CHECKING, Type
+from typing import Callable, Literal, Optional, Protocol, TYPE_CHECKING, Type, overload
 
 if TYPE_CHECKING:
     from os import PathLike
@@ -10,6 +10,8 @@ if TYPE_CHECKING:
     from domain.editable import EditableNote
     from domain.protocols import GetApp
     from utils.index import RollingIndex
+    from .android.android_note_repository import AndroidNoteRepository
+    from .fs.fs_note_repository import FileSystemNoteRepository
 
     PLATFORM = Literal["win", "linux", "android", "macosx", "ios", "unknown"]
 
@@ -22,7 +24,17 @@ class NoteRepositoryInitProtocol(Protocol):
 
 class NoteRepositoryFactory:
     @classmethod
-    def get_repo(cls) -> Type["AbstractNoteRepository", NoteRepositoryInitProtocol]:
+    @overload
+    def get_repo(cls) -> "Type[AndroidNoteRepository]":
+        ...
+
+    @classmethod
+    @overload
+    def get_repo(cls) -> "Type[FileSystemNoteRepository]":
+        ...
+
+    @classmethod
+    def get_repo(cls):
         """
         Dynamic Class returned based on platform.
         """

@@ -1,6 +1,6 @@
 from collections import deque
 from pathlib import Path
-from typing import Callable, Optional, Protocol, TYPE_CHECKING
+from typing import Callable, Optional, TYPE_CHECKING
 
 from kivy import Logger
 
@@ -15,29 +15,16 @@ from utils.caching import kivy_cache
 from widgets.typeahead.typeahead_dropdown import Suggestion
 
 if TYPE_CHECKING:
-    from adapters.notes.note_repository import AbstractNoteRepository
-    from adapters.atlas.atlas_repository import AbstractAtlasRepository
-    from adapters.editor.editor_repository import AbstractEditorRepository
+    from domain.protocols import AppRegistryProtocol
     from domain.markdown_note import MarkdownNote, MarkdownNoteDict
     from domain.events import Event
     from domain.editable import EditableNote
-    from kivy.uix.screenmanager import ScreenManager
-
-
-class AppServiceProtocol(Protocol):
-    atlas_service: "AbstractAtlasRepository"
-    note_service: "AbstractNoteRepository"
-    editor_service: "AbstractEditorRepository"
-    screen_manager: "ScreenManager"
-    note_category: str
-    note_category_meta: list["MarkdownNoteDict"]
-    note_data: dict
 
 
 class Registry:
     """Orchestration"""
 
-    _app: Optional["AppServiceProtocol"]
+    _app: Optional["AppRegistryProtocol"]
     events: deque["Event"]
 
     def __init__(self):
@@ -52,7 +39,7 @@ class Registry:
         return self._app
 
     @app.setter
-    def app(self, app: "AppServiceProtocol"):
+    def app(self, app: "AppRegistryProtocol"):
         self._app = app
 
     def set_note_storage_path(self, path: Path | str):
@@ -155,8 +142,9 @@ class Registry:
 
         If Exception occurs (KeyError) push an error event
 
-        Returns
+        Notes
         ------
+        App will update it's own note_category in `App.process_note_category_event`
         """
         try:
             self.app.note_service.current_category = value

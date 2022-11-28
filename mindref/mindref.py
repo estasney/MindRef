@@ -51,6 +51,7 @@ from widgets.screens.manager import NoteAppScreenManager
 if TYPE_CHECKING:
     DISPLAY_STATES = Literal["choose", "display", "list", "edit", "add", "error"]
     DISPLAY_STATE = tuple[DISPLAY_STATES, DISPLAY_STATES]
+    PLAY_STATE = Literal["play", "pause"]
 
 
 class MindRefApp(App):
@@ -70,9 +71,6 @@ class MindRefApp(App):
 
     editor_note = ObjectProperty(allownone=True)
 
-    screen_transitions = OptionProperty(
-        "slide", options=["None", "Slide", "Rise-In", "Card", "Fade", "Swap", "Wipe"]
-    )
     menu_open = BooleanProperty(False)
 
     display_state_last = OptionProperty(
@@ -84,7 +82,7 @@ class MindRefApp(App):
     display_state_trigger: Callable[["DISPLAY_STATES"], None]
 
     play_state = OptionProperty("play", options=["play", "pause"])
-    play_state_trigger: Callable[[Literal["play", "pause"]], None]
+    play_state_trigger: Callable[["PLAY_STATE"], None]
 
     error_message = StringProperty()
 

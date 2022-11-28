@@ -1,13 +1,47 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Callable, Optional, Protocol, TypeVar
+from typing import Callable, Optional, Protocol, TYPE_CHECKING, TypeVar, Union
 
 from service.registry import Registry
 
+if TYPE_CHECKING:
+    from adapters.atlas.fs.fs_atlas_repository import AtlasService
+    from adapters.editor.fs.fs_editor_repository import FileSystemEditor
+    from adapters.notes.fs.fs_note_repository import FileSystemNoteRepository
+    from adapters.notes.android.android_note_repository import AndroidNoteRepository
+    from plugins import PluginManager
+    from mindref.mindref import DISPLAY_STATES, DISPLAY_STATE, PLAY_STATE
+    from kivy._clock import ClockEvent  # noqa
+    from kivy.uix.screenmanager import ScreenManager
+    from widgets import MindRefSettingsAndroid, MindRefSettingsNative
+
 
 class AppRegistryProtocol(Protocol):
+    atlas_service: "AtlasService"
+    note_service: "Union[FileSystemNoteRepository, AndroidNoteRepository]"
+    editor_service: "FileSystemEditor"
+    plugin_manager: "PluginManager"
     registry: "Registry"
+
+    platform_android: bool
+    note_categories: list[str]
+    note_category: str
+    menu_open: bool
+    display_state_last: "DISPLAY_STATES"
+    display_state_current: "DISPLAY_STATES"
+    display_state: "DISPLAY_STATE"
+    display_state_trigger: Callable[["DISPLAY_STATES"], None]
+    play_state: "PLAY_STATE"
+    play_state_trigger: Callable[["PLAY_STATE"], None]
+    error_message: str
+    paginate_interval: int
+    paginate_timer: "ClockEvent"
+    screen_manager: "ScreenManager"
+    fonts: dict[str, str]
+    base_font_size: int
+    colors: dict[str, tuple[float, float, float] | tuple[float, float, float, float]]
+    settings_cls: str | "MindRefSettingsAndroid" | "MindRefSettingsNative"
 
 
 T = TypeVar("T", bound=AppRegistryProtocol)

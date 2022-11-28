@@ -37,7 +37,6 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
         self.app.bind(display_state=self.handle_app_display_state)
         self.app.bind(on_paginate=self.handle_pagination)
         self.app.bind(play_state=self.setter("play_state"))
-        self.app.bind(screen_transitions=self.setter("screen_transitions"))
         self.app.bind(menu_open=self.setter("menu_open"))
         self.fbind("menu_open", self.handle_menu_state)
         self.fbind("reversed_transition", self.handle_reversed_transition)
