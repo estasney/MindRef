@@ -18,17 +18,19 @@ from domain.events import (
     ListViewButtonEvent,
     PaginationEvent,
 )
+
 from utils import import_kv
 from utils.caching import cache_key_note, kivy_cache
 from widgets.behavior.gesture_rec_behavior import GestureRecognizingBehavior
+from widgets.markdown.markdown_document import MarkdownDocument
 
 import_kv(__file__)
 
-from widgets.markdown.markdown_document import MarkdownDocument
 
 if TYPE_CHECKING:
     from domain.markdown_note import MarkdownNoteDict
     from typing import Optional
+    from domain.protocols import AppRegistryProtocol
 
 Cache.register("note_widget", limit=10, timeout=3600)
 
@@ -93,7 +95,7 @@ class NoteTitleBar(BoxLayout):
 
     def handle_select(self, _, value):
 
-        app = App.get_running_app()
+        app: "AppRegistryProtocol" = App.get_running_app()
         match value:
             case "add":
                 app.registry.push_event(AddNoteEvent())
@@ -108,7 +110,7 @@ class NoteTitleBar(BoxLayout):
                 return True
             case "back":
                 app.registry.push_event(
-                    BackButtonEvent(current_display_state="display")
+                    BackButtonEvent(display_state=app.display_state)
                 )
                 return True
             case _:
