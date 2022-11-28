@@ -3,7 +3,6 @@ from kivy.factory import Factory
 from kivy.properties import StringProperty
 from kivy.uix.settings import SettingPath, SettingsWithSpinner
 
-from adapters.notes.android.interface import AndroidStorageManager
 from widgets.behavior.interact_behavior import InteractBehavior
 
 
@@ -29,6 +28,8 @@ class AndroidSettingPath(SettingPath):
         self.value = uri
 
     def _create_popup(self, *args):
+        from adapters.notes.android.interface import AndroidStorageManager
+
         AndroidStorageManager.select_folder(self.select_folder_callback)
 
 
