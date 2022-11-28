@@ -98,19 +98,33 @@ class NoteTitleBar(BoxLayout):
         app: "AppRegistryProtocol" = App.get_running_app()
         match value:
             case "add":
-                app.registry.push_event(AddNoteEvent())
+                event = AddNoteEvent()
+                app.registry.push_event(event)
+                Logger.info(
+                    f"{type(self).__name__}: handle_select : 'add',  pushed:{event!r}"
+                )
                 return True
             case "edit":
-                app.registry.push_event(
-                    EditNoteEvent(category=app.note_category, idx=self.index)
+                event = EditNoteEvent(category=app.note_category, idx=self.index)
+                app.registry.push_event(event)
+                Logger.info(
+                    f"{type(self).__name__}: handle_select : 'edit', pushed: {event!r}"
                 )
                 return True
             case "list":
-                app.registry.push_event(ListViewButtonEvent())
+                event = ListViewButtonEvent()
+                app.registry.push_event(event)
+                Logger.info(
+                    f"{type(self).__name__}: handle_select : 'list', pushed: {event!r}"
+                )
                 return True
             case "back":
+                event = BackButtonEvent(display_state=app.display_state)
                 app.registry.push_event(
                     BackButtonEvent(display_state=app.display_state)
+                )
+                Logger.info(
+                    f"{type(self).__name__}: handle_select : 'back', pushed: {event!r}"
                 )
                 return True
             case _:

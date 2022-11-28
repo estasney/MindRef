@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 from functools import partial, wraps
+from operator import itemgetter
 from pathlib import Path
 from typing import (
     Callable,
@@ -137,6 +138,21 @@ def fmt_attrs(instance, *attr) -> str:
     """
     params = ((a, getattr(instance, a)) for a in attr)
     fmt_params = (f"{a!s}={v!s}" for a, v in params if v)
+    param_str = ", ".join(fmt_params)
+    return f"[{param_str}]"
+
+
+def fmt_items(instance: "SupportsGetItem", *attr) -> str:
+    """
+    Build a param string formatted for logging with form
+    [key=item]
+
+    Returns
+    -------
+    """
+    keys, values = attr, itemgetter(*attr)(instance)
+    params = ((k, v) for k, v in zip(keys, values))
+    fmt_params = (f"{k!s}={v!s}" for k, v in params if v)
     param_str = ", ".join(fmt_params)
     return f"[{param_str}]"
 

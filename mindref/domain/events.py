@@ -92,7 +92,7 @@ class NoteFetchedEvent(Event):
 @dataclass
 class NoteCategoryEvent(Event):
     event_type = "note_category"
-    value: str
+    value: Optional[str]
     on_complete: Optional[Callable]
 
     def __repr__(self):

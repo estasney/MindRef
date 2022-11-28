@@ -66,7 +66,7 @@ class MindRefApp(App):
     registry = Registry()
 
     note_categories = ListProperty()
-    note_category = StringProperty("")
+    note_category = StringProperty(allownone=True)
     note_category_meta = ListProperty()
 
     editor_note = ObjectProperty(allownone=True)
@@ -163,16 +163,16 @@ class MindRefApp(App):
     )
 
     def on_display_state(self, _, value: "DISPLAY_STATE"):
-        _, value = value
-
-        if value != "display":
-            self.play_state_trigger("pause")
-        if value == "edit":
-            self.editor_note = self.editor_service.edit_current_note()
-        elif value == "add":
-            self.editor_note = self.editor_service.new_note(
-                category=self.note_category, idx=self.note_service.index_size()
-            )
+        old, new = value
+        match (old, new):
+            case _, "edit":
+                self.editor_note = self.editor_service.edit_current_note()
+                self.play_state_trigger("pause")
+            case _, "add":
+                self.editor_note = self.editor_service.new_note(
+                    category=self.note_category, idx=self.note_service.index_size()
+                )
+                self.play_state_trigger("pause")
 
     def on_play_state(self, *_args):
         if self.play_state == "pause":
@@ -284,32 +284,52 @@ class MindRefApp(App):
         self.display_state_trigger("list")
 
     def process_note_category_event(self, event: NoteCategoryEvent):
-        """Note Category has been set via registry"""
-
-        def set_note_category_meta(meta):
-            self.note_category_meta = meta
-            sch_cb(
-                set_note_category, refresh_note_page, trigger_display_state, timeout=0.1
-            )
-
-        # Query Category Meta, on_complete - Set App note_category_meta to result
-        get_category_meta = caller(
-            self.note_service,
-            "get_category_meta",
-            category=event.value,
-            on_complete=set_note_category_meta,
-        )
+        """
+        Note Category has been set via registry. If a valid string, we need to query and set category_meta.
+        Otherwise, if None, we clear it
+        """
 
         # Set note category attribute
         set_note_category = attrsetter(self, "note_category", event.value)
 
-        # Paginate the note
-        refresh_note_page = caller(self, "paginate_note", direction=0)
+        match event.value:
+            case str():
 
-        # Display the notes
-        trigger_display_state = caller(self, "display_state_trigger", "display")
+                def set_note_category_meta(meta):
+                    self.note_category_meta = meta
+                    sch_cb(
+                        set_note_category,
+                        refresh_note_page,
+                        trigger_display_state,
+                        timeout=0.1,
+                    )
 
-        sch_cb(get_category_meta, timeout=0.1)
+                # Query Category Meta, on_complete - Set App note_category_meta to result
+                get_category_meta = caller(
+                    self.note_service,
+                    "get_category_meta",
+                    category=event.value,
+                    on_complete=set_note_category_meta,
+                )
+
+                # Paginate the note
+                refresh_note_page = caller(self, "paginate_note", direction=0)
+
+                # Display the notes
+                trigger_display_state = caller(self, "display_state_trigger", "display")
+
+                sch_cb(get_category_meta, timeout=0.1)
+                Logger.info(
+                    f"{type(self).__name__}: process_note_category_event - Scheduled Updating Note Data"
+                )
+            case None:
+                clear_note_meta = attrsetter(self, "note_category_meta", [])
+                sch_cb(set_note_category, clear_note_meta)
+                Logger.info(
+                    f"{type(self).__name__}: process_note_category_event - Scheduled Clearing Note Data"
+                )
+            case _:
+                raise AssertionError(f"Unhandled {event!r}.value : {event.value}")
 
     def process_note_category_failure_event(self, event: NoteCategoryFailureEvent):
         """Failed to set"""
@@ -360,13 +380,25 @@ class MindRefApp(App):
         match (old, new):
             case _, "choose":
                 # Cannot go further back
+                Logger.info(
+                    f"{type(self).__name__}: process_back_button_event: Exiting"
+                )
                 App.get_running_app().stop()
             case _, "display":
+                clear_registry_category = caller(
+                    self.registry, "set_note_category", value=None, on_complete=None
+                )
                 trigger_display_choose = caller(self, "display_state_trigger", "choose")
-                sch_cb(trigger_display_choose)
+                sch_cb(clear_registry_category, trigger_display_choose)
+                Logger.info(
+                    f"{type(self).__name__}: process_back_button_event - scheduled display_state: choose"
+                )
             case _, "list":
                 trigger_display = caller(self, "display_state_trigger", "display")
                 sch_cb(trigger_display)
+                Logger.info(
+                    f"{type(self).__name__}: process_back_button_event - scheduled display_state: display"
+                )
             case _, "edit" | "add":
                 self.registry.push_event(CancelEditEvent())
             case _:

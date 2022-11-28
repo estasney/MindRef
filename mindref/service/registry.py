@@ -136,7 +136,7 @@ class Registry:
         sch_cb(set_note_index, fetch_note)
         Logger.info(f"{type(self).__name__}: set_note_index - {value}")
 
-    def set_note_category(self, value: str, on_complete: Optional[Callable]):
+    def set_note_category(self, value: Optional[str], on_complete: Optional[Callable]):
         """
         Update note_service current category.
 
