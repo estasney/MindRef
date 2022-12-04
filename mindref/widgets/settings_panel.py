@@ -30,7 +30,7 @@ class AndroidSettingPath(SettingPath):
     def _create_popup(self, *args):
         from adapters.notes.android.interface import AndroidStorageManager
 
-        AndroidStorageManager.select_folder(self.select_folder_callback)
+        AndroidStorageManager.prompt_for_external_folder(self.select_folder_callback)
 
 
 class MindRefSettingsAndroid(InteractBehavior, SettingsWithSpinner):
