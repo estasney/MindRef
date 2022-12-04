@@ -241,7 +241,7 @@ class AndroidStorageManager:
         """
 
         cls._prompt_folder_callback_java = OnDocumentCallback(
-            py_mediator=cls._get_mediator, activity_code=activity_code
+            cls._get_mediator, activity_code
         )
         activity = cls._get_activity()
         activity.registerActivityResultListener(cls._prompt_folder_callback_java)
