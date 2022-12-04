@@ -13,17 +13,25 @@ NDK_VERSION ?= 29
 SDK_VERSION ?= 33
 
 # ADB
-LOGCAT_FILTER ?= '*:S python:I mindrefutils:D'
+PYTHON_LOG_LEVEL ?= 'I'
+JAVA_LOG_LEVEL ?= 'D'
+OTHER_LOG_LEVEL ?= '*:S'
+LOGCAT_FILTER ?= '$(OTHER_LOG_LEVEL) python:$(PYTHON_LOG_LEVEL) mindrefutils:$(JAVA_LOG_LEVEL)'
 
-default_target : all
-.PHONY : default_target
-
-test-clean:
-	echo $(PROJECT_ROOT)
-.PHONY : test-clean
+echo-vars:
+	@echo PROJECT_ROOT = \"$(PROJECT_ROOT)\"
+	@echo ROOT_DIR = \"$(ROOT_DIR)\"
+	@echo UTIL_ROOT = \"$(UTIL_ROOT)\"
+	@echo UTIL_OUTPUT = \"$(UTIL_OUTPUT)\"
+	@echo UTIL_AAR = \"$(UTIL_AAR)\"
+	@echo APK_VERSION = \"$(APK_VERSION)\"
+	@echo NDK_VERSION = \"$(NDK_VERSION)\"
+	@echo APK_VERSION = \"$(APK_VERSION)\"
+	@echo LOGCAT_FILTER = \"$(LOGCAT_FILTER)\"
+.PHONY : echo-vars
 
 clean-apk :
-	find . -type f -name "*.apk" -exec rm {} \;
+	find . -type f -name "*.apk" -delete
 .PHONY : clean-apk
 
 clean-aar :
@@ -77,6 +85,7 @@ build-apk :  *.aar
   	--depend "com.google.guava:guava:31.1-android" \
   	--depend "org.apache.commons:commons-io:1.3.2" \
   	--add-aar $(ROOT_DIR)/mindrefutils-debug.aar
+ .PHONY : build-apk
 
 
 install : build-apk
@@ -88,6 +97,3 @@ install-run : install
 	&& adb logcat -c \
 	&& adb logcat $(LOGCAT_FILTER)
 .PHONY : install-run
-
-
-all: clean-all build-apk install-run
