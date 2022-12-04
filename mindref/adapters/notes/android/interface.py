@@ -191,7 +191,11 @@ class AndroidStorageManager:
                     ("appStorageRoot", appStorageRoot),
                 )
             ):
+                Logger.info(
+                    f"{type(cls).__name__}: _get_mindref_utils_cls - Recreating MindRefUtils - Parameters Changed"
+                )
                 cls._utils_cls = None
+                cls._mindref_callback_java = None
                 return cls._get_mindref_utils_cls(
                     externalStorageRoot, appStorageRoot, context
                 )
