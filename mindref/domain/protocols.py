@@ -31,9 +31,7 @@ class AppRegistryProtocol(Protocol):
     display_state_last: "DISPLAY_STATES"
     display_state_current: "DISPLAY_STATES"
     display_state: "DISPLAY_STATE"
-    display_state_trigger: Callable[["DISPLAY_STATES"], None]
     play_state: "PLAY_STATE"
-    play_state_trigger: Callable[["PLAY_STATE"], None]
     error_message: str
     paginate_interval: int
     paginate_timer: "ClockEvent"
@@ -42,6 +40,15 @@ class AppRegistryProtocol(Protocol):
     base_font_size: int
     colors: dict[str, tuple[float, float, float] | tuple[float, float, float, float]]
     settings_cls: str | "MindRefSettingsAndroid" | "MindRefSettingsNative"
+
+    def display_state_trigger(self, state: "DISPLAY_STATES") -> None:
+        ...
+
+    def play_state_trigger(self, state: "PLAY_STATE") -> None:
+        ...
+
+    def open_settings(self) -> None:
+        ...
 
 
 T = TypeVar("T", bound=AppRegistryProtocol)

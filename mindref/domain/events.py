@@ -1,5 +1,7 @@
 import abc
 from dataclasses import dataclass, field
+from enum import Flag, auto
+from pathlib import Path
 from typing import Any, Callable, Literal, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -145,6 +147,20 @@ class DiscoverCategoryEvent(Event):
 
 
 @dataclass
+class CreateCategoryEvent(Event):
+    class Action(Flag):
+        OPEN_FORM = auto()
+        CLOSE_FORM = auto()
+        ACCEPT = auto()
+        REJECT = auto()
+
+    event_type = "create_category_event"
+    category: Optional[str] = None
+    img_path: Optional[str | Path] = None
+    action: Action = Action.ACCEPT
+
+
+@dataclass
 class NotesQueryFailureEvent(EventFailure, NotesQueryEvent):
     event_type = "notes_query_failure"
     message = "To view notes, open Settings > Storage\n\nAnd set 'Note Storage'"
@@ -219,4 +235,18 @@ class TypeAheadQueryEvent(Event):
 
     def __repr__(self):
         attrs = ("event_type", "query", "on_complete")
+        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+
+
+@dataclass
+class PromptExternalStorageAndroid(Event):
+    """
+    Android specific event dispatched when we want to invoke AndroidStorageManager.prompt_for_external_folder
+    """
+
+    event_type = "prompt_external_storage_android"
+    on_complete: Callable[[str], None]
+
+    def __repr__(self):
+        attrs = ("event_type",)
         return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"

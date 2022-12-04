@@ -1,4 +1,3 @@
-from enum import IntEnum
 from typing import (
     Any,
     Callable,
@@ -7,6 +6,7 @@ from typing import (
     Protocol,
     TYPE_CHECKING,
     runtime_checkable,
+    overload,
 )
 
 if TYPE_CHECKING:
@@ -20,12 +20,6 @@ LIntentFlags = Literal[1, 2]
 
 MIME_TYPE = NewType("MIME_TYPE", str)
 DISPLAY_NAME_TYPE = NewType("DISPLAY_NAME_TYPE", str)
-
-
-class ActivityResultCode(IntEnum):
-    RESULT_OK = -1
-    RESULT_CANCELLED = 0
-    RESULT_FIRST_USER = 1
 
 
 class IntentProtocol(Protocol):
@@ -77,48 +71,68 @@ class ContextProtocol(Protocol):
     getContentResolver: Callable[[ContentResolverProtocol], None]
 
 
-class ApplicationProtocol(Protocol):
+class AndroidApplicationProtocol(Protocol):
     ...
 
 
 class ActivityProtocol(Protocol):
     mActivity: "ActivityProtocol"
     getContentResolver: Callable[[], ContentResolverProtocol]
-    getApplication: Callable[[], ApplicationProtocol]
+    getApplication: Callable[[], AndroidApplicationProtocol]
     getContext: Callable[[], ContextProtocol]
     getAppRoot: Callable[[], str]
     registerActivityResultListener: Callable[["OnDocumentCallback"], None]
     startActivityForResult: Callable[[IntentProtocol, int], None]
 
 
-class MindRefCopyStorageCallbackProtocol(Protocol):
-    onCopyStorageResult: Callable[[bool], None]
-    onCopyStorageDirectoryResult: Callable[[str], None]
+class MindRefUtilsCallback(Protocol):
+    onCompleteCreateCategory: Callable[[int, str], None]
+    onCompleteGetCategories: Callable[[int, list[str]], None]
+    onCompleteCopyStorage: Callable[[int], None]
+    onFailure: Callable[[int], None]
 
 
-class MindRefGetCategoriesCallbackProtocol(Protocol):
-    onComplete: Callable[[list[str]], None]
+class MindRefUtilsCallbackPyMediator(Protocol):
+    @overload
+    def __call__(self, _key: int, category: str):
+        ...
+
+    @overload
+    def __call__(self, _key: int, categories: list[str]):
+        ...
+
+    @overload
+    def __call__(self, _key: int):
+        ...
+
+    def __call__(self, _key, *args):
+        ...
 
 
 # noinspection PyUnusedLocal
 class MindRefUtilsProtocol(Protocol):
     externalStorageRoot: str
     appStorageRoot: str
-
-    setStorageCallback: Callable[[MindRefCopyStorageCallbackProtocol], None]
-    copyToAppStorage: Callable[[], None]
-    setGetCategoriesCallback: Callable[[MindRefGetCategoriesCallbackProtocol], None]
-    getNoteCategories: Callable[[], None]
-    haveGetCategoriesCallback: bool
-    haveStorageCallback: bool
-    haveWriteDocumentCallback: bool
+    haveMindRefUtilsCallback: bool
 
     def __init__(
         self, externalStorageRoot: str, appStorageRoot: str, context: ContextProtocol
     ):
         ...
 
+    def setMindRefCallback(self, callback: MindRefUtilsCallback):
+        ...
+
+    def getNoteCategories(self, key: int):
+        ...
+
+    def copyToAppStorage(self, key: int):
+        ...
+
     def copyToExternalStorage(
-        self, sourcePath: str, category: str, name: str, mimeType: str
+        self, key: int, sourcePath: str, category: str, name: str, mimeType: str
     ):
+        ...
+
+    def createCategory(self, key: int, category: str):
         ...

@@ -7,7 +7,7 @@ from kivy.properties import ObjectProperty, OptionProperty, StringProperty
 from domain.editable import EditableNote
 from domain.events import CancelEditEvent, SaveNoteEvent
 from utils import attrsetter, import_kv, sch_cb
-from widgets.editor.editor import NoteEditor
+from widgets.editor.note_editor import NoteEditor
 from widgets.screens import InteractScreen
 
 if TYPE_CHECKING:

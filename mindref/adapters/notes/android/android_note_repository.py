@@ -1,6 +1,16 @@
+from enum import IntEnum
 from functools import partial
 from pathlib import Path
-from typing import Any, Callable, Iterable, Optional, TYPE_CHECKING
+from typing import (
+    Any,
+    Callable,
+    Iterable,
+    Optional,
+    TYPE_CHECKING,
+    NewType,
+    Literal,
+    TypeVar,
+)
 
 from kivy import Logger
 from kivy.app import App
@@ -18,6 +28,52 @@ from utils import caller, fmt_attrs
 if TYPE_CHECKING:
     from domain.editable import EditableNote
     from domain.protocols import GetApp
+    from adapters.notes.android.annotations import MindRefUtilsCallbackPyMediator
+
+CodeNames = Literal[
+    "MIRROR",
+    "READ",
+    "WRITE",
+    "REMOVE",
+    "CATEGORIES",
+    "NOTES",
+    "EXTERNAL_STORAGE",
+    "APP_STORAGE",
+]
+
+
+class MindRefCallCodes(IntEnum):
+    MIRROR = 1 << 0  # Mirroring a filesystem
+    READ = 1 << 1  # Read without writing
+    WRITE = 1 << 2  # Creating a resource
+    REMOVE = 1 << 3  # Removing a resource
+    PROMPT = 1 << 4  # Asked for User Intervention
+    CATEGORIES = 1 << 5  # Operating on categories
+    NOTES = 1 << 6  # Operating on notes
+    EXTERNAL_STORAGE = 1 << 7  # Target of operation is external storage
+    APP_STORAGE = 1 << 8  # Target of operation is app storage
+
+    @staticmethod
+    def check_field(x: int, n: int) -> bool:
+        return (x & n) != 0
+
+    @classmethod
+    def deconstruct_int(cls, val: int) -> tuple[tuple[CodeNames], bool]:
+        fields_true = []
+        a_val = abs(val)
+        n_bits = a_val.bit_count()
+        n_found = 0
+        # noinspection PyTypeChecker
+        members: Iterable[tuple[CodeNames, int]] = (
+            (member.name, member.value) for member in cls
+        )
+        for name, value in members:
+            if n_found == n_bits:
+                return tuple(fields_true), val >= 0
+            if MindRefCallCodes.check_field(val, value):
+                fields_true.append(name)
+                n_found += 1
+        return tuple(fields_true), val >= 0
 
 
 class AndroidNoteRepository(FileSystemNoteRepository):
@@ -32,10 +88,14 @@ class AndroidNoteRepository(FileSystemNoteRepository):
 
     _storage_path: Optional[Path]
     _native_path: Optional[str]
+    _mediator_callbacks: dict[int, Callable]
+    py_mediator: "MindRefUtilsCallbackPyMediator"
 
     def __init__(self, get_app: "GetApp", new_first: bool):
         super().__init__(get_app, new_first)
         self._native_path = None
+        self._mediator_callbacks = {}
+        AndroidStorageManager._mindref_callback_py_mediator = self.py_mediator
 
     @property
     def configured(self) -> bool:
@@ -55,19 +115,38 @@ class AndroidNoteRepository(FileSystemNoteRepository):
         value : str
             E.g. content://com.android.externalstorage.documents/tree/primary:
         """
-        Logger.info(f"{type(self).__name__} : set native path :  {value}")
+        s_native = str(value)
+        if self._native_path == s_native:
+            return
+        Logger.info(f"{type(self).__name__} : set native path :  {s_native}")
         self._native_path = str(value)
         self._storage_path = Path(App.get_running_app().user_data_dir) / "notes"
         self._storage_path.mkdir(exist_ok=True, parents=True)
+        self.current_category = None
+        self.category_files.clear()
         Logger.info(f"{type(self).__name__}: set storage path : {self._storage_path!s}")
+
+    def py_mediator(self, key: int, *args):
+        Logger.info(
+            f"{type(self).__name__}: py_mediator - Got Key : {key}, Args: {args}"
+        )
+        if key not in self._mediator_callbacks:
+            Logger.info(
+                f"{type(self).__name__}: py_mediator - No callback for code {key}"
+            )
+            return
+        cb = self._mediator_callbacks.pop(key)
+        cb(*args)
 
     def _copy_storage(self, on_complete: Callable[[Any], None]):
         Logger.info(
             f"{type(self).__name__} : Invoking AndroidStorageManager to copy_storage from {self._native_path} to {self._storage_path}"
         )
 
+        key = MindRefCallCodes.MIRROR | MindRefCallCodes.EXTERNAL_STORAGE
+        self._mediator_callbacks[key] = on_complete
         AndroidStorageManager.clone_external_storage(
-            self._native_path, self._storage_path, on_complete
+            self._native_path, self._storage_path, key
         )
 
     def discover_categories(self, on_complete: Optional[Callable[[], None]], *args):
@@ -112,7 +191,7 @@ class AndroidNoteRepository(FileSystemNoteRepository):
             if on_complete_inner:
                 on_complete_inner()
 
-        def after_get_external_storage_categories(_categories: Iterable[str]):
+        def after_get_external_storage_categories():
             Logger.info(
                 f"{type(self).__name__}:"
                 f" after_get_external_storage_categories - External Storage Categories Copied"
@@ -165,23 +244,45 @@ class AndroidNoteRepository(FileSystemNoteRepository):
         Logger.info(
             f"{type(self).__name__}: get_external_storage_categories - {fmt_attrs(self, '_native_path', '_storage_path')}"
         )
+        callback_code = MindRefCallCodes.READ | MindRefCallCodes.CATEGORIES
+        self._mediator_callbacks[callback_code] = on_complete
         AndroidStorageManager.get_categories(
-            self._native_path, self._storage_path, on_complete
+            self._native_path, self._storage_path, callback_code
         )
 
     def save_note(self, note: "EditableNote", on_complete):
         Logger.info(f"{type(self).__name__} : Saving Note : {note}")
+
+        key = MindRefCallCodes.WRITE | MindRefCallCodes.NOTES
 
         def store_to_external(md_note: MarkdownNote):
             Logger.info(
                 f"{type(self).__name__} : storing {md_note.title}.md to external storage"
             )
             note_fp = md_note.filepath
+
+            def inject_md():
+                on_complete(md_note)
+
+            self._mediator_callbacks[key] = inject_md
             AndroidStorageManager.copy_to_external_storage(
-                note_fp,
-                str(self.storage_path),
-                self._native_path,
-                lambda dt: on_complete(md_note),
+                note_fp, str(self.storage_path), self._native_path, key
             )
 
         super().save_note(note, store_to_external)
+
+    def prompt_for_external_folder(self, on_complete: Callable[[], None]):
+        """
+        Wrapper for `AndroidStorageManager.prompt_for_external_folder` that stores a callback and passes appropriate code
+
+        Parameters
+        ----------
+        on_complete
+
+        Returns
+        -------
+
+        """
+        code = MindRefCallCodes.PROMPT | MindRefCallCodes.EXTERNAL_STORAGE
+        self._mediator_callbacks[code] = on_complete
+        AndroidStorageManager.prompt_for_external_folder(code)
