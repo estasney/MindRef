@@ -220,3 +220,17 @@ class TypeAheadQueryEvent(Event):
     def __repr__(self):
         attrs = ("event_type", "query", "on_complete")
         return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+
+
+@dataclass
+class PromptExternalStorageAndroid(Event):
+    """
+    Android specific event dispatched when we want to invoke AndroidStorageManager.prompt_for_external_folder
+    """
+
+    event_type = "prompt_external_storage_android"
+    on_complete: Callable[[str], None]
+
+    def __repr__(self):
+        attrs = ("event_type",)
+        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"

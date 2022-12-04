@@ -112,8 +112,13 @@ class FileSystemNoteRepository(AbstractNoteRepository):
     def storage_path(self, value: "PathLike"):
         if value is None:
             self._storage_path = None
-        else:
-            self._storage_path = Path(value)
+            return
+        if self._storage_path == Path(value):
+            return
+        # If it's different we need to clear our category_files
+        self._storage_path = Path(value)
+        self.current_category = None
+        self.category_files.clear()
 
     def discover_category(
         self,

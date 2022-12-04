@@ -115,10 +115,15 @@ class AndroidNoteRepository(FileSystemNoteRepository):
         value : str
             E.g. content://com.android.externalstorage.documents/tree/primary:
         """
-        Logger.info(f"{type(self).__name__} : set native path :  {value}")
+        s_native = str(value)
+        if self._native_path == s_native:
+            return
+        Logger.info(f"{type(self).__name__} : set native path :  {s_native}")
         self._native_path = str(value)
         self._storage_path = Path(App.get_running_app().user_data_dir) / "notes"
         self._storage_path.mkdir(exist_ok=True, parents=True)
+        self.current_category = None
+        self.category_files.clear()
         Logger.info(f"{type(self).__name__}: set storage path : {self._storage_path!s}")
 
     def py_mediator(self, key: int, *args):
@@ -265,3 +270,19 @@ class AndroidNoteRepository(FileSystemNoteRepository):
             )
 
         super().save_note(note, store_to_external)
+
+    def prompt_for_external_folder(self, on_complete: Callable[[], None]):
+        """
+        Wrapper for `AndroidStorageManager.prompt_for_external_folder` that stores a callback and passes appropriate code
+
+        Parameters
+        ----------
+        on_complete
+
+        Returns
+        -------
+
+        """
+        code = MindRefCallCodes.PROMPT | MindRefCallCodes.EXTERNAL_STORAGE
+        self._mediator_callbacks[code] = on_complete
+        AndroidStorageManager.prompt_for_external_folder(code)
