@@ -41,6 +41,7 @@ from domain.events import (
     SaveNoteEvent,
     TypeAheadQueryEvent,
     PromptExternalStorageAndroid,
+    CreateCategoryEvent,
 )
 from domain.settings import app_settings
 from plugins import PluginManager
@@ -50,7 +51,9 @@ from utils.triggers import trigger_factory
 from widgets.screens.manager import NoteAppScreenManager
 
 if TYPE_CHECKING:
-    DISPLAY_STATES = Literal["choose", "display", "list", "edit", "add", "error"]
+    DISPLAY_STATES = Literal[
+        "choose", "display", "list", "edit", "add", "error", "category_editor"
+    ]
     DISPLAY_STATE = tuple[DISPLAY_STATES, DISPLAY_STATES]
     PLAY_STATE = Literal["play", "pause"]
 
@@ -75,10 +78,28 @@ class MindRefApp(App):
     menu_open = BooleanProperty(False)
 
     display_state_last = OptionProperty(
-        "choose", options=["choose", "display", "list", "edit", "add", "error"]
+        "choose",
+        options=[
+            "choose",
+            "display",
+            "list",
+            "edit",
+            "add",
+            "error",
+            "category_editor",
+        ],
     )
     display_state_current = OptionProperty(
-        "choose", options=["choose", "display", "list", "edit", "add", "error"]
+        "choose",
+        options=[
+            "choose",
+            "display",
+            "list",
+            "edit",
+            "add",
+            "error",
+            "category_editor",
+        ],
     )
     display_state_trigger: Callable[["DISPLAY_STATES"], None]
 
@@ -269,6 +290,8 @@ class MindRefApp(App):
                         )
                     case _, "edit" | "add":
                         self.registry.push_event(CancelEditEvent())
+                    case previous, "category_editor":
+                        self.display_state_trigger(previous)
                     case _:
                         Logger.warning(
                             f"Unknown display state encountered when handling back button: {old},{new}"
@@ -404,6 +427,8 @@ class MindRefApp(App):
                 return Clock.schedule_once(registry_paginate)
             case PromptExternalStorageAndroid(on_complete=on_complete):
                 return self.note_service.prompt_for_external_folder(on_complete)
+            case CreateCategoryEvent(action=CreateCategoryEvent.Action.OPEN_FORM) as e:
+                return self.display_state_trigger("category_editor")
             case _:
                 Logger.info(
                     f"{type(self).__name__}: process_event - Unhandled Event {type(event).__name__}"

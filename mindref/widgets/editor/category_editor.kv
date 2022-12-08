@@ -1,0 +1,95 @@
+#:import HSeparator widgets.separator
+#:import VSeparator widgets.separator
+#:import ExpandingLabel widgets.style
+
+
+<-TitleBar@BoxLayout>:
+    canvas:
+        Color:
+            rgba: app.colors['Primary']
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    padding: dp(15)
+    ExpandingLabel:
+        text: "Create Category"
+        halign: 'center'
+        valign: 'center'
+        font_size: app.base_font_size + sp(2)
+        size_hint_y: None
+
+<-ButtonBar@BoxLayout>:
+    padding: 0
+    orientation: 'horizontal'
+    size_hint_x: 1
+    size_hint_y: None
+
+<OpenFileDialogButton@TexturedButton>:
+    text: ''
+    size_hint_y: None
+    size: dp(40), dp(40)
+    font_size: app.base_font_size + sp(4)
+    LargeLabel:
+        text: root.text
+
+
+<-CategoryNameRow@BoxLayout>:
+    orientation: 'vertical'
+    height: self.minimum_height
+    padding: app.base_font_size
+    value: input.text
+    BoxLayout:
+        orientation: 'vertical'
+        pos_hint: {"center_y": 0.5}
+
+        BoxLayout:
+            orientation: 'horizontal'
+            pos_hint: {"center_y": 0.5}
+            LargeLabel:
+                color: app.colors['White']
+                text: 'Category Name'
+            VSeparator:
+                color: app.colors['Gray-200']
+            TextInput:
+                id: input
+
+<-FormContainer@BoxLayout>:
+    orientation: 'vertical'
+    padding: dp(24)
+    canvas:
+        Color:
+            rgba: app.colors['Dark']
+        Rectangle:
+            size: self.size
+            pos: self.pos
+
+
+
+
+<CategoryEditor>:
+    orientation: 'vertical'
+    padding: 0
+    spacing: 0
+    value_category: category_input.value
+    TitleBar:
+        size_hint_y: 0.1
+
+    FormContainer:
+        size_hint_y: 0.8
+        CategoryNameRow:
+            id: category_input
+            pos_hint: {"top": 1}
+
+#        HSeparator:
+#            color: app.colors['Primary']
+#            height: dp(2)
+#            pos_hint: {"center_y": 0.45}
+
+    ButtonBar:
+        size_hint_y: 0.1
+        SaveButton:
+            padding: dp(10)
+            on_release: root.dispatch('on_save')
+        CancelButton:
+            on_release: root.dispatch('on_cancel')
+
