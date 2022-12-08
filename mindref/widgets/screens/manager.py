@@ -95,6 +95,8 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
                 self.handle_notes_add_view()
             case (_, "error"):
                 self.handle_error_message()
+            case (_, "category_editor"):
+                return self.screen_triggers("category_editor_screen")
             case _:
                 raise Exception(f"Unhandled display state {value}")
 

@@ -2,8 +2,10 @@
 #:import NoteCategoryChooserScreen widgets.screens.chooser_screen
 #:import NoteCategoryScreen widgets.screens.note_screen
 #:import NoteListViewScreen widgets.screens.list_view_screen
-#:import NoteEditScreen widgets.screens.edit_screen
+#:import NoteEditScreen widgets.screens.note_edit_screen
 #:import ErrorMessageScreen widgets.screens.message_screen
+#:import CategoryEditorScreen widgets.screens.category_editor_screen
+
 
 <NoteAppScreenManager>:
     id: screen_manager
@@ -27,3 +29,6 @@
     ErrorMessageScreen:
         id: error_message_screen
         name: 'error_message_screen'
+    CategoryEditorScreen:
+        id: category_editor_screen
+        name: 'category_editor_screen'

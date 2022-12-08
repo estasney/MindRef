@@ -1,5 +1,7 @@
 import abc
 from dataclasses import dataclass, field
+from enum import Flag, auto
+from pathlib import Path
 from typing import Any, Callable, Literal, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -142,6 +144,20 @@ class DiscoverCategoryEvent(Event):
     def __repr__(self):
         attrs = ("event_type", "category")
         return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+
+
+@dataclass
+class CreateCategoryEvent(Event):
+    class Action(Flag):
+        OPEN_FORM = auto()
+        CLOSE_FORM = auto()
+        ACCEPT = auto()
+        REJECT = auto()
+
+    event_type = "create_category_event"
+    category: Optional[str] = None
+    img_path: Optional[str | Path] = None
+    action: Action = Action.ACCEPT
 
 
 @dataclass
