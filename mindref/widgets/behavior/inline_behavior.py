@@ -150,9 +150,7 @@ class LabelHighlightInline(Label):
                     f"[ref=kbd]{snippet_text}[/ref][/color][/font] "
                 )
             else:
-                texts.append(
-                    f"[color={self.text_color}]{escape_markup(snippet_text)}[/color]"
-                )
+                texts.append(f"[color={self.text_color}]{snippet_text}[/color]")
 
         # Snippets preserve leading/trailing whitespace
         self.text = "".join(texts)

@@ -5,7 +5,7 @@ from kivy.clock import Clock
 from kivy.graphics import Color, Line
 
 from utils import import_kv
-from widgets.markdown.markdown_interceptor import InterceptingInlineWidgetMixin
+from widgets.markdown.markdown_parsing_mixin import MarkdownLabelParsingMixin
 
 import_kv(__file__)
 
@@ -53,7 +53,7 @@ class MarkdownRow(BoxLayout):
                 Line(width=1.2, rectangle=(self.x, self.y, child.width, self.height))
 
 
-class MarkdownCell(BoxLayout, InterceptingInlineWidgetMixin):
+class MarkdownCell(BoxLayout, MarkdownLabelParsingMixin):
     label = ObjectProperty()
     open_bbcode_tag = StringProperty()
     snippets = ListProperty()

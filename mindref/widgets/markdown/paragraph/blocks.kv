@@ -1,5 +1,5 @@
 #:import parse_color kivy.parser.parse_color
-#:import BaseLabel widgets.style
+#:import LabelHighlightInline widgets.behavior.inline_behavior
 <MarkdownBlockQuote>:
     cols: 1
     size_hint_y: None
@@ -17,11 +17,13 @@
         Rectangle:
             pos: [self.pos[0], self.pos[1] + dp(5)]
             size: [sp(4), self.height - dp(10)]
-    BaseLabel:
-        id: content
+    LabelHighlightInline:
+        snippets: root.snippets
         bg_color: app.colors['Gray-500']
-        markup: False
+        highlight_color: app.colors['Codespan']
+        text_threshold: 170
         valign: 'center'
         size: self.texture_size
         text_size: self.width, None
-        text: parent.text_content
+
+

@@ -17,3 +17,5 @@ htmlcov/
 .idea
 bin
 tests/**/*.png
+**/.mypy_cache
+
