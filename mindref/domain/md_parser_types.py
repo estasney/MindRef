@@ -107,7 +107,7 @@ class MdBlockQuote(TypedDict):
 
 
 class MdBlockText(TypedDict):
-    type: MdBlockText
+    type: BLOCK_TEXT
     children: list[MD_TYPES]
 
 
@@ -178,6 +178,19 @@ class MdInlineHTML(TypedDict):
 
 class MdInlineKeyboard(TypedDict):
     type: INLINE_KBD
+    text: str
+
+
+class AnyMd(TypedDict):
+    type: MD_LIT_TYPES
+
+
+class AnyParentMd(TypedDict):
+    type: MD_LIT_TYPES
+    children: list[AnyMd] | None
+
+
+class AnyTextMd(TypedDict):
     text: str
 
 

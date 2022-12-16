@@ -1,11 +1,10 @@
 from typing import Callable, TYPE_CHECKING
 
 from kivy import Logger
-from kivy.clock import Clock
 from kivy.properties import BooleanProperty, ObjectProperty, StringProperty
 from kivy.uix.screenmanager import ScreenManager, SlideTransition
 
-from utils import attrsetter, caller, import_kv, sch_cb
+from utils import caller, import_kv, sch_cb
 from utils.index import RollingIndex
 from utils.triggers import trigger_factory
 from widgets.app_menu.app_menu import AppMenu
@@ -33,7 +32,6 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
         self.note_screen_cycler = RollingIndex(size=2)
         self.current = "chooser_screen"
         self.menu = None
-        self.note_data_trigger = Clock.create_trigger(self.dispatch_note_data)
         self.app.bind(display_state=self.handle_app_display_state)
         self.app.bind(on_paginate=self.handle_pagination)
         self.app.bind(play_state=self.setter("play_state"))
@@ -154,31 +152,6 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
         # Advance index
 
         sch_cb(set_data, trigger_screen_display, *funcs)
-        return True
-
-    def dispatch_note_data(self, *_args, **_kwargs):
-        """
-        When app.note_data has changed, update the widget in
-        Parameters
-        ----------
-        args
-        kwargs
-
-        Returns
-        -------
-
-        """
-
-        data = {k: v for k, v in self.app.note_data.items()}
-        Logger.info(f"{type(self).__name__}: dispatch_note_date")
-
-        current_screen = self.note_screen_cycler.current
-        current_screen_name = f"note_screen_{current_screen}"
-
-        # Set note data
-        set_data = attrsetter(current_screen, "set_note_content", data)
-        trigger_screen_display = caller(self, "screen_triggers", current_screen_name)
-        sch_cb(set_data, trigger_screen_display)
         return True
 
     def handle_notes_list_view(self, *_args):

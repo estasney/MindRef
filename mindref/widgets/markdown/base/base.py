@@ -1,10 +1,10 @@
 from kivy.properties import ListProperty, ObjectProperty, OptionProperty, StringProperty
 from kivy.uix.boxlayout import BoxLayout
 
-from widgets.markdown.markdown_interceptor import InterceptingInlineWidgetMixin
+from widgets.markdown.markdown_parsing_mixin import MarkdownLabelParsingMixin
 
 
-class MarkdownLabelBase(BoxLayout, InterceptingInlineWidgetMixin):
+class MarkdownLabelBase(BoxLayout, MarkdownLabelParsingMixin):
     label = ObjectProperty()
     open_bbcode_tag = StringProperty()
     snippets = ListProperty()

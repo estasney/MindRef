@@ -7,7 +7,7 @@ from kivy.properties import (
 from kivy.uix.scrollview import ScrollView
 
 from utils import import_kv
-from widgets.markdown.markdown_visitor import MarkdownVisitor
+from widgets.markdown.markdown_widget_parser import MarkdownWidgetParser
 
 if TYPE_CHECKING:
     from domain.markdown_note import MarkdownNoteDict
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 import_kv(__file__)
 
 
-class MarkdownDocument(ScrollView, MarkdownVisitor):
+class MarkdownDocument(ScrollView):
     text = StringProperty()
     title = StringProperty()
     document = ObjectProperty()
@@ -34,8 +34,9 @@ class MarkdownDocument(ScrollView, MarkdownVisitor):
     def on_document(self, _, _value: "MarkdownNoteDict"):
         self.content.clear_widgets()
         for child in self.document:
-            if self.visit(child):
-                child_result = self.pop_entry()
+            parser = MarkdownWidgetParser()
+            child_result = parser.parse(child)
+            if child_result:
                 self.content.add_widget(child_result)
 
     def render(self):
