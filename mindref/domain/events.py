@@ -2,7 +2,7 @@ import abc
 from dataclasses import dataclass, field
 from enum import Flag, auto
 from pathlib import Path
-from typing import Any, Callable, Literal, Optional, TYPE_CHECKING
+from typing import Any, Callable, Literal, Optional, TYPE_CHECKING, Iterable
 
 if TYPE_CHECKING:
     from domain.markdown_note import MarkdownNote
@@ -157,7 +157,7 @@ class CreateCategoryEvent(Event):
         CLOSE_ACCEPT = CLOSE_FORM | ACCEPT
 
     action: Action
-    event_type = "create_category_event"
+    event_type = "create_category"
     category: Optional[str] = None
     img_path: Optional[str | Path] = None
 
@@ -241,13 +241,24 @@ class TypeAheadQueryEvent(Event):
 
 
 @dataclass
-class PromptExternalStorageAndroid(Event):
+class FilePickerEvent(Event):
     """
-    Android specific event dispatched when we want to invoke AndroidStorageManager.prompt_for_external_folder
+    Any event dispatched when the event is to open a platform specific file/folder picker
     """
 
-    event_type = "prompt_external_storage_android"
-    on_complete: Callable[[str], None]
+    class Action(Flag):
+        OPEN = auto()
+        CLOSE = auto()
+        FILE = auto()
+        FOLDER = auto()
+        OPEN_FILE = OPEN | FILE
+        OPEN_FOLDER = OPEN | FOLDER
+
+    event_type = "file_picker"
+    on_complete: Callable[[str], None] | None
+    action: Action
+    start_folder: str | None = None
+    ext_filter: list[str] | Callable[[tuple[str, str]], bool] | None = None
 
     def __repr__(self):
         attrs = ("event_type",)

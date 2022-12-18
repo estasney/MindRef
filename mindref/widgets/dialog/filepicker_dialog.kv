@@ -1,0 +1,53 @@
+#:import TexturedLabelButton widgets.buttons.buttons
+
+
+
+<LoadDialog>:
+    chooser: file_chooser
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: 'vertical'
+        FileChooserIconView:
+            id: file_chooser
+            dirselect: root.dirselect
+            filters: root.filters
+        BoxLayout:
+            size_hint_y: None
+            height: self.minimum_height
+            orientation: 'horizontal'
+            TexturedLabelButton:
+                text: 'OK'
+                disabled: not file_chooser.selection
+                on_release: root.dispatch('on_button_event', 'accept', file_chooser.path, file_chooser.selection)
+            TexturedLabelButton:
+                text: 'Cancel'
+                on_release: root.dispatch('on_button_event', 'cancel')
+
+
+<SaveDialog>:
+    chooser: file_chooser
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: 'vertical'
+        FileChooserIconView:
+            id: file_chooser
+            dirselect: root.dirselect
+            on_selection: text_input.text = self.selection and self.selection[0] or ''
+            filters: root.filters
+        TextInput:
+            id: text_input:
+            size_hint_y: None
+            height: app.base_font_size * 2
+            multiline: False
+        BoxLayout:
+            orientation: 'horizontal'
+            TexturedLabelButton:
+                text: 'Save'
+                on_release: root.dispatch('on_button_event', 'accept', file_chooser.path, text_input.text)
+            TexturedLabelButton:
+                text: 'Cancel'
+                on_release: root.dispatch('on_button_event', 'cancel')
+
+

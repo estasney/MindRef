@@ -5,7 +5,7 @@ from kivy.factory import Factory
 from kivy.properties import StringProperty
 from kivy.uix.settings import SettingPath, SettingsWithSpinner
 
-from domain.events import PromptExternalStorageAndroid
+from domain.events import FilePickerEvent
 from utils import get_app
 from widgets.behavior.interact_behavior import InteractBehavior
 
@@ -41,7 +41,10 @@ class AndroidSettingPath(SettingPath):
     def _create_popup(self, *args):
         app = self.get_app()
         app.registry.push_event(
-            PromptExternalStorageAndroid(on_complete=self.select_folder_callback)
+            FilePickerEvent(
+                on_complete=self.select_folder_callback,
+                action=FilePickerEvent.Action.OPEN_FOLDER,
+            )
         )
 
 

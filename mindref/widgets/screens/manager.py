@@ -2,8 +2,10 @@ from typing import Callable, TYPE_CHECKING
 
 from kivy import Logger
 from kivy.properties import BooleanProperty, ObjectProperty, StringProperty
+from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import ScreenManager, SlideTransition
 
+from domain.events import FilePickerEvent
 from utils import caller, import_kv, sch_cb
 from utils.index import RollingIndex
 from utils.triggers import trigger_factory
@@ -11,6 +13,7 @@ from widgets.app_menu.app_menu import AppMenu
 from widgets.behavior.interact_behavior import InteractBehavior
 from widgets.behavior.refresh_behavior import RefreshBehavior
 from widgets.buttons.category import NoteCategoryButton
+from widgets.dialog.filepicker_dialog import LoadDialog
 
 if TYPE_CHECKING:
     from mindref.mindref import DISPLAY_STATE
@@ -32,6 +35,7 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
         self.note_screen_cycler = RollingIndex(size=2)
         self.current = "chooser_screen"
         self.menu = None
+        self.popup = None
         self.app.bind(display_state=self.handle_app_display_state)
         self.app.bind(on_paginate=self.handle_pagination)
         self.app.bind(play_state=self.setter("play_state"))
@@ -173,3 +177,31 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
     def handle_error_message(self, *_args):
         Logger.debug(f"{type(self).__name__} : Switching to error_message_screen")
         self.screen_triggers("error_message_screen")
+
+    def open_file_picker(self, event: FilePickerEvent):
+        action = event.Action
+
+        match event:
+            case FilePickerEvent(
+                action=action.OPEN_FOLDER | action.OPEN_FILE as event_action,
+                ext_filter=list() | None as ext_filter,
+                on_complete=on_complete,
+                start_folder=start_folder,
+            ):
+                self.popup = Popup(title="Select File")
+
+                def dismiss_and_dispatch(val):
+                    self.popup.dismiss()
+                    on_complete(val)
+
+                dialog = LoadDialog(
+                    filters=ext_filter,
+                    on_cancel=self.popup.dismiss,
+                    on_accept=dismiss_and_dispatch,
+                    dirselect=action.FOLDER in event_action,
+                    start_folder=start_folder,
+                )
+
+                self.popup.content = dialog
+
+        self.popup.open()

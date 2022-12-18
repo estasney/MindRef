@@ -33,6 +33,13 @@ class TexturedButton(ButtonBehavior, BoxLayout):
         super(TexturedButton, self).__init__(**kwargs)
 
 
+class TexturedLabelButton(TexturedButton):
+    text: StringProperty()
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
 class ImageButton(TexturedButton):
     source = StringProperty()
 

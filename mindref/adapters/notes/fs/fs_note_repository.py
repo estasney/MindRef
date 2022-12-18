@@ -36,7 +36,7 @@ class FileSystemNoteRepository(AbstractNoteRepository):
     Categories are defined with directories
     Categories Contain
         - .md Note Files
-        - .png Category Image File, Optional
+        - .png | .jpg | .jpeg Category Image File, Optional
     """
 
     def __init__(self, get_app: "GetApp", new_first: bool):

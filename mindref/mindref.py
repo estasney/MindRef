@@ -40,7 +40,7 @@ from domain.events import (
     RefreshNotesEvent,
     SaveNoteEvent,
     TypeAheadQueryEvent,
-    PromptExternalStorageAndroid,
+    FilePickerEvent,
     CreateCategoryEvent,
 )
 from domain.settings import app_settings
@@ -238,13 +238,14 @@ class MindRefApp(App):
     @mainthread
     def process_event(self, *_args):
         """Pop an Event from Registry and Process"""
-        if len(self.registry.events) == 0:
+        registry = self.registry
+        if len(registry.events) == 0:
             return
-        event = self.registry.events.popleft()
+        event = registry.events.popleft()
         Logger.debug(f"Processing Event: {type(event).__name__}")
         match event:
             case TypeAheadQueryEvent(query=query, on_complete=on_complete):
-                return self.registry.query_category(
+                return registry.query_category(
                     category=self.note_category,
                     query=query,
                     on_complete=on_complete,
@@ -266,7 +267,7 @@ class MindRefApp(App):
                         get_app().stop()
                     case _, "display":
                         clear_registry_category = caller(
-                            self.registry,
+                            registry,
                             "set_note_category",
                             value=None,
                             on_complete=None,
@@ -287,7 +288,7 @@ class MindRefApp(App):
                             f"{type(self).__name__}: process_back_button_event - scheduled display_state: display"
                         )
                     case _, "edit" | "add":
-                        self.registry.push_event(CancelEditEvent())
+                        registry.push_event(CancelEditEvent())
                     case previous, "category_editor":
                         self.display_state_trigger(previous)
                     case _:
@@ -310,7 +311,12 @@ class MindRefApp(App):
 
                 match (error, platform):
                     case ("permission_error", "android"):
-                        return self.registry.push_event(PromptExternalStorageAndroid())
+                        return registry.push_event(
+                            FilePickerEvent(
+                                on_complete=None,
+                                action=FilePickerEvent.Action.OPEN_FOLDER,
+                            )
+                        )
                     case _:
                         self.error_message = message
                         self.display_state_trigger("error")
@@ -329,7 +335,7 @@ class MindRefApp(App):
                     app_config.write()
                 self.paginate_timer.cancel()
                 # We'll get another event to clear app's note category
-                return self.registry.set_note_category(None, on_complete=None)
+                return registry.set_note_category(None, on_complete=None)
             case NoteCategoryEvent(value=value):
                 """
                 Note Category has been set via registry. If a valid string, we need to query and set category_meta.
@@ -382,8 +388,8 @@ class MindRefApp(App):
                 return self.display_state_trigger("list")
             case RefreshNotesEvent(on_complete=on_complete):
                 clear_categories = attrsetter(self, "note_categories", [])
-                clear_caches = caller(self.registry, "clear_caches")
-                run_query = caller(self.registry, "query_all", on_complete=on_complete)
+                clear_caches = caller(registry, "clear_caches")
+                run_query = caller(registry, "query_all", on_complete=on_complete)
                 return sch_cb(clear_categories, clear_caches, run_query, timeout=0.5)
             case NoteFetchedEvent(note=note):
                 update_data = attrsetter(self, "note_data", note.to_dict())
@@ -397,34 +403,33 @@ class MindRefApp(App):
                 if note_is_new:
                     data_note.edit_title = title
                 remove_edit_note_widget = attrsetter(self, "editor_note", None)
-                persist_note = caller(self.registry, "save_note", note=data_note)
+                persist_note = caller(registry, "save_note", note=data_note)
                 return sch_cb(persist_note, remove_edit_note_widget, timeout=0.1)
             case AddNoteEvent():
-                data_note = self.registry.new_note(
-                    category=self.note_category, idx=None
-                )
+                data_note = registry.new_note(category=self.note_category, idx=None)
                 add_edit_note_widget = attrsetter(self, "editor_note", data_note)
                 trigger_display_add = caller(self, "display_state_trigger", "add")
                 return sch_cb(add_edit_note_widget, trigger_display_add, timeout=0.1)
             case EditNoteEvent(category=category, idx=idx):
-                data_note = self.registry.edit_note(category=category, idx=idx)
+                data_note = registry.edit_note(category=category, idx=idx)
                 add_edit_note_widget = attrsetter(self, "editor_note", data_note)
                 trigger_display_edit = caller(self, "display_state_trigger", "edit")
                 return sch_cb(add_edit_note_widget, trigger_display_edit, timeout=0.1)
             case CancelEditEvent():
                 trigger_display = caller(self, "display_state_trigger", "display")
-                registry_paginate = caller(self.registry, "paginate_note", direction=0)
+                registry_paginate = caller(registry, "paginate_note", direction=0)
                 remove_edit_note = attrsetter(self, "editor_note", None)
                 return sch_cb(
                     trigger_display, registry_paginate, remove_edit_note, timeout=0.1
                 )
             case PaginationEvent(direction=direction):
                 registry_paginate = caller(
-                    self.registry, "paginate_note", direction=direction
+                    registry, "paginate_note", direction=direction
                 )
                 return Clock.schedule_once(registry_paginate)
-            case PromptExternalStorageAndroid(on_complete=on_complete):
-                return self.note_service.prompt_for_external_folder(on_complete)
+            case FilePickerEvent() as pick_event:
+                return self.registry.handle_picker_event(pick_event)
+
             case CreateCategoryEvent(
                 action=action, category=category, img_path=img_path
             ) as event:

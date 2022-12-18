@@ -9,6 +9,7 @@ from domain.events import (
     NoteCategoryFailureEvent,
     NoteFetchedEvent,
     NotesQueryNotSetFailureEvent,
+    FilePickerEvent,
 )
 from utils import caller, def_cb, sch_cb
 from utils.caching import kivy_cache
@@ -249,3 +250,33 @@ class Registry:
         # store note to disk
         self.app.note_service.save_note(note, on_complete=push_fetched_event)
         Logger.info(f"{type(self).__name__}: save_note - {note!r}")
+
+    def handle_picker_event(self, event: FilePickerEvent):
+        e = FilePickerEvent.Action
+        Logger.info(f"{type(self).__name__}: handle_picker_event - {event}")
+        app = self.app
+        match event, app.platform_android:
+            case FilePickerEvent(action=e.OPEN_FOLDER), True:
+                # Note Service
+                return app.note_service.prompt_for_external_folder(
+                    on_complete=event.on_complete
+                )
+            case FilePickerEvent(action=e.OPEN_FILE), True:
+                raise NotImplementedError()
+            case FilePickerEvent(
+                action=e.OPEN_FOLDER | e.OPEN_FILE, start_folder=str()
+            ), False:
+                return app.screen_manager.open_file_picker(event)
+            case FilePickerEvent(
+                action=e.OPEN_FOLDER | e.OPEN_FILE, start_folder=None
+            ), False:
+                event = FilePickerEvent(
+                    on_complete=event.on_complete,
+                    action=event.action,
+                    start_folder=str(app.note_service.storage_path),
+                    ext_filter=event.ext_filter,
+                )
+                return app.screen_manager.open_file_picker(event)
+
+            case FilePickerEvent(action=e.CLOSE), False:
+                raise NotImplementedError()

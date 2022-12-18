@@ -202,9 +202,10 @@ class AtlasService(AbstractAtlasRepository):
             return int(p.stem.rsplit("-")[-1])
 
         atlas_img_dst_folder = self._atlas_path(atlas_name)
-        for i, atlas_img in enumerate(
-            sorted(Path(temp_dir_container.name).glob("*.png"), key=sort_atlas_imgs)
-        ):
+
+        img_files = (f for f in Path(temp_dir_container.name).iterdir() if f.is_file())
+        img_files = (f for f in img_files if f.suffix in {".png", ".jpg", ".jpeg"})
+        for i, atlas_img in enumerate(sorted(img_files, key=sort_atlas_imgs)):
             atlas_img_name = f"{atlas_name}-{atlas_n_start + i}.png".replace("_", "-")
             dst = (atlas_img_dst_folder / atlas_img_name).with_suffix(".png")
             # Enforce lower casing

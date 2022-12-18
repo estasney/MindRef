@@ -99,12 +99,13 @@
                     height: dp(50)
                     size_hint_x: 0.3
                     pos_hint: {"right": 1}
+                    on_release: root.button_event('browse')
 
     ButtonBar:
         size_hint_y: 0.1
         SaveButton:
             padding: dp(10)
-            on_release: root.dispatch('on_save')
+            on_release: root.button_event('save')
         CancelButton:
-            on_release: root.dispatch('on_cancel')
+            on_release: root.button_event('cancel')
 

@@ -236,7 +236,7 @@ class AndroidNoteRepository(FileSystemNoteRepository):
 
         Notes
         -----
-        This reflects directories and *.png files *only*
+        This reflects directories and image files *only*
         """
         Logger.info(
             f"{type(self).__name__}: get_external_storage_categories - {fmt_attrs(self, '_native_path', '_storage_path')}"

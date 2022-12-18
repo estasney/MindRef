@@ -413,14 +413,14 @@ class AndroidStorageManager:
                 cls._register_mindref_utils_callback(mrUtils)
 
         source = Path(filePath)
-        source_ext = source.suffix
-        match source_ext:
+        source_ext = source.suffix if source.suffix else ""
+        match source_ext.lower():
             case ".md":
                 source_mime = "text/markdown"
-            case ".png":
-                source_mime = "image/png"
+            case ".png" | ".jpg" | ".jpeg" as ext:
+                source_mime = f"image/{ext[1:]}"
             case _:
-                Logger.error(f"Unknown mime type from source extension: {source_ext}")
+                Logger.error(f"Unhandled mime type from source extension: {source_ext}")
                 source_mime = ""
         mrUtils.copyToExternalStorage(
             key, str(source), source.parent.stem, source.stem, source_mime
