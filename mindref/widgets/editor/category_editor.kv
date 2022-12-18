@@ -1,7 +1,7 @@
 #:import HSeparator widgets.separator
-#:import VSeparator widgets.separator
 #:import ExpandingLabel widgets.style
-
+#:import TexturedButton widgets.buttons.buttons
+#:import XSmallLabel widgets.style
 
 <-TitleBar@BoxLayout>:
     canvas:
@@ -24,66 +24,80 @@
     size_hint_x: 1
     size_hint_y: None
 
-<OpenFileDialogButton@TexturedButton>:
-    text: ''
+<BrowseButton@TexturedButton>:
+    text: 'Browse'
     size_hint_y: None
     size: dp(40), dp(40)
     font_size: app.base_font_size + sp(4)
-    LargeLabel:
+    BaseLabel:
         text: root.text
-
-
-<-CategoryNameRow@BoxLayout>:
-    orientation: 'vertical'
-    height: self.minimum_height
-    padding: app.base_font_size
-    value: input.text
-    BoxLayout:
-        orientation: 'vertical'
-        pos_hint: {"center_y": 0.5}
-
-        BoxLayout:
-            orientation: 'horizontal'
-            pos_hint: {"center_y": 0.5}
-            LargeLabel:
-                color: app.colors['White']
-                text: 'Category Name'
-            VSeparator:
-                color: app.colors['Gray-200']
-            TextInput:
-                id: input
-
-<-FormContainer@BoxLayout>:
-    orientation: 'vertical'
-    padding: dp(24)
-    canvas:
-        Color:
-            rgba: app.colors['Dark']
-        Rectangle:
-            size: self.size
-            pos: self.pos
-
 
 
 
 <CategoryEditor>:
+    category_name: category_name_input.text
     orientation: 'vertical'
-    padding: 0
-    spacing: 0
-    value_category: category_input.value
     TitleBar:
         size_hint_y: 0.1
-
-    FormContainer:
+        pos_hint: {"center_y": 0}
+    BoxLayout:
+        # Form Container
         size_hint_y: 0.8
-        CategoryNameRow:
-            id: category_input
+        BoxLayout:
+            # Form Container
+            orientation: 'vertical'
+            size_hint_y: 0.6
             pos_hint: {"top": 1}
-
-#        HSeparator:
-#            color: app.colors['Primary']
-#            height: dp(2)
-#            pos_hint: {"center_y": 0.45}
+            padding: [dp(48), dp(24), dp(48), dp(24)]
+            # Form
+            BoxLayout:
+                # Category Name Row
+                orientation: 'vertical'
+                XSmallLabel:
+                    color: app.colors['Gray-200']
+                    text: "Category Name"
+                    text_size: self.size
+                    valign: 'bottom'
+                    halign: 'left'
+                TextInput:
+                    id: category_name_input
+                    multiline: False
+                    size_hint_min_y: app.base_font_size * 1.5
+                    size_hint_max_y: app.base_font_size * 2.5
+                BoxLayout:
+                    padding: [0, dp(4), 0, dp(4)]
+                    height: self.minimum_height
+                    size_hint_y: None
+                    HSeparator:
+                        color: app.colors['Accent-One'] if category_name_input.focused else app.colors['Gray-300']
+            BoxLayout:
+                # Image Path Row
+                orientation: 'vertical'
+                XSmallLabel:
+                    color: app.colors['Gray-200']
+                    text: "Category Image"
+                    text_size: self.size
+                    valign: "bottom"
+                    halign: "left"
+                TextInput:
+                    id: image_path_input
+                    multiline: False
+                    size_hint_min_y: app.base_font_size * 1.5
+                    size_hint_max_y: app.base_font_size * 2.5
+                BoxLayout:
+                    padding: [0, dp(4), 0, dp(4)]
+                    height: self.minimum_height
+                    size_hint_y: None
+                    HSeparator:
+                        color: app.colors['Accent-One'] if image_path_input.focused else app.colors['Gray-300']
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+                BrowseButton:
+                    height: dp(50)
+                    size_hint_x: 0.3
+                    pos_hint: {"right": 1}
 
     ButtonBar:
         size_hint_y: 0.1

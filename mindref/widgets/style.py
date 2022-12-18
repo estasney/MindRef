@@ -10,6 +10,10 @@ class BaseLabel(Label):
     ...
 
 
+class XSmallLabel(BaseLabel):
+    ...
+
+
 class SmallLabel(BaseLabel):
     ...
 
