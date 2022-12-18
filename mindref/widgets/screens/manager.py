@@ -63,7 +63,8 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
             if temp_pause:
                 view.fbind("on_dismiss", resume_temp_pause)
             view.fbind("on_dismiss", remove_from_screen)
-        else:
+
+        elif not menu_open and self.menu:
             self.menu.dispatch("on_dismiss")
 
     def category_selected(self, category: "NoteCategoryButton"):

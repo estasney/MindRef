@@ -1,10 +1,11 @@
+from functools import partial
 from typing import Literal, TYPE_CHECKING
 
 from kivy.properties import ObjectProperty
 from kivy.uix.modalview import ModalView
 
 from domain.events import CreateCategoryEvent
-from utils import import_kv, get_app
+from utils import import_kv, get_app, sch_cb, caller
 
 import_kv(__file__)
 
@@ -23,10 +24,11 @@ class AppMenu(ModalView):
 
     def on_release(self, release: MENU_BUTTON_NAMES):
         app = get_app()
+        dismiss_self = caller(self, "dispatch", "on_dismiss")
         match release:
             case "Settings":
-                return app.open_settings()
+                sch_cb(dismiss_self, app.open_settings, timeout=0.1)
             case "New Category":
-                app.registry.push_event(
-                    CreateCategoryEvent(action=CreateCategoryEvent.Action.OPEN_FORM)
-                )
+                event = CreateCategoryEvent(action=CreateCategoryEvent.Action.OPEN_FORM)
+                push_event = caller(app.registry, "push_event", event)
+                sch_cb(dismiss_self, push_event, timeout=0.1)
