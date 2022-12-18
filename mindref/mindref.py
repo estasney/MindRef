@@ -425,8 +425,21 @@ class MindRefApp(App):
                 return Clock.schedule_once(registry_paginate)
             case PromptExternalStorageAndroid(on_complete=on_complete):
                 return self.note_service.prompt_for_external_folder(on_complete)
-            case CreateCategoryEvent(action=CreateCategoryEvent.Action.OPEN_FORM) as e:
-                return self.display_state_trigger("category_editor")
+            case CreateCategoryEvent(
+                action=action, category=category, img_path=img_path
+            ) as event:
+                event_action = event.Action
+                match action, category, img_path:
+                    case event_action.OPEN_FORM, _, _:
+                        return self.display_state_trigger("category_editor")
+                    case event_action.CLOSE_FORM | event_action.CLOSE_REJECT, _, _:
+                        return self.display_state_trigger(self.display_state_last)
+                    case event_action.CLOSE_ACCEPT, str(category), img_path:
+                        Logger.info(
+                            f"{type(self).__name__}: process_event - Create Category {category}"
+                        )
+                        return self.display_state_trigger(self.display_state_last)
+
             case _:
                 Logger.info(
                     f"{type(self).__name__}: process_event - Unhandled Event {type(event).__name__}"

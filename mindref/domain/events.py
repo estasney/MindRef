@@ -153,11 +153,13 @@ class CreateCategoryEvent(Event):
         CLOSE_FORM = auto()
         ACCEPT = auto()
         REJECT = auto()
+        CLOSE_REJECT = CLOSE_FORM | REJECT
+        CLOSE_ACCEPT = CLOSE_FORM | ACCEPT
 
+    action: Action
     event_type = "create_category_event"
     category: Optional[str] = None
     img_path: Optional[str | Path] = None
-    action: Action = Action.ACCEPT
 
 
 @dataclass
