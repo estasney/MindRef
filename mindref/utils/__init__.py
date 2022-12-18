@@ -10,11 +10,15 @@ from typing import (
     ParamSpec,
     Protocol,
     TypeVar,
+    TYPE_CHECKING,
 )
 
 from kivy import Logger
 from kivy.clock import Clock
 from kivy.lang import Builder
+
+if TYPE_CHECKING:
+    from domain.protocols import AppRegistryProtocol
 
 _LOG_LEVEL = None
 
@@ -155,6 +159,14 @@ def fmt_items(instance: "SupportsGetItem", *attr) -> str:
     fmt_params = (f"{k!s}={v!s}" for k, v in params if v)
     param_str = ", ".join(fmt_params)
     return f"[{param_str}]"
+
+
+def get_app() -> "AppRegistryProtocol":
+    """Calls App.get_running_app() but casts as expected protocol"""
+    from kivy.app import App
+
+    app: "AppRegistryProtocol" = App.get_running_app()
+    return app
 
 
 class SupportsGetItem(Protocol):

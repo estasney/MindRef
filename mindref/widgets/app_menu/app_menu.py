@@ -1,18 +1,17 @@
 from typing import Literal, TYPE_CHECKING
 
-from kivy.app import App
 from kivy.properties import ObjectProperty
 from kivy.uix.modalview import ModalView
 
 from domain.events import CreateCategoryEvent
-from utils import import_kv
+from utils import import_kv, get_app
 
 import_kv(__file__)
 
 MENU_BUTTON_NAMES = Literal["Settings", "New Category"]
 
 if TYPE_CHECKING:
-    from domain.protocols import AppRegistryProtocol
+    pass
 
 
 class AppMenu(ModalView):
@@ -23,7 +22,7 @@ class AppMenu(ModalView):
         self.register_event_type("on_release")
 
     def on_release(self, release: MENU_BUTTON_NAMES):
-        app: "AppRegistryProtocol" = App.get_running_app()
+        app = get_app()
         match release:
             case "Settings":
                 return app.open_settings()

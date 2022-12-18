@@ -1,7 +1,6 @@
 from math import sin
 
 from kivy import Logger
-from kivy.app import App
 from kivy.clock import Clock
 from kivy.effects.opacityscroll import OpacityScrollEffect
 from kivy.properties import (
@@ -12,7 +11,7 @@ from kivy.properties import (
 )
 from kivy.uix.floatlayout import FloatLayout
 
-from utils import import_kv
+from utils import import_kv, get_app
 
 import_kv(__file__)
 
@@ -25,9 +24,7 @@ class RefreshSymbol(FloatLayout):
     source = StringProperty(None)
 
     def __init__(self, **kwargs):
-        self.source = App.get_running_app().atlas_service.uri_for(
-            "refresh", atlas_name="icons"
-        )
+        self.source = get_app().atlas_service.uri_for("refresh", atlas_name="icons")
         super(RefreshSymbol, self).__init__(**kwargs)
         self._scheduler = None
 

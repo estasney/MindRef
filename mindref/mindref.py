@@ -46,7 +46,7 @@ from domain.events import (
 from domain.settings import app_settings
 from plugins import PluginManager
 from service.registry import Registry
-from utils import attrsetter, caller, sch_cb
+from utils import attrsetter, caller, sch_cb, get_app
 from utils.triggers import trigger_factory
 from widgets.screens.manager import NoteAppScreenManager
 
@@ -61,10 +61,8 @@ if TYPE_CHECKING:
 class MindRefApp(App):
     APP_NAME = "MindRef"
     atlas_service = AtlasService(storage_path=Path("./static").resolve())
-    note_service = NoteRepositoryFactory.get_repo()(
-        get_app=App.get_running_app, new_first=True
-    )
-    editor_service = FileSystemEditor(get_app=App.get_running_app)
+    note_service = NoteRepositoryFactory.get_repo()(get_app=get_app, new_first=True)
+    editor_service = FileSystemEditor(get_app=get_app)
     plugin_manager = PluginManager()
     platform_android = BooleanProperty(defaultvalue=False)
     registry = Registry()
@@ -265,7 +263,7 @@ class MindRefApp(App):
                         Logger.info(
                             f"{type(self).__name__}: process_back_button_event: Exiting"
                         )
-                        App.get_running_app().stop()
+                        get_app().stop()
                     case _, "display":
                         clear_registry_category = caller(
                             self.registry,

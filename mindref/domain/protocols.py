@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Callable, Optional, Protocol, TYPE_CHECKING, TypeVar, Union
+from typing import Callable, Optional, Protocol, TYPE_CHECKING, TypeVar, Union, NoReturn
 
 from service.registry import Registry
 
@@ -47,7 +47,16 @@ class AppRegistryProtocol(Protocol):
     def play_state_trigger(self, state: "PLAY_STATE") -> None:
         ...
 
+    def select_index(self, value: int) -> None:
+        ...
+
     def open_settings(self) -> None:
+        ...
+
+    def bind(self, **kwargs: Callable):
+        ...
+
+    def stop(self) -> NoReturn:
         ...
 
 

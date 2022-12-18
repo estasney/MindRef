@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import abc
 
-from domain.protocols import AppRegistryProtocol, GetApp
 from domain.editable import EditableNote
 from domain.markdown_note import MarkdownNote
+from domain.protocols import AppRegistryProtocol, GetApp
 
 
 class AbstractEditorRepository(abc.ABC):

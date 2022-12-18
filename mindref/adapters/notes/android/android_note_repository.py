@@ -7,13 +7,10 @@ from typing import (
     Iterable,
     Optional,
     TYPE_CHECKING,
-    NewType,
     Literal,
-    TypeVar,
 )
 
 from kivy import Logger
-from kivy.app import App
 from kivy.clock import Clock
 
 from adapters.notes.android.interface import AndroidStorageManager
@@ -23,7 +20,7 @@ from adapters.notes.fs.fs_note_repository import (
 )
 from domain.events import DiscoverCategoryEvent
 from domain.markdown_note import MarkdownNote
-from utils import caller, fmt_attrs
+from utils import caller, fmt_attrs, get_app
 
 if TYPE_CHECKING:
     from domain.editable import EditableNote
@@ -120,7 +117,7 @@ class AndroidNoteRepository(FileSystemNoteRepository):
             return
         Logger.info(f"{type(self).__name__} : set native path :  {s_native}")
         self._native_path = str(value)
-        self._storage_path = Path(App.get_running_app().user_data_dir) / "notes"
+        self._storage_path = Path(get_app().user_data_dir) / "notes"
         self._storage_path.mkdir(exist_ok=True, parents=True)
         self.current_category = None
         self.category_files.clear()

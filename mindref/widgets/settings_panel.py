@@ -1,15 +1,16 @@
+from typing import TYPE_CHECKING
+
 from kivy import Logger, platform
 from kivy.factory import Factory
 from kivy.properties import StringProperty
 from kivy.uix.settings import SettingPath, SettingsWithSpinner
-from kivy.app import App
 
 from domain.events import PromptExternalStorageAndroid
+from utils import get_app
 from widgets.behavior.interact_behavior import InteractBehavior
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from domain.protocols import AppRegistryProtocol
+    pass
 
 
 class MindRefSettingsNative(InteractBehavior, SettingsWithSpinner):
@@ -26,7 +27,7 @@ class AndroidSettingPath(SettingPath):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.get_app = App.get_running_app
+        self.get_app = get_app
 
     def on_panel(self, instance, value):
         if value is None:
@@ -38,7 +39,7 @@ class AndroidSettingPath(SettingPath):
         self.value = uri
 
     def _create_popup(self, *args):
-        app: "AppRegistryProtocol" = self.get_app()
+        app = self.get_app()
         app.registry.push_event(
             PromptExternalStorageAndroid(on_complete=self.select_folder_callback)
         )

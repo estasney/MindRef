@@ -1,7 +1,7 @@
 from kivy.properties import StringProperty
 from kivy.uix.boxlayout import BoxLayout
 
-from utils import import_kv
+from utils import import_kv, get_app
 from widgets.buttons.buttons import TexturedButton
 
 import_kv(__file__)
@@ -25,7 +25,7 @@ class CategoryEditor(BoxLayout):
         self.register_event_type("on_cancel")
 
     def on_cancel(self, *_args):
-        ...
+        app = get_app()
 
     def on_save(self, *_args):
         ...

@@ -2,9 +2,9 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from kivy import Logger
+from kivy import platform
 from kivy.config import Config
 from kivy.core.text import LabelBase
-from kivy import platform
 
 
 def run_android():

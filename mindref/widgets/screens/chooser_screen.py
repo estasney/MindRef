@@ -1,11 +1,10 @@
 from kivy import Logger
-from kivy.app import App
 from kivy.clock import Clock
 from kivy.properties import BooleanProperty, ObjectProperty
 from kivy.uix.scrollview import ScrollView
 
 from domain.events import RefreshNotesEvent
-from utils import def_cb, import_kv
+from utils import def_cb, import_kv, get_app
 from widgets.buttons.category import NoteCategoryButton
 from widgets.screens import RefreshableScreen
 
@@ -45,7 +44,7 @@ class NoteCategoryChooserScreen(RefreshableScreen):
         if not self.refresh_dispatched:
             self.refresh_dispatched = True
             Logger.info(f"{type(self).__name__} : Dispatching Refresh Event")
-            app = App.get_running_app()
+            app = get_app()
             cb = def_cb(
                 self.remove_refresh_symbol_trigger,
                 lambda dt: setattr(self, "refresh_dispatched", False),

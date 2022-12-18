@@ -1,10 +1,9 @@
 from typing import TYPE_CHECKING
 
-from kivy.app import App
 from kivy.clock import Clock
 from kivy.graphics import Color, Line
 
-from utils import import_kv
+from utils import import_kv, get_app
 from widgets.markdown.markdown_parsing_mixin import MarkdownLabelParsingMixin
 
 import_kv(__file__)
@@ -47,7 +46,7 @@ class MarkdownRow(BoxLayout):
     def draw_cell_border(self, *_args):
         with self.canvas.before:
             self.canvas.before.clear()
-            Color(rgba=App.get_running_app().colors["Dark"])
+            Color(rgba=get_app().colors["Dark"])
             Line(width=1.2, rectangle=(self.x, self.y, self.width, self.height))
             for child in self.children[:-1]:
                 Line(width=1.2, rectangle=(self.x, self.y, child.width, self.height))
