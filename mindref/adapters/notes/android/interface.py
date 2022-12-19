@@ -22,6 +22,7 @@ from adapters.notes.android.annotations import (
     MINDREF_CLASS_NAME,
     MINDREF_CLASS_NAMESPACE,
     UriProtocol,
+    MIME_TYPE,
 )
 
 if TYPE_CHECKING:
@@ -81,7 +82,7 @@ class ActivityResultCode(IntEnum):
 
 # noinspection PyPep8Naming,PyUnusedLocal
 class OnDocumentCallback(PythonJavaClass):
-    """PythonActivity (Kivy Built-in) calls this after User has selected folder with Android Document Picker"""
+    """PythonActivity (Kivy Built-in) calls this after User has selected folder or file with Android Document Picker"""
 
     __javainterfaces__ = [ACTIVITY_CLASS_NAMESPACE + "$ActivityResultListener"]
     __javacontext__ = "app"
@@ -89,7 +90,6 @@ class OnDocumentCallback(PythonJavaClass):
     def __init__(
         self,
         py_mediator: Callable[[], "MindRefUtilsCallbackPyMediator"],
-        activity_code: int,
     ):
         """
 
@@ -101,17 +101,17 @@ class OnDocumentCallback(PythonJavaClass):
         """
         super().__init__()
         self.py_mediator = py_mediator
-        self.activity_code = activity_code
+        self.activity_code = 1
 
     @java_method("(IILandroid/content/Intent;)V")
     def onActivityResult(
         self, requestCode: int, resultCode: "ActivityResultCode", result_data
     ):
-        tree_uri: UriProtocol = result_data.getData()
+        uri: UriProtocol = result_data.getData()
         Logger.debug(
-            f"OnDocumentCallback: Selected uri - {tree_uri.toString()} - {tree_uri.getPath()}"
+            f"OnDocumentCallback: Selected uri - {uri.toString()} - {uri.getPath()}"
         )
-        self.py_mediator()(self.activity_code, tree_uri.toString())
+        self.py_mediator()(self.activity_code, uri.toString())
 
 
 P = ParamSpec("P")
@@ -123,8 +123,8 @@ class AndroidStorageManager:
     _lock = threading.Lock()
     _utils_cls_static: Optional[Type["MindRefUtilsProtocol"]] = None
     _utils_cls: Optional["MindRefUtilsProtocol"] = None
-    _prompt_folder_callback: Optional[Callable[[str], None]] = None
-    _prompt_folder_callback_java: Optional["OnDocumentCallback"] = None
+    _prompt_picker_callback: Optional[Callable[[str], None]] = None
+    _prompt_picker_callback_java: Optional["OnDocumentCallback"] = None
     _mindref_callback_java: Optional["MindRefUtilsCallback"] = None
     _mindref_callback_py_mediator: Optional["MindRefUtilsCallbackPyMediator"] = None
 
@@ -139,10 +139,10 @@ class AndroidStorageManager:
         Class definition of MindRefUtils
     _utils_cls
         Instance of MindRefUtils
-    _prompt_folder_callback
+    _prompt_picker_callback
         Python callback for prompt_for_folder 
-    _prompt_folder_callback_java
-        Java callback which call _prompt_folder_callback
+    _prompt_picker_callback_java
+        Java callback which call _prompt_picker_callback
     _mindref_callback_java
         MindRefUtilsCallback
     _mindref_callback_py_mediator
@@ -231,7 +231,7 @@ class AndroidStorageManager:
     """
 
     @classmethod
-    def _register_prompt_folder_callback(cls, activity_code):
+    def _register_prompt_picker_callback(cls):
         """Register a Java native on_complete with our Java Activity that in turn calls our python on_complete and then
         finally calls user python callbacks
 
@@ -240,11 +240,9 @@ class AndroidStorageManager:
         activity_code
         """
 
-        cls._prompt_folder_callback_java = OnDocumentCallback(
-            cls._get_mediator, activity_code
-        )
+        cls._prompt_picker_callback_java = OnDocumentCallback(cls._get_mediator)
         activity = cls._get_activity()
-        activity.registerActivityResultListener(cls._prompt_folder_callback_java)
+        activity.registerActivityResultListener(cls._prompt_picker_callback_java)
 
     @classmethod
     def _get_mediator(cls):
@@ -285,7 +283,7 @@ class AndroidStorageManager:
         Called from OnDocumentCallback.onActivityResult
         """
         cls._take_persistable_permission(uri)
-        if cb := cls._prompt_folder_callback:
+        if cb := cls._prompt_picker_callback:
             cb(uri)
 
     @classmethod
@@ -361,13 +359,39 @@ class AndroidStorageManager:
         This will suspend the App while Android Native picker is shown
         """
         with cls._lock:
-            if not cls._prompt_folder_callback_java:
-                cls._register_prompt_folder_callback(activity_code)
+            if not cls._prompt_picker_callback_java:
+                cls._register_prompt_picker_callback()
             activity = cls._get_activity()
             Intent = autoclass("android.content.Intent")
-            intent = Intent()
+            intent: "IntentProtocol" = Intent()
             intent.setAction(Intent.ACTION_OPEN_DOCUMENT_TREE)
-        activity.startActivityForResult(intent, 1)
+        activity.startActivityForResult(intent, activity_code)
+
+    @classmethod
+    def prompt_for_external_file(cls, activity_code: int, mime_types: set[MIME_TYPE]):
+        with cls._lock:
+            if not cls._prompt_picker_callback_java:
+                cls._register_prompt_picker_callback()
+                activity = cls._get_activity()
+                Intent: "Type[IntentProtocol]" = autoclass("android.content.Intent")
+                intent = Intent()
+                intent.setAction(Intent.ACTION_OPEN_DOCUMENT)
+                intent.addCategory(Intent.CATEGORY_OPENABLE)
+                any_mime = MIME_TYPE("*/*")
+
+                match len(mime_types), any_mime in mime_types:
+                    case 0, _:
+                        intent.setType(any_mime)
+                    case 1, _:
+                        intent.setType(mime_types.pop())
+                    case int(), True:
+                        intent.setType(any_mime)
+                        mime_types.remove(any_mime)
+                        intent.EXTRA_MIME_TYPES = list(mime_types)
+                    case int(), False:
+                        intent.setType(mime_types.pop())
+                        intent.EXTRA_MIME_TYPES = list(mime_types)
+        activity.startActivityForResult(intent, activity_code)
 
     @classmethod
     def get_categories(cls, source: str, target: str | Path, key: int):

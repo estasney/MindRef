@@ -25,7 +25,10 @@ from utils import caller, fmt_attrs, get_app
 if TYPE_CHECKING:
     from domain.editable import EditableNote
     from domain.protocols import GetApp
-    from adapters.notes.android.annotations import MindRefUtilsCallbackPyMediator
+    from adapters.notes.android.annotations import (
+        MindRefUtilsCallbackPyMediator,
+        MIME_TYPE,
+    )
 
 CodeNames = Literal[
     "MIRROR",
@@ -151,9 +154,9 @@ class AndroidNoteRepository(FileSystemNoteRepository):
         )
 
         key = MindRefCallCodes.MIRROR | MindRefCallCodes.EXTERNAL_STORAGE
-        self._mediator_callbacks[key] = on_complete
+        self._mediator_callbacks[key.value()] = on_complete
         AndroidStorageManager.clone_external_storage(
-            self._native_path, self._storage_path, key
+            self._native_path, self._storage_path, key.value()
         )
 
     def discover_categories(self, on_complete: Optional[Callable[[], None]], *args):
@@ -299,13 +302,23 @@ class AndroidNoteRepository(FileSystemNoteRepository):
     ):
         code = MindRefCallCodes.PROMPT_EXTERNAL_FILE.value()
         self._mediator_callbacks[code] = on_complete
-        image_exts = (".jpg", ".jpeg", ".png")
-        doc_exts = (".md",)
-        mime_types = []
 
-        if any(any((ef.endswith(ie) for ie in image_exts)) for ef in ext_filter):
-            mime_types.append("image/*")
-        if any(any((ef.endswith(de) for de in doc_exts)) for ef in ext_filter):
-            mime_types.append("document/*")
+        def get_mime_types(filters: list[str]) -> set[MIME_TYPE]:
+            result = set(())
+            image_exts = (".jpg", ".jpeg", ".png")
+            doc_exts = (".md",)
+            img_mime = MIME_TYPE("image/*")
+            doc_mime = MIME_TYPE("document/*")
+            any_mime = MIME_TYPE("*/*")
+            if any(any((ef.endswith(ie) for ie in image_exts)) for ef in filters):
+                result.add(img_mime)
+
+            if any(any((ef.endswith(de) for de in doc_exts)) for ef in filters):
+                result.add(doc_mime)
+            if not result:
+                result.add(any_mime)
+            return result
+
+        mime_types = get_mime_types(ext_filter)
 
         AndroidStorageManager.prompt_for_external_file(code, mime_types)

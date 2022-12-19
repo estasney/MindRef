@@ -25,8 +25,15 @@ DISPLAY_NAME_TYPE = NewType("DISPLAY_NAME_TYPE", str)
 class IntentProtocol(Protocol):
     FLAG_GRANT_READ_URI_PERMISSION: Literal[1]
     FLAG_GRANT_WRITE_URI_PERMISSION: Literal[2]
+    ACTION_OPEN_DOCUMENT_TREE: Any
+    ACTION_OPEN_DOCUMENT: Any
+    CATEGORY_OPENABLE: str
+    EXTRA_MIME_TYPES: list[MIME_TYPE]
+    addCategory: Callable[[str], None]
     data: Any
     getData: Callable
+    setAction: Callable
+    setType: Callable[[MIME_TYPE], None]
 
 
 @runtime_checkable
