@@ -1,4 +1,4 @@
-from enum import IntEnum
+from enum import Flag, auto
 from functools import partial
 from pathlib import Path
 from typing import (
@@ -36,19 +36,29 @@ CodeNames = Literal[
     "NOTES",
     "EXTERNAL_STORAGE",
     "APP_STORAGE",
+    "FILE",
+    "DIRECTORY",
+    "PROMPT_EXTERNAL",
+    "PROMPT_EXTERNAL_DIRECTORY",
+    "PROMPT_EXTERNAL_FILE",
 ]
 
 
-class MindRefCallCodes(IntEnum):
-    MIRROR = 1 << 0  # Mirroring a filesystem
-    READ = 1 << 1  # Read without writing
-    WRITE = 1 << 2  # Creating a resource
-    REMOVE = 1 << 3  # Removing a resource
-    PROMPT = 1 << 4  # Asked for User Intervention
-    CATEGORIES = 1 << 5  # Operating on categories
-    NOTES = 1 << 6  # Operating on notes
-    EXTERNAL_STORAGE = 1 << 7  # Target of operation is external storage
-    APP_STORAGE = 1 << 8  # Target of operation is app storage
+class MindRefCallCodes(Flag):
+    MIRROR = auto()  # Mirroring a filesystem
+    READ = auto()  # Read without writing
+    WRITE = auto()  # Creating a resource
+    REMOVE = auto()  # Removing a resource
+    PROMPT = auto()  # Asked for User Intervention
+    CATEGORIES = auto()  # Operating on categories
+    NOTES = auto()  # Operating on notes
+    EXTERNAL_STORAGE = auto()  # Target of operation is external storage
+    APP_STORAGE = auto()  # Target of operation is app storage
+    FILE = auto()  # Target of operation is a file
+    DIRECTORY = auto()  # Target of operation is a directory
+    PROMPT_EXTERNAL = PROMPT | EXTERNAL_STORAGE
+    PROMPT_EXTERNAL_DIRECTORY = PROMPT_EXTERNAL | DIRECTORY
+    PROMPT_EXTERNAL_FILE = PROMPT_EXTERNAL | FILE
 
     @staticmethod
     def check_field(x: int, n: int) -> bool:
@@ -280,6 +290,22 @@ class AndroidNoteRepository(FileSystemNoteRepository):
         -------
 
         """
-        code = MindRefCallCodes.PROMPT | MindRefCallCodes.EXTERNAL_STORAGE
+        code = MindRefCallCodes.PROMPT_EXTERNAL_DIRECTORY.value()
         self._mediator_callbacks[code] = on_complete
         AndroidStorageManager.prompt_for_external_folder(code)
+
+    def prompt_for_external_file(
+        self, ext_filter: list[str], on_complete: Callable[[str], None]
+    ):
+        code = MindRefCallCodes.PROMPT_EXTERNAL_FILE.value()
+        self._mediator_callbacks[code] = on_complete
+        image_exts = (".jpg", ".jpeg", ".png")
+        doc_exts = (".md",)
+        mime_types = []
+
+        if any(any((ef.endswith(ie) for ie in image_exts)) for ef in ext_filter):
+            mime_types.append("image/*")
+        if any(any((ef.endswith(de) for de in doc_exts)) for ef in ext_filter):
+            mime_types.append("document/*")
+
+        AndroidStorageManager.prompt_for_external_file(code, mime_types)
