@@ -11,24 +11,22 @@ from typing import (
 )
 
 from kivy import Logger
-from kivy.clock import Clock
+from kivy.clock import Clock, mainthread
 
 from adapters.notes.android.interface import AndroidStorageManager
+from adapters.notes.android.annotations import MIME_TYPE
 from adapters.notes.fs.fs_note_repository import (
     FileSystemNoteRepository,
     TGetCategoriesCallback,
 )
 from domain.events import DiscoverCategoryEvent
 from domain.markdown_note import MarkdownNote
-from utils import caller, fmt_attrs, get_app
+from utils import caller, fmt_attrs, get_app, sch_cb
 
 if TYPE_CHECKING:
     from domain.editable import EditableNote
     from domain.protocols import GetApp
-    from adapters.notes.android.annotations import (
-        MindRefUtilsCallbackPyMediator,
-        MIME_TYPE,
-    )
+    from adapters.notes.android.annotations import MindRefUtilsCallbackPyMediator
 
 CodeNames = Literal[
     "MIRROR",
@@ -136,6 +134,7 @@ class AndroidNoteRepository(FileSystemNoteRepository):
         self.category_files.clear()
         Logger.info(f"{type(self).__name__}: set storage path : {self._storage_path!s}")
 
+    @mainthread
     def py_mediator(self, key: int, *args):
         Logger.info(
             f"{type(self).__name__}: py_mediator - Got Key : {key}, Args: {args}"
@@ -293,14 +292,15 @@ class AndroidNoteRepository(FileSystemNoteRepository):
         -------
 
         """
-        code = MindRefCallCodes.PROMPT_EXTERNAL_DIRECTORY.value()
+        code = MindRefCallCodes.PROMPT_EXTERNAL_DIRECTORY.value
         self._mediator_callbacks[code] = on_complete
-        AndroidStorageManager.prompt_for_external_folder(code)
+        func = caller(AndroidStorageManager, "prompt_for_external_folder", code)
+        sch_cb(func)
 
     def prompt_for_external_file(
         self, ext_filter: list[str], on_complete: Callable[[str], None]
     ):
-        code = MindRefCallCodes.PROMPT_EXTERNAL_FILE.value()
+        code = MindRefCallCodes.PROMPT_EXTERNAL_FILE.value
         self._mediator_callbacks[code] = on_complete
 
         def get_mime_types(filters: list[str]) -> set[MIME_TYPE]:
@@ -321,4 +321,7 @@ class AndroidNoteRepository(FileSystemNoteRepository):
 
         mime_types = get_mime_types(ext_filter)
 
-        AndroidStorageManager.prompt_for_external_file(code, mime_types)
+        func = caller(
+            AndroidStorageManager, "prompt_for_external_file", code, mime_types
+        )
+        sch_cb(func)

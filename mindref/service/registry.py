@@ -1,6 +1,6 @@
 from collections import deque
 from pathlib import Path
-from typing import Callable, Optional, TYPE_CHECKING
+from typing import Callable, Optional, TYPE_CHECKING, Literal
 
 from kivy import Logger
 
@@ -262,7 +262,9 @@ class Registry:
                     on_complete=event.on_complete
                 )
             case FilePickerEvent(action=e.OPEN_FILE), True:
-                raise NotImplementedError()
+                return app.note_service.prompt_for_external_file(
+                    ext_filter=event.ext_filter, on_complete=event.on_complete
+                )
             case FilePickerEvent(
                 action=e.OPEN_FOLDER | e.OPEN_FILE, start_folder=str()
             ), False:
@@ -280,3 +282,54 @@ class Registry:
 
             case FilePickerEvent(action=e.CLOSE), False:
                 raise NotImplementedError()
+
+    def handle_category_validation(
+        self, field: Literal["name", "image"], value: str
+    ) -> str | None:
+        """
+        Validate the category name or image path provided by the user in the category editor
+
+        Parameters
+        ----------
+        field : Literal['name', 'image']
+            The field name to validate
+        value : str
+            The value to validate
+
+        Returns
+        -------
+        None if valid, otherwise a string describing the error
+
+        Notes
+        -----
+        - Category names must be unique, this includes by case. NoteService will determine if
+          the name is unique by case-insensitive comparison of known category (folder) names.
+            - Leading and trailing whitespace is stripped from the name, so '  My Category  ' is
+              the same as 'My Category'
+        - Category image paths have different requirements depending on the platform
+           - Desktop: Must be a valid path to an existing file, and the file extension must be one of the following:
+                - .png
+                - .jpg
+                - .jpeg
+           - Android: The image path must not be empty. As is, we don't have a way to validate the path, nor do we have
+               a way to validate the file extension. As such, we'll just assume the user knows what they're doing.
+        """
+
+        match field:
+            case "name":
+                if not value:
+                    return "Category name cannot be empty"
+                if not self.app.note_service.category_name_unique(value):
+                    return "Category name must be unique"
+
+            case "image" if self.app.platform_android:
+                if not value:
+                    return "Category image cannot be empty"
+
+            case "image":
+                if not value:
+                    return "Category image cannot be empty"
+                if not Path(value).exists():
+                    return "Category image must be a valid path to an existing file"
+                if Path(value).suffix.lower() not in (".png", ".jpg", ".jpeg"):
+                    return "Category image must be a .png, .jpg, or .jpeg file"

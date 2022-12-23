@@ -390,3 +390,37 @@ class FileSystemNoteRepository(AbstractNoteRepository):
 
     def category_image_uri(self, category: str) -> Optional[Path]:
         return self.category_files[category].get_image_uri()
+
+    def category_name_unique(self, category: str) -> bool:
+        """
+        Checks if a category name is unique
+
+        Parameters
+        ----------
+        category : str
+            The category name to check
+        """
+        lcat = category.lower().strip()
+        # Perform a case-insensitive check in our category_files dict
+        if lcat in (k.lower().strip() for k in self.category_files.keys()):
+            return False
+
+        # We want to check the filesystem for any other categories but can only do this if we have a storage path.
+        # We can check that we have a storage path by checking our configured attribute.
+        if not self.configured:
+            return True
+
+        # Check if the directory exists, since we can access app filesystem, this is an inexpensive check
+        # We can't just check if the directory exists, since we may have a category named "Foo" and "foo"
+        # Create a generator of all directories in the storage path and lowercase them
+        matched = next(
+            (
+                d
+                for d in self.storage_path.iterdir()
+                if d.is_dir() and d.name.lower() == lcat
+            ),
+            None,
+        )
+        if matched:
+            return False
+        return True

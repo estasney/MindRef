@@ -96,7 +96,7 @@ class OnDocumentCallback(PythonJavaClass):
         Parameters
         ----------
         py_mediator
-        activity_code : int
+
             Since result comes from PythonActivity, we can't have to inject the activity code here
         """
         super().__init__()
@@ -111,7 +111,7 @@ class OnDocumentCallback(PythonJavaClass):
         Logger.debug(
             f"OnDocumentCallback: Selected uri - {uri.toString()} - {uri.getPath()}"
         )
-        self.py_mediator()(self.activity_code, uri.toString())
+        self.py_mediator()(requestCode, uri.toString())
 
 
 P = ParamSpec("P")
@@ -372,25 +372,28 @@ class AndroidStorageManager:
         with cls._lock:
             if not cls._prompt_picker_callback_java:
                 cls._register_prompt_picker_callback()
-                activity = cls._get_activity()
-                Intent: "Type[IntentProtocol]" = autoclass("android.content.Intent")
-                intent = Intent()
-                intent.setAction(Intent.ACTION_OPEN_DOCUMENT)
-                intent.addCategory(Intent.CATEGORY_OPENABLE)
-                any_mime = MIME_TYPE("*/*")
+            activity = cls._get_activity()
+            Intent: "Type[IntentProtocol]" = autoclass("android.content.Intent")
+            intent = Intent()
+            intent.setAction(Intent.ACTION_OPEN_DOCUMENT)
+            intent.addCategory(Intent.CATEGORY_OPENABLE)
+            any_mime = MIME_TYPE("*/*")
 
-                match len(mime_types), any_mime in mime_types:
-                    case 0, _:
-                        intent.setType(any_mime)
-                    case 1, _:
-                        intent.setType(mime_types.pop())
-                    case int(), True:
-                        intent.setType(any_mime)
-                        mime_types.remove(any_mime)
-                        intent.EXTRA_MIME_TYPES = list(mime_types)
-                    case int(), False:
-                        intent.setType(mime_types.pop())
-                        intent.EXTRA_MIME_TYPES = list(mime_types)
+            match len(mime_types), any_mime in mime_types:
+                case 0, _:
+                    intent.setType(any_mime)
+                case 1, _:
+                    intent.setType(mime_types.pop())
+                case int(), True:
+                    intent.setType(any_mime)
+                    mime_types.remove(any_mime)
+                    intent.EXTRA_MIME_TYPES = list(mime_types)
+                case int(), False:
+                    intent.setType(mime_types.pop())
+                    intent.EXTRA_MIME_TYPES = list(mime_types)
+        Logger.info(
+            f"{type(cls).__name__}: prompt_for_external_file - code {activity_code}"
+        )
         activity.startActivityForResult(intent, activity_code)
 
     @classmethod

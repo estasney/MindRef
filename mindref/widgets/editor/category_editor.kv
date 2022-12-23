@@ -2,6 +2,7 @@
 #:import ExpandingLabel widgets.style
 #:import TexturedButton widgets.buttons.buttons
 #:import XSmallLabel widgets.style
+#:import TextField widgets.forms.text_field
 
 <-TitleBar@BoxLayout>:
     canvas:
@@ -35,6 +36,7 @@
 
 
 <CategoryEditor>:
+    validator: app.registry.handle_category_validation
     category_name_input: category_name_input
     image_path_input: image_path_input
     orientation: 'vertical'
@@ -53,44 +55,20 @@
             # Form
             BoxLayout:
                 # Category Name Row
-                orientation: 'vertical'
-                XSmallLabel:
-                    color: app.colors['Gray-200']
-                    text: "Category Name"
-                    text_size: self.size
-                    valign: 'bottom'
-                    halign: 'left'
-                TextInput:
+                TextField:
                     id: category_name_input
-                    multiline: False
-                    size_hint_min_y: app.base_font_size * 1.5
-                    size_hint_max_y: app.base_font_size * 2.5
-                BoxLayout:
-                    padding: [0, dp(4), 0, dp(4)]
-                    height: self.minimum_height
-                    size_hint_y: None
-                    HSeparator:
-                        color: app.colors['Accent-One'] if category_name_input.focused else app.colors['Gray-300']
+                    on_touched: root.validate(self, self.touched, 'name')
+                    helper_text: 'Category Name'
+
             BoxLayout:
                 # Image Path Row
                 orientation: 'vertical'
-                XSmallLabel:
-                    color: app.colors['Gray-200']
-                    text: "Category Image"
-                    text_size: self.size
-                    valign: "bottom"
-                    halign: "left"
-                TextInput:
+                TextField:
                     id: image_path_input
-                    multiline: False
-                    size_hint_min_y: app.base_font_size * 1.5
-                    size_hint_max_y: app.base_font_size * 2.5
-                BoxLayout:
-                    padding: [0, dp(4), 0, dp(4)]
-                    height: self.minimum_height
-                    size_hint_y: None
-                    HSeparator:
-                        color: app.colors['Accent-One'] if image_path_input.focused else app.colors['Gray-300']
+                    on_touched: root.validate(self, self.touched, 'image')
+                    helper_text: 'Category Image'
+
+
             BoxLayout:
                 orientation: 'vertical'
                 size_hint_y: None

@@ -158,3 +158,8 @@ class AbstractNoteRepository(ABC):
         on_complete
         """
         raise NotImplementedError
+
+    @abc.abstractmethod
+    def category_name_unique(self, category: str) -> bool:
+        """Return True if category name is unique"""
+        raise NotImplementedError
