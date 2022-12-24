@@ -23,7 +23,7 @@
             border:  root.border_size
             pos: self.pos
             size: self.size
-            source: self.state_image
+            source: root.state_image if not root.disabled else root.background_disabled
 
 <-TexturedLabelButton>:
     text: ''
@@ -42,7 +42,7 @@
             border:  root.border_size
             pos: self.pos
             size: self.size
-            source: self.state_image
+            source: root.state_image if not root.disabled else root.background_disabled
     BaseLabel:
         text: root.text
         size_hint_y: None
@@ -63,7 +63,7 @@
             border:  [dp(8), dp(8), dp(8), dp(8)]
             pos: self.pos
             size: self.size
-            source: self.state_image
+            source: root.state_image if not root.disabled else root.background_disabled
 
     Image:
         mipmap: True

@@ -1,7 +1,10 @@
 from typing import Literal, Callable
 
 from kivy import Logger
-from kivy.properties import ObjectProperty
+from kivy.properties import (
+    ObjectProperty,
+    BooleanProperty,
+)
 from kivy.uix.boxlayout import BoxLayout
 
 from domain.events import CreateCategoryEvent, FilePickerEvent
@@ -15,6 +18,7 @@ class CategoryEditor(BoxLayout):
     category_name_input: TextField = ObjectProperty()
     image_path_input: TextField = ObjectProperty()
     validator: Callable[[tuple[str, str]], str | None] = ObjectProperty()
+    allow_submit = BooleanProperty(False)
 
     def __init__(self, **kwargs):
         """

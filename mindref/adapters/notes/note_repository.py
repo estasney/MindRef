@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import abc
 from abc import ABC
+from pathlib import Path
 from typing import Callable, Literal, Optional, Protocol, TYPE_CHECKING, Type, overload
 
 if TYPE_CHECKING:
@@ -79,6 +80,10 @@ class AbstractNoteRepository(ABC):
     @current_category.setter
     @abc.abstractmethod
     def current_category(self, value: str):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def create_category(self, name: str, image_path: Path | str, on_complete: Callable):
         raise NotImplementedError
 
     def get_category_meta(self, category: str, on_complete: Callable, refresh=False):

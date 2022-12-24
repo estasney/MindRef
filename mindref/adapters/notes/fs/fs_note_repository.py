@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import shutil
 from collections import namedtuple
 from functools import partial
 from operator import attrgetter, itemgetter
@@ -14,7 +15,7 @@ from adapters.notes.note_repository import (
 from domain.events import DiscoverCategoryEvent, NotesQueryNotSetFailureEvent
 from domain.markdown_note import MarkdownNote
 from domain.note_resource import CategoryResourceFiles
-from utils import caller, def_cb, sch_cb
+from utils import caller, def_cb, sch_cb, scheduleable
 from utils.index import RollingIndex
 from widgets.typeahead.typeahead_dropdown import Suggestion
 
@@ -238,6 +239,118 @@ class FileSystemNoteRepository(AbstractNoteRepository):
             return
         self._current_category = value
         self._index = RollingIndex(size=len(self.category_files[value].notes))
+
+    def create_category(
+        self,
+        name: str,
+        image_path: Path | str,
+        on_complete: Callable[[Path, bool], None],
+    ):
+        """
+        Create a new category on the filesystem
+
+        Parameters
+        ----------
+        name : str
+            Category Name
+        image_path : Path
+            Path to the image file. This will be copied to the new category folder
+        on_complete : Path | None
+            An optional callback to be called after the category is created.
+            If successful, the callback will be called with the path to the category and True
+            If unsuccessful, the callback will be called with the path to the category and False
+
+
+        """
+        category_path = self.storage_path / name
+        src_image_path = Path(image_path)
+        tgt_image_path = (category_path / name).with_suffix(src_image_path.suffix)
+
+        """
+        Order of operations:
+        1. Try to create the category folder
+          a. If it fails, call the on_complete callback with the category path and False
+          b. If it succeeds, schedule a function to copy the image file to the category folder.
+          This function will need to be aware of the on_complete callback in case it fails.
+        2. Try to copy the image file to the category folder
+            a. If it fails, call the on_complete callback with the category path and False
+            b. If it succeeds, we need to schedule a function to update the category_files dict
+            which will in turn call the on_complete callback with the category path and True
+        3. Update the category_files dict
+            a. If it fails, call the on_complete callback with the category path and False
+            b. If it succeeds, call the on_complete callback with the category path and True
+        """
+
+        def create_category_folder(
+            category_path_: Path,
+            on_success: Callable,
+            on_fail: Callable[[Path, bool], None],
+        ):
+            try:
+                category_path_.mkdir(exist_ok=False, parents=False)
+            except OSError as e:
+                Logger.error(
+                    f"{type(self).__name__}: create_category_folder - Failed to create {name}"
+                )
+                on_fail(category_path, False)
+                return
+            bound = scheduleable(on_success)
+            sch_cb(bound)
+
+        def copy_image_file(
+            src, tgt, on_success: Callable, on_fail: Callable[[Path, bool], None]
+        ):
+            try:
+                shutil.copy(src, tgt)
+            except OSError as e:
+                Logger.info(
+                    f"{type(self).__name__}: copy_image_file - Failed to copy image {src} to {tgt}"
+                )
+                on_fail(category_path, False)
+                return
+            bound = scheduleable(on_success)
+            sch_cb(bound)
+
+        def update_category_files_dict(
+            category_name: str, category_path_: Path, on_success: Callable
+        ):
+            category_resource = self.discover_category(
+                category=category_name, on_complete=None
+            )
+            self.category_files[category_name] = category_resource
+            self.get_app().registry.push_event(
+                DiscoverCategoryEvent(
+                    category=category_name,
+                )
+            )
+
+            bound = scheduleable(on_success, category_path, True)
+            sch_cb(bound)
+
+            # We work backwards in the callback chain, binding arguments to the callback
+
+        sch_update_category_files_dict = scheduleable(
+            update_category_files_dict,
+            category_name=name,
+            category_path_=category_path,
+            on_success=on_complete,
+        )
+
+        sch_copy_image_file = scheduleable(
+            copy_image_file,
+            src=src_image_path,
+            tgt=tgt_image_path,
+            on_success=sch_update_category_files_dict,
+            on_fail=on_complete,
+        )
+
+        sch_create_category_folder = scheduleable(
+            create_category_folder,
+            category_path_=category_path,
+            on_success=sch_copy_image_file,
+            on_fail=on_complete,
+        )
+        sch_cb(sch_create_category_folder)
 
     def index_size(self):
         if not self._index:

@@ -39,6 +39,7 @@
     validator: app.registry.handle_category_validation
     category_name_input: category_name_input
     image_path_input: image_path_input
+    allow_submit: all((category_name_input.text, image_path_input.text, not category_name_input.error_message, not image_path_input.error_message))
     orientation: 'vertical'
     TitleBar:
         size_hint_y: 0.1
@@ -84,6 +85,7 @@
         SaveButton:
             padding: dp(10)
             on_release: root.button_event('save')
+            disabled: not root.allow_submit
         CancelButton:
             on_release: root.button_event('cancel')
 

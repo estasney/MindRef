@@ -10,6 +10,9 @@ from domain.events import (
     NoteFetchedEvent,
     NotesQueryNotSetFailureEvent,
     FilePickerEvent,
+    EventFailure,
+    NotesQueryFailureEvent,
+    NotesQueryErrorFailureEvent,
 )
 from utils import caller, def_cb, sch_cb
 from utils.caching import kivy_cache
@@ -282,6 +285,46 @@ class Registry:
 
             case FilePickerEvent(action=e.CLOSE), False:
                 raise NotImplementedError()
+
+    def create_category(
+        self,
+        category: str,
+        image_path: str | Path,
+        on_complete: Callable[[Path, bool], None],
+    ):
+        """
+        Create a new category
+
+        Parameters
+        ----------
+        category : str
+            The name of the category to create
+        image_path : str | Path
+            The path to the image to use for the category
+        on_complete : Callable[[Path, bool], None]
+            Dual purpose callback. First argument is the category name, second is a boolean indicating success.
+
+
+        """
+        note_repo = self.app.note_service
+        if not note_repo.configured:
+            self.push_event(NotesQueryNotSetFailureEvent(on_complete=None))
+            return
+        note_repo.create_category(category, image_path, on_complete=on_complete)
+
+    def handle_error(self, event: EventFailure):
+        """
+        Handle an error event
+        """
+        match event:
+            case NotesQueryFailureEvent():
+                ...
+            case NotesQueryNotSetFailureEvent():
+                ...
+            case NotesQueryErrorFailureEvent():
+                ...
+            case EventFailure():
+                ...
 
     def handle_category_validation(
         self, field: Literal["name", "image"], value: str

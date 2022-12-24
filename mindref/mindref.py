@@ -46,7 +46,7 @@ from domain.events import (
 from domain.settings import app_settings
 from plugins import PluginManager
 from service.registry import Registry
-from utils import attrsetter, caller, sch_cb, get_app
+from utils import attrsetter, caller, sch_cb, get_app, scheduleable
 from utils.triggers import trigger_factory
 from widgets.screens.manager import NoteAppScreenManager
 
@@ -442,6 +442,14 @@ class MindRefApp(App):
                     case event_action.CLOSE_ACCEPT, str(category), img_path:
                         Logger.info(
                             f"{type(self).__name__}: process_event - Create Category {category}"
+                        )
+                        # Scheduled callback will switch display state to display_state last trigger
+                        sch_display_state = scheduleable(
+                            self.display_state_trigger, self.display_state_last
+                        )
+
+                        self.registry.create_category(
+                            category, img_path, on_complete=sch_display_state
                         )
                         return self.display_state_trigger(self.display_state_last)
 

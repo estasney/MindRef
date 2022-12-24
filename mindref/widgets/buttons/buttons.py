@@ -26,6 +26,7 @@ class HamburgerIcon(BoxLayout):
 class TexturedButton(ButtonBehavior, BoxLayout):
     background_normal = StringProperty(f"{texture_atlas}/bg_normal")
     background_down = StringProperty(f"{texture_atlas}/bg_down")
+    background_disabled = StringProperty(f"{texture_atlas}/bg_disabled")
     background_color = ColorProperty()
     border_size = VariableListProperty()
 
