@@ -443,13 +443,17 @@ class MindRefApp(App):
                         Logger.info(
                             f"{type(self).__name__}: process_event - Create Category {category}"
                         )
+
                         # Scheduled callback will switch display state to display_state last trigger
-                        sch_display_state = scheduleable(
-                            self.display_state_trigger, self.display_state_last
-                        )
+                        # as well as push a refresh event to the registry
+                        @scheduleable
+                        def on_category_created():
+
+                            self.display_state_trigger("choose")
+                            self.registry.query_all(on_complete=None)
 
                         self.registry.create_category(
-                            category, img_path, on_complete=sch_display_state
+                            category, img_path, on_complete=on_category_created
                         )
                         return self.display_state_trigger(self.display_state_last)
 

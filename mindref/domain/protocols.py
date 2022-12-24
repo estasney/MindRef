@@ -40,6 +40,7 @@ class AppRegistryProtocol(Protocol):
     base_font_size: int
     colors: dict[str, tuple[float, float, float] | tuple[float, float, float, float]]
     settings_cls: str | "MindRefSettingsAndroid" | "MindRefSettingsNative"
+    user_data_dir: str
 
     def display_state_trigger(self, state: "DISPLAY_STATES") -> None:
         ...

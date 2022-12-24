@@ -15,6 +15,7 @@ from typing import (
 
 from jnius import PythonJavaClass, autoclass, java_method
 from kivy import Logger
+from kivy.clock import Clock
 
 from adapters.notes.android.annotations import (
     ACTIVITY_CLASS_NAME,
@@ -24,6 +25,7 @@ from adapters.notes.android.annotations import (
     UriProtocol,
     MIME_TYPE,
 )
+from utils import scheduleable
 
 if TYPE_CHECKING:
     from .annotations import (
@@ -58,20 +60,28 @@ class MindRefUtilsCallback(PythonJavaClass):
 
     @java_method("(ILjava/lang/String;)V", name="onComplete")
     def onCompleteCreateCategory(self, key: int, category: str):
-        self.py_mediator()(key, category)
+        mediator = self.py_mediator()
+        sched_mediator = scheduleable(mediator, key, category)
+        Clock.schedule_once(sched_mediator)
 
     @java_method("(I[Ljava/lang/String;)V", name="onComplete")
     def onCompleteGetCategories(self, key: int, categories: list[str]):
-        self.py_mediator()(key, categories)
+        mediator = self.py_mediator()
+        sched_mediator = scheduleable(mediator, key, categories)
+        Clock.schedule_once(sched_mediator)
 
     @java_method("(I)V", name="onComplete")
     def onCompleteCopyStorage(self, key: int):
-        self.py_mediator()(key)
+        mediator = self.py_mediator()
+        sched_mediator = scheduleable(mediator, key)
+        Clock.schedule_once(sched_mediator)
 
     @java_method("(I)V")
     def onFailure(self, key: int):
         # Indicate a failure by making negating the key
-        self.py_mediator()(-key)
+        mediator = self.py_mediator()
+        sched_mediator = scheduleable(mediator, -key)
+        Clock.schedule_once(sched_mediator)
 
 
 class ActivityResultCode(IntEnum):
@@ -111,7 +121,10 @@ class OnDocumentCallback(PythonJavaClass):
         Logger.debug(
             f"OnDocumentCallback: Selected uri - {uri.toString()} - {uri.getPath()}"
         )
-        self.py_mediator()(requestCode, uri.toString())
+        mediator = self.py_mediator()
+        sched_mediator = scheduleable(mediator, requestCode, uri.toString())
+        Clock.schedule_once(sched_mediator)
+        AndroidStorageManager.take_persistable_permission(uri)
 
 
 P = ParamSpec("P")
@@ -235,9 +248,6 @@ class AndroidStorageManager:
         """Register a Java native on_complete with our Java Activity that in turn calls our python on_complete and then
         finally calls user python callbacks
 
-        Parameters
-        ----------
-        activity_code
         """
 
         cls._prompt_picker_callback_java = OnDocumentCallback(cls._get_mediator)
@@ -257,7 +267,7 @@ class AndroidStorageManager:
         instance.setMindRefCallback(cls._mindref_callback_java)
 
     @classmethod
-    def _take_persistable_permission(cls, uri: str | UriProtocol) -> str | UriProtocol:
+    def take_persistable_permission(cls, uri: str | UriProtocol) -> str | UriProtocol:
         """After user selects DocumentTree, we want to persist the permission"""
         Intent: "IntentProtocol" = autoclass("android.content.Intent")
         pyActivity: "ActivityProtocol" = cls._get_activity()
@@ -268,6 +278,7 @@ class AndroidStorageManager:
             Intent.FLAG_GRANT_READ_URI_PERMISSION
             | Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
         )
+        Logger.info(f"{type(cls).__name__}: take_persistable_permission - {uri}")
         return uri
 
     @classmethod
@@ -282,7 +293,7 @@ class AndroidStorageManager:
 
         Called from OnDocumentCallback.onActivityResult
         """
-        cls._take_persistable_permission(uri)
+        cls.take_persistable_permission(uri)
         if cb := cls._prompt_picker_callback:
             cb(uri)
 
@@ -363,8 +374,14 @@ class AndroidStorageManager:
                 cls._register_prompt_picker_callback()
             activity = cls._get_activity()
             Intent = autoclass("android.content.Intent")
-            intent: "IntentProtocol" = Intent()
-            intent.setAction(Intent.ACTION_OPEN_DOCUMENT_TREE)
+            intent: "IntentProtocol" = (
+                Intent()
+                .setAction(Intent.ACTION_OPEN_DOCUMENT_TREE)
+                .addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                .addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                .addFlags(Intent.FLAG_GRANT_PREFIX_URI_PERMISSION)
+            )
         activity.startActivityForResult(intent, activity_code)
 
     @classmethod
@@ -374,9 +391,13 @@ class AndroidStorageManager:
                 cls._register_prompt_picker_callback()
             activity = cls._get_activity()
             Intent: "Type[IntentProtocol]" = autoclass("android.content.Intent")
-            intent = Intent()
-            intent.setAction(Intent.ACTION_OPEN_DOCUMENT)
-            intent.addCategory(Intent.CATEGORY_OPENABLE)
+            intent = (
+                Intent()
+                .setAction(Intent.ACTION_OPEN_DOCUMENT)
+                .addCategory(Intent.CATEGORY_OPENABLE)
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            )
+
             any_mime = MIME_TYPE("*/*")
 
             match len(mime_types), any_mime in mime_types:
@@ -452,3 +473,75 @@ class AndroidStorageManager:
         mrUtils.copyToExternalStorage(
             key, str(source), source.parent.stem, source.stem, source_mime
         )
+
+    @classmethod
+    def create_category_directory(
+        cls, directoryName: str, appStorageRoot: str, externalStorageRoot: str, key: int
+    ):
+        """
+        Create a directory on external storage on Android
+
+        Parameters
+        ----------
+        directoryName : str
+            Name of directory to create
+        appStorageRoot : str
+            Path to app storage root
+        externalStorageRoot : str
+            Path to external storage root (Uri from OPEN_DOCUMENT_TREE)
+        key : int
+            Arbitrary int, that will be passed to py_mediator when callback is invoked
+
+        """
+        with cls._lock:
+            activity = cls._get_activity()
+            context = cls._get_context(activity)
+            mrUtils = cls._get_mindref_utils_cls(
+                externalStorageRoot, appStorageRoot, context
+            )
+            if not cls._mindref_callback_java:
+                cls._register_mindref_utils_callback(mrUtils)
+        mrUtils.createCategory(key, directoryName)
+
+    @classmethod
+    def add_category_image(
+        cls,
+        directoryName: str,
+        appStorageRoot: str,
+        externalStorageRoot: str,
+        imageUri: str,
+        key: int,
+    ):
+        """
+        Add an image to a category directory on external storage on Android.
+
+        Parameters
+        ----------
+        directoryName : str
+            Category name that image will be added to. This should already exist.
+        appStorageRoot : str
+            Path to app storage root. Used only for caching purposes.
+        externalStorageRoot : str
+            Path to our managed external storage root (Uri from OPEN_DOCUMENT_TREE)
+        imageUri : str
+            Content Uri of image to add to category from OPEN_DOCUMENT
+        key : int
+            Arbitrary int, that will be passed to py_mediator when callback is invoked
+
+        Returns
+        -------
+
+        """
+        with cls._lock:
+            activity = cls._get_activity()
+            context = cls._get_context(activity)
+            mrUtils = cls._get_mindref_utils_cls(
+                externalStorageRoot, appStorageRoot, context
+            )
+            if not cls._mindref_callback_java:
+                cls._register_mindref_utils_callback(mrUtils)
+        srcUri = cls.ensure_uri_type(imageUri, UriProtocol)
+        Logger.info(
+            f"{type(cls).__name__}: add_category_image - [srcUri={imageUri}][dir={directoryName}]"
+        )
+        mrUtils.copyToManagedExternal(key, srcUri, directoryName)

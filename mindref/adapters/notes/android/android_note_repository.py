@@ -8,6 +8,7 @@ from typing import (
     Optional,
     TYPE_CHECKING,
     Literal,
+    cast,
 )
 
 from kivy import Logger
@@ -21,7 +22,7 @@ from adapters.notes.fs.fs_note_repository import (
 )
 from domain.events import DiscoverCategoryEvent
 from domain.markdown_note import MarkdownNote
-from utils import caller, fmt_attrs, get_app, sch_cb
+from utils import caller, fmt_attrs, get_app, sch_cb, scheduleable
 
 if TYPE_CHECKING:
     from domain.editable import EditableNote
@@ -57,9 +58,12 @@ class MindRefCallCodes(Flag):
     APP_STORAGE = auto()  # Target of operation is app storage
     FILE = auto()  # Target of operation is a file
     DIRECTORY = auto()  # Target of operation is a directory
+    IMAGE = auto()  # Target of operation is an image
     PROMPT_EXTERNAL = PROMPT | EXTERNAL_STORAGE
     PROMPT_EXTERNAL_DIRECTORY = PROMPT_EXTERNAL | DIRECTORY
     PROMPT_EXTERNAL_FILE = PROMPT_EXTERNAL | FILE
+    WRITE_DIRECTORY = WRITE | DIRECTORY
+    WRITE_IMAGE = WRITE | IMAGE
 
     @staticmethod
     def check_field(x: int, n: int) -> bool:
@@ -152,10 +156,11 @@ class AndroidNoteRepository(FileSystemNoteRepository):
             f"{type(self).__name__} : Invoking AndroidStorageManager to copy_storage from {self._native_path} to {self._storage_path}"
         )
 
-        key = MindRefCallCodes.MIRROR | MindRefCallCodes.EXTERNAL_STORAGE
-        self._mediator_callbacks[key.value()] = on_complete
+        key_ = MindRefCallCodes.MIRROR | MindRefCallCodes.EXTERNAL_STORAGE
+        key = cast(int, key_.value)
+        self._mediator_callbacks[key] = on_complete
         AndroidStorageManager.clone_external_storage(
-            self._native_path, self._storage_path, key.value()
+            self._native_path, self._storage_path, key
         )
 
     def discover_categories(self, on_complete: Optional[Callable[[], None]], *args):
@@ -253,7 +258,8 @@ class AndroidNoteRepository(FileSystemNoteRepository):
         Logger.info(
             f"{type(self).__name__}: get_external_storage_categories - {fmt_attrs(self, '_native_path', '_storage_path')}"
         )
-        callback_code = MindRefCallCodes.READ | MindRefCallCodes.CATEGORIES
+        callback_code_ = MindRefCallCodes.READ | MindRefCallCodes.CATEGORIES
+        callback_code = cast(int, callback_code_.value)
         self._mediator_callbacks[callback_code] = on_complete
         AndroidStorageManager.get_categories(
             self._native_path, self._storage_path, callback_code
@@ -262,7 +268,8 @@ class AndroidNoteRepository(FileSystemNoteRepository):
     def save_note(self, note: "EditableNote", on_complete):
         Logger.info(f"{type(self).__name__} : Saving Note : {note}")
 
-        key = MindRefCallCodes.WRITE | MindRefCallCodes.NOTES
+        key_ = MindRefCallCodes.WRITE | MindRefCallCodes.NOTES
+        key = cast(int, key_.value)
 
         def store_to_external(md_note: MarkdownNote):
             Logger.info(
@@ -292,7 +299,7 @@ class AndroidNoteRepository(FileSystemNoteRepository):
         -------
 
         """
-        code = MindRefCallCodes.PROMPT_EXTERNAL_DIRECTORY.value
+        code = cast(int, MindRefCallCodes.PROMPT_EXTERNAL_DIRECTORY.value)
         self._mediator_callbacks[code] = on_complete
         func = caller(AndroidStorageManager, "prompt_for_external_folder", code)
         sch_cb(func)
@@ -300,7 +307,7 @@ class AndroidNoteRepository(FileSystemNoteRepository):
     def prompt_for_external_file(
         self, ext_filter: list[str], on_complete: Callable[[str], None]
     ):
-        code = MindRefCallCodes.PROMPT_EXTERNAL_FILE.value
+        code = cast(int, MindRefCallCodes.PROMPT_EXTERNAL_FILE.value)
         self._mediator_callbacks[code] = on_complete
 
         def get_mime_types(filters: list[str]) -> set[MIME_TYPE]:
@@ -325,3 +332,62 @@ class AndroidNoteRepository(FileSystemNoteRepository):
             AndroidStorageManager, "prompt_for_external_file", code, mime_types
         )
         sch_cb(func)
+
+    def create_category(
+        self,
+        name: str,
+        image_path: Path | str,
+        on_complete: Callable[[Path, bool], None],
+    ):
+        """
+        We perform mostly the same steps as FileSystemNoteRepository, but in addition to creating the category directory
+        in our app storage (and copying the image), we also need to duplicate this to external storage using MindRefUtils.
+
+        Parameters
+        ----------
+        name
+        image_path
+        on_complete
+
+        Returns
+        -------
+        """
+
+        Logger.info(
+            f"{type(self).__name__}: create_category - [name={name}, image_path={image_path}]"
+        )
+        # We need to create the category directory in our app storage, and copy the image to that directory
+        # We have to ensure that the directory is created before we copy the image
+
+        # We will register our image copy callback with this code
+        category_callback_code = cast(int, MindRefCallCodes.WRITE_DIRECTORY.value)
+
+        @scheduleable
+        def create_category_android():
+            Logger.info(
+                f"{type(self).__name__}: create_category_android - [directory={name}]"
+            )
+            AndroidStorageManager.create_category_directory(
+                directoryName=name,
+                appStorageRoot=str(self.storage_path),
+                externalStorageRoot=self._native_path,
+                key=category_callback_code,
+            )
+
+        # We will call the on_complete callback with this code
+        image_callback_code = cast(int, MindRefCallCodes.WRITE_IMAGE.value)
+
+        @scheduleable
+        def copy_image_android():
+            AndroidStorageManager.add_category_image(
+                directoryName=name,
+                appStorageRoot=str(self.storage_path),
+                externalStorageRoot=self._native_path,
+                imageUri=str(image_path),
+                key=image_callback_code,
+            )
+
+        self._mediator_callbacks[category_callback_code] = copy_image_android
+        self._mediator_callbacks[image_callback_code] = on_complete
+
+        Clock.schedule_once(create_category_android)

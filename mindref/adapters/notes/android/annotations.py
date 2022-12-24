@@ -16,7 +16,7 @@ ACTIVITY_CLASS_NAME = "org.kivy.android.PythonActivity"
 ACTIVITY_CLASS_NAMESPACE = "org/kivy/android/PythonActivity"
 MINDREF_CLASS_NAME = "org.estasney.android.MindRefUtils"
 MINDREF_CLASS_NAMESPACE = "org/estasney/android/MindRefUtils"
-LIntentFlags = Literal[1, 2]
+LIntentFlags = Literal[1, 2, 64, 128]
 
 MIME_TYPE = NewType("MIME_TYPE", str)
 DISPLAY_NAME_TYPE = NewType("DISPLAY_NAME_TYPE", str)
@@ -25,12 +25,16 @@ DISPLAY_NAME_TYPE = NewType("DISPLAY_NAME_TYPE", str)
 class IntentProtocol(Protocol):
     FLAG_GRANT_READ_URI_PERMISSION: Literal[1]
     FLAG_GRANT_WRITE_URI_PERMISSION: Literal[2]
+    FLAG_GRANT_PERSISTABLE_URI_PERMISSION: Literal[64]
+    FLAG_GRANT_PREFIX_URI_PERMISSION: Literal[128]
+
     ACTION_OPEN_DOCUMENT_TREE: Any
     ACTION_OPEN_DOCUMENT: Any
     CATEGORY_OPENABLE: str
     EXTRA_MIME_TYPES: list[MIME_TYPE]
     addCategory: Callable[[str], None]
     data: Any
+    addFlags: Callable[[LIntentFlags], None]
     getData: Callable
     setAction: Callable
     setType: Callable[[MIME_TYPE], None]
@@ -134,6 +138,9 @@ class MindRefUtilsProtocol(Protocol):
         ...
 
     def copyToAppStorage(self, key: int):
+        ...
+
+    def copyToManagedExternal(self, key: int, sourceUri: str, targetRoot: str):
         ...
 
     def copyToExternalStorage(

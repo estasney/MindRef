@@ -42,6 +42,8 @@ clean-aar :
 clean-bytecode :
 	find $(PROJECT_ROOT) -name "*.pyc" -delete
 	find $(PROJECT_ROOT) -name "__pycache__" -delete
+	find $(PROJECT_ROOT) -name ".mypy_cache" -delete
+
 .PHONY : clean-bytecode
 
 clean-builds :

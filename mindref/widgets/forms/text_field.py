@@ -122,3 +122,19 @@ class TextField(BoxLayout):
         else:
             self.remove_widget(self.w_error_message_label)
         return True
+
+    def clear(self):
+        """
+        Clears the widget state
+
+        Notes
+        -----
+        Since our text state is bound to our w_text_input's text state, we expose a method to clear the text input
+        from w_text_input without needing to know the implementation details of the widget.
+        """
+
+        self.w_text_input.text = ""
+        self.error_message = ""
+        self.touched = False
+
+        return True

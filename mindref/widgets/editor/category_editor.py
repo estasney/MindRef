@@ -51,10 +51,8 @@ class CategoryEditor(BoxLayout):
                 w_field.error_message = ""
 
     def clear_inputs(self, *_args):
-        self.category_name_input.text = ""
-        self.category_name_input.touched = False
-        self.image_path_input.text = ""
-        self.image_path_input.touched = False
+        self.category_name_input.clear()
+        self.image_path_input.clear()
 
     def button_event(self, event: Literal["save", "cancel", "browse"]):
         """
@@ -65,8 +63,6 @@ class CategoryEditor(BoxLayout):
             The event that was triggered
         """
         app = get_app()
-
-        # push_event = partial(caller, app.registry, "push_event")
 
         match event:
             case "save":
