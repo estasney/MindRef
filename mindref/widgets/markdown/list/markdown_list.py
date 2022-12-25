@@ -2,7 +2,6 @@ from kivy.uix.gridlayout import GridLayout
 
 from utils import import_kv
 
-
 import_kv(__file__)
 
 

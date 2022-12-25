@@ -1,0 +1,15 @@
+#:import CategoryEditor widgets.editor.category_editor
+
+<CategoryEditorScreen>:
+    id: category_edit_screen
+    container: container
+    canvas:
+        Color:
+            rgba: app.colors['Dark']
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    BoxLayout:
+        orientation: 'vertical'
+        id: container
+        CategoryEditor:

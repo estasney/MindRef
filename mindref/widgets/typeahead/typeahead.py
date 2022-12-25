@@ -1,12 +1,11 @@
 from typing import Optional
 
 from kivy import Logger
-from kivy.app import App
 from kivy.properties import NumericProperty, ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
 
 from domain.events import TypeAheadQueryEvent
-from utils import import_kv, sch_cb
+from utils import import_kv, sch_cb, get_app
 from widgets.typeahead.typeahead_dropdown import Suggestion, TypeAheadDropDown
 
 import_kv(__file__)
@@ -28,7 +27,7 @@ class TypeAhead(BoxLayout):
     def handle_text(self, _, val):
         if val and len(val) >= self.min_query_length:
             Logger.debug(f"TypeAhead: Query {val}")
-            App.get_running_app().registry.push_event(
+            get_app().registry.push_event(
                 TypeAheadQueryEvent(query=val, on_complete=self.handle_suggestions)
             )
         elif self.dd:
@@ -51,7 +50,7 @@ class TypeAhead(BoxLayout):
         self.dd = None
         Logger.debug(f"TypeAhead: Selecting App Index {value.index}")
 
-        app = App.get_running_app()
+        app = get_app()
         clear_text = lambda dt: setattr(self.typer, "text", "")
         set_index = lambda dt: app.select_index(value.index)
 

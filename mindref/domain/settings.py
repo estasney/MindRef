@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from kivy import platform
 
 SETTINGS_BEHAVIOR_PATH = Path(__file__).parent / "settings" / "app_settings.json"

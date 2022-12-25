@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING
 
 from kivy import Logger
-from kivy.app import App
 from kivy.cache import Cache
 from kivy.properties import (
     DictProperty,
@@ -18,19 +17,16 @@ from domain.events import (
     ListViewButtonEvent,
     PaginationEvent,
 )
-
-from utils import import_kv
+from utils import import_kv, get_app
 from utils.caching import cache_key_note, kivy_cache
 from widgets.behavior.gesture_rec_behavior import GestureRecognizingBehavior
 from widgets.markdown.markdown_document import MarkdownDocument
 
 import_kv(__file__)
 
-
 if TYPE_CHECKING:
     from domain.markdown_note import MarkdownNoteDict
     from typing import Optional
-    from domain.protocols import AppRegistryProtocol
 
 Cache.register("note_widget", limit=10, timeout=3600)
 
@@ -52,7 +48,7 @@ class Note(BoxLayout, GestureRecognizingBehavior):
         self.bind(on_swipe=self.handle_swipe)
 
     def handle_swipe(self, _instance, _score, gesture):
-        app = App.get_running_app()
+        app = get_app()
         if gesture.name == "swipe-left":
             app.registry.push_event(PaginationEvent(direction=-1))
         elif gesture.name == "swipe-right":
@@ -95,7 +91,7 @@ class NoteTitleBar(BoxLayout):
 
     def handle_select(self, _, value):
 
-        app: "AppRegistryProtocol" = App.get_running_app()
+        app = get_app()
         match value:
             case "add":
                 event = AddNoteEvent()

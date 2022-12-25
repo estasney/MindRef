@@ -1,4 +1,3 @@
-from kivy.app import App
 from kivy.properties import (
     ColorProperty,
     DictProperty,
@@ -10,7 +9,7 @@ from kivy.properties import (
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout
 
-from utils import import_kv, mindref_path
+from utils import import_kv, mindref_path, get_app
 
 texture_atlas = "atlas://" + str(mindref_path() / "static" / "textures" / "textures")
 icon_atlas = "atlas://" + str(mindref_path() / "static" / "icons" / "icons")
@@ -27,11 +26,19 @@ class HamburgerIcon(BoxLayout):
 class TexturedButton(ButtonBehavior, BoxLayout):
     background_normal = StringProperty(f"{texture_atlas}/bg_normal")
     background_down = StringProperty(f"{texture_atlas}/bg_down")
+    background_disabled = StringProperty(f"{texture_atlas}/bg_disabled")
     background_color = ColorProperty()
     border_size = VariableListProperty()
 
     def __init__(self, **kwargs):
         super(TexturedButton, self).__init__(**kwargs)
+
+
+class TexturedLabelButton(TexturedButton):
+    text: StringProperty()
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 
 class ImageButton(TexturedButton):
@@ -99,7 +106,7 @@ class PlayStateButton(ImageButton):
 
     def __init__(self, **kwargs):
         super(PlayStateButton, self).__init__(**kwargs)
-        app = App.get_running_app()
+        app = get_app()
         app.bind(play_state=self.handle_play_state)
 
     def handle_icon_active(self, *_args):

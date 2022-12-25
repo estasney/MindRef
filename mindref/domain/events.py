@@ -1,6 +1,8 @@
 import abc
 from dataclasses import dataclass, field
-from typing import Any, Callable, Literal, Optional, TYPE_CHECKING
+from enum import Flag, auto
+from pathlib import Path
+from typing import Any, Callable, Literal, Optional, TYPE_CHECKING, Iterable
 
 if TYPE_CHECKING:
     from domain.markdown_note import MarkdownNote
@@ -145,6 +147,22 @@ class DiscoverCategoryEvent(Event):
 
 
 @dataclass
+class CreateCategoryEvent(Event):
+    class Action(Flag):
+        OPEN_FORM = auto()
+        CLOSE_FORM = auto()
+        ACCEPT = auto()
+        REJECT = auto()
+        CLOSE_REJECT = CLOSE_FORM | REJECT
+        CLOSE_ACCEPT = CLOSE_FORM | ACCEPT
+
+    action: Action
+    event_type = "create_category"
+    category: Optional[str] = None
+    img_path: Optional[str | Path] = None
+
+
+@dataclass
 class NotesQueryFailureEvent(EventFailure, NotesQueryEvent):
     event_type = "notes_query_failure"
     message = "To view notes, open Settings > Storage\n\nAnd set 'Note Storage'"
@@ -219,4 +237,29 @@ class TypeAheadQueryEvent(Event):
 
     def __repr__(self):
         attrs = ("event_type", "query", "on_complete")
+        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+
+
+@dataclass
+class FilePickerEvent(Event):
+    """
+    Any event dispatched when the event is to open a platform specific file/folder picker
+    """
+
+    class Action(Flag):
+        OPEN = auto()
+        CLOSE = auto()
+        FILE = auto()
+        FOLDER = auto()
+        OPEN_FILE = OPEN | FILE
+        OPEN_FOLDER = OPEN | FOLDER
+
+    event_type = "file_picker"
+    on_complete: Callable[[str], None] | None
+    action: Action
+    start_folder: str | None = None
+    ext_filter: list[str] | Callable[[tuple[str, str]], bool] | None = None
+
+    def __repr__(self):
+        attrs = ("event_type",)
         return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"

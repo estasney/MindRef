@@ -1,9 +1,16 @@
+from typing import TYPE_CHECKING
+
 from kivy import Logger, platform
 from kivy.factory import Factory
 from kivy.properties import StringProperty
 from kivy.uix.settings import SettingPath, SettingsWithSpinner
 
+from domain.events import FilePickerEvent
+from utils import get_app
 from widgets.behavior.interact_behavior import InteractBehavior
+
+if TYPE_CHECKING:
+    pass
 
 
 class MindRefSettingsNative(InteractBehavior, SettingsWithSpinner):
@@ -18,6 +25,10 @@ class MindRefSettingsNative(InteractBehavior, SettingsWithSpinner):
 class AndroidSettingPath(SettingPath):
     value = StringProperty()
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.get_app = get_app
+
     def on_panel(self, instance, value):
         if value is None:
             return
@@ -28,9 +39,13 @@ class AndroidSettingPath(SettingPath):
         self.value = uri
 
     def _create_popup(self, *args):
-        from adapters.notes.android.interface import AndroidStorageManager
-
-        AndroidStorageManager.select_folder(self.select_folder_callback)
+        app = self.get_app()
+        app.registry.push_event(
+            FilePickerEvent(
+                on_complete=self.select_folder_callback,
+                action=FilePickerEvent.Action.OPEN_FOLDER,
+            )
+        )
 
 
 class MindRefSettingsAndroid(InteractBehavior, SettingsWithSpinner):
@@ -46,7 +61,6 @@ class MindRefSettingsAndroid(InteractBehavior, SettingsWithSpinner):
 
     def create_json_panel(self, title, config, filename=None, data=None):
         self.register_type("android_path", AndroidSettingPath)
-        Logger.info(f"{type(self).__name__}: Creating JSON Panel")
         return super(MindRefSettingsAndroid, self).create_json_panel(
             title, config, filename, data
         )

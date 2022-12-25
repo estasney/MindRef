@@ -1,0 +1,91 @@
+#:import HSeparator widgets.separator
+#:import ExpandingLabel widgets.style
+#:import TexturedButton widgets.buttons.buttons
+#:import XSmallLabel widgets.style
+#:import TextField widgets.forms.text_field
+
+<-TitleBar@BoxLayout>:
+    canvas:
+        Color:
+            rgba: app.colors['Primary']
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    padding: dp(15)
+    ExpandingLabel:
+        text: "Create Category"
+        halign: 'center'
+        valign: 'center'
+        font_size: app.base_font_size + sp(2)
+        size_hint_y: None
+
+<-ButtonBar@BoxLayout>:
+    padding: 0
+    orientation: 'horizontal'
+    size_hint_x: 1
+    size_hint_y: None
+
+<BrowseButton@TexturedButton>:
+    text: 'Browse'
+    size_hint_y: None
+    size: dp(40), dp(40)
+    font_size: app.base_font_size + sp(4)
+    BaseLabel:
+        text: root.text
+
+
+
+<CategoryEditor>:
+    validator: app.registry.handle_category_validation
+    category_name_input: category_name_input
+    image_path_input: image_path_input
+    allow_submit: all((category_name_input.text, image_path_input.text, not category_name_input.error_message, not image_path_input.error_message))
+    orientation: 'vertical'
+    TitleBar:
+        size_hint_y: 0.1
+        pos_hint: {"center_y": 0}
+    BoxLayout:
+        # Form Container
+        size_hint_y: 0.8
+        BoxLayout:
+            # Form Container
+            orientation: 'vertical'
+            size_hint_y: 0.6
+            pos_hint: {"top": 1}
+            padding: [dp(48), dp(24), dp(48), dp(24)]
+            # Form
+            BoxLayout:
+                # Category Name Row
+                TextField:
+                    id: category_name_input
+                    on_touched: root.validate(self, self.touched, 'name')
+                    helper_text: 'Category Name'
+
+            BoxLayout:
+                # Image Path Row
+                orientation: 'vertical'
+                TextField:
+                    id: image_path_input
+                    on_touched: root.validate(self, self.touched, 'image')
+                    helper_text: 'Category Image'
+
+
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+                BrowseButton:
+                    height: dp(50)
+                    size_hint_x: 0.3
+                    pos_hint: {"right": 1}
+                    on_release: root.button_event('browse')
+
+    ButtonBar:
+        size_hint_y: 0.1
+        SaveButton:
+            padding: dp(10)
+            on_release: root.button_event('save')
+            disabled: not root.allow_submit
+        CancelButton:
+            on_release: root.button_event('cancel')
+

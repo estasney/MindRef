@@ -5,7 +5,7 @@ from typing import Callable, Literal, TYPE_CHECKING
 from kivy import platform
 from kivy._clock import ClockEvent  # noqa
 from kivy.app import App
-from kivy.clock import Clock
+from kivy.clock import Clock, mainthread
 from kivy.config import Config
 from kivy.core.window import Window
 from kivy.logger import Logger
@@ -40,16 +40,20 @@ from domain.events import (
     RefreshNotesEvent,
     SaveNoteEvent,
     TypeAheadQueryEvent,
+    FilePickerEvent,
+    CreateCategoryEvent,
 )
 from domain.settings import app_settings
 from plugins import PluginManager
 from service.registry import Registry
-from utils import attrsetter, caller, sch_cb
+from utils import attrsetter, caller, sch_cb, get_app, scheduleable
 from utils.triggers import trigger_factory
 from widgets.screens.manager import NoteAppScreenManager
 
 if TYPE_CHECKING:
-    DISPLAY_STATES = Literal["choose", "display", "list", "edit", "add", "error"]
+    DISPLAY_STATES = Literal[
+        "choose", "display", "list", "edit", "add", "error", "category_editor"
+    ]
     DISPLAY_STATE = tuple[DISPLAY_STATES, DISPLAY_STATES]
     PLAY_STATE = Literal["play", "pause"]
 
@@ -57,10 +61,8 @@ if TYPE_CHECKING:
 class MindRefApp(App):
     APP_NAME = "MindRef"
     atlas_service = AtlasService(storage_path=Path("./static").resolve())
-    note_service = NoteRepositoryFactory.get_repo()(
-        get_app=App.get_running_app, new_first=True
-    )
-    editor_service = FileSystemEditor(get_app=App.get_running_app)
+    note_service = NoteRepositoryFactory.get_repo()(get_app=get_app, new_first=True)
+    editor_service = FileSystemEditor(get_app=get_app)
     plugin_manager = PluginManager()
     platform_android = BooleanProperty(defaultvalue=False)
     registry = Registry()
@@ -74,10 +76,28 @@ class MindRefApp(App):
     menu_open = BooleanProperty(False)
 
     display_state_last = OptionProperty(
-        "choose", options=["choose", "display", "list", "edit", "add", "error"]
+        "choose",
+        options=[
+            "choose",
+            "display",
+            "list",
+            "edit",
+            "add",
+            "error",
+            "category_editor",
+        ],
     )
     display_state_current = OptionProperty(
-        "choose", options=["choose", "display", "list", "edit", "add", "error"]
+        "choose",
+        options=[
+            "choose",
+            "display",
+            "list",
+            "edit",
+            "add",
+            "error",
+            "category_editor",
+        ],
     )
     display_state_trigger: Callable[["DISPLAY_STATES"], None]
 
@@ -215,218 +235,233 @@ class MindRefApp(App):
 
         return self.registry.paginate_note(direction)
 
-    """
-    Event Handlers for Registry
-    """
-
-    def process_pagination_event(self, event: PaginationEvent):
-        registry_paginate = caller(
-            self.registry, "paginate_note", direction=event.direction
-        )
-        Clock.schedule_once(registry_paginate)
-
-    def process_cancel_edit_event(self, _: CancelEditEvent):
-
-        trigger_display = caller(self, "display_state_trigger", "display")
-        registry_paginate = caller(self.registry, "paginate_note", direction=0)
-        remove_edit_note = attrsetter(self, "editor_note", None)
-        sch_cb(trigger_display, registry_paginate, remove_edit_note, timeout=0.1)
-
-    def process_edit_note_event(self, event: EditNoteEvent):
-        data_note = self.registry.edit_note(category=event.category, idx=event.idx)
-        add_edit_note_widget = attrsetter(self, "editor_note", data_note)
-        trigger_display_edit = caller(self, "display_state_trigger", "edit")
-        sch_cb(add_edit_note_widget, trigger_display_edit, timeout=0.1)
-
-    def process_add_note_event(self, _: AddNoteEvent):
-        data_note = self.registry.new_note(category=self.note_category, idx=None)
-        add_edit_note_widget = attrsetter(self, "editor_note", data_note)
-        trigger_display_add = caller(self, "display_state_trigger", "add")
-        sch_cb(add_edit_note_widget, trigger_display_add, timeout=0.1)
-
-    def process_save_note_event(self, event: SaveNoteEvent):
-        """
-        Save Button Was Pressed in the Editor
-
-        Parameters
-        ----------
-        event
-
-        Returns
-        -------
-
-        """
-        note_is_new = self.display_state_current == "add"
-        data_note = self.editor_note
-        data_note.edit_text = event.text
-        if note_is_new:
-            data_note.edit_title = event.title
-        data_note.category = data_note.category
-        remove_edit_note_widget = attrsetter(self, "editor_note", None)
-        # update_display_state = lambda dt: self.display_state_trigger("display")
-        persist_note = caller(self.registry, "save_note", note=data_note)
-        sch_cb(persist_note, remove_edit_note_widget, timeout=0.1)
-
-    def process_note_fetched_event(self, event: NoteFetchedEvent):
-        note_data = event.note.to_dict()
-        update_data = attrsetter(self, "note_data", note_data)
-        refresh_note = caller(self, "paginate_note", direction=0)
-        sch_cb(update_data, refresh_note, timeout=0.1)
-
-    def process_refresh_notes_event(self, event: RefreshNotesEvent):
-        clear_categories = attrsetter(self, "note_categories", [])
-        clear_caches = caller(self.registry, "clear_caches")
-        run_query = caller(self.registry, "query_all", on_complete=event.on_complete)
-        sch_cb(clear_categories, clear_caches, run_query, timeout=0.5)
-
-    def process_list_view_event(self, _: ListViewButtonEvent):
-        """List Button was pressed"""
-        self.display_state_trigger("list")
-
-    def process_note_category_event(self, event: NoteCategoryEvent):
-        """
-        Note Category has been set via registry. If a valid string, we need to query and set category_meta.
-        Otherwise, if None, we clear it
-        """
-
-        # Set note category attribute
-        set_note_category = attrsetter(self, "note_category", event.value)
-
-        match event.value:
-            case str():
-
-                def set_note_category_meta(meta):
-                    self.note_category_meta = meta
-                    sch_cb(
-                        set_note_category,
-                        refresh_note_page,
-                        trigger_display_state,
-                        timeout=0.1,
-                    )
-
-                # Query Category Meta, on_complete - Set App note_category_meta to result
-                get_category_meta = caller(
-                    self.note_service,
-                    "get_category_meta",
-                    category=event.value,
-                    on_complete=set_note_category_meta,
-                )
-
-                # Paginate the note
-                refresh_note_page = caller(self, "paginate_note", direction=0)
-
-                # Display the notes
-                trigger_display_state = caller(self, "display_state_trigger", "display")
-
-                sch_cb(get_category_meta, timeout=0.1)
-                Logger.info(
-                    f"{type(self).__name__}: process_note_category_event - Scheduled Updating Note Data"
-                )
-            case None:
-                clear_note_meta = attrsetter(self, "note_category_meta", [])
-                sch_cb(set_note_category, clear_note_meta)
-                Logger.info(
-                    f"{type(self).__name__}: process_note_category_event - Scheduled Clearing Note Data"
-                )
-            case _:
-                raise AssertionError(f"Unhandled {event!r}.value : {event.value}")
-
-    def process_note_category_failure_event(self, event: NoteCategoryFailureEvent):
-        """Failed to set"""
-        Logger.error(event)
-        if self.config.get("Behavior", "CATEGORY_SELECTED") == event.value:
-            # Clear the config
-            app_config = Config.get_configparser("app")
-            app_config.set("Behavior", "CATEGORY_SELECTED", "")
-            app_config.write()
-
-        self.paginate_timer.cancel()
-        self.registry.set_note_category("", on_complete=None)
-
-    def process_notes_query_event(self, event: NotesQueryEvent):
-        """Notes have finished Querying"""
-
-        if event.on_complete is not None:
-            sch_cb(event.on_complete, timeout=0.1)
-        self.screen_manager.dispatch("on_refresh", False)
-
-    def process_notes_query_failure_event(self, event: NotesQueryFailureEvent):
-
-        if event.on_complete is not None:
-            sch_cb(event.on_complete)
-
-        match event.error:
-            case "permission_error" | "not_found":
-                self.note_service.storage_path = None
-                app_config = Config.get_configparser("app")
-                app_config.set("Storage", "NOTES_PATH", App.user_data_dir)
-                app_config.write()
-
-        match (event.error, platform):
-            case ("permission_error", "android"):
-                from android.permissions import (
-                    request_permissions,
-                    Permission,
-                )
-
-                request_permissions([Permission.READ_EXTERNAL_STORAGE], callback=None)
-            case _:
-                self.error_message = event.message
-                self.display_state_trigger("error")
-
-    def process_back_button_event(self, event: BackButtonEvent):
-        # The display state when button was pressed
-        old, new = event.display_state
-        match (old, new):
-            case _, "choose":
-                # Cannot go further back
-                Logger.info(
-                    f"{type(self).__name__}: process_back_button_event: Exiting"
-                )
-                App.get_running_app().stop()
-            case _, "display":
-                clear_registry_category = caller(
-                    self.registry, "set_note_category", value=None, on_complete=None
-                )
-                trigger_display_choose = caller(self, "display_state_trigger", "choose")
-                sch_cb(clear_registry_category, trigger_display_choose)
-                Logger.info(
-                    f"{type(self).__name__}: process_back_button_event - scheduled display_state: choose"
-                )
-            case _, "list":
-                trigger_display = caller(self, "display_state_trigger", "display")
-                sch_cb(trigger_display)
-                Logger.info(
-                    f"{type(self).__name__}: process_back_button_event - scheduled display_state: display"
-                )
-            case _, "edit" | "add":
-                self.registry.push_event(CancelEditEvent())
-            case _:
-                Logger.warning(
-                    f"Unknown display state encountered when handling back button: {old},{new}"
-                )
-
-    def process_discover_category_event(self, event: DiscoverCategoryEvent):
-        event_category = event.category
-        if event_category not in self.note_categories:
-            Logger.info(f"{type(self).__name__}: Found New Category - {event!r}")
-            self.note_categories.append(event_category)
-
-    def process_typeahead_query_event(self, event: TypeAheadQueryEvent):
-        self.registry.query_category(
-            category=self.note_category,
-            query=event.query,
-            on_complete=event.on_complete,
-        )
-
+    @mainthread
     def process_event(self, *_args):
-        if len(self.registry.events) == 0:
+        """Pop an Event from Registry and Process"""
+        registry = self.registry
+        if len(registry.events) == 0:
             return
-        event = self.registry.events.popleft()
-        Logger.debug(f"Processing Event: {event}")
-        event_type = event.event_type
-        func = getattr(self, f"process_{event_type}_event")
-        return func(event)
+        event = registry.events.popleft()
+        Logger.debug(f"Processing Event: {type(event).__name__}")
+        match event:
+            case TypeAheadQueryEvent(query=query, on_complete=on_complete):
+                return registry.query_category(
+                    category=self.note_category,
+                    query=query,
+                    on_complete=on_complete,
+                )
+            case DiscoverCategoryEvent(category=category):
+                if category not in self.note_categories:
+                    Logger.info(
+                        f"{type(self).__name__}: Found New Category - {event!r}"
+                    )
+                    self.note_categories.append(category)
+                return
+            case BackButtonEvent(display_state=(old, new)):
+                match (old, new):
+                    case _, "choose":
+                        # Cannot go further back
+                        Logger.info(
+                            f"{type(self).__name__}: process_back_button_event: Exiting"
+                        )
+                        get_app().stop()
+                    case _, "display":
+                        clear_registry_category = caller(
+                            registry,
+                            "set_note_category",
+                            value=None,
+                            on_complete=None,
+                        )
+                        trigger_display_choose = caller(
+                            self, "display_state_trigger", "choose"
+                        )
+                        sch_cb(clear_registry_category, trigger_display_choose)
+                        Logger.info(
+                            f"{type(self).__name__}: process_back_button_event - scheduled display_state: choose"
+                        )
+                    case _, "list":
+                        trigger_display = caller(
+                            self, "display_state_trigger", "display"
+                        )
+                        sch_cb(trigger_display)
+                        Logger.info(
+                            f"{type(self).__name__}: process_back_button_event - scheduled display_state: display"
+                        )
+                    case _, "edit" | "add":
+                        registry.push_event(CancelEditEvent())
+                    case previous, "category_editor":
+                        self.display_state_trigger(previous)
+                    case _:
+                        Logger.warning(
+                            f"Unknown display state encountered when handling back button: {old},{new}"
+                        )
+                return
+            case NotesQueryFailureEvent(
+                error=error, message=message, on_complete=on_complete
+            ):
+                if on_complete is not None:
+                    sch_cb(on_complete)
+
+                match error:
+                    case "permission_error" | "not_found":
+                        self.note_service.storage_path = None
+                        app_config = Config.get_configparser("app")
+                        app_config.set("Storage", "NOTES_PATH", App.user_data_dir)
+                        app_config.write()
+
+                match (error, platform):
+                    case ("permission_error", "android"):
+                        return registry.push_event(
+                            FilePickerEvent(
+                                on_complete=None,
+                                action=FilePickerEvent.Action.OPEN_FOLDER,
+                            )
+                        )
+                    case _:
+                        self.error_message = message
+                        self.display_state_trigger("error")
+
+            case NotesQueryEvent(on_complete=on_complete):
+                if on_complete:
+                    sch_cb(on_complete, timeout=0.1)
+                return self.screen_manager.dispatch("on_refresh", False)
+
+            case NoteCategoryFailureEvent(value=value):
+                Logger.error(event)
+                if self.config.get("Behavior", "CATEGORY_SELECTED") == value:
+                    # Clear the config
+                    app_config = Config.get_configparser("app")
+                    app_config.set("Behavior", "CATEGORY_SELECTED", "")
+                    app_config.write()
+                self.paginate_timer.cancel()
+                # We'll get another event to clear app's note category
+                return registry.set_note_category(None, on_complete=None)
+            case NoteCategoryEvent(value=value):
+                """
+                Note Category has been set via registry. If a valid string, we need to query and set category_meta.
+                Otherwise, if None, we clear it
+                """
+                set_note_category = attrsetter(self, "note_category", value)
+                match value:
+                    case str():
+
+                        def set_note_category_meta(meta):
+                            self.note_category_meta = meta
+                            sch_cb(
+                                set_note_category,
+                                refresh_note_page,
+                                trigger_display_state,
+                                timeout=0.1,
+                            )
+
+                        # Query Category Meta, on_complete - Set App note_category_meta to result
+                        get_category_meta = caller(
+                            self.note_service,
+                            "get_category_meta",
+                            category=value,
+                            on_complete=set_note_category_meta,
+                        )
+
+                        # Paginate the note
+                        refresh_note_page = caller(self, "paginate_note", direction=0)
+
+                        # Display the notes
+                        trigger_display_state = caller(
+                            self, "display_state_trigger", "display"
+                        )
+
+                        sch_cb(get_category_meta, timeout=0.1)
+                        Logger.info(
+                            f"{type(self).__name__}: process_note_category_event - Scheduled Updating Note Data"
+                        )
+                    case None:
+                        clear_note_meta = attrsetter(self, "note_category_meta", [])
+                        sch_cb(set_note_category, clear_note_meta)
+                        Logger.info(
+                            f"{type(self).__name__}: process_note_category_event - Scheduled Clearing Note Data"
+                        )
+                    case _:
+                        raise AssertionError(f"Unhandled {event!r}.value : {value}")
+                return
+            case ListViewButtonEvent():
+                """List Button was Pressed"""
+                return self.display_state_trigger("list")
+            case RefreshNotesEvent(on_complete=on_complete):
+                clear_categories = attrsetter(self, "note_categories", [])
+                clear_caches = caller(registry, "clear_caches")
+                run_query = caller(registry, "query_all", on_complete=on_complete)
+                return sch_cb(clear_categories, clear_caches, run_query, timeout=0.5)
+            case NoteFetchedEvent(note=note):
+                update_data = attrsetter(self, "note_data", note.to_dict())
+                refresh_note = caller(self, "paginate_note", direction=0)
+                return sch_cb(update_data, refresh_note, timeout=0.1)
+            case SaveNoteEvent(text=text, title=title):
+                """Save Button Pressed in Editor"""
+                note_is_new = self.display_state_current == "add"
+                data_note = self.editor_note
+                data_note.edit_text = text
+                if note_is_new:
+                    data_note.edit_title = title
+                remove_edit_note_widget = attrsetter(self, "editor_note", None)
+                persist_note = caller(registry, "save_note", note=data_note)
+                return sch_cb(persist_note, remove_edit_note_widget, timeout=0.1)
+            case AddNoteEvent():
+                data_note = registry.new_note(category=self.note_category, idx=None)
+                add_edit_note_widget = attrsetter(self, "editor_note", data_note)
+                trigger_display_add = caller(self, "display_state_trigger", "add")
+                return sch_cb(add_edit_note_widget, trigger_display_add, timeout=0.1)
+            case EditNoteEvent(category=category, idx=idx):
+                data_note = registry.edit_note(category=category, idx=idx)
+                add_edit_note_widget = attrsetter(self, "editor_note", data_note)
+                trigger_display_edit = caller(self, "display_state_trigger", "edit")
+                return sch_cb(add_edit_note_widget, trigger_display_edit, timeout=0.1)
+            case CancelEditEvent():
+                trigger_display = caller(self, "display_state_trigger", "display")
+                registry_paginate = caller(registry, "paginate_note", direction=0)
+                remove_edit_note = attrsetter(self, "editor_note", None)
+                return sch_cb(
+                    trigger_display, registry_paginate, remove_edit_note, timeout=0.1
+                )
+            case PaginationEvent(direction=direction):
+                registry_paginate = caller(
+                    registry, "paginate_note", direction=direction
+                )
+                return Clock.schedule_once(registry_paginate)
+            case FilePickerEvent() as pick_event:
+                return self.registry.handle_picker_event(pick_event)
+
+            case CreateCategoryEvent(
+                action=action, category=category, img_path=img_path
+            ) as event:
+                event_action = event.Action
+                match action, category, img_path:
+                    case event_action.OPEN_FORM, _, _:
+                        return self.display_state_trigger("category_editor")
+                    case event_action.CLOSE_FORM | event_action.CLOSE_REJECT, _, _:
+                        return self.display_state_trigger(self.display_state_last)
+                    case event_action.CLOSE_ACCEPT, str(category), img_path:
+                        Logger.info(
+                            f"{type(self).__name__}: process_event - Create Category {category}"
+                        )
+
+                        # Scheduled callback will switch display state to display_state last trigger
+                        # as well as push a refresh event to the registry
+                        @scheduleable
+                        def on_category_created():
+
+                            self.display_state_trigger("choose")
+                            self.registry.query_all(on_complete=None)
+
+                        self.registry.create_category(
+                            category, img_path, on_complete=on_category_created
+                        )
+                        return self.display_state_trigger(self.display_state_last)
+
+            case _:
+                Logger.info(
+                    f"{type(self).__name__}: process_event - Unhandled Event {type(event).__name__}"
+                )
+                return
 
     def key_input(self, _window, key, _scancode, _codepoint, _modifier):
         if key == 27:  # Esc Key
@@ -523,14 +558,14 @@ class MindRefApp(App):
     def on_config_change(self, config, section, key, value):
 
         truthy = {True, 1, "1", "True"}
-
+        Logger.info(f"{type(self).__name__}: on_config_change - {section},{key}")
         match section, key:
             case "Storage", "NOTES_PATH" if not self.platform_android:
                 self.note_service.storage_path = value
                 self.display_state_trigger("choose")
                 self.registry.push_event(RefreshNotesEvent(on_complete=None))
             case "Storage", "NOTES_PATH" if self.platform_android:
-                self.note_service.storage_path = value
+                self.registry.set_note_storage_path(value)
                 self.display_state_trigger("choose")
                 self.registry.push_event(RefreshNotesEvent(on_complete=None))
             case "Behavior", "NEW_FIRST":
@@ -545,6 +580,9 @@ class MindRefApp(App):
                 self.base_font_size = int(value)
             case "Plugins", _:
                 ...
+
+    def on_pause(self):
+        return True
 
 
 if __name__ == "__main__":

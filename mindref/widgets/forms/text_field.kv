@@ -1,0 +1,32 @@
+#:import XSmallLabel widgets.style
+#:import SmallLabel widgets.style
+#:import HSeparator widgets.separator
+
+<TextField>:
+    orientation: 'vertical'
+    text: w_text_input.text
+    w_text_input: w_text_input
+    w_error_message_label: w_error_message_label.__self__
+    XSmallLabel:
+        color: app.colors['Gray-200']
+        text: root.helper_text
+        text_size: self.size
+        valign: 'bottom'
+        halign: 'left'
+    TextInput:
+        id: w_text_input
+        multiline: False
+        size_hint_min_y: app.base_font_size * 1.5
+        size_hint_max_y: app.base_font_size * 2.5
+        on_focus: root.touch_handler(args[1])
+    SmallLabel:
+        id: w_error_message_label
+        color: app.colors['Warn']
+        text: root.error_message
+    BoxLayout:
+        padding: [0, dp(4), 0, dp(4)]
+        size_hint_y: None
+        height: self.minimum_height
+        HSeparator:
+            color: app.colors['Accent-One'] if w_text_input.focused else app.colors['Gray-300']
+

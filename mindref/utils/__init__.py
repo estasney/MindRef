@@ -10,11 +10,16 @@ from typing import (
     ParamSpec,
     Protocol,
     TypeVar,
+    TYPE_CHECKING,
+    Concatenate,
 )
 
 from kivy import Logger
 from kivy.clock import Clock
 from kivy.lang import Builder
+
+if TYPE_CHECKING:
+    from domain.protocols import AppRegistryProtocol
 
 _LOG_LEVEL = None
 
@@ -47,6 +52,28 @@ def log_run_time(func: Callable[P, T]) -> Callable[P, T]:
         return result
 
     return wrapped_log_run_time
+
+
+def scheduleable(
+    func: Callable[P, T], *args: P.args, **kwargs: P.kwargs
+) -> Callable[P, T]:
+    """
+    Decorator to make a function scheduleable with Kivy's Clock.
+
+    Since Kivy insists on passing the time elapsed since the last frame, this decorator
+    will ignore the first argument and pass the rest to the function.
+
+    Internally, this decorator wraps the function in a partial that will ignore the first argument.
+    """
+
+    # Use typing.Concatenate to annotate that Kivy will call scheduleable_inner with our args, kwargs and the time elapsed
+
+    @wraps(func)
+    def scheduleable_inner(*s_args: Concatenate[float, P], **s_kwargs: P.kwargs) -> T:
+        """This is the function that will be called by Kivy's Clock"""
+        return func(*args, **kwargs)
+
+    return scheduleable_inner
 
 
 def sch_cb(*args: Callable[P, T], timeout: float = 0) -> None:
@@ -155,6 +182,14 @@ def fmt_items(instance: "SupportsGetItem", *attr) -> str:
     fmt_params = (f"{k!s}={v!s}" for k, v in params if v)
     param_str = ", ".join(fmt_params)
     return f"[{param_str}]"
+
+
+def get_app() -> "AppRegistryProtocol":
+    """Calls App.get_running_app() but casts as expected protocol"""
+    from kivy.app import App
+
+    app: "AppRegistryProtocol" = App.get_running_app()
+    return app
 
 
 class SupportsGetItem(Protocol):

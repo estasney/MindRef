@@ -1,6 +1,6 @@
 from collections import deque
 from pathlib import Path
-from typing import Callable, Optional, TYPE_CHECKING
+from typing import Callable, Optional, TYPE_CHECKING, Literal
 
 from kivy import Logger
 
@@ -9,6 +9,10 @@ from domain.events import (
     NoteCategoryFailureEvent,
     NoteFetchedEvent,
     NotesQueryNotSetFailureEvent,
+    FilePickerEvent,
+    EventFailure,
+    NotesQueryFailureEvent,
+    NotesQueryErrorFailureEvent,
 )
 from utils import caller, def_cb, sch_cb
 from utils.caching import kivy_cache
@@ -249,3 +253,126 @@ class Registry:
         # store note to disk
         self.app.note_service.save_note(note, on_complete=push_fetched_event)
         Logger.info(f"{type(self).__name__}: save_note - {note!r}")
+
+    def handle_picker_event(self, event: FilePickerEvent):
+        e = FilePickerEvent.Action
+        Logger.info(f"{type(self).__name__}: handle_picker_event - {event}")
+        app = self.app
+        match event, app.platform_android:
+            case FilePickerEvent(action=e.OPEN_FOLDER), True:
+                # Note Service
+                return app.note_service.prompt_for_external_folder(
+                    on_complete=event.on_complete
+                )
+            case FilePickerEvent(action=e.OPEN_FILE), True:
+                return app.note_service.prompt_for_external_file(
+                    ext_filter=event.ext_filter, on_complete=event.on_complete
+                )
+            case FilePickerEvent(
+                action=e.OPEN_FOLDER | e.OPEN_FILE, start_folder=str()
+            ), False:
+                return app.screen_manager.open_file_picker(event)
+            case FilePickerEvent(
+                action=e.OPEN_FOLDER | e.OPEN_FILE, start_folder=None
+            ), False:
+                event = FilePickerEvent(
+                    on_complete=event.on_complete,
+                    action=event.action,
+                    start_folder=str(app.note_service.storage_path),
+                    ext_filter=event.ext_filter,
+                )
+                return app.screen_manager.open_file_picker(event)
+
+            case FilePickerEvent(action=e.CLOSE), False:
+                raise NotImplementedError()
+
+    def create_category(
+        self,
+        category: str,
+        image_path: str | Path,
+        on_complete: Callable[[Path, bool], None],
+    ):
+        """
+        Create a new category
+
+        Parameters
+        ----------
+        category : str
+            The name of the category to create
+        image_path : str | Path
+            The path to the image to use for the category
+        on_complete : Callable[[Path, bool], None]
+            Dual purpose callback. First argument is the category name, second is a boolean indicating success.
+
+
+        """
+        note_repo = self.app.note_service
+        if not note_repo.configured:
+            self.push_event(NotesQueryNotSetFailureEvent(on_complete=None))
+            return
+        note_repo.create_category(category, image_path, on_complete=on_complete)
+
+    def handle_error(self, event: EventFailure):
+        """
+        Handle an error event
+        """
+        match event:
+            case NotesQueryFailureEvent():
+                ...
+            case NotesQueryNotSetFailureEvent():
+                ...
+            case NotesQueryErrorFailureEvent():
+                ...
+            case EventFailure():
+                ...
+
+    def handle_category_validation(
+        self, field: Literal["name", "image"], value: str
+    ) -> str | None:
+        """
+        Validate the category name or image path provided by the user in the category editor
+
+        Parameters
+        ----------
+        field : Literal['name', 'image']
+            The field name to validate
+        value : str
+            The value to validate
+
+        Returns
+        -------
+        None if valid, otherwise a string describing the error
+
+        Notes
+        -----
+        - Category names must be unique, this includes by case. NoteService will determine if
+          the name is unique by case-insensitive comparison of known category (folder) names.
+            - Leading and trailing whitespace is stripped from the name, so '  My Category  ' is
+              the same as 'My Category'
+        - Category image paths have different requirements depending on the platform
+           - Desktop: Must be a valid path to an existing file, and the file extension must be one of the following:
+                - .png
+                - .jpg
+                - .jpeg
+           - Android: The image path must not be empty. As is, we don't have a way to validate the path, nor do we have
+               a way to validate the file extension. As such, we'll just assume the user knows what they're doing.
+        """
+
+        match field:
+            case "name":
+                if not value:
+                    return "Category name cannot be empty"
+                if not self.app.note_service.category_name_unique(value):
+                    return "Category name must be unique"
+
+            case "image" if self.app.platform_android:
+                if not value:
+                    return "Category image cannot be empty"
+
+            case "image":
+                if not value:
+                    return "Category image cannot be empty"
+                if not Path(value).exists():
+                    return "Category image must be a valid path to an existing file"
+                if Path(value).suffix.lower() not in (".png", ".jpg", ".jpeg"):
+                    return "Category image must be a .png, .jpg, or .jpeg file"

@@ -1,6 +1,8 @@
-import mistune
-from utils import Singleton
 from typing import TYPE_CHECKING
+
+import mistune
+
+from utils import Singleton
 from .kbd_plugin import plugin_kbd
 
 if TYPE_CHECKING:

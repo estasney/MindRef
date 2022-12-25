@@ -1,4 +1,4 @@
-from kivy.properties import VariableListProperty, ColorProperty, AliasProperty
+from kivy.properties import VariableListProperty, AliasProperty
 from kivy.uix.anchorlayout import AnchorLayout
 
 from utils import import_kv

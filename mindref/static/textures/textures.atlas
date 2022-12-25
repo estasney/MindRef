@@ -1,1 +1,1 @@
-{"textures-0.png": {"bg_normal": [2, 342, 256, 256], "bg_down": [260, 342, 256, 256]}}
+{"textures-0.png": {"bg_normal": [2, 342, 256, 256], "bg_down": [260, 342, 256, 256], "bg_disabled": [2, 84, 256, 256]}}

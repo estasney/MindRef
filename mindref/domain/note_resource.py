@@ -24,8 +24,9 @@ class ResourceFile:
     ) -> "NoteResourceFile | ImageResourceFile":
 
         age = fp.lstat().st_mtime_ns
+        fp_suffix = fp.suffix.lower() if fp.suffix else None
         match fp.suffix:
-            case ".png":
+            case ".png" | ".jpg" | ".jpeg":
                 return ImageResourceFile(
                     path=fp, age=age, is_image=True, category=category
                 )

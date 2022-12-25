@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import abc
 from abc import ABC
+from pathlib import Path
 from typing import Callable, Literal, Optional, Protocol, TYPE_CHECKING, Type, overload
 
 if TYPE_CHECKING:
@@ -81,6 +82,10 @@ class AbstractNoteRepository(ABC):
     def current_category(self, value: str):
         raise NotImplementedError
 
+    @abc.abstractmethod
+    def create_category(self, name: str, image_path: Path | str, on_complete: Callable):
+        raise NotImplementedError
+
     def get_category_meta(self, category: str, on_complete: Callable, refresh=False):
         """For self.current_category, get MarkdownNoteDict for all files in category
 
@@ -157,4 +162,9 @@ class AbstractNoteRepository(ABC):
             String query to search
         on_complete
         """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def category_name_unique(self, category: str) -> bool:
+        """Return True if category name is unique"""
         raise NotImplementedError

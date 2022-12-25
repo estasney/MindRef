@@ -1,13 +1,12 @@
 from typing import TYPE_CHECKING, Union
 
 from kivy import Logger
-from kivy.app import App
 from kivy.properties import ObjectProperty, OptionProperty, StringProperty
 
 from domain.editable import EditableNote
 from domain.events import CancelEditEvent, SaveNoteEvent
-from utils import attrsetter, import_kv, sch_cb
-from widgets.editor.editor import NoteEditor
+from utils import attrsetter, import_kv, sch_cb, get_app
+from widgets.editor.note_editor import NoteEditor
 from widgets.screens import InteractScreen
 
 if TYPE_CHECKING:
@@ -37,7 +36,7 @@ class NoteEditScreen(InteractScreen):
 
     def __init__(self, **kwargs):
         super(NoteEditScreen, self).__init__(**kwargs)
-        app = App.get_running_app()
+        app = get_app()
         app.bind(editor_note=self.handle_app_editor_note)
         app.bind(display_state=self.handle_app_display_state)
 
@@ -65,11 +64,11 @@ class NoteEditScreen(InteractScreen):
 
     def handle_cancel(self, *_args):
         Logger.debug(f"{type(self).__name__}: Cancel Edit")
-        app = App.get_running_app()
+        app = get_app()
         app.registry.push_event(CancelEditEvent())
 
     def handle_save(self, *_args, **kwargs):
-        app = App.get_running_app()
+        app = get_app()
         text = kwargs.get("text")
         title = kwargs.get("title")
         Logger.info(f"{type(self).__name__}: Save Note - {title} = {app.note_category}")

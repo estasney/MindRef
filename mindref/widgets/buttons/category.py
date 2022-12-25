@@ -1,9 +1,8 @@
-from kivy.app import App
 from kivy.clock import Clock
 from kivy.loader import Loader
 from kivy.properties import ObjectProperty, StringProperty
 
-from utils import import_kv
+from utils import import_kv, get_app
 from widgets.buttons.buttons import TexturedButton
 
 import_kv(__file__)
@@ -24,9 +23,7 @@ class NoteCategoryButton(TexturedButton):
         )
         self.fbind("source", self.load_category_tx_trigger)
         self.source = (
-            str(uri)
-            if (uri := App.get_running_app().note_service.category_image_uri(text))
-            else ""
+            str(uri) if (uri := get_app().note_service.category_image_uri(text)) else ""
         )
         self.text = text
 

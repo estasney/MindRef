@@ -91,6 +91,15 @@ if __name__ == "__main__":
         radius=4,
         opacity_padding=4,
     )
+    btn_disabled = TextureParam(
+        main=Color("#8f8f8f"),
+        accent=Color("#000000"),
+        steps=5,
+        size=64 * 4,
+        step_size=1,
+        radius=4,
+        opacity_padding=4,
+    )
 
     texture_path = Path(__file__).parent.parent / "mindref" / "static" / "textures"
     for file in texture_path.iterdir():
@@ -98,3 +107,4 @@ if __name__ == "__main__":
 
     gradient_texture(**btn_down._asdict()).save(texture_path / "bg_down.png")
     gradient_texture(**btn_normal._asdict()).save(texture_path / "bg_normal.png")
+    gradient_texture(**btn_disabled._asdict()).save(texture_path / "bg_disabled.png")

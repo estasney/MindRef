@@ -10,11 +10,23 @@ class BaseLabel(Label):
     ...
 
 
-class SmallLabel(Label):
+class XSmallLabel(BaseLabel):
     ...
 
 
-class LargeLabel(Label):
+class SmallLabel(BaseLabel):
+    ...
+
+
+class LargeLabel(BaseLabel):
+    ...
+
+
+class XLargeLabel(BaseLabel):
+    ...
+
+
+class ExpandingLabel(BaseLabel):
     ...
 
 

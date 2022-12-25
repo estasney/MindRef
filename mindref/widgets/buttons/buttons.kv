@@ -23,7 +23,31 @@
             border:  root.border_size
             pos: self.pos
             size: self.size
-            source: self.state_image
+            source: root.state_image if not root.disabled else root.background_disabled
+
+<-TexturedLabelButton>:
+    text: ''
+    state_image: self.background_normal if self.state == 'normal' else self.background_down
+    background_color: app.colors['Primary'] if self.state == 'normal' else app.colors['Accent-One']
+    border_size: dp(8)
+    orientation: 'vertical'
+    padding: dp(5)
+    spacing: dp(2)
+    size_hint_y: None
+    height: self.minimum_height
+    canvas:
+        Color:
+            rgba: self.background_color
+        BorderImage:
+            border:  root.border_size
+            pos: self.pos
+            size: self.size
+            source: root.state_image if not root.disabled else root.background_disabled
+    BaseLabel:
+        text: root.text
+        size_hint_y: None
+        height: self.texture_size[1] * 2
+
 
 <-ImageButton>:
     state_image: self.background_normal if self.state == 'normal' else self.background_down
@@ -39,11 +63,14 @@
             border:  [dp(8), dp(8), dp(8), dp(8)]
             pos: self.pos
             size: self.size
-            source: self.state_image
+            source: root.state_image if not root.disabled else root.background_disabled
 
     Image:
         mipmap: True
         source: root.source
+
+<SaveButton>:
+    padding: dp(10)
 
 
 <HamburgerIcon>:

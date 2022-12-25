@@ -16,8 +16,8 @@ from kivy.properties import (
 from kivy.uix.label import Label
 from kivy.utils import escape_markup
 
-from utils.caching import cache_key_color_norm, cache_key_text_contrast, kivy_cache
 from utils import import_kv
+from utils.caching import cache_key_color_norm, cache_key_text_contrast, kivy_cache
 
 import_kv(__file__)
 

@@ -1,5 +1,6 @@
 from functools import wraps
 from typing import Callable, Optional, TypeVar, Hashable, TYPE_CHECKING
+
 from kivy.cache import Cache
 
 if TYPE_CHECKING:
