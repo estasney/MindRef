@@ -22,7 +22,7 @@ from adapters.notes.fs.fs_note_repository import (
 )
 from domain.events import DiscoverCategoryEvent
 from domain.markdown_note import MarkdownNote
-from utils import caller, fmt_attrs, get_app, sch_cb, scheduleable
+from utils import fmt_attrs, get_app, sch_cb, schedulable
 
 if TYPE_CHECKING:
     from domain.editable import EditableNote
@@ -217,25 +217,24 @@ class AndroidNoteRepository(FileSystemNoteRepository):
             emit_app_categories = partial(
                 after_reflect_external_storage_files, on_complete_inner=on_complete
             )
-            get_categories_with_cb = caller(
-                self, "get_categories", on_complete=emit_app_categories
+
+            get_categories_with_cb = schedulable(
+                self.get_categories, on_complete=emit_app_categories
             )
 
             # Sync Markdown Files
-            sync_external = caller(
-                self, "_copy_storage", on_complete=get_categories_with_cb
+
+            sync_external = schedulable(
+                self._copy_storage, on_complete=get_categories_with_cb
             )
 
             Clock.schedule_once(sync_external)
 
         self.category_files.clear()
         # Discover Categories
-        reflect_categories = caller(
-            self,
-            "get_external_storage_categories",
-            on_complete=caller(
-                self, "_copy_storage", after_get_external_storage_categories
-            ),
+        reflect_categories = schedulable(
+            self.get_external_storage_categories,
+            on_complete=after_get_external_storage_categories,
         )
 
         Clock.schedule_once(reflect_categories)
@@ -301,7 +300,8 @@ class AndroidNoteRepository(FileSystemNoteRepository):
         """
         code = cast(int, MindRefCallCodes.PROMPT_EXTERNAL_DIRECTORY.value)
         self._mediator_callbacks[code] = on_complete
-        func = caller(AndroidStorageManager, "prompt_for_external_folder", code)
+
+        func = schedulable(AndroidStorageManager.prompt_for_external_folder, code)
         sch_cb(func)
 
     def prompt_for_external_file(
@@ -327,9 +327,8 @@ class AndroidNoteRepository(FileSystemNoteRepository):
             return result
 
         mime_types = get_mime_types(ext_filter)
-
-        func = caller(
-            AndroidStorageManager, "prompt_for_external_file", code, mime_types
+        func = schedulable(
+            AndroidStorageManager.prompt_for_external_file, code, mime_types
         )
         sch_cb(func)
 
@@ -362,7 +361,7 @@ class AndroidNoteRepository(FileSystemNoteRepository):
         # We will register our image copy callback with this code
         category_callback_code = cast(int, MindRefCallCodes.WRITE_DIRECTORY.value)
 
-        @scheduleable
+        @schedulable
         def create_category_android():
             Logger.info(
                 f"{type(self).__name__}: create_category_android - [directory={name}]"
@@ -377,7 +376,7 @@ class AndroidNoteRepository(FileSystemNoteRepository):
         # We will call the on_complete callback with this code
         image_callback_code = cast(int, MindRefCallCodes.WRITE_IMAGE.value)
 
-        @scheduleable
+        @schedulable
         def copy_image_android():
             AndroidStorageManager.add_category_image(
                 directoryName=name,

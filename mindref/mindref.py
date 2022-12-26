@@ -46,7 +46,7 @@ from domain.events import (
 from domain.settings import app_settings
 from plugins import PluginManager
 from service.registry import Registry
-from utils import attrsetter, caller, sch_cb, get_app, scheduleable
+from utils import attrsetter, sch_cb, get_app, schedulable
 from utils.triggers import trigger_factory
 from widgets.screens.manager import NoteAppScreenManager
 
@@ -203,7 +203,8 @@ class MindRefApp(App):
     def on_paginate_interval(self, *_args):
         """Interval for Autoplay has changed"""
         self.paginate_timer.cancel()
-        pagination = caller(self, "paginate_note", direction=1)
+        pagination = schedulable(self.paginate_note, direction=1)
+
         self.paginate_timer = Clock.create_trigger(
             pagination,
             timeout=self.paginate_interval,
@@ -218,12 +219,11 @@ class MindRefApp(App):
     def select_index(self, value: int):
         self.registry.set_note_index(value)
 
-    def paginate(self, value):
-        paginate = caller(self, "paginate_note", direction=value)
+    def paginate(self, value: int):
+        paginate = schedulable(self.paginate_note, direction=value)
         if self.play_state == "play":
             self.paginate_timer.cancel()
-
-            setup_timer = caller(self, "paginate_timer")
+            setup_timer = schedulable(self.paginate_timer)
             sch_cb(paginate, setup_timer, timeout=0.1)
         else:
             sch_cb(paginate, timeout=0.1)
@@ -235,7 +235,6 @@ class MindRefApp(App):
 
         return self.registry.paginate_note(direction)
 
-    @mainthread
     def process_event(self, *_args):
         """Pop an Event from Registry and Process"""
         registry = self.registry
@@ -266,22 +265,19 @@ class MindRefApp(App):
                         )
                         get_app().stop()
                     case _, "display":
-                        clear_registry_category = caller(
-                            registry,
-                            "set_note_category",
-                            value=None,
-                            on_complete=None,
+                        clear_registry_category = schedulable(
+                            registry.set_note_category, value=None, on_complete=None
                         )
-                        trigger_display_choose = caller(
-                            self, "display_state_trigger", "choose"
+                        trigger_display_choose = schedulable(
+                            self.display_state_trigger, "choose"
                         )
                         sch_cb(clear_registry_category, trigger_display_choose)
                         Logger.info(
                             f"{type(self).__name__}: process_back_button_event - scheduled display_state: choose"
                         )
                     case _, "list":
-                        trigger_display = caller(
-                            self, "display_state_trigger", "display"
+                        trigger_display = schedulable(
+                            self.display_state_trigger, "display"
                         )
                         sch_cb(trigger_display)
                         Logger.info(
@@ -355,19 +351,19 @@ class MindRefApp(App):
                             )
 
                         # Query Category Meta, on_complete - Set App note_category_meta to result
-                        get_category_meta = caller(
-                            self.note_service,
-                            "get_category_meta",
+
+                        get_category_meta = schedulable(
+                            self.note_service.get_category_meta,
                             category=value,
                             on_complete=set_note_category_meta,
                         )
 
                         # Paginate the note
-                        refresh_note_page = caller(self, "paginate_note", direction=0)
+                        refresh_note_page = schedulable(self.paginate_note, direction=0)
 
                         # Display the notes
-                        trigger_display_state = caller(
-                            self, "display_state_trigger", "display"
+                        trigger_display_state = schedulable(
+                            self.display_state_trigger, "display"
                         )
 
                         sch_cb(get_category_meta, timeout=0.1)
@@ -388,12 +384,12 @@ class MindRefApp(App):
                 return self.display_state_trigger("list")
             case RefreshNotesEvent(on_complete=on_complete):
                 clear_categories = attrsetter(self, "note_categories", [])
-                clear_caches = caller(registry, "clear_caches")
-                run_query = caller(registry, "query_all", on_complete=on_complete)
+                clear_caches = schedulable(registry.clear_caches)
+                run_query = schedulable(registry.query_all, on_complete=on_complete)
                 return sch_cb(clear_categories, clear_caches, run_query, timeout=0.5)
             case NoteFetchedEvent(note=note):
                 update_data = attrsetter(self, "note_data", note.to_dict())
-                refresh_note = caller(self, "paginate_note", direction=0)
+                refresh_note = schedulable(self.paginate_note, direction=0)
                 return sch_cb(update_data, refresh_note, timeout=0.1)
             case SaveNoteEvent(text=text, title=title):
                 """Save Button Pressed in Editor"""
@@ -403,28 +399,29 @@ class MindRefApp(App):
                 if note_is_new:
                     data_note.edit_title = title
                 remove_edit_note_widget = attrsetter(self, "editor_note", None)
-                persist_note = caller(registry, "save_note", note=data_note)
+                persist_note = schedulable(registry.save_note, note=data_note)
                 return sch_cb(persist_note, remove_edit_note_widget, timeout=0.1)
             case AddNoteEvent():
                 data_note = registry.new_note(category=self.note_category, idx=None)
                 add_edit_note_widget = attrsetter(self, "editor_note", data_note)
-                trigger_display_add = caller(self, "display_state_trigger", "add")
+                trigger_display_add = schedulable(self.display_state_trigger, "add")
                 return sch_cb(add_edit_note_widget, trigger_display_add, timeout=0.1)
             case EditNoteEvent(category=category, idx=idx):
                 data_note = registry.edit_note(category=category, idx=idx)
                 add_edit_note_widget = attrsetter(self, "editor_note", data_note)
-                trigger_display_edit = caller(self, "display_state_trigger", "edit")
+                trigger_display_edit = schedulable(self.display_state_trigger, "edit")
                 return sch_cb(add_edit_note_widget, trigger_display_edit, timeout=0.1)
             case CancelEditEvent():
-                trigger_display = caller(self, "display_state_trigger", "display")
-                registry_paginate = caller(registry, "paginate_note", direction=0)
+                trigger_display = schedulable(self.display_state_trigger, "display")
+                registry_paginate = schedulable(registry.paginate_note, direction=0)
                 remove_edit_note = attrsetter(self, "editor_note", None)
                 return sch_cb(
                     trigger_display, registry_paginate, remove_edit_note, timeout=0.1
                 )
             case PaginationEvent(direction=direction):
-                registry_paginate = caller(
-                    registry, "paginate_note", direction=direction
+
+                registry_paginate = schedulable(
+                    registry.paginate_note, direction=direction
                 )
                 return Clock.schedule_once(registry_paginate)
             case FilePickerEvent() as pick_event:
@@ -446,7 +443,7 @@ class MindRefApp(App):
 
                         # Scheduled callback will switch display state to display_state last trigger
                         # as well as push a refresh event to the registry
-                        @scheduleable
+                        @schedulable
                         def on_category_created():
 
                             self.display_state_trigger("choose")

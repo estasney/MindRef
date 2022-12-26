@@ -13,7 +13,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
 
-from utils import caller, fmt_items, import_kv, sch_cb
+from utils import fmt_items, import_kv, sch_cb, schedulable
 
 if TYPE_CHECKING:
     from domain.markdown_note import MarkdownNoteDict
@@ -59,8 +59,8 @@ class ListView(GridLayout):
 
     def on_meta_notes(self, _, value: list["MarkdownNoteDict"]):
         Logger.info(f"{type(self).__name__} : on_meta_notes : {len(value)} items")
-        clear_widgets = caller(self, "clear_widgets")
-        startup_timer = caller(self, "add_item_trigger")
+        clear_widgets = schedulable(self.clear_widgets)
+        startup_timer = schedulable(self.add_item_trigger)
         self.pending_items = []
         if value:
             self.pending_items = value[::-1]

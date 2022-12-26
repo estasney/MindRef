@@ -14,7 +14,7 @@ from domain.events import (
     NotesQueryFailureEvent,
     NotesQueryErrorFailureEvent,
 )
-from utils import caller, def_cb, sch_cb
+from utils import def_cb, sch_cb, schedulable
 from utils.caching import kivy_cache
 from widgets.typeahead.typeahead_dropdown import Suggestion
 
@@ -73,10 +73,10 @@ class Registry:
             Logger.info(
                 f"{type(self).__name__}: after_note_fetched - Set App Note Data to {note!r}"
             )
-            trigger_pause_state = caller(self.app, "play_state_trigger", "pause")
-            trigger_display = caller(self.app, "display_state_trigger", "display")
-            emit_paginate = caller(
-                self.app, "dispatch", "on_paginate", (direction, note_data)
+            trigger_pause_state = schedulable(self.app.play_state_trigger, "pause")
+            trigger_display = schedulable(self.app.display_state_trigger, "display")
+            emit_paginate = schedulable(
+                self.app.dispatch, "on_paginate", (direction, note_data)
             )
             sch_cb(trigger_pause_state, trigger_display, emit_paginate, timeout=0.1)
 
@@ -84,17 +84,14 @@ class Registry:
             case 0:
                 return self.set_note_index(self.app.note_service.index.current)
             case 1:
-                fetch_note = caller(
-                    self.app.note_service,
-                    "get_next_note",
-                    on_complete=after_note_fetched,
+                fetch_note = schedulable(
+                    self.app.note_service.get_next_note, on_complete=after_note_fetched
                 )
                 sch_cb(fetch_note)
                 Logger.info(f"{type(self).__name__}: paginate_note - forwards")
             case -1:
-                fetch_note = caller(
-                    self.app.note_service,
-                    "get_previous_note",
+                fetch_note = schedulable(
+                    self.app.note_service.get_previous_note,
                     on_complete=after_note_fetched,
                 )
                 sch_cb(fetch_note)
@@ -120,7 +117,7 @@ class Registry:
         - Set It
         """
 
-        set_note_index = caller(self.app.note_service, "set_index", value)
+        set_note_index = schedulable(self.app.note_service.set_index, value)
 
         def after_note_fetched(note: "MarkdownNote"):
             """Callback from note_service"""
@@ -129,13 +126,15 @@ class Registry:
                 f"{type(self).__name__}: after_note_fetched - "
                 f"Set App Note Data to {note!r}"
             )
-            trigger_pause_state = caller(self.app, "play_state_trigger", "pause")
-            trigger_display = caller(self.app, "display_state_trigger", "display")
-            emit_paginate = caller(self.app, "dispatch", "on_paginate", (0, note_data))
+            trigger_pause_state = schedulable(self.app.play_state_trigger, "pause")
+            trigger_display = schedulable(self.app.display_state_trigger, "display")
+            emit_paginate = schedulable(
+                self.app.dispatch, "on_paginate", (0, note_data)
+            )
             sch_cb(trigger_pause_state, trigger_display, emit_paginate, timeout=0.1)
 
-        fetch_note = caller(
-            self.app.note_service, "get_current_note", on_complete=after_note_fetched
+        fetch_note = schedulable(
+            self.app.note_service.get_current_note, on_complete=after_note_fetched
         )
         sch_cb(set_note_index, fetch_note)
         Logger.info(f"{type(self).__name__}: set_note_index - {value}")
@@ -193,7 +192,9 @@ class Registry:
             )
             return
 
-        clear_refresh = caller(self.app.screen_manager, "dispatch", "on_refresh", False)
+        clear_refresh = schedulable(
+            self.app.screen_manager.dispatch, "on_refresh", False
+        )
         if on_complete:
             chained_complete = def_cb(on_complete, clear_refresh)
         else:

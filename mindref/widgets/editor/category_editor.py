@@ -8,7 +8,7 @@ from kivy.properties import (
 from kivy.uix.boxlayout import BoxLayout
 
 from domain.events import CreateCategoryEvent, FilePickerEvent
-from utils import import_kv, get_app, sch_cb, caller
+from utils import import_kv, get_app, sch_cb, schedulable
 from widgets.forms.text_field import TextField
 
 import_kv(__file__)
@@ -71,13 +71,13 @@ class CategoryEditor(BoxLayout):
                     category=self.category_name_input.text,
                     img_path=self.image_path_input.text,
                 )
-                push_cat_event = caller(app.registry, "push_event", cat_event)
+                push_cat_event = schedulable(app.registry.push_event, cat_event)
                 sch_cb(push_cat_event, self.clear_inputs, timeout=0.1)
             case "cancel":
                 cat_event = CreateCategoryEvent(
                     action=CreateCategoryEvent.Action.CLOSE_FORM
                 )
-                push_cat_event = caller(app.registry, "push_event", cat_event)
+                push_cat_event = schedulable(app.registry.push_event, cat_event)
                 sch_cb(push_cat_event, self.clear_inputs, timeout=0.1)
             case "browse":
 
@@ -89,13 +89,13 @@ class CategoryEditor(BoxLayout):
                     action=FilePickerEvent.Action.OPEN_FILE,
                     ext_filter=["*.png", "*.jpg", "*.jpeg"],
                 )
-                push_browse_event = caller(app.registry, "push_event", browse_event)
+                push_browse_event = schedulable(app.registry.push_event, browse_event)
                 sch_cb(push_browse_event)
 
     def on_cancel(self, *_args):
         app = get_app()
         event = CreateCategoryEvent(action=CreateCategoryEvent.Action.CLOSE_FORM)
-        push_event = caller(app.registry, "push_event", event)
+        push_event = schedulable(app.registry.push_event, event)
         sch_cb(push_event, self.clear_inputs, timeout=0.1)
 
     def on_save(self, *_args):
@@ -105,5 +105,5 @@ class CategoryEditor(BoxLayout):
             category=self.category_name_input.text,
             img_path=self.image_path_input.text,
         )
-        push_event = caller(app.registry, "push_event", event)
+        push_event = schedulable(app.registry.push_event, event)
         sch_cb(push_event, self.clear_inputs, timeout=0.1)

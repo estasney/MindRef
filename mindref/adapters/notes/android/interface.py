@@ -25,7 +25,7 @@ from adapters.notes.android.annotations import (
     UriProtocol,
     MIME_TYPE,
 )
-from utils import scheduleable
+from utils import schedulable
 
 if TYPE_CHECKING:
     from .annotations import (
@@ -61,26 +61,26 @@ class MindRefUtilsCallback(PythonJavaClass):
     @java_method("(ILjava/lang/String;)V", name="onComplete")
     def onCompleteCreateCategory(self, key: int, category: str):
         mediator = self.py_mediator()
-        sched_mediator = scheduleable(mediator, key, category)
+        sched_mediator = schedulable(mediator, key, category)
         Clock.schedule_once(sched_mediator)
 
     @java_method("(I[Ljava/lang/String;)V", name="onComplete")
     def onCompleteGetCategories(self, key: int, categories: list[str]):
         mediator = self.py_mediator()
-        sched_mediator = scheduleable(mediator, key, categories)
+        sched_mediator = schedulable(mediator, key, categories)
         Clock.schedule_once(sched_mediator)
 
     @java_method("(I)V", name="onComplete")
     def onCompleteCopyStorage(self, key: int):
         mediator = self.py_mediator()
-        sched_mediator = scheduleable(mediator, key)
+        sched_mediator = schedulable(mediator, key)
         Clock.schedule_once(sched_mediator)
 
     @java_method("(I)V")
     def onFailure(self, key: int):
         # Indicate a failure by making negating the key
         mediator = self.py_mediator()
-        sched_mediator = scheduleable(mediator, -key)
+        sched_mediator = schedulable(mediator, -key)
         Clock.schedule_once(sched_mediator)
 
 
@@ -122,7 +122,7 @@ class OnDocumentCallback(PythonJavaClass):
             f"OnDocumentCallback: Selected uri - {uri.toString()} - {uri.getPath()}"
         )
         mediator = self.py_mediator()
-        sched_mediator = scheduleable(mediator, requestCode, uri.toString())
+        sched_mediator = schedulable(mediator, requestCode, uri.toString())
         Clock.schedule_once(sched_mediator)
         AndroidStorageManager.take_persistable_permission(uri)
 

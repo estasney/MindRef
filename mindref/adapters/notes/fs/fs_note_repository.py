@@ -15,7 +15,7 @@ from adapters.notes.note_repository import (
 from domain.events import DiscoverCategoryEvent, NotesQueryNotSetFailureEvent
 from domain.markdown_note import MarkdownNote
 from domain.note_resource import CategoryResourceFiles
-from utils import caller, def_cb, sch_cb, scheduleable
+from utils import def_cb, sch_cb, schedulable
 from utils.index import RollingIndex
 from widgets.typeahead.typeahead_dropdown import Suggestion
 
@@ -294,7 +294,7 @@ class FileSystemNoteRepository(AbstractNoteRepository):
                 )
                 on_fail(category_path, False)
                 return
-            bound = scheduleable(on_success)
+            bound = schedulable(on_success)
             sch_cb(bound)
 
         def copy_image_file(
@@ -308,7 +308,7 @@ class FileSystemNoteRepository(AbstractNoteRepository):
                 )
                 on_fail(category_path, False)
                 return
-            bound = scheduleable(on_success)
+            bound = schedulable(on_success)
             sch_cb(bound)
 
         def update_category_files_dict(
@@ -324,19 +324,19 @@ class FileSystemNoteRepository(AbstractNoteRepository):
                 )
             )
 
-            bound = scheduleable(on_success, category_path, True)
+            bound = schedulable(on_success, category_path, True)
             sch_cb(bound)
 
             # We work backwards in the callback chain, binding arguments to the callback
 
-        sch_update_category_files_dict = scheduleable(
+        sch_update_category_files_dict = schedulable(
             update_category_files_dict,
             category_name=name,
             category_path_=category_path,
             on_success=on_complete,
         )
 
-        sch_copy_image_file = scheduleable(
+        sch_copy_image_file = schedulable(
             copy_image_file,
             src=src_image_path,
             tgt=tgt_image_path,
@@ -344,7 +344,7 @@ class FileSystemNoteRepository(AbstractNoteRepository):
             on_fail=on_complete,
         )
 
-        sch_create_category_folder = scheduleable(
+        sch_create_category_folder = schedulable(
             create_category_folder,
             category_path_=category_path,
             on_success=sch_copy_image_file,
@@ -407,8 +407,8 @@ class FileSystemNoteRepository(AbstractNoteRepository):
                 fp = (self.storage_path / note.category / note.edit_title).with_suffix(
                     ".md"
                 )
-                write_note = caller(
-                    fp, "write_text", data=note.edit_text, encoding="utf-8"
+                write_note = schedulable(
+                    fp.write_text, data=note.edit_text, encoding="utf-8"
                 )
                 after_write = partial(
                     after_write_new_note,
@@ -422,8 +422,8 @@ class FileSystemNoteRepository(AbstractNoteRepository):
                 fp = (self.storage_path / note.category / note.edit_title).with_suffix(
                     ".md"
                 )
-                write_note = caller(
-                    fp, "write_text", data=note.edit_text, encoding="utf-8"
+                write_note = schedulable(
+                    fp.write_text, data=note.edit_text, encoding="utf-8"
                 )
                 after_write = partial(
                     after_write_new_note,
@@ -431,14 +431,13 @@ class FileSystemNoteRepository(AbstractNoteRepository):
                     note_path=fp,
                     callback=cb,
                 )
-
                 sch_cb(write_note, after_write)
                 Logger.info(f"{type(self).__name__}: save_note - new note")
             case False, None:
 
                 fp = note.md_note.filepath
-                write_note = caller(
-                    fp, "write_text", data=note.edit_text, encoding="utf-8"
+                write_note = schedulable(
+                    fp.write_text, data=note.edit_text, encoding="utf-8"
                 )
                 after_write = partial(
                     after_write_edit_note,
@@ -450,8 +449,8 @@ class FileSystemNoteRepository(AbstractNoteRepository):
                 Logger.info(f"{type(self).__name__}: save_note - edit note")
             case False, _ as cb:
                 fp = note.md_note.filepath
-                write_note = caller(
-                    fp, "write_text", data=note.edit_text, encoding="utf-8"
+                write_note = schedulable(
+                    fp.write_text, data=note.edit_text, encoding="utf-8"
                 )
                 after_write = partial(
                     after_write_edit_note,

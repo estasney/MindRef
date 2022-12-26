@@ -42,6 +42,9 @@ class AppRegistryProtocol(Protocol):
     settings_cls: str | "MindRefSettingsAndroid" | "MindRefSettingsNative"
     user_data_dir: str
 
+    def dispatch(self, *args, **kwargs) -> None:
+        ...
+
     def display_state_trigger(self, state: "DISPLAY_STATES") -> None:
         ...
 

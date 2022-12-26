@@ -6,7 +6,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import ScreenManager, SlideTransition
 
 from domain.events import FilePickerEvent
-from utils import caller, import_kv, sch_cb
+from utils import schedulable, import_kv, sch_cb
 from utils.index import RollingIndex
 from utils.triggers import trigger_factory
 from widgets.app_menu.app_menu import AppMenu
@@ -141,7 +141,7 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
                 target_screen = self.get_screen(
                     f"note_screen_{self.note_screen_cycler.next(peek=True)}"
                 )
-                advance_index = caller(self.note_screen_cycler, "next")
+                advance_index = schedulable(self.note_screen_cycler.next)
                 funcs.append(advance_index)
             case 0:
                 Logger.info(
@@ -154,8 +154,8 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
             case _:
                 raise NotImplementedError(f"Invalid direction {direction}")
 
-        set_data = caller(target_screen, "set_note_content", note_data)
-        trigger_screen_display = caller(self, "screen_triggers", target_screen.name)
+        set_data = schedulable(target_screen.set_note_content, note_data)
+        trigger_screen_display = schedulable(self.screen_triggers, target_screen.name)
         # Advance index
 
         sch_cb(set_data, trigger_screen_display, *funcs)

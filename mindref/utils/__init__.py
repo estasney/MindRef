@@ -54,11 +54,11 @@ def log_run_time(func: Callable[P, T]) -> Callable[P, T]:
     return wrapped_log_run_time
 
 
-def scheduleable(
+def schedulable(
     func: Callable[P, T], *args: P.args, **kwargs: P.kwargs
 ) -> Callable[P, T]:
     """
-    Decorator to make a function scheduleable with Kivy's Clock.
+    Decorator to make a function schedulable with Kivy's Clock.
 
     Since Kivy insists on passing the time elapsed since the last frame, this decorator
     will ignore the first argument and pass the rest to the function.
@@ -69,7 +69,7 @@ def scheduleable(
     # Use typing.Concatenate to annotate that Kivy will call scheduleable_inner with our args, kwargs and the time elapsed
 
     @wraps(func)
-    def scheduleable_inner(*s_args: Concatenate[float, P], **s_kwargs: P.kwargs) -> T:
+    def scheduleable_inner(dt: float) -> T:
         """This is the function that will be called by Kivy's Clock"""
         return func(*args, **kwargs)
 
@@ -126,33 +126,6 @@ def attrsetter(instance, attr: str, value) -> Callable[[], None]:
         setattr(instance, attr, value)
 
     return attrsetter_inner
-
-
-def caller(
-    instance, attr: str, *args: P.args, **kwargs: P.kwargs
-) -> Callable[[], None]:
-    """
-
-    Create a function that calls a method 'attr' from instance with *args, **kwargs bound
-
-    Parameters
-    ----------
-    instance
-    attr
-    args
-    kwargs
-
-    Returns
-    -------
-    """
-
-    method = getattr(instance, attr)
-
-    @wraps(method)
-    def caller_inner(*_iargs):
-        return method(*args, **kwargs)
-
-    return caller_inner
 
 
 def fmt_attrs(instance, *attr) -> str:
