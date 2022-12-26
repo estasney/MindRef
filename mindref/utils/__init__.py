@@ -11,7 +11,6 @@ from typing import (
     Protocol,
     TypeVar,
     TYPE_CHECKING,
-    Concatenate,
 )
 
 from kivy import Logger

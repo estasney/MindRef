@@ -1,4 +1,3 @@
-from functools import partial
 from typing import Literal, TYPE_CHECKING
 
 from kivy.properties import ObjectProperty

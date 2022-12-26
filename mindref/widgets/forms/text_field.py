@@ -1,7 +1,5 @@
-from kivy import Logger
 from kivy.clock import Clock
 from kivy.properties import (
-    BooleanProperty,
     StringProperty,
     AliasProperty,
     ObjectProperty,

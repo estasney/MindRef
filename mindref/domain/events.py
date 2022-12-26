@@ -2,7 +2,7 @@ import abc
 from dataclasses import dataclass, field
 from enum import Flag, auto
 from pathlib import Path
-from typing import Any, Callable, Literal, Optional, TYPE_CHECKING, Iterable
+from typing import Any, Callable, Literal, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from domain.markdown_note import MarkdownNote

@@ -298,42 +298,6 @@ class AndroidStorageManager:
             cb(uri)
 
     @classmethod
-    def _python_copy_storage_callback(cls, result: bool):
-        if (cb := cls._callbacks[cls.COPY_TO_APP_STORAGE]) and callable(cb):
-            Logger.debug(
-                f"{cls.__class__.__name__} : copy_storage_callback invoking registered on_complete"
-            )
-            cb(result)
-        else:
-            Logger.debug(
-                f"{cls.__class__.__name__} : copy_storage_callback no registered callbacks"
-            )
-
-    @classmethod
-    def _python_get_categories_callback(cls, results: list[str]):
-        if (cb := cls._callbacks[cls.GET_NOTE_CATEGORIES]) and callable(cb):
-            Logger.debug(
-                f"{cls.__class__.__name__} : get_categories - invoking registered on_complete"
-            )
-            cb(results)
-        else:
-            Logger.debug(
-                f"{cls.__class__.__name__} : get_categories - no registered on_complete"
-            )
-
-    @classmethod
-    def _python_manage_categories_callback(cls, category: str, result: bool):
-        if (cb := cls._callbacks[cls.MANAGE_CATEGORIES]) and callable(cb):
-            Logger.debug(
-                f"{cls.__class__.__name__} : manage_categories - invoking registered on_complete"
-            )
-            cb(category, result)
-        else:
-            Logger.debug(
-                f"{cls.__class__.__name__} : get_categories - no registered on_complete"
-            )
-
-    @classmethod
     def ensure_uri_type(
         cls, uri: str | UriProtocol, target: Type[str] | Type[UriProtocol]
     ):

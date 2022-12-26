@@ -5,7 +5,7 @@ from typing import Callable, Literal, TYPE_CHECKING
 from kivy import platform
 from kivy._clock import ClockEvent  # noqa
 from kivy.app import App
-from kivy.clock import Clock, mainthread
+from kivy.clock import Clock
 from kivy.config import Config
 from kivy.core.window import Window
 from kivy.logger import Logger
