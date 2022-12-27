@@ -1,6 +1,7 @@
 #:import XSmallLabel widgets.style
 #:import SmallLabel widgets.style
-#:import HSeparator widgets.separator
+#:import AnimatedHSeparator widgets.separator
+
 
 <TextField>:
     orientation: 'vertical'
@@ -24,9 +25,16 @@
         color: app.colors['Warn']
         text: root.error_message
     BoxLayout:
+        orientation: 'vertical'
         padding: [0, dp(4), 0, dp(4)]
         size_hint_y: None
         height: self.minimum_height
-        HSeparator:
-            color: app.colors['Accent-One'] if w_text_input.focused else app.colors['Gray-300']
+        AnimatedHSeparator:
+            active: w_text_input.focused
+            color: app.colors['Gray-300']
+            active_color: app.colors['Accent-One']
+            width_modifier: 1.05
+            pos_hint: {"center_x": 0.5}
+            width: root.width *.95
+            size_hint_x: None
 
