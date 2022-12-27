@@ -178,7 +178,7 @@ class MindRefApp(App):
     display_state = AliasProperty(
         get_display_state,
         set_display_state,
-        bind=("display_state_last", "display_state_current"),
+        bind=("display_state_current",),
         cache=True,
     )
 

@@ -4,8 +4,7 @@
 #:import NoteListViewScreen widgets.screens.list_view_screen
 #:import NoteEditScreen widgets.screens.note_edit_screen
 #:import ErrorMessageScreen widgets.screens.message_screen
-#:import CategoryEditorScreen widgets.screens.category_editor_screen
-
+#:import ScreenContainer widgets.screens.screen_container
 
 <NoteAppScreenManager>:
     id: screen_manager
@@ -26,9 +25,9 @@
     NoteEditScreen:
         id: note_edit_screen
         name: 'note_edit_screen'
+    ScreenContainer:
+        id: screen_container
+        name: 'screen_container'
     ErrorMessageScreen:
         id: error_message_screen
         name: 'error_message_screen'
-    CategoryEditorScreen:
-        id: category_editor_screen
-        name: 'category_editor_screen'

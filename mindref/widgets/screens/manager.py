@@ -14,6 +14,7 @@ from widgets.behavior.interact_behavior import InteractBehavior
 from widgets.behavior.refresh_behavior import RefreshBehavior
 from widgets.buttons.category import NoteCategoryButton
 from widgets.dialog.filepicker_dialog import LoadDialog
+from widgets.editor.category_editor import CategoryEditor
 
 if TYPE_CHECKING:
     from mindref.mindref import DISPLAY_STATE
@@ -99,7 +100,21 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
             case (_, "error"):
                 self.handle_error_message()
             case (_, "category_editor"):
-                return self.screen_triggers("category_editor_screen")
+                # return self.screen_triggers("category_editor_screen")
+                # Attach a CategoryEditor to the ScreenContainer
+                container_screen = next(
+                    (
+                        screen
+                        for screen in self.screens
+                        if screen.name == "screen_container"
+                    ),
+                    None,
+                )
+                if not container_screen:
+                    raise ValueError("No Screen Container Found")
+                container_screen.content = CategoryEditor()
+                trigger_screen = schedulable(self.screen_triggers, "screen_container")
+                sch_cb(trigger_screen, timeout=0.1)
             case _:
                 raise Exception(f"Unhandled display state {value}")
 
