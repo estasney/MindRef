@@ -8,8 +8,9 @@
     color: app.colors['Primary']
     height: dp(2)
 
-<-TexturedButton>:
+<-ThemedButton>:
     state_image: self.background_normal if self.state == 'normal' else self.background_down
+    disabled_image: self.background_disabled
     background_color: app.colors['Primary'] if self.state == 'normal' else app.colors['Accent-One']
     border_size: dp(8)
     orientation: 'vertical'
@@ -20,14 +21,15 @@
         Color:
             rgba: self.background_color
         BorderImage:
-            border:  root.border_size
+            border:  self.border_size
             pos: self.pos
             size: self.size
-            source: root.state_image if not root.disabled else root.background_disabled
+            source: self.state_image if not self.disabled else self.disabled_image
 
-<-TexturedLabelButton>:
+<-ThemedLabelButton>:
     text: ''
     state_image: self.background_normal if self.state == 'normal' else self.background_down
+    disabled_image: self.background_disabled
     background_color: app.colors['Primary'] if self.state == 'normal' else app.colors['Accent-One']
     border_size: dp(8)
     orientation: 'vertical'
@@ -39,10 +41,10 @@
         Color:
             rgba: self.background_color
         BorderImage:
-            border:  root.border_size
+            border:  self.border_size
             pos: self.pos
             size: self.size
-            source: root.state_image if not root.disabled else root.background_disabled
+            source: self.state_image if not root.disabled else self.disabled_image
     BaseLabel:
         text: root.text
         size_hint_y: None

@@ -8,7 +8,7 @@ from kivy.uix.dropdown import DropDown
 from kivy.weakproxy import WeakProxy
 
 from utils import import_kv
-from widgets.buttons.buttons import TexturedButton
+from widgets.buttons.buttons import ThemedButton
 
 import_kv(__file__)
 
@@ -19,7 +19,7 @@ class Suggestion:
     index: int
 
 
-class SuggestionButton(TexturedButton):
+class SuggestionButton(ThemedButton):
     index = NumericProperty()
     text = StringProperty()
 

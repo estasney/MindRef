@@ -3,12 +3,12 @@ from kivy.loader import Loader
 from kivy.properties import ObjectProperty, StringProperty
 
 from utils import import_kv, get_app
-from widgets.buttons.buttons import TexturedButton
+from widgets.buttons.buttons import ThemedButton
 
 import_kv(__file__)
 
 
-class NoteCategoryButton(TexturedButton):
+class NoteCategoryButton(ThemedButton):
     source = StringProperty()
     text = StringProperty()
     image = ObjectProperty()

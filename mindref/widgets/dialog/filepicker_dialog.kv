@@ -1,4 +1,4 @@
-#:import TexturedLabelButton widgets.buttons.buttons
+#:import ThemedLabelButton widgets.buttons.buttons
 
 
 
@@ -16,11 +16,11 @@
             size_hint_y: None
             height: self.minimum_height
             orientation: 'horizontal'
-            TexturedLabelButton:
+            ThemedLabelButton:
                 text: 'OK'
                 disabled: not file_chooser.selection
                 on_release: root.dispatch('on_button_event', 'accept', file_chooser.path, file_chooser.selection)
-            TexturedLabelButton:
+            ThemedLabelButton:
                 text: 'Cancel'
                 on_release: root.dispatch('on_button_event', 'cancel')
 
@@ -43,10 +43,10 @@
             multiline: False
         BoxLayout:
             orientation: 'horizontal'
-            TexturedLabelButton:
+            ThemedLabelButton:
                 text: 'Save'
                 on_release: root.dispatch('on_button_event', 'accept', file_chooser.path, text_input.text)
-            TexturedLabelButton:
+            ThemedLabelButton:
                 text: 'Cancel'
                 on_release: root.dispatch('on_button_event', 'cancel')
 

@@ -3,7 +3,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.dropdown import DropDown
 
 from utils import import_kv
-from widgets.buttons.buttons import TexturedButton
+from widgets.buttons.buttons import ThemedButton
 
 import_kv(__file__)
 
@@ -16,7 +16,7 @@ class NoteActionDropDown(DropDown):
     ...
 
 
-class NoteActionButton(TexturedButton):
+class NoteActionButton(ThemedButton):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.dd = None

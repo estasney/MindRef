@@ -23,7 +23,7 @@ class HamburgerIcon(BoxLayout):
         super(HamburgerIcon, self).__init__(**kwargs)
 
 
-class TexturedButton(ButtonBehavior, BoxLayout):
+class ThemedButton(ButtonBehavior, BoxLayout):
     background_normal = StringProperty(f"{texture_atlas}/bg_normal")
     background_down = StringProperty(f"{texture_atlas}/bg_down")
     background_disabled = StringProperty(f"{texture_atlas}/bg_disabled")
@@ -31,17 +31,17 @@ class TexturedButton(ButtonBehavior, BoxLayout):
     border_size = VariableListProperty()
 
     def __init__(self, **kwargs):
-        super(TexturedButton, self).__init__(**kwargs)
+        super(ThemedButton, self).__init__(**kwargs)
 
 
-class TexturedLabelButton(TexturedButton):
+class ThemedLabelButton(ThemedButton):
     text: StringProperty()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
 
-class ImageButton(TexturedButton):
+class ImageButton(ThemedButton):
     source = StringProperty()
 
     def __init__(self, **kwargs):
