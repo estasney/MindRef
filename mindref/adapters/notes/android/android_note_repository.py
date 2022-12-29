@@ -205,6 +205,7 @@ class AndroidNoteRepository(FileSystemNoteRepository):
             if on_complete_inner:
                 on_complete_inner()
 
+        @schedulable
         def after_get_external_storage_categories():
             Logger.info(
                 f"{type(self).__name__}:"

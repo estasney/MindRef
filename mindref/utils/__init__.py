@@ -68,7 +68,7 @@ def schedulable(
     # Use typing.Concatenate to annotate that Kivy will call scheduleable_inner with our args, kwargs and the time elapsed
 
     @wraps(func)
-    def scheduleable_inner(dt: float) -> T:
+    def scheduleable_inner(*_iargs: float) -> T:
         """This is the function that will be called by Kivy's Clock"""
         return func(*args, **kwargs)
 
