@@ -1,6 +1,4 @@
-from kivy.app import App
 from kivy.clock import Clock
-from kivy.graphics import RenderContext, Color, Rectangle
 from kivy.loader import Loader
 from kivy.properties import ObjectProperty, StringProperty
 
@@ -31,10 +29,31 @@ class NoteCategoryButton(ThemedButton, RippleMixin):
         )
         self.text = text
 
+    def normalize_touch_pos(self, touch_x, touch_y):
+        """
+        Normalize touch position to texture coordinates.
+
+        Kivy's origin point is the bottom left corner of the window.
+
+
+        """
+        # Remap window coordinates to local widget coordinates
+        x_local = touch_x - self.x
+        y_local = touch_y - self.y
+
+        # Normalize to texture coordinates
+        x_norm = x_local / self.width
+        y_norm = 1 - (y_local / self.height)
+
+        # Constrain to range 0, 1
+        x_norm = max(0, min(1, x_norm))
+        y_norm = max(0, min(1, y_norm))
+
+        return x_norm, y_norm
+
     def on_touch_down(self, touch):
         if super().on_touch_down(touch):
-            self.touch = touch.spos
-
+            self.touch = self.normalize_touch_pos(*touch.pos)
             self.no_touch_trigger.cancel()
             self.has_touch_trigger()
             return True
@@ -42,7 +61,7 @@ class NoteCategoryButton(ThemedButton, RippleMixin):
 
     def on_touch_move(self, touch):
         if super().on_touch_move(touch):
-            self.touch = touch.spos
+            self.touch = self.normalize_touch_pos(*touch.pos)
             return True
         return False
 

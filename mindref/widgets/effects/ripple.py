@@ -7,10 +7,10 @@ from kivy.properties import (
     BoundedNumericProperty,
     StringProperty,
 )
-from kivy.uix.widget import Widget
 
 fs_header = """
 $HEADER$
+uniform vec2 resolution;
 uniform vec2 touch;
 uniform float touch_time;
 uniform float intensity;
@@ -21,10 +21,9 @@ void main(void) {
 
             vec4 color = frag_color * texture2D(texture0, tex_coord0);
             float dist = distance(touch, tex_coord0);
-            float radius = touch_time;
-            if (dist < radius) {
-              float pct = (radius - dist) / radius;
-              float theta = pct * pct * intensity;
+            if (dist < touch_time) {
+              float pct = (touch_time - dist) / touch_time;
+              float theta = pct*pct*intensity;
               color.rgb += theta;
             }
             
@@ -36,8 +35,8 @@ void main(void) {
 class RippleMixin:
     touch = ListProperty([0.0, 0.0])
     touch_time = NumericProperty(0.0)
-    intensity = BoundedNumericProperty(0.9, min=0, max=1)
-    growth_rate = NumericProperty(0.2)
+    intensity = BoundedNumericProperty(0.4, min=0, max=1)
+    growth_rate = NumericProperty(1)
     fs = StringProperty()
     size: list[int, int]
 
@@ -84,10 +83,11 @@ class RippleMixin:
     def increment_touch_time(self, dt):
         """
         Increase the touch_time since the touch event is still active
-        We limit the touch_time to 1.0 so that the effect can fill the texture, but we want it to decrement from a maximum of 1.0,
+        We limit the touch_time to 1.0 so that the effect can fill the texture, but we want it to decrement from a maximum of 2.0,
         otherwise the effect will take too long to disappear.
         """
-        self.touch_time = min(self.touch_time + dt / self.growth_rate, 1.0)
+
+        self.touch_time = min(self.touch_time + (dt * self.growth_rate), 2.0)
 
     def decrement_touch_time(self, dt):
         touch_time = max(self.touch_time - dt, 0)
@@ -99,10 +99,16 @@ class RippleMixin:
         self.touch_time = touch_time
 
     def on_touch(self, _instance, value):
-        self.canvas["touch"] = list(map(float, value))
+        canvas = self.canvas
+        canvas["touch"] = list(map(float, value))
+        canvas["resolution"] = [float(x) for x in self.size]
 
     def on_touch_time(self, _instance, value):
-        self.canvas["touch_time"] = float(value)
+        canvas = self.canvas
+        canvas["touch_time"] = float(value)
+        canvas["resolution"] = [float(x) for x in self.size]
 
     def on_intensity(self, _instance, value):
-        self.canvas["intensity"] = float(value)
+        canvas = self.canvas
+        canvas["intensity"] = float(value)
+        canvas["resolution"] = [float(x) for x in self.size]
