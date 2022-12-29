@@ -1,3 +1,4 @@
+from kivy.base import EventLoop
 from kivy.clock import Clock
 from kivy.graphics import RenderContext
 from kivy.properties import (
@@ -41,6 +42,7 @@ class RippleMixin:
     size: list[int, int]
 
     def __init__(self, **kwargs):
+        EventLoop.ensure_window()
         super().__init__(**kwargs)
         self.canvas = RenderContext(
             use_parent_projection=True,
@@ -53,10 +55,10 @@ class RippleMixin:
         self.no_touch_trigger = Clock.create_trigger(
             self.decrement_touch_time, interval=True, timeout=1 / 60
         )
-        Clock.schedule_interval(self.update_glsl, 1.0 / 60.0)
+        Clock.schedule_once(self.init_glsl_uniforms, 0)
         Clock.schedule_once(lambda dt: setattr(self, "fs", fs_header + fs_main), 1 / 60)
 
-    def update_glsl(self, _dt):
+    def init_glsl_uniforms(self, _dt):
         """
         Update the GLSL uniforms
         """
@@ -95,3 +97,12 @@ class RippleMixin:
             # Cancel the trigger
             return False
         self.touch_time = touch_time
+
+    def on_touch(self, _instance, value):
+        self.canvas["touch"] = list(map(float, value))
+
+    def on_touch_time(self, _instance, value):
+        self.canvas["touch_time"] = float(value)
+
+    def on_intensity(self, _instance, value):
+        self.canvas["intensity"] = float(value)
