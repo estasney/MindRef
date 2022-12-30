@@ -1,0 +1,4 @@
+mindref.ini
+mypy.ini
+.gitignore
+*.pyc

@@ -360,7 +360,7 @@ class FileSystemNoteRepository(AbstractNoteRepository):
     def set_index(self, n: int):
         if not self._index:
             raise Exception("No Index")
-        self._index.set_current(n)
+        self._index.current = n
 
     @property
     def index(self) -> RollingIndex:

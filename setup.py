@@ -5,8 +5,10 @@
 #   $ pip install twine
 
 import os
+from distutils.extension import Extension
 
 from setuptools import find_packages, setup
+from Cython.Build import cythonize
 
 # Package meta-data
 NAME = "MindRef"
@@ -18,21 +20,17 @@ REQUIRES_PYTHON = ">=3.10"
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-    "click",
-    "Cython",
-    "Kivy",
-    "mistune",
-    "Pillow",
-    "Pygments",
-    "python-dotenv",
-    "toolz",
+    "Cython==0.29.32",
+    "Kivy==2.1.0",
+    "mistune==2.0.4",
+    "Pillow==9.3.0",
+    "Pygments==2.13.0",
+    "python-dotenv==0.21.0",
+    "toolz==0.12.0",
 ]
 
 EXTRAS = {
-    "dev": [
-        "pre-commit" "pytest",
-        "PyYAML",
-    ],
+    "dev": ["pre-commit", "pytest", "PyYAML", "click"],
     "android": ["python-for-android", "pyjnius"],
 }
 
@@ -61,7 +59,6 @@ setup(
             "data",
             [
                 "mindref/static/icons/*",
-                "mindref/static/keys/*",
                 "mindref/static/textures/*",
             ],
         )
@@ -72,7 +69,17 @@ setup(
         # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
         "Development Status :: 3 - Alpha",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
     ],
+    ext_modules=cythonize(
+        [
+            Extension(
+                "mindref.utils.calculation",
+                ["mindref/utils/calculation.pyx"],
+            ),
+            Extension("mindref.utils.index", ["mindref/utils/index.pyx"]),
+        ],
+        compiler_directives={"language_level": 3},
+    ),
 )

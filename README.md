@@ -15,16 +15,45 @@ MindRef renders Markdown notes with a special emphasis on technical notes, such 
 ### Building for Android
 
 #### p4a Fork
-I've forked [python-for-android](https://github.com/kivy/python-for-android) at [forked p4a](https://github.com/estasney/python-for-android)
-to provide Python 3.10 support
 
+I've forked [python-for-android](https://github.com/kivy/python-for-android)
+at [forked p4a](https://github.com/estasney/python-for-android)
+to provide Python 3.10 support
 
 #### MindRefUtils
 
-With the introduction of SDK 33 on Android, it is no longer possible to simply request EXTERNAL_STORAGE permission and treat files natively.
+With the introduction of SDK 33 on Android, it is no longer possible to simply request EXTERNAL_STORAGE permission and
+treat files natively.
 
-A user selects a directory to share with Mindref. This provides a Content URI that is only usable via the `DocumentProvider`.
+A user selects a directory to share with Mindref. This provides a Content URI that is only usable via
+the `DocumentProvider`.
 
 This requires some additional Java 'glue' code to sync External Storage with App Storage.
 
 MindRefUtils can be found at [MindRefUtils](https://github.com/estasney/MindRefUtils)
+
+### Benchmarks
+
+#### normalize_coordinates
+
+*100,000 iterations, 10 repeats*
+
+    - Python 3.10.9
+        - 0.0281 seconds
+    - Cython
+        - 0.0048 seconds
+
+*Cython is 5.8x faster than Python*
+
+#### rolling_index
+
+*1,000,000 iterations, 10 repeats*
+
+    - Python 3.10.9
+        - 0.2755 seconds
+    - Cython
+        - 0.1278 seconds
+
+* Cython is 2.15x faster than Python*
+
+    

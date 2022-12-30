@@ -3,6 +3,7 @@ from kivy.loader import Loader
 from kivy.properties import ObjectProperty, StringProperty
 
 from utils import import_kv, get_app
+from utils.calculation import normalize_coordinates
 from widgets.buttons.buttons import ThemedButton
 from widgets.effects.ripple import RippleMixin
 
@@ -37,19 +38,14 @@ class NoteCategoryButton(ThemedButton, RippleMixin):
 
 
         """
-        # Remap window coordinates to local widget coordinates
-        x_local = touch_x - self.x
-        y_local = touch_y - self.y
-
-        # Normalize to texture coordinates
-        x_norm = x_local / self.width
-        y_norm = 1 - (y_local / self.height)
-
-        # Constrain to range 0, 1
-        x_norm = max(0, min(1, x_norm))
-        y_norm = max(0, min(1, y_norm))
-
-        return x_norm, y_norm
+        return normalize_coordinates(
+            touch_x,
+            touch_y,
+            self.x,
+            self.y,
+            self.height,
+            self.width,
+        )
 
     def on_touch_down(self, touch):
         if super().on_touch_down(touch):
