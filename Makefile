@@ -1,5 +1,5 @@
 PROJECT_NAME:=mindref
-PROJECT_REQUIREMENTS=python3==3.10.9,hostpython3==3.10.9,kivy,python-dotenv,toolz,pygments,docutils,urllib3,chardet,idna,android,pillow,mistune,utils
+PROJECT_REQUIREMENTS=python3==3.10.9,hostpython3==3.10.9,kivy,python-dotenv,toolz,pygments,docutils,urllib3,chardet,idna,android,pillow,mistune,mindref_cython
 UTIL_ROOT:=$(HOME)/AndroidStudioProjects/MindRefUtils
 UTIL_OUTPUT:=$(UTIL_ROOT)/mindrefutils/build/outputs/aar
 UTIL_AAR:=$(UTIL_OUTPUT)/mindrefutils-debug.aar
@@ -67,18 +67,7 @@ clean-all : clean-aar clean-apk clean-bytecode clean-builds clean-dists
 		&& ./gradlew :mindrefutils:build
 	cp $(UTIL_AAR) .
 
-build-cython : clean-cython
-	. venv/bin/activate \
-	&& python setup.py build_ext --inplace \
-	&& find $(PROJECT_ROOT) -name "*.so" -exec rename -v -d 's/\.cpython-.*/.so/' {} \;
-.PHONY : build-cython
-
-clean-cython :
-	find $(PROJECT_ROOT) -name "*.so" -delete
-	find $(PROJECT_ROOT) -name "*.c" -delete
-.PHONY : clean-cython
-
-build-apk :  *.aar clean-bytecode build-cython
+build-apk :  *.aar clean-bytecode
 	. venv/bin/activate \
 	&& python -m pythonforandroid.entrypoints apk --private $(PROJECT_ROOT) \
   	--package=org.test.mindref \
@@ -99,7 +88,6 @@ build-apk :  *.aar clean-bytecode build-cython
   	--depend "com.google.guava:guava:31.1-android" \
   	--depend "org.apache.commons:commons-io:1.3.2" \
   	--add-aar $(ROOT_DIR)/mindrefutils-debug.aar \
-  	--blacklist $(BUILD_REF_DIR)/blacklist.txt \
   	--no-byte-compile-python
 .PHONY : build-apk
 

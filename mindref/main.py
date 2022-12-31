@@ -11,9 +11,7 @@ def run_android():
     import shutil
 
     def util_libs_exist():
-        utils_pkg_path = (
-            Path(__file__).parent / "_python_bundle" / "site-packages" / "utils"
-        )
+        utils_pkg_path = Path(__file__).parent / "_python_bundle" / "site-packages"
         lib_calc = Path(__file__).parent / "utils" / "calculation.so"
         if not lib_calc.exists():
             Logger.info("Copying calculation.so")

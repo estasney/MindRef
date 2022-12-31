@@ -68,7 +68,8 @@ setup(
         *cythonize(
             [
                 Extension(
-                    "mindref.utils.calculation", ["mindref/utils/calculation.pyx"]
+                    "mindref.utils.calculation",
+                    ["mindref/utils/calculation.pyx"],
                 ),
                 Extension("mindref.utils.index", ["mindref/utils/index.pyx"]),
             ],
