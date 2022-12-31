@@ -1,16 +1,8 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-# Note: To use the 'upload' functionality of this file, you must:
-#   $ pip install twine
-
 import os
-from distutils.extension import Extension
 
-from setuptools import find_packages, setup
 from Cython.Build import cythonize
+from setuptools import find_packages, setup, Extension
 
-# Package meta-data
 NAME = "MindRef"
 DESCRIPTION = "Cross-Platform Application for maintaining Markdown formatted notes"
 URL = "https://github.com/estasney/MindRef"
@@ -18,7 +10,6 @@ EMAIL = "estasney@users.noreply.github.com"
 AUTHOR = "Eric Stasney"
 REQUIRES_PYTHON = ">=3.10"
 
-# What packages are required for this module to be executed?
 REQUIRED = [
     "Cython==0.29.32",
     "Kivy==2.1.0",
@@ -53,6 +44,7 @@ setup(
     packages=find_packages(exclude=("tests",)),
     install_requires=REQUIRED,
     extras_require=EXTRAS,
+    zip_safe=False,
     include_package_data=True,
     data_files=[
         (
@@ -72,14 +64,15 @@ setup(
         "Programming Language :: Python :: 3.10",
         "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
     ],
-    ext_modules=cythonize(
-        [
-            Extension(
-                "mindref.utils.calculation",
-                ["mindref/utils/calculation.pyx"],
-            ),
-            Extension("mindref.utils.index", ["mindref/utils/index.pyx"]),
-        ],
-        compiler_directives={"language_level": 3},
-    ),
+    ext_modules=[
+        *cythonize(
+            [
+                Extension(
+                    "mindref.utils.calculation", ["mindref/utils/calculation.pyx"]
+                ),
+                Extension("mindref.utils.index", ["mindref/utils/index.pyx"]),
+            ],
+            compiler_directives={"language_level": 3},
+        ),
+    ],
 )

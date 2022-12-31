@@ -18,4 +18,5 @@ htmlcov/
 bin
 tests/**/*.png
 **/.mypy_cache
+build
 

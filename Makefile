@@ -1,5 +1,5 @@
 PROJECT_NAME:=mindref
-PROJECT_REQUIREMENTS=python3==3.10.8,hostpython3==3.10.8,kivy,python-dotenv,toolz,pygments,docutils,urllib3,chardet,idna,android,pillow,mistune
+PROJECT_REQUIREMENTS=python3==3.10.9,hostpython3==3.10.9,kivy,python-dotenv,toolz,pygments,docutils,urllib3,chardet,idna,android,pillow,mistune,utils
 UTIL_ROOT:=$(HOME)/AndroidStudioProjects/MindRefUtils
 UTIL_OUTPUT:=$(UTIL_ROOT)/mindrefutils/build/outputs/aar
 UTIL_AAR:=$(UTIL_OUTPUT)/mindrefutils-debug.aar
