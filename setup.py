@@ -21,7 +21,7 @@ REQUIRED = [
 ]
 
 EXTRAS = {
-    "dev": ["pre-commit", "pytest", "PyYAML", "click"],
+    "dev": ["pre-commit", "pytest", "PyYAML", "click", "line_profiler"],
     "android": ["python-for-android", "pyjnius"],
 }
 

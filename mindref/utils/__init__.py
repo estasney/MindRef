@@ -27,6 +27,43 @@ P = ParamSpec("P")
 K = TypeVar("K", bound=str)
 V = TypeVar("V")
 
+import atexit
+
+_PROFILER = None
+
+
+def get_stats():
+    global _PROFILER
+    if _PROFILER is None:
+        print("No Profiler")
+        return
+    # noinspection PyUnresolvedReferences
+    from io import StringIO
+
+    fp = StringIO()
+
+    _PROFILER.print_stats(stream=fp)
+    stats = fp.getvalue()
+    fp.close()
+    print(stats)
+    Path("profile.txt").write_text(stats)
+
+
+def profile(func):
+    global _PROFILER
+    if _PROFILER is None:
+        try:
+            from line_profiler import LineProfiler
+
+            _PROFILER = LineProfiler()
+        except ImportError:
+            return func
+
+    _PROFILER.add_function(func)
+    _PROFILER.enable_by_count()
+    atexit.register(get_stats)
+    return func
+
 
 def mindref_path() -> Path:
     # find our module location
