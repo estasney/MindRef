@@ -56,4 +56,24 @@ MindRefUtils can be found at [MindRefUtils](https://github.com/estasney/MindRefU
 
 * Cython is 2.15x faster than Python*
 
-    
+#### compute_ref_coordinates
+
+*100,000 iterations, 10 repeats*
+
+    - Python 3.10.9
+        - 0.0200 seconds
+    - Cython
+        - 0.0116 seconds
+
+* Cython is 1.72x faster than Python*
+
+#### color_str_components
+
+*100,000 iterations, 10 repeats*
+
+    - Python 3.10.9
+        - 0.0234 seconds
+    - Cython
+        - 0.0075 seconds
+
+* Cython is 3.12x faster than Python*

@@ -74,6 +74,7 @@ setup(
                 Extension("mindref.utils.index", ["mindref/utils/index.pyx"]),
             ],
             compiler_directives={"language_level": 3},
+            annotate=True,
         ),
     ],
 )

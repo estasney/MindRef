@@ -47,6 +47,10 @@ clean-bytecode :
 	find $(PROJECT_ROOT) -name ".mypy_cache" -type d -print0 | xargs -0 rm -rf
 .PHONY : clean-bytecode
 
+clean-cythonized:
+	find $(PROJECT_ROOT) -name "*.c" -delete
+	find $(PROJECT_ROOT) -name "*.so" -delete
+	find $(PROJECT_ROOT) -name "*.html" -delete
 clean-builds :
 	. venv/bin/activate \
 	&& python -m pythonforandroid.entrypoints clean builds
@@ -57,7 +61,7 @@ clean-dists :
 	&& python -m pythonforandroid.entrypoints clean dists
 .PHONY : clean-dists
 
-clean-all : clean-aar clean-apk clean-bytecode clean-builds clean-dists
+clean-all : clean-aar clean-apk clean-bytecode clean-builds clean-dists clean-cythonized
 	. venv/bin/activate \
 	&& python -m pythonforandroid.entrypoints clean-all
 .PHONY : clean-all
@@ -67,7 +71,7 @@ clean-all : clean-aar clean-apk clean-bytecode clean-builds clean-dists
 		&& ./gradlew :mindrefutils:build
 	cp $(UTIL_AAR) .
 
-build-apk :  *.aar clean-bytecode
+build-apk :  *.aar clean-bytecode clean-cythonized
 	. venv/bin/activate \
 	&& python -m pythonforandroid.entrypoints apk --private $(PROJECT_ROOT) \
   	--package=org.test.mindref \

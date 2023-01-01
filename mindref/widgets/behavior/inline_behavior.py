@@ -1,7 +1,11 @@
 from __future__ import annotations
 
 from typing import Any, Literal, NamedTuple, Optional
-
+from utils.calculation import (
+    compute_ref_coords,
+    color_str_components,
+    compute_text_contrast,
+)
 from kivy.clock import Clock
 from kivy.graphics import Color, RoundedRectangle
 from kivy.metrics import dp
@@ -16,7 +20,7 @@ from kivy.properties import (
 from kivy.uix.label import Label
 from kivy.utils import escape_markup
 
-from utils import import_kv
+from utils import import_kv, profile
 from utils.caching import cache_key_color_norm, cache_key_text_contrast, kivy_cache
 
 import_kv(__file__)
@@ -157,7 +161,7 @@ class LabelHighlightInline(Label):
         return True
 
     def compute_ref_coords(
-        self, span: tuple[int, int, int, int]
+        self, span: tuple[float, float, float, float]
     ) -> tuple[float, float, float, float]:
         """
         Since spans are computed relative to texture, we want them in window form
@@ -191,28 +195,14 @@ class LabelHighlightInline(Label):
         -------
 
         """
-        # Window X coordinate of left edge of text texture
-
-        pX = self.center_x - self.texture_size[0] / 2
-
-        # Window Y coordinate of bottom edge of text texture
-
-        pY = self.center_y - self.texture_size[1] / 2
-
-        x1, y1, x2, y2 = span
-
-        x1 += pX
-        y1 += pY
-        x2 += pX
-        y2 += pY
-
-        # Padding
-        x1 -= self.highlight_padding_x
-        x2 += self.highlight_padding_x
-        y1 += self.highlight_padding_y
-        y2 -= self.highlight_padding_y
-
-        return x1, y1, x2, y2
+        return compute_ref_coords(
+            self.center_x,
+            self.center_y,
+            *self.texture_size,
+            *span,
+            self.highlight_padding_x,
+            self.highlight_padding_y,
+        )
 
     def draw_ref_spans(self, *_args, **_kwargs):
         """
@@ -261,71 +251,34 @@ class LabelHighlightInline(Label):
 @kivy_cache(cache_name="text_contrast", key_func=cache_key_text_contrast, limit=1000)
 def get_cached_text_contrast(
     *,
-    background_color: tuple[float],
+    background_color: tuple[float, float, float, float],
     threshold: float,
     highlight_color: Optional[Any] = None,
 ):
     """
     Set text as white or black depending on bg
     """
-    if not highlight_color:
-        r, g, b, opacity = get_cached_color_norm(color=background_color)
-        brightness = (r * 0.299 + g * 0.587 + b * 0.114 + (1 - opacity)) * 255
-    else:
-        hl_norm = get_cached_color_norm(color=highlight_color)
-        bg_norm = get_cached_color_norm(color=background_color)
-
-        r_hl, g_hl, b_hl, opacity_hl = hl_norm
-        r_bg, g_bg, b_bg, opacity_bg = bg_norm
-
-        # https://stackoverflow.com/questions/726549/algorithm-for-additive-color-mixing-for-rgb-values
-        opacity = 1 - (1 - opacity_hl) * (1 - opacity_bg)
-        r = r_hl * opacity_hl / opacity + r_bg * opacity_bg * (1 - opacity_hl) / opacity
-        g = g_hl * opacity_hl / opacity + g_bg * opacity_bg * (1 - opacity_hl) / opacity
-        b = b_hl * opacity_hl / opacity + b_bg * opacity_bg * (1 - opacity_hl) / opacity
-
-        # https://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color
-        brightness = (r * 0.299 + g * 0.587 + b * 0.114 + (1 - opacity)) * 255
-    if brightness > threshold:
-        return "#000000"
-    else:
-        return "#ffffff"
+    return compute_text_contrast(background_color, threshold, highlight_color)
 
 
 @kivy_cache(cache_name="color_norm", key_func=cache_key_color_norm, limit=1000)
 def get_cached_color_norm(color) -> tuple[float, float, float, float]:
-    def color_str_components(s: str) -> tuple[float, float, float, float]:
-        """Return hex as 1.0 * 4"""
-        s = s.removeprefix("#")
-        # Groups of two
-        components_hex = zip(*[iter(s)] * 2)
-        has_opacity = False
-        for i, comp in enumerate(components_hex):
-            if i == 3:
-                has_opacity = True
-                yield int("".join(comp), 16) / 255
-                continue
-            yield int("".join(comp), 16) / 255
-        if not has_opacity:
-            yield 1.0
-
     def color_float_components(
         s: tuple[int] | tuple[float] | "ObservableList",
     ) -> tuple[float, float, float, float]:
         """Return r, g, b (0.0-1.0) as (0-1) and opacity as (0-1)"""
-        has_opacity = False
-        for i, comp in enumerate(s):
-            if i == 3:
-                has_opacity = True
-                yield comp
-                continue
-            yield comp
-        if not has_opacity:
-            yield 1.0
+        match s:
+            case [float(r), float(g), float(b), float(opacity)]:
+                return r, g, b, opacity
+            case [float(r), float(g), float(b)]:
+                return r, g, b, 1.0
+            case _:
+                raise ValueError(f"Invalid color: {s}")
 
-    if isinstance(color, str):
-        components = color_str_components(color)
-    else:
-        components = color_float_components(color)
+    match color:
+        case str():
+            components = color_str_components(color)
+        case _:
+            components = color_float_components(color)
 
     return tuple(components)
