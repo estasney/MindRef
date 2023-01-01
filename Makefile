@@ -51,6 +51,9 @@ clean-cythonized:
 	find $(PROJECT_ROOT) -name "*.c" -delete
 	find $(PROJECT_ROOT) -name "*.so" -delete
 	find $(PROJECT_ROOT) -name "*.html" -delete
+	. venv/bin/activate \
+	&& python -m pythonforandroid.entrypoints clean-recipe-build mindref_cython
+
 clean-builds :
 	. venv/bin/activate \
 	&& python -m pythonforandroid.entrypoints clean builds
