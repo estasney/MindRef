@@ -196,8 +196,10 @@ class LabelHighlightInline(Label):
 
         """
         return compute_ref_coords(
-            self.center_x,
-            self.center_y,
+            self.width,
+            self.height,
+            self.x,
+            self.y,
             *self.texture_size,
             *span,
             self.highlight_padding_x,

@@ -21,14 +21,15 @@ def normalize_coordinates(double touch_x, double touch_y, double self_x, double 
 
     return x_local, y_local
 
-def compute_ref_coords(double center_x, double center_y, double texture_width, double texture_height,
+def compute_ref_coords(double width, double height, double wX, double wY, double texture_width, double texture_height,
                        double span_x1, double span_y1, double span_x2, double span_y2,
                        double hl_pad_x, double hl_pad_y):
     """
-        Since spans are computed relative to texture, we want them in window form
+        Since spans are computed relative to texture, we need to convert them to widget coordinates
 
-        Spans (x1, y1) references the top left corner of the texture
-        Spans y2 increases as it moves down
+        Spans (x1, y1) references the top left corner of the texture. So x1 = 0, y1 = 0 means the
+            top left corner of the texture is at the top left corner of the widget.
+        Relative to texture, the y coordinate increases as you go down.
 
         Kivy's typical origin is (0,0) at bottom-left.
 
@@ -46,22 +47,55 @@ def compute_ref_coords(double center_x, double center_y, double texture_width, d
         │                                                                       │
         │                                                                       │
         └───────────────────────────────────────────────────────────────────────┘
+    this is a long text snippet that will be used to test the text wrapping
+    break
+
+    refs : [4,0, 504, 22], [0, 22, 50, 44]
+
     """
 
-    cdef double pX, pY
+    """
+    X Coordinate
+    For X coordinate, we only need to consider the left padding. Basically, we need the distance from the
+        left edge of the widget to the left edge of the texture. This is the same as the left padding.
+    """
 
-    pX = center_x - texture_width / 2.0
-    pY = center_y - texture_height / 2.0
-
+    cdef double pX = (width - texture_width) / 2.0
     span_x1 += pX
     span_x2 += pX
-    span_y1 += pY
-    span_y2 += pY
+
+    """
+    Y Coordinate
+    For Y coordinate, we need to consider the top padding and the height of the texture.
+    Then we need to invert the y coordinate because the y coordinate increases as you go down.
+     
+    """
+    cdef double pY = (height - texture_height) / 2.0
+    # Convert span_y to be relative to the bottom of the widget.
+    # Larger y means lower on the screen.
+    span_y1 = height - span_y1 - pY
+    span_y2 = height - span_y2 - pY
+
+    """
+    Highlight Padding
+    We want the highlight padding to extend outside of the span. So for x1, we subtract the highlight padding.
+    For x2, we add the highlight padding.
+    For y1, we subtract the highlight padding.
+    For y2, we add the highlight padding.
+    """
 
     span_x1 -= hl_pad_x
     span_x2 += hl_pad_x
-    span_y1 += hl_pad_y
-    span_y2 -= hl_pad_y
+    span_y1 -= hl_pad_y
+    span_y2 += hl_pad_y
+
+    """
+    Now we need to convert these into window coordinates using the widget's position and size
+    """
+    span_x1 += wX
+    span_x2 += wX
+    span_y1 += wY
+    span_y2 += wY
 
     return span_x1, span_y1, span_x2, span_y2
 
