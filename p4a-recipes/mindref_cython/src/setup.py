@@ -5,6 +5,7 @@ from setuptools import find_packages
 modules = [
     Extension("calculation", ["mindref_cython/calculation.c"]),
     Extension("index", ["mindref_cython/index.c"]),
+    Extension("scrolling_c", ["mindref_cython/scrolling_c.c"]),
 ]
 
 setup(

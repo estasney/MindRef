@@ -72,6 +72,10 @@ setup(
                     ["mindref/utils/calculation.pyx"],
                 ),
                 Extension("mindref.utils.index", ["mindref/utils/index.pyx"]),
+                Extension(
+                    "mindref.widgets.effects.scrolling_c",
+                    ["mindref/widgets/effects/scrolling_c.pyx"],
+                ),
             ],
             compiler_directives={"language_level": 3},
             annotate=True,

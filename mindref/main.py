@@ -13,6 +13,7 @@ def run_android():
     def util_libs_exist():
         utils_pkg_path = Path(__file__).parent / "_python_bundle" / "site-packages"
         lib_calc = Path(__file__).parent / "utils" / "calculation.so"
+        lib_scrolling = Path(__file__).parent / "widgets" / "effects" / "scrolling_c.so"
         if not lib_calc.exists():
             Logger.info("Copying calculation.so")
             shutil.copy(utils_pkg_path / "calculation.so", lib_calc)
@@ -24,6 +25,11 @@ def run_android():
             shutil.copy(utils_pkg_path / "index.so", lib_index)
         else:
             Logger.info("index.so exists")
+        if not lib_scrolling.exists():
+            Logger.info("Copying scrolling_c.so")
+            shutil.copy(utils_pkg_path / "scrolling_c.so", lib_scrolling)
+        else:
+            Logger.info("scrolling_c.so exists")
 
     Logger.info("Copying Lib Files")
     util_libs_exist()
