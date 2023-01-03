@@ -1,11 +1,9 @@
+from collections import namedtuple
+from math import sqrt
 from pathlib import Path
-from typing import Sequence
 
 from PIL import Image, ImageDraw
 from colour import Color
-from collections import namedtuple
-
-from math import ceil, cos, floor, sin, sqrt
 
 c1 = Color("#6d7272")
 c2 = Color("#388fe5")
@@ -82,6 +80,15 @@ if __name__ == "__main__":
         radius=4,
         opacity_padding=2,
     )
+    btn_down_nb = TextureParam(
+        main=Color("#ffffff"),
+        accent=Color("#ffffff"),
+        steps=5,
+        size=64 * 4,
+        step_size=1,
+        radius=0,
+        opacity_padding=0,
+    )
     btn_normal = TextureParam(
         main=Color("#ffffff"),
         accent=Color("#000000"),
@@ -90,6 +97,15 @@ if __name__ == "__main__":
         step_size=1,
         radius=4,
         opacity_padding=4,
+    )
+    btn_normal_nb = TextureParam(
+        main=Color("#ffffff"),
+        accent=Color("#ffffff"),
+        steps=5,
+        size=64 * 4,
+        step_size=1,
+        radius=0,
+        opacity_padding=0,
     )
     btn_disabled = TextureParam(
         main=Color("#8f8f8f"),
@@ -100,11 +116,25 @@ if __name__ == "__main__":
         radius=4,
         opacity_padding=4,
     )
+    btn_disabled_nb = TextureParam(
+        main=Color("#8f8f8f"),
+        accent=Color("#8f8f8f"),
+        steps=5,
+        size=64 * 4,
+        step_size=1,
+        radius=0,
+        opacity_padding=0,
+    )
 
     texture_path = Path(__file__).parent.parent / "mindref" / "static" / "textures"
     for file in texture_path.iterdir():
         file.unlink()
 
     gradient_texture(**btn_down._asdict()).save(texture_path / "bg_down.png")
+    gradient_texture(**btn_down_nb._asdict()).save(texture_path / "bg_down_nb.png")
     gradient_texture(**btn_normal._asdict()).save(texture_path / "bg_normal.png")
+    gradient_texture(**btn_normal_nb._asdict()).save(texture_path / "bg_normal_nb.png")
     gradient_texture(**btn_disabled._asdict()).save(texture_path / "bg_disabled.png")
+    gradient_texture(**btn_disabled_nb._asdict()).save(
+        texture_path / "bg_disabled_nb.png"
+    )
