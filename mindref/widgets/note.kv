@@ -1,5 +1,6 @@
 #:import LargeLabel widgets.style
 #:import NoteActionButton widgets.buttons.button_bar
+#:import SwipingLayout widgets.layouts.swiping.SwipingLayout
 
 <NoteTitleBar>:
     id: note_title
@@ -28,10 +29,6 @@
             size_hint_min_y: 0.95
             size_hint_x: 0.15
 
-
-
-
-
 <NoteContent>:
     id: note_content
     orientation: 'vertical'
@@ -44,8 +41,6 @@
 
 <Note>:
     id: note_container
-
-
     BoxLayout:
         orientation: 'vertical'
         NoteTitleBar:
@@ -57,10 +52,12 @@
         HSeparator:
             size_hint: 1, 0.01
             size_hint_max_y: dp(2)
-        NoteContent:
-            id: note_content
-            content: note_container.note_content
+        SwipingLayout:
             size_hint: 1, 0.75
+            on_swipe: root.handle_swipe(args[1])
+            NoteContent:
+                id: note_content
+                content: note_container.note_content
         HSeparator:
             size_hint: 1, 0.01
             size_hint_max_y: dp(2)

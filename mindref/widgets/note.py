@@ -19,7 +19,6 @@ from domain.events import (
 )
 from utils import import_kv, get_app
 from utils.caching import cache_key_note, kivy_cache
-from widgets.behavior.gesture_rec_behavior import GestureRecognizingBehavior
 from widgets.markdown.markdown_document import MarkdownDocument
 
 import_kv(__file__)
@@ -37,7 +36,7 @@ def get_cached_note(*, content_data: "MarkdownNoteDict", parent: "NoteContent"):
     return MarkdownDocument(content_data=content_data)
 
 
-class Note(BoxLayout, GestureRecognizingBehavior):
+class Note(BoxLayout):
     note_title = StringProperty()
     note_index = NumericProperty()
     note_content = DictProperty()
@@ -46,12 +45,9 @@ class Note(BoxLayout, GestureRecognizingBehavior):
         super(Note, self).__init__(**kwargs)
         self.bind(on_swipe=self.handle_swipe)
 
-    def handle_swipe(self, _instance, _score, gesture):
+    def handle_swipe(self, direction: bool):
         app = get_app()
-        if gesture.name == "swipe-left":
-            app.registry.push_event(PaginationEvent(direction=-1))
-        elif gesture.name == "swipe-right":
-            app.registry.push_event(PaginationEvent(direction=1))
+        app.registry.push_event(PaginationEvent(direction=-1 if direction else 1))
         return True
 
     def set_note_content(self, note_data: "Optional[MarkdownNoteDict]"):
