@@ -9,8 +9,16 @@
         Rectangle:
             size: self.size
             pos: self.pos
-    HamburgerIcon:
-        release_callback: lambda : setattr(app, 'menu_open', not getattr(app, 'menu_open'))
+    OpenMenuButton:
+        enable_ripple_effect: False
+        on_release: app.menu_open = not app.menu_open
+        icon_size: app.base_font_size * 2
+        size_hint: None, None
+        width: self.height
+        padding: 0
+        border: 0
+
+
     ExpandingLabel:
         text: app.APP_NAME
         halign: 'center'
