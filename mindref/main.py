@@ -67,6 +67,10 @@ if __name__ == "__main__":
         name="RobotoMono",
         fn_regular=str(Path(__file__).parent / "assets" / "RobotoMono-Regular.ttf"),
     )
+    LabelBase.register(
+        name="Icon",
+        fn_regular=str(Path(__file__).parent / "assets" / "MaterialIcons.ttf"),
+    )
 
     match platform:
         case "android":

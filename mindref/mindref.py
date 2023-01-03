@@ -104,7 +104,7 @@ class MindRefApp(App):
 
     screen_manager = ObjectProperty()
 
-    fonts = DictProperty({"mono": "RobotoMono", "default": "Roboto"})
+    fonts = DictProperty({"mono": "RobotoMono", "default": "Roboto", "icons": "Icon"})
     base_font_size = NumericProperty()
     colors = DictProperty(
         {

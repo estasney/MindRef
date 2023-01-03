@@ -1,3 +1,4 @@
+from kivy.properties import StringProperty
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 
@@ -32,3 +33,7 @@ class ExpandingLabel(BaseLabel):
 
 class TitleInput(TextInput):
     ...
+
+
+class IconLabel(BaseLabel):
+    icon_code = StringProperty()
