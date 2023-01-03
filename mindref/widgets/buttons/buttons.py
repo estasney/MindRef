@@ -39,6 +39,13 @@ class ThemedLabelButton(ThemedButton):
         super().__init__(**kwargs)
 
 
+class IconButton(ThemedButton):
+    icon_code = StringProperty()
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
 class ImageButton(ThemedButton):
     source = StringProperty()
 

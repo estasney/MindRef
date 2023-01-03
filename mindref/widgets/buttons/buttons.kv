@@ -1,4 +1,5 @@
 #:import seps widgets.separator
+#:import style widgets.style
 
 <PrimaryVSep@VSeparator>:
     color: app.colors['Primary']
@@ -50,6 +51,41 @@
         size_hint_y: None
         height: self.texture_size[1] * 2
 
+<-IconButton>:
+    icon_code: ''
+    state_image: self.background_normal if self.state == 'normal' else self.background_down
+    disabled_image: self.background_disabled
+    icon_size: app.base_font_size + sp(10)
+    background_color: app.colors['Primary'] if self.state == 'normal' else app.colors['Accent-One']
+    orientation: 'vertical'
+    padding: dp(5)
+    spacing: dp(2)
+    size_hint_y: None
+    height: self.minimum_height
+    canvas:
+        Color:
+            rgba: self.background_color
+        BorderImage:
+            border:  self.border_size
+            pos: self.pos
+            size: self.size
+            source: self.state_image if not root.disabled else self.disabled_image
+    IconLabel:
+        icon_code: root.icon_code
+        font_size: root.icon_size
+        text_size: self.texture_size
+        size: self.texture_size
+        size_hint: None, None
+
+<XButton@IconButton>:
+    icon_code: '\ue5cd'
+    border_size: [sp(1.5) * 4]
+    pos_hint: {"x": 1}
+    size_hint_x: None
+    size: self.minimum_size
+    spacing: dp(1)
+    padding: dp(4)
+    on_release: app.menu_open = not app.menu_open
 
 <-ImageButton>:
     state_image: self.background_normal if self.state == 'normal' else self.background_down
@@ -70,6 +106,8 @@
     Image:
         mipmap: True
         source: root.source
+
+
 
 <SaveButton>:
     padding: dp(10)
@@ -99,18 +137,4 @@
                 pos: ((self.x + self.center_x)/2, self.center_y + self.height/5)
                 size: self.width/2, dp(2)
                 radius: dp(2), dp(2)
-<XButton@BoxLayout>:
-    btn: btn
-    orientation: 'horizontal'
-    size_hint_min_y: 1
-    size_hint_x: None
-    height: btn.texture_size[1] + dp(4)
-    width: self.height * 2
-    Button:
-        id: btn
-        text: 'X'
-        font_size: app.base_font_size + sp(8)
-        halign: 'center'
-        valign: 'center'
-        padding_x: dp(4)
-        on_release: app.menu_open = not app.menu_open
+
