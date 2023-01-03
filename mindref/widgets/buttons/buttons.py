@@ -1,15 +1,13 @@
 from kivy.properties import (
     ColorProperty,
-    DictProperty,
     ObjectProperty,
-    OptionProperty,
     StringProperty,
     VariableListProperty,
 )
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout
 
-from utils import import_kv, mindref_path, get_app
+from utils import import_kv, mindref_path
 
 texture_atlas = "atlas://" + str(mindref_path() / "static" / "textures" / "textures")
 icon_atlas = "atlas://" + str(mindref_path() / "static" / "icons" / "icons")
@@ -95,32 +93,3 @@ class FileButton(ImageButton):
 
     def __init__(self, **kwargs):
         super(FileButton, self).__init__(**kwargs)
-
-
-class PlayStateButton(ImageButton):
-    source = StringProperty(f"{icon_atlas}/play")
-    icon_active = OptionProperty("play", options=["play", "pause"])
-    sources = DictProperty(
-        {"play": f"{icon_atlas}/play", "pause": f"{icon_atlas}/pause"}
-    )
-
-    def __init__(self, **kwargs):
-        super(PlayStateButton, self).__init__(**kwargs)
-        app = get_app()
-        app.bind(play_state=self.handle_play_state)
-
-    def handle_icon_active(self, *_args):
-        self.source = self.sources[self.icon_active]
-
-    def handle_play_state(self, instance, _):
-        """When App's play_state is 'pause', we show a play icon"""
-        if instance.play_state == "pause":
-            self.icon_active = "play"
-        else:
-            self.icon_active = "pause"
-
-    def handle_press(self, app):
-        """
-        Our source of truth for whether the app is 'paused' or 'playing' is self.
-        """
-        app.play_state_trigger(self.icon_active)

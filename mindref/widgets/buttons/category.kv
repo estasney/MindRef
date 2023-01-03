@@ -8,12 +8,10 @@
     height: dp(128)
     opacity: self.parent.opacity if self.parent else 1
 
-
     Image:
         id: image
         mipmap: True
         texture: root.tx_category
-
     LargeLabel:
         text: root.text
         text_size: (self.width, None)

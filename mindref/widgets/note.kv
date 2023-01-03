@@ -1,6 +1,5 @@
 #:import LargeLabel widgets.style
 #:import NoteActionButton widgets.buttons.button_bar
-#:import ControllerButtonBar widgets.buttons.button_bar
 
 <NoteTitleBar>:
     id: note_title
@@ -43,32 +42,9 @@
             pos: self.pos
             size: self.size
 
-
-<NoteControlBar@BoxLayout>:
-    id: note_tags
-    orientation: 'vertical'
-    height: self.minimum_height
-    canvas:
-        Color:
-            rgba: app.colors['Dark']
-        Rectangle:
-            pos: self.pos
-            size: self.size
-    padding: 0
-    ControllerButtonBar:
-        pos_hint: {"right": 1}
-        size_hint_y: None
-        height: dp(35)
-        canvas:
-            Color:
-                rgb: app.colors['Accent-One']
-
-
-
-
 <Note>:
     id: note_container
-    note_control: note_control
+
 
     BoxLayout:
         orientation: 'vertical'
@@ -88,6 +64,3 @@
         HSeparator:
             size_hint: 1, 0.01
             size_hint_max_y: dp(2)
-        NoteControlBar:
-            id: note_control
-            size_hint: 1, None

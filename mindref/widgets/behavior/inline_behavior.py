@@ -1,11 +1,7 @@
 from __future__ import annotations
 
 from typing import Any, Literal, NamedTuple, Optional
-from utils.calculation import (
-    compute_ref_coords,
-    color_str_components,
-    compute_text_contrast,
-)
+
 from kivy.clock import Clock
 from kivy.graphics import Color, RoundedRectangle
 from kivy.metrics import dp
@@ -20,8 +16,13 @@ from kivy.properties import (
 from kivy.uix.label import Label
 from kivy.utils import escape_markup
 
-from utils import import_kv, profile
+from utils import import_kv
 from utils.caching import cache_key_color_norm, cache_key_text_contrast, kivy_cache
+from utils.calculation import (
+    compute_ref_coords,
+    color_str_components,
+    compute_text_contrast,
+)
 
 import_kv(__file__)
 

@@ -73,12 +73,12 @@ class Registry:
             Logger.info(
                 f"{type(self).__name__}: after_note_fetched - Set App Note Data to {note!r}"
             )
-            trigger_pause_state = schedulable(self.app.play_state_trigger, "pause")
+
             trigger_display = schedulable(self.app.display_state_trigger, "display")
             emit_paginate = schedulable(
                 self.app.dispatch, "on_paginate", (direction, note_data)
             )
-            sch_cb(trigger_pause_state, trigger_display, emit_paginate, timeout=0.1)
+            sch_cb(trigger_display, emit_paginate, timeout=0.1)
 
         match direction:
             case 0:
@@ -126,12 +126,12 @@ class Registry:
                 f"{type(self).__name__}: after_note_fetched - "
                 f"Set App Note Data to {note!r}"
             )
-            trigger_pause_state = schedulable(self.app.play_state_trigger, "pause")
+
             trigger_display = schedulable(self.app.display_state_trigger, "display")
             emit_paginate = schedulable(
                 self.app.dispatch, "on_paginate", (0, note_data)
             )
-            sch_cb(trigger_pause_state, trigger_display, emit_paginate, timeout=0.1)
+            sch_cb(trigger_display, emit_paginate, timeout=0.1)
 
         fetch_note = schedulable(
             self.app.note_service.get_current_note, on_complete=after_note_fetched

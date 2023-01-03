@@ -55,7 +55,6 @@ if TYPE_CHECKING:
         "choose", "display", "list", "edit", "add", "error", "category_editor"
     ]
     DISPLAY_STATE = tuple[DISPLAY_STATES, DISPLAY_STATES]
-    PLAY_STATE = Literal["play", "pause"]
 
 
 class MindRefApp(App):
@@ -101,13 +100,7 @@ class MindRefApp(App):
     )
     display_state_trigger: Callable[["DISPLAY_STATES"], None]
 
-    play_state = OptionProperty("play", options=["play", "pause"])
-    play_state_trigger: Callable[["PLAY_STATE"], None]
-
     error_message = StringProperty()
-
-    paginate_interval = NumericProperty(15)
-    paginate_timer: ClockEvent
 
     screen_manager = ObjectProperty()
 
@@ -155,10 +148,7 @@ class MindRefApp(App):
                 - error: Show an error screen
         error_message: StringProperty
             Message 
-        play_state: OptionProperty
-            One of [play, pause]
-            play:: schedule pagination through notes
-            pause:: stop pagination through notes
+        
         screen_manager: ObjectProperty
             Holds the reference to ScreenManager
         colors: DictProperty
@@ -187,46 +177,17 @@ class MindRefApp(App):
         match (old, new):
             case _, "edit":
                 self.editor_note = self.editor_service.edit_current_note()
-                self.play_state_trigger("pause")
+
             case _, "add":
                 self.editor_note = self.editor_service.new_note(
                     category=self.note_category, idx=self.note_service.index_size()
                 )
-                self.play_state_trigger("pause")
-
-    def on_play_state(self, *_args):
-        if self.play_state == "pause":
-            self.paginate_timer.cancel()
-        else:
-            self.paginate_timer()
-
-    def on_paginate_interval(self, *_args):
-        """Interval for Autoplay has changed"""
-        self.paginate_timer.cancel()
-        pagination = schedulable(self.paginate_note, direction=1)
-
-        self.paginate_timer = Clock.create_trigger(
-            pagination,
-            timeout=self.paginate_interval,
-            interval=True,
-        )
-        if self.play_state == "play":
-            self.paginate_timer()
 
     def on_paginate(self, *args, **kwargs):
         ...
 
     def select_index(self, value: int):
         self.registry.set_note_index(value)
-
-    def paginate(self, value: int):
-        paginate = schedulable(self.paginate_note, direction=value)
-        if self.play_state == "play":
-            self.paginate_timer.cancel()
-            setup_timer = schedulable(self.paginate_timer)
-            sch_cb(paginate, setup_timer, timeout=0.1)
-        else:
-            sch_cb(paginate, timeout=0.1)
 
     def paginate_note(self, direction=1):
         """
@@ -476,14 +437,8 @@ class MindRefApp(App):
         self.register_event_type("on_paginate")
         self.platform_android = platform == "android"
         self.registry.app = self
-        self.play_state_trigger = trigger_factory(
-            self, "play_state", self.__class__.play_state.options
-        )
         self.display_state_trigger = trigger_factory(
             self, "display_state", self.__class__.display_state_current.options
-        )
-        self.paginate_timer = Clock.create_trigger(
-            self.paginate_note, timeout=self.paginate_interval, interval=True
         )
         Window.bind(on_keyboard=self.key_input)
         storage_path = (
@@ -497,9 +452,7 @@ class MindRefApp(App):
         )
         sm = NoteAppScreenManager()
         self.screen_manager = sm
-        self.play_state = (
-            "play" if self.config.get("Behavior", "PLAY_STATE") in truthy else "pause"
-        )
+
         # Invokes note_service.discover_notes
         self.registry.query_all()
 
@@ -524,8 +477,6 @@ class MindRefApp(App):
                     "Behavior",
                     {
                         "NEW_FIRST": True,
-                        "PLAY_STATE": False,
-                        "PLAY_DELAY": 15,
                         "CATEGORY_SELECTED": "",
                     },
                 )
@@ -543,8 +494,6 @@ class MindRefApp(App):
                     "Behavior",
                     {
                         "NEW_FIRST": True,
-                        "PLAY_STATE": False,
-                        "PLAY_DELAY": 15,
                         "CATEGORY_SELECTED": "",
                     },
                 )
@@ -569,10 +518,7 @@ class MindRefApp(App):
                 self.note_service.new_first = True if value in truthy else False
                 self.display_state_trigger("choose")
                 self.registry.push_event(RefreshNotesEvent(on_complete=None))
-            case "Behavior", "PLAY_STATE":
-                ...  # No effect here, this is on first load
-            case "Behavior", "PLAY_DELAY":
-                self.paginate_interval = int(value)
+
             case "Display", "BASE_FONT_SIZE":
                 self.base_font_size = int(value)
             case "Plugins", _:

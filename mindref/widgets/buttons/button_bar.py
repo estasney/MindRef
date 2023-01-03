@@ -1,15 +1,10 @@
 from kivy.logger import Logger
-from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.dropdown import DropDown
 
 from utils import import_kv
 from widgets.buttons.buttons import ThemedButton
 
 import_kv(__file__)
-
-
-class ControllerButtonBar(BoxLayout):
-    ...
 
 
 class NoteActionDropDown(DropDown):
