@@ -1,0 +1,31 @@
+#:import icons widgets.style
+
+<SwipeIcon@Label>:
+    font_size: app.base_font_size * 3
+    size_hint: None, None
+    size: self.texture_size
+    valign: 'middle'
+
+<SwipeNext@NavigateNext+SwipeIcon>:
+<SwipeBefore@NavigateBefore+SwipeIcon>:
+
+
+<LabeledBoundsLayout>:
+    label_right: label_right
+    label_left: label_left
+    canvas.before:
+        Color:
+            rgba: app.colors['Accent-One'] if root.swiping else (0,0,0,0)
+        Rectangle:
+            pos: [self.x-self.swipe_threshold, self.y]
+            size: [self.width + (2*self.swipe_threshold), self.height]
+    SwipeNext:
+        id: label_right
+        opacity: 1 if root.swiping else 0
+        y: root.y + root.height /2 - self.height /2
+        x: root.x + root.width + root.swipe_threshold - self.width
+    SwipeBefore:
+        id: label_left
+        opacity: 1 if root.swiping else 0
+        y: root.y + root.height /2 - self.height /2
+        x: root.x - self.width - root.swipe_threshold + self.width
