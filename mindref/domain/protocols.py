@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from adapters.notes.fs.fs_note_repository import FileSystemNoteRepository
     from adapters.notes.android.android_note_repository import AndroidNoteRepository
     from plugins import PluginManager
-    from mindref.mindref import DISPLAY_STATES, DISPLAY_STATE, PLAY_STATE
+    from mindref.mindref import DISPLAY_STATES, DISPLAY_STATE
     from kivy._clock import ClockEvent  # noqa
     from kivy.uix.screenmanager import ScreenManager
     from widgets import MindRefSettingsAndroid, MindRefSettingsNative
@@ -31,7 +31,7 @@ class AppRegistryProtocol(Protocol):
     display_state_last: "DISPLAY_STATES"
     display_state_current: "DISPLAY_STATES"
     display_state: "DISPLAY_STATE"
-    play_state: "PLAY_STATE"
+
     error_message: str
     paginate_interval: int
     paginate_timer: "ClockEvent"
@@ -46,9 +46,6 @@ class AppRegistryProtocol(Protocol):
         ...
 
     def display_state_trigger(self, state: "DISPLAY_STATES") -> None:
-        ...
-
-    def play_state_trigger(self, state: "PLAY_STATE") -> None:
         ...
 
     def select_index(self, value: int) -> None:

@@ -38,23 +38,3 @@
         font_size: app.base_font_size + sp(4)
 
 
-
-<ControllerButtonBar>:
-    orientation: "horizontal"
-    play_button: play_button
-
-    BackButton:
-        padding: [0, dp(8), 0, dp(8)]
-        border_size: 0
-        on_release: app.registry.push_event(e.PaginationEvent(direction=-1))
-    PrimaryVSep:
-    PlayStateButton:
-        padding: [0, dp(8), 0, dp(8)]
-        border_size: 0
-        id: play_button
-        on_release: self.handle_press(app)
-    PrimaryVSep:
-    ForwardButton:
-        padding: [0, dp(8), 0, dp(8)]
-        border_size: 0
-        on_release: app.registry.push_event(e.PaginationEvent(direction=1))

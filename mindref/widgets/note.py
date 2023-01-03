@@ -41,7 +41,6 @@ class Note(BoxLayout, GestureRecognizingBehavior):
     note_title = StringProperty()
     note_index = NumericProperty()
     note_content = DictProperty()
-    note_control = ObjectProperty()
 
     def __init__(self, **kwargs):
         super(Note, self).__init__(**kwargs)

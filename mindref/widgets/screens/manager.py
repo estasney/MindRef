@@ -1,7 +1,7 @@
 from typing import Callable, TYPE_CHECKING
 
 from kivy import Logger
-from kivy.properties import BooleanProperty, ObjectProperty, StringProperty
+from kivy.properties import BooleanProperty, ObjectProperty
 from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import ScreenManager, SlideTransition
 
@@ -26,7 +26,7 @@ import_kv(__file__)
 
 class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
     app = ObjectProperty()
-    play_state = StringProperty()
+
     menu_open = BooleanProperty(False)
     reversed_transition = BooleanProperty(False)
     screen_triggers: Callable[[str], None]
@@ -39,7 +39,7 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
         self.popup = None
         self.app.bind(display_state=self.handle_app_display_state)
         self.app.bind(on_paginate=self.handle_pagination)
-        self.app.bind(play_state=self.setter("play_state"))
+
         self.app.bind(menu_open=self.setter("menu_open"))
         self.fbind("menu_open", self.handle_menu_state)
         self.fbind("reversed_transition", self.handle_reversed_transition)
@@ -50,10 +50,6 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
         return True
 
     def handle_menu_state(self, _, menu_open: bool):
-        def resume_temp_pause(*_args):
-            Logger.debug("Resume Temp Pause")
-            self.app.play_state = "play"
-
         def remove_from_screen(*_args):
             Logger.debug("Remove Menu")
             self.current_screen.remove_widget(self.menu)
@@ -63,10 +59,9 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
         if menu_open:
             view = AppMenu()
             self.menu = view
-            temp_pause = self.play_state == "play"
+
             self.current_screen.add_widget(view)
-            if temp_pause:
-                view.fbind("on_dismiss", resume_temp_pause)
+
             view.fbind("on_dismiss", remove_from_screen)
 
         elif not menu_open and self.menu:
@@ -117,9 +112,6 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
                 sch_cb(trigger_screen, timeout=0.1)
             case _:
                 raise Exception(f"Unhandled display state {value}")
-
-    def handle_app_play_state(self, _, value):
-        self.play_state = value
 
     def handle_notes_display_view(self):
         ...
