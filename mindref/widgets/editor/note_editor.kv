@@ -14,10 +14,12 @@
         size_hint_x: 1
         size_hint_y: 0.1
         orientation: 'horizontal'
-        SaveButton:
-            on_release: root.handle_press_save()
-        CancelButton:
+        ThemedSecondaryLabelButton:
+            text: 'Cancel'
             on_release: root.dispatch('on_cancel')
+        ThemedLabelButton:
+            text: 'Save'
+            on_release: root.handle_press_save()
 
 
 <NoteTitleInput>:

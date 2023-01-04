@@ -1,4 +1,5 @@
 #:import seps widgets.separator
+#:import style widgets.style
 
 <PrimaryVSep@VSeparator>:
     color: app.colors['Primary']
@@ -9,39 +10,39 @@
     height: dp(2)
 
 <-ThemedButton>:
+    background_normal: app.atlas_service.uri_for("bg_normal", atlas_name="textures") if max(self.border) > 0 else app.atlas_service.uri_for("bg_normal_nb", atlas_name="textures")
+    background_down: app.atlas_service.uri_for("bg_down", atlas_name="textures") if max(self.border) > 0 else app.atlas_service.uri_for("bg_down_nb", atlas_name="textures")
+    background_disabled: app.atlas_service.uri_for("bg_disabled", atlas_name="textures") if max(self.border) > 0 else app.atlas_service.uri_for("bg_disabled_nb", atlas_name="textures")
     state_image: self.background_normal if self.state == 'normal' else self.background_down
     disabled_image: self.background_disabled
     background_color: app.colors['Primary'] if self.state == 'normal' else app.colors['Accent-One']
-    border_size: dp(8)
     orientation: 'vertical'
+    border: dp(8)
     padding: dp(5)
     spacing: dp(2)
-
     canvas:
         Color:
             rgba: self.background_color
         BorderImage:
-            border:  self.border_size
+            border:  self.border
             pos: self.pos
             size: self.size
             source: self.state_image if not self.disabled else self.disabled_image
 
-<-ThemedLabelButton>:
+<ThemedSecondaryButton@ThemedButton>:
+    background_normal: app.atlas_service.uri_for("bg_border", atlas_name="textures")
+    background_down: app.atlas_service.uri_for("bg_border", atlas_name="textures")
+    background_disabled: app.atlas_service.uri_for("bg_border", atlas_name="textures")
+
+<ThemedLabelButton>:
     text: ''
-    state_image: self.background_normal if self.state == 'normal' else self.background_down
-    disabled_image: self.background_disabled
-    background_color: app.colors['Primary'] if self.state == 'normal' else app.colors['Accent-One']
-    border_size: dp(8)
-    orientation: 'vertical'
-    padding: dp(5)
-    spacing: dp(2)
     size_hint_y: None
     height: self.minimum_height
     canvas:
         Color:
             rgba: self.background_color
         BorderImage:
-            border:  self.border_size
+            border:  self.border
             pos: self.pos
             size: self.size
             source: self.state_image if not root.disabled else self.disabled_image
@@ -50,6 +51,57 @@
         size_hint_y: None
         height: self.texture_size[1] * 2
 
+<ThemedSecondaryLabelButton@ThemedSecondaryButton>:
+    text: ''
+    size_hint_y: None
+    height: self.minimum_height
+    canvas:
+        Color:
+            rgba: self.background_color
+        BorderImage:
+            border:  self.border
+            pos: self.pos
+            size: self.size
+            source: self.state_image if not root.disabled else self.disabled_image
+    BaseLabel:
+        text: root.text
+        size_hint_y: None
+        height: self.texture_size[1] * 2
+
+<ThemedIconButton>:
+    icon_code: ''
+    icon_size: app.base_font_size + sp(10)
+    orientation: 'vertical'
+    size_hint_y: None
+    height: self.minimum_height
+    canvas:
+        Color:
+            rgba: self.background_color
+        BorderImage:
+            border:  self.border
+            pos: self.pos
+            size: self.size
+            source: self.state_image if not root.disabled else self.disabled_image
+    IconLabel:
+        id: icon
+        icon_code: root.icon_code
+        font_size: root.icon_size
+        text_size: self.size
+        size: self.texture_size
+        valign: 'middle'
+        halign: 'center'
+        size_hint: None, None
+        pos_hint: {"center_x": .5, "center_y": .5}
+
+<XButton@ThemedIconButton>:
+    icon_code: '\ue5cd'
+    border: sp(2)
+    pos_hint: {"x": 1}
+    size_hint_x: None
+    size: self.minimum_size
+    spacing: dp(1)
+    padding: [sp(6), sp(2), sp(6), sp(2)]
+    on_release: app.menu_open = not app.menu_open
 
 <-ImageButton>:
     state_image: self.background_normal if self.state == 'normal' else self.background_down
@@ -71,46 +123,12 @@
         mipmap: True
         source: root.source
 
-<SaveButton>:
-    padding: dp(10)
 
 
-<HamburgerIcon>:
-    orientation: 'horizontal'
-    size_hint_x: None
-    width: self.height*1.618
+<SaveButton@ThemedIconButton>:
+    icon_code: '\ue161'
+<CancelButton@ThemedIconButton>:
+    icon_code: '\ue5c9'
+<OpenMenuButton@ThemedIconButton>:
+    icon_code: '\ue5d2'
 
-    Button:
-        id: btn
-        background_color: [0,0,0,0]
-        on_release: root.release_callback()
-        canvas:
-            Color:
-                rgba: app.colors['White']
-            RoundedRectangle:
-                pos: (self.x + self.center_x) / 2, self.center_y
-                size: self.width/2, dp(2)
-                radius: dp(2),dp(2)
-            RoundedRectangle:
-                pos: ((self.x + self.center_x)/2, self.center_y - self.height/5)
-                size: self.width/2, dp(2)
-                radius: dp(2),dp(2)
-            RoundedRectangle:
-                pos: ((self.x + self.center_x)/2, self.center_y + self.height/5)
-                size: self.width/2, dp(2)
-                radius: dp(2), dp(2)
-<XButton@BoxLayout>:
-    btn: btn
-    orientation: 'horizontal'
-    size_hint_min_y: 1
-    size_hint_x: None
-    height: btn.texture_size[1] + dp(4)
-    width: self.height * 2
-    Button:
-        id: btn
-        text: 'X'
-        font_size: app.base_font_size + sp(8)
-        halign: 'center'
-        valign: 'center'
-        padding_x: dp(4)
-        on_release: app.menu_open = not app.menu_open

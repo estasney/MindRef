@@ -30,43 +30,6 @@ class NoteCategoryButton(ThemedButton, RippleMixin):
         )
         self.text = text
 
-    def normalize_touch_pos(self, touch_x, touch_y):
-        """
-        Normalize touch position to texture coordinates.
-
-        Kivy's origin point is the bottom left corner of the window.
-
-
-        """
-        return normalize_coordinates(
-            touch_x,
-            touch_y,
-            self.x,
-            self.y,
-            self.height,
-            self.width,
-        )
-
-    def on_touch_down(self, touch):
-        if super().on_touch_down(touch):
-            self.touch = self.normalize_touch_pos(*touch.pos)
-            self.no_touch_trigger.cancel()
-            self.has_touch_trigger()
-            return True
-        return False
-
-    def on_touch_move(self, touch):
-        if super().on_touch_move(touch):
-            self.touch = self.normalize_touch_pos(*touch.pos)
-            return True
-        return False
-
-    def on_touch_up(self, touch):
-        super().on_touch_up(touch)
-        self.has_touch_trigger.cancel()
-        self.no_touch_trigger()
-        return True
-
     def category_tx_loaded(self, *_args):
         self.tx_category = self.img_loader.texture
 
