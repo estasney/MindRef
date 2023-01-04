@@ -81,6 +81,7 @@ build-apk :  *.aar clean-bytecode clean-cythonized
   	--name "MindRef" \
   	--version $(APK_VERSION) \
   	--bootstrap=sdl2 \
+  	--window \
   	--dist-name=$(PROJECT_NAME) \
   	--sdk-dir ~/Android/Sdk \
   	--ndk-dir ~/Android/Sdk/ndk/25.1.8937393 \
