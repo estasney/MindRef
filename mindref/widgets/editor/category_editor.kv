@@ -82,10 +82,12 @@
 
     ButtonBar:
         size_hint_y: 0.1
-        SaveButton:
-            padding: dp(10)
+        ThemedSecondaryLabelButton:
+            text: 'Cancel'
+            on_release: root.button_event('cancel')
+
+        ThemedLabelButton:
+            text: 'Save'
             on_release: root.button_event('save')
             disabled: not root.allow_submit
-        CancelButton:
-            on_release: root.button_event('cancel')
 

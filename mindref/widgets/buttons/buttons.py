@@ -109,17 +109,3 @@ class ImageButton(ThemedButton):
 
     def __init__(self, **kwargs):
         super(ImageButton, self).__init__(**kwargs)
-
-
-class SaveButton(ImageButton):
-    source = StringProperty(f"{icon_atlas}/save")
-
-    def __init__(self, **kwargs):
-        super(SaveButton, self).__init__(**kwargs)
-
-
-class CancelButton(ImageButton):
-    source = StringProperty(f"{icon_atlas}/cancel")
-
-    def __init__(self, **kwargs):
-        super(CancelButton, self).__init__(**kwargs)

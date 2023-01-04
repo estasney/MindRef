@@ -29,7 +29,29 @@
             size: self.size
             source: self.state_image if not self.disabled else self.disabled_image
 
+<ThemedSecondaryButton@ThemedButton>:
+    background_normal: app.atlas_service.uri_for("bg_border", atlas_name="textures")
+    background_down: app.atlas_service.uri_for("bg_border", atlas_name="textures")
+    background_disabled: app.atlas_service.uri_for("bg_border", atlas_name="textures")
+
 <ThemedLabelButton>:
+    text: ''
+    size_hint_y: None
+    height: self.minimum_height
+    canvas:
+        Color:
+            rgba: self.background_color
+        BorderImage:
+            border:  self.border
+            pos: self.pos
+            size: self.size
+            source: self.state_image if not root.disabled else self.disabled_image
+    BaseLabel:
+        text: root.text
+        size_hint_y: None
+        height: self.texture_size[1] * 2
+
+<ThemedSecondaryLabelButton@ThemedSecondaryButton>:
     text: ''
     size_hint_y: None
     height: self.minimum_height
@@ -103,12 +125,10 @@
 
 
 
-<SaveButton>:
-    padding: dp(10)
-
-
+<SaveButton@ThemedIconButton>:
+    icon_code: '\ue161'
+<CancelButton@ThemedIconButton>:
+    icon_code: '\ue5c9'
 <OpenMenuButton@ThemedIconButton>:
     icon_code: '\ue5d2'
-    icon_size: app.base_font_size + sp(10)
-    border: 0
 

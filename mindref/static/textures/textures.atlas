@@ -1,1 +1,1 @@
-{"textures-0.png": {"bg_down_nb": [2, 642, 256, 256], "bg_normal": [260, 642, 256, 256], "bg_down": [518, 642, 256, 256], "bg_normal_nb": [2, 384, 256, 256], "bg_disabled_nb": [260, 384, 256, 256], "bg_disabled": [518, 384, 256, 256]}}
+{"textures-0.png": {"bg_down_nb": [2, 642, 256, 256], "bg_border": [260, 642, 256, 256], "bg_normal": [518, 642, 256, 256], "bg_down": [2, 384, 256, 256], "bg_normal_nb": [260, 384, 256, 256], "bg_disabled_nb": [518, 384, 256, 256], "bg_disabled": [2, 126, 256, 256]}}

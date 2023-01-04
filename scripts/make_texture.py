@@ -70,6 +70,50 @@ def gradient_texture(
     return img
 
 
+def border_texture(size=64 * 4, radius=4, steps=2, step_size=1, opacity_padding=2):
+    """
+    Generate 9-scaling texture image
+
+    We want to draw a mostly transparent square with a solid border
+
+    Parameters
+    ----------
+    steps
+
+    size : int
+        (width/height) of image. Assumed to be square
+    radius : int
+        for rounded rectangle
+    step_size: int
+        Pixel size of step
+    opacity_padding : int
+
+    """
+
+    # Start with a transparent square
+    img = Image.new(mode="RGBA", size=(size, size))
+    draw = ImageDraw.Draw(img)
+    draw.rectangle((0, 0, size, size), fill=f"#ffffff00")
+
+    # For our border we want to transition from fully transparent to fully opaque
+
+    px0 = step_size + opacity_padding
+    px1 = size - step_size - opacity_padding
+
+    opacity_steps = [round(255 / i) for i in range(1, steps + 1)]
+    # Start to draw the border which steps from fully transparent to fully opaque
+    for opacity in reversed(opacity_steps):
+        draw.rounded_rectangle(
+            (px0, px0, px1, px1), fill=f"#ffffff{opacity:02x}", radius=radius
+        )
+        px0 += step_size
+        px1 -= step_size
+
+    draw.rounded_rectangle((px0, px0, px1, px1), fill=f"#ffffff00", radius=radius)
+
+    return img
+
+
 if __name__ == "__main__":
     btn_down = TextureParam(
         main=Color("#ffffff"),
@@ -138,3 +182,4 @@ if __name__ == "__main__":
     gradient_texture(**btn_disabled_nb._asdict()).save(
         texture_path / "bg_disabled_nb.png"
     )
+    border_texture().save(texture_path / "bg_border.png")
