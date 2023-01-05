@@ -55,9 +55,15 @@
         SwipingLayout:
             size_hint: 1, 0.75
             on_swipe: root.handle_swipe(args[1])
-            NoteContent:
-                id: note_content
-                content: note_container.note_content
+            id: swipe
+            ScrollView:
+                do_scroll_x: False
+                do_scroll_y: True
+                size_hint_y: None
+                height: swipe.height
+                NoteContent:
+                    id: note_content
+                    content: note_container.note_content
         HSeparator:
             size_hint: 1, 0.01
             size_hint_max_y: dp(2)

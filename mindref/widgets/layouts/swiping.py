@@ -110,18 +110,20 @@ class SwipingLayout(Scatter):
             self.animate_snap_back.cancel(self)
             touch.grab(self)
             self._last_touch_pos_x = touch.x
-            return True
+            self.dispatch_children("on_touch_down", touch)
         return super().on_touch_down(touch)
 
     def on_touch_move(self, touch):
+
         if touch.grab_current is self:
             # Calculate the delta between the last touch event and this one
             x_touch = touch.x
             dX = x_touch - self._last_touch_pos_x
             has_moved = abs(dX) > self.min_translation
 
+            self.dispatch_children("on_touch_down", touch)
             if not has_moved:
-                return True
+                return False
 
             # We can physically move the widget now
             # We need to clamp the delta to avoid moving past the swipe threshold

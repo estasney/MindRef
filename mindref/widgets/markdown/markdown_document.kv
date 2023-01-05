@@ -11,19 +11,11 @@
         Rectangle:
             pos: self.pos
             size: self.size
-    Scatter:
-        id: scatter
+
+    GridLayout:
         size_hint_y: None
-        height: content.minimum_height
+        id: content
+        cols: 1
+        height: self.minimum_height
         width: root.width
-        scale: 1
-        do_translation: False, False
-        do_scale: True
-        do_rotation: False
-        GridLayout:
-            size_hint_y: None
-            id: content
-            cols: 1
-            height: self.minimum_height
-            width: root.width
-            padding: dp(10)
+        padding: dp(10)
