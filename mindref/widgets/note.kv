@@ -1,6 +1,7 @@
 #:import LargeLabel widgets.style
 #:import NoteActionButton widgets.buttons.button_bar
 #:import SwipingLayout widgets.layouts.swiping.SwipingLayout
+#:import SecondaryScroll widgets.layouts.secondary_scroll.SecondaryScroll
 
 <NoteTitleBar>:
     id: note_title
@@ -54,13 +55,16 @@
             size_hint_max_y: dp(2)
         SwipingLayout:
             size_hint: 1, 0.75
+            min_translation: dp(50)
             on_swipe: root.handle_swipe(args[1])
             id: swipe
-            ScrollView:
+            on_swiping: print(args)
+            SecondaryScroll:
                 do_scroll_x: False
                 do_scroll_y: True
                 size_hint_y: None
                 height: swipe.height
+                force_release: swipe.swiping
                 NoteContent:
                     id: note_content
                     content: note_container.note_content
