@@ -1,6 +1,7 @@
 from kivy.properties import StringProperty, ListProperty
 from kivy.uix.gridlayout import GridLayout
 
+from domain.md_parser_types import MdBlockQuote
 from utils import import_kv
 from widgets.markdown.markdown_parsing_mixin import MarkdownLabelParsingMixin
 
@@ -13,3 +14,7 @@ class MarkdownBlockQuote(GridLayout, MarkdownLabelParsingMixin):
 
     def __init__(self, **kwargs):
         super(MarkdownBlockQuote, self).__init__(**kwargs)
+
+    def visit(self, node: MdBlockQuote):
+        for node in node["children"]:
+            super().visit(node)

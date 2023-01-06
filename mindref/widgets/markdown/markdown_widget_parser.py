@@ -23,6 +23,7 @@ from domain.md_parser_types import (
     MdListOrdered,
     MdListUnordered,
     MdListItem,
+    MdNewLine,
 )
 from widgets.markdown.block.markdown_block import MarkdownHeading, MarkdownBlock
 from widgets.markdown.code.code_span import MarkdownCodeSpan
@@ -275,6 +276,12 @@ class MarkdownWidgetParser:
                         self.state = MarkdownListItem(level=level)
                         for child in children:
                             self.parse(child)
+
+            case {"type": "newline"}:
+                parsed_node = cast(MdNewLine, node)
+                match self.state:
+                    case Widget() if hasattr(self.state, "text"):
+                        self.state.text += "\n"
 
             case _:
                 Logger.warning(f"{type(self).__name__}: parse - Unhandled node {node}")

@@ -9,6 +9,7 @@ from kivy.uix.widget import Widget
 from domain.md_parser_types import (
     MD_INLINE_TYPES,
     MdTextStrong,
+    MdTextEmphasis,
 )
 from widgets.behavior.inline_behavior import TextSnippet
 
@@ -70,7 +71,7 @@ class MarkdownLabelParsingMixin:
                         return unh
                 return
             case {"type": "emphasis", "children": list()}:
-                matched_node = cast(MdTextStrong, node)
+                matched_node = cast(MdTextEmphasis, node)
                 self.open_bbcode_tag = "i"
                 for child in matched_node["children"]:
                     if unh := self.visit(child):
