@@ -4,7 +4,7 @@ from typing import Any, Literal, NamedTuple, Optional
 
 from kivy.clock import Clock
 from kivy.graphics import Color, RoundedRectangle
-from kivy.metrics import dp
+from kivy.metrics import dp, sp
 from kivy.properties import (
     BooleanProperty,
     ColorProperty,
@@ -12,6 +12,7 @@ from kivy.properties import (
     NumericProperty,
     ReferenceListProperty,
     StringProperty,
+    VariableListProperty,
 )
 from kivy.uix.label import Label
 from kivy.utils import escape_markup
@@ -67,6 +68,8 @@ class LabelHighlightInline(Label):
         Additional height to add to a highlighted text ref
     highlight_padding: ReferenceListProperty
         Additional width and height of a highlighted text ref's highlight
+    highlight_radius: VariableListProperty
+        List of 1-4 radii for the highlighted text ref's highlight rectangle
     """
 
     bg_color = ColorProperty()
@@ -83,6 +86,7 @@ class LabelHighlightInline(Label):
     highlight_padding_x = NumericProperty(defaultvalue=0)
     highlight_padding_y = NumericProperty(defaultvalue=0)
     highlight_padding = ReferenceListProperty(highlight_padding_x, highlight_padding_y)
+    highlight_radius = VariableListProperty([sp(1)])
 
     def __init__(self, **kwargs):
         super(LabelHighlightInline, self).__init__(**kwargs)
@@ -228,10 +232,12 @@ class LabelHighlightInline(Label):
                 x1, y1, x2, y2 = self.compute_ref_coords(span)
                 w = x2 - x1
                 h = y2 - y1
-                RoundedRectangle(pos=(x1, y1), size=(w, h), radius=(3,))
+                RoundedRectangle(
+                    pos=(x1, y1), size=(w, h), radius=self.highlight_radius
+                )
 
-            kbd_inset_x = dp(0.75)
-            kbd_inset_y = dp(0.75)
+            kbd_inset_x = sp(1.75)
+            kbd_inset_y = sp(1.75)
             for span in self.refs.get("kbd", []):
                 x1, y1, x2, y2 = self.compute_ref_coords(span)
                 w = x2 - x1
@@ -241,13 +247,11 @@ class LabelHighlightInline(Label):
                 RoundedRectangle(
                     pos=(x1 - kbd_inset_x, y1 - kbd_inset_y),
                     size=(w, h),
-                    radius=(3,),
+                    radius=self.highlight_radius,
                 )
                 Color(*self.kbd_color)
                 RoundedRectangle(
-                    pos=(x1 + kbd_inset_x, y1 + kbd_inset_y),
-                    size=(w - kbd_inset_x, h - (1 * kbd_inset_y)),
-                    radius=(3,),
+                    pos=(x1, y1), size=(w, h), radius=self.highlight_radius
                 )
 
 

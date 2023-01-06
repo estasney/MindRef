@@ -1,0 +1,22 @@
+#:import parse_color kivy.parser.parse_color
+
+BoxLayout:
+    orientation: 'vertical'
+    Label:
+        canvas.before:
+            Color:
+                rgba: parse_color("#656565ff")
+            RoundedRectangle:
+                pos: self.center_x - self.texture_size[0]/2 - dp(4), self.center_y - self.texture_size[1]/2 - dp(4)
+                size: [self.texture_size[0] + dp(4), self.texture_size[1] + dp(4)]
+            Color:
+                rgba: parse_color("#ffffffcf")
+            RoundedRectangle:
+                pos: self.center_x - self.texture_size[0]/2, self.center_y - self.texture_size[1]/2
+                size: self.texture_size
+        size_hint: 0.3,0.3
+        halign: 'left'
+        pos_hint: {'center_x':0.5, 'center_y':0.5}
+        font_size: 50
+        text: 'Ctrl'
+        color: 0, 0, 0, 1

@@ -115,8 +115,8 @@ class MindRefApp(App):
             "Gray-400": parse_color("#9a9da1"),  # White text
             "Gray-500": parse_color("#6d7278"),
             "Codespan": parse_color("#00000026"),
-            "Keyboard": parse_color("#c4c4c4"),
-            "KeyboardShadow": parse_color("#656565"),
+            "Keyboard": parse_color("#ffffffaf"),
+            "KeyboardShadow": parse_color("#656565ff"),
             "Primary": parse_color("#37464f"),
             "Dark": parse_color("#101f27"),
             "Accent-One": parse_color("#388fe5"),
