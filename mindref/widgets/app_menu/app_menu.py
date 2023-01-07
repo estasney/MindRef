@@ -1,7 +1,7 @@
 from typing import Literal, TYPE_CHECKING
 
 from kivy.properties import ObjectProperty
-from kivy.uix.modalview import ModalView
+from kivy.uix.anchorlayout import AnchorLayout
 
 from domain.events import CreateCategoryEvent
 from utils import import_kv, get_app, sch_cb, schedulable
@@ -14,12 +14,16 @@ if TYPE_CHECKING:
     pass
 
 
-class AppMenu(ModalView):
+class AppMenu(AnchorLayout):
     btnroot = ObjectProperty()
 
     def __init__(self, **kwargs):
         super(AppMenu, self).__init__(**kwargs)
         self.register_event_type("on_release")
+        self.register_event_type("on_dismiss")
+
+    def on_dismiss(self, *_args):
+        ...
 
     def on_release(self, release: MENU_BUTTON_NAMES):
         app = get_app()

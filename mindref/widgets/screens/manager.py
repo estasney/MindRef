@@ -26,7 +26,9 @@ import_kv(__file__)
 
 class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
     app = ObjectProperty()
-
+    popup = ObjectProperty(None, allownone=True)
+    drawer_cls = ObjectProperty()
+    drawer = ObjectProperty(None, allownone=True)
     menu_open = BooleanProperty(False)
     reversed_transition = BooleanProperty(False)
     screen_triggers: Callable[[str], None]
@@ -35,37 +37,28 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
         super().__init__(**kwargs)
         self.note_screen_cycler = RollingIndex(size=2)
         self.current = "chooser_screen"
-        self.menu = None
-        self.popup = None
         self.app.bind(display_state=self.handle_app_display_state)
         self.app.bind(on_paginate=self.handle_pagination)
-
         self.app.bind(menu_open=self.setter("menu_open"))
         self.fbind("menu_open", self.handle_menu_state)
         self.fbind("reversed_transition", self.handle_reversed_transition)
         self.screen_triggers = trigger_factory(self, "current", self.screen_names)
+        self.drawer = self.drawer_cls(size_hint=(0.3, 1))
+        self.drawer.bind(on_close=lambda *_: setattr(self.app, "menu_open", False))
 
     def on_refresh(self, state: bool):
         self.dispatch_children("on_refresh", state)
         return True
 
     def handle_menu_state(self, _, menu_open: bool):
-        def remove_from_screen(*_args):
-            Logger.debug("Remove Menu")
-            self.current_screen.remove_widget(self.menu)
-            self.menu = None
-
-        Logger.debug(f"Menu Open {menu_open}")
         if menu_open:
             view = AppMenu()
-            self.menu = view
+            self.drawer.content = view
+            self.drawer.open()
+            view.fbind("on_dismiss", self.drawer.close)
 
-            self.current_screen.add_widget(view)
-
-            view.fbind("on_dismiss", remove_from_screen)
-
-        elif not menu_open and self.menu:
-            self.menu.dispatch("on_dismiss")
+        elif not menu_open and self.drawer:
+            self.drawer.close()
 
     def category_selected(self, category: "NoteCategoryButton"):
         self.app.registry.set_note_category(category.text, on_complete=None)

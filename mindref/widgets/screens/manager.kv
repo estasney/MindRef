@@ -5,10 +5,13 @@
 #:import NoteEditScreen widgets.screens.note_edit_screen
 #:import ErrorMessageScreen widgets.screens.message_screen
 #:import ScreenContainer widgets.screens.screen_container
+#:import DrawerLayout widgets.layouts.drawer.DrawerLayout
+#:import AppMenu widgets.app_menu.app_menu.AppMenu
 
 <NoteAppScreenManager>:
     id: screen_manager
     app: app
+    drawer_cls: DrawerLayout
     transition: SlideTransition()
     NoteCategoryChooserScreen:
         id: chooser_screen
