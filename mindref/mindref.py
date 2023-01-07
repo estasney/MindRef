@@ -290,7 +290,7 @@ class MindRefApp(App):
                     app_config = Config.get_configparser("app")
                     app_config.set("Behavior", "CATEGORY_SELECTED", "")
                     app_config.write()
-                self.paginate_timer.cancel()
+
                 # We'll get another event to clear app's note category
                 return registry.set_note_category(None, on_complete=None)
             case NoteCategoryEvent(value=value):
