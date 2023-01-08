@@ -20,6 +20,7 @@
         size_hint_min_y: app.base_font_size * 1.5
         size_hint_max_y: app.base_font_size * 2.5
         on_focus: root.touch_handler(args[1])
+        input_type: 'text'
     SmallLabel:
         id: w_error_message_label
         color: app.colors['Warn']

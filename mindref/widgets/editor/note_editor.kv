@@ -1,3 +1,5 @@
+#:import TitleInput widgets.style.TitleInput
+
 <NoteEditor>:
     orientation: 'vertical'
     editor: editor
@@ -10,6 +12,7 @@
         style_name: root.style_name
         font_family: app.fonts['mono']
         font_size: app.base_font_size
+        input_type: 'text'
     BoxLayout:
         size_hint_x: 1
         size_hint_y: 0.1
@@ -42,5 +45,6 @@
         halign: "center"
         valign: "center"
     TitleInput:
+        input_type: 'text'
         id: input_widget
         multiline: False
