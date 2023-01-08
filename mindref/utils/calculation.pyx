@@ -4,16 +4,16 @@ def normalize_coordinates(double touch_x, double touch_y, double self_x, double 
                           double self_height, double self_width):
     cdef double x_local, y_local
 
-    if self_height != 0:
+    if self_width != 0:
 
-        x_local = (touch_x - self_x) / self_height
+        x_local = (touch_x - self_x) / self_width
         x_local = 1.0 if x_local > 1.0 else x_local
         x_local = 0.0 if x_local < 0.0 else x_local
     else:
         x_local = 0.0
 
-    if self_width != 0:
-        y_local = 1.0 - (touch_y - self_y) / self_width
+    if self_height != 0:
+        y_local = 1.0 - (touch_y - self_y) / self_height
         y_local = 1.0 if y_local > 1.0 else y_local
         y_local = 0.0 if y_local < 0.0 else y_local
     else:
