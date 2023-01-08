@@ -23,9 +23,9 @@ class ResourceFile:
         cls, fp: Path, category: str
     ) -> "NoteResourceFile | ImageResourceFile":
 
-        age = fp.lstat().st_mtime_ns
+        age = fp.stat().st_mtime_ns
         fp_suffix = fp.suffix.lower() if fp.suffix else None
-        match fp.suffix:
+        match fp_suffix:
             case ".png" | ".jpg" | ".jpeg":
                 return ImageResourceFile(
                     path=fp, age=age, is_image=True, category=category
@@ -127,7 +127,7 @@ class CategoryResourceFiles:
         """
 
         def get_age(note_inner: "NoteResourceFile"):
-            return note_inner.path.lstat().st_mtime_ns
+            return note_inner.path.stat().st_mtime_ns
 
         if args:
             for note in args:
@@ -154,7 +154,7 @@ class CategoryResourceFiles:
         """
         resource = NoteResourceFile(
             path=fp,
-            age=fp.lstat().st_mtime_ns,
+            age=fp.stat().st_mtime_ns,
             is_image=False,
             index_=-1,
             category=self.category,
