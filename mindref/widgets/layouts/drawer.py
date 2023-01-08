@@ -175,12 +175,12 @@ class DrawerLayout(AnchorLayout):
     def on_touch_down(self, touch):
         self._touch_started_inside = self.collide_point(*touch.pos)
         if not self.auto_dismiss or self._touch_started_inside:
-            return super().on_touch_down(touch)
+            super().on_touch_down(touch)
         return True
 
     def on_touch_move(self, touch):
         if not self.auto_dismiss or self._touch_started_inside:
-            return super().on_touch_move(touch)
+            super().on_touch_move(touch)
         return True
 
     def on_touch_up(self, touch):
