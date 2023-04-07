@@ -5,7 +5,7 @@ from kivy.properties import NumericProperty, ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
 
 from domain.events import TypeAheadQueryEvent
-from utils import import_kv, sch_cb, get_app
+from utils import import_kv, sch_cb, get_app, attrsetter
 from widgets.typeahead.typeahead_dropdown import Suggestion, TypeAheadDropDown
 
 import_kv(__file__)
@@ -23,6 +23,7 @@ class TypeAhead(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.dd = None
+        get_app().bind(note_category=self.clear_text)
 
     def handle_text(self, _, val):
         if val and len(val) >= self.min_query_length:
@@ -32,6 +33,11 @@ class TypeAhead(BoxLayout):
             )
         elif self.dd:
             self.dd.suggestions = []
+
+    def clear_text(self, instance, value):
+        clear_text_ = attrsetter(self.typer, "text", "")
+        if value is None:
+            sch_cb(clear_text_)
 
     def handle_scroll(self, val):
         if not self.dd:
@@ -51,10 +57,9 @@ class TypeAhead(BoxLayout):
         Logger.debug(f"TypeAhead: Selecting App Index {value.index}")
 
         app = get_app()
-        clear_text = lambda dt: setattr(self.typer, "text", "")
         set_index = lambda dt: app.select_index(value.index)
 
-        sch_cb(clear_text, set_index, timeout=0.1)
+        sch_cb(self.clear_text, set_index, timeout=0.1)
 
     def handle_dismissed_dd(self, *_args):
         """Dropdown was dismissed ensure we reflect that"""
