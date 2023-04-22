@@ -34,10 +34,9 @@ class TypeAhead(BoxLayout):
         elif self.dd:
             self.dd.suggestions = []
 
-    def clear_text(self, instance, value):
+    def clear_text(self, *_args):
         clear_text_ = attrsetter(self.typer, "text", "")
-        if value is None:
-            sch_cb(clear_text_)
+        sch_cb(clear_text_)
 
     def handle_scroll(self, val):
         if not self.dd:
