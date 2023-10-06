@@ -236,6 +236,7 @@ class Registry:
         - Add or Replace Note Data
         - Add or Replace Note Metadata
         - Change App display state to 'display'
+        - Clear Editor
         """
 
         def update_app_meta(meta: list["MarkdownNoteDict"]):

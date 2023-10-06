@@ -8,7 +8,7 @@ from kivy.properties import (
 from kivy.uix.boxlayout import BoxLayout
 from pygments.lexers import get_lexer_by_name
 
-from utils import import_kv
+from utils import import_kv, attrsetter, sch_cb
 
 import_kv(__file__)
 
@@ -61,6 +61,9 @@ class NoteEditor(BoxLayout):
                 "on_save",
                 **{"text": self.editor.text, "title": self.title_widget.title},
             )
+            clear_text = attrsetter(self.editor, "text", "")
+            clear_title = attrsetter(self.title_widget.input_widget, "text", "")
+            sch_cb(clear_text, clear_title, timeout=0.5)
         else:
             self.dispatch("on_save", **{"text": self.editor.text, "title": None})
 
