@@ -12,7 +12,7 @@ REQUIRES_PYTHON = ">=3.10"
 
 REQUIRED = [
     "Cython==0.29.32",
-    "Kivy==2.1.0",
+    "Kivy==2.2.1",
     "mistune==2.0.4",
     "Pillow==9.3.0",
     "Pygments==2.13.0",

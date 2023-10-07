@@ -1,5 +1,5 @@
 PROJECT_NAME:=mindref
-PROJECT_REQUIREMENTS=python3==3.10.9,hostpython3==3.10.9,kivy,python-dotenv,toolz,pygments,docutils,urllib3,chardet,idna,android,pillow,mistune,mindref_cython
+PROJECT_REQUIREMENTS=python3==3.10.9,hostpython3==3.10.9,kivy,python-dotenv,toolz,pygments,docutils,urllib3,chardet,idna,android,pillow,mistune==2.0.4,mindref_cython
 UTIL_ROOT:=$(HOME)/AndroidStudioProjects/MindRefUtils
 UTIL_OUTPUT:=$(UTIL_ROOT)/mindrefutils/build/outputs/aar
 UTIL_AAR:=$(UTIL_OUTPUT)/mindrefutils-debug.aar
@@ -7,6 +7,8 @@ UTIL_AAR:=$(UTIL_OUTPUT)/mindrefutils-debug.aar
 ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 PROJECT_ROOT:=$(ROOT_DIR)/$(PROJECT_NAME)
 BUILD_REF_DIR:=$(ROOT_DIR)/scripts/build
+SDK_DIR:=$(HOME)/Documents/Android/
+NDK_DIR:=$(HOME)/Documents/Android/ndk/25.2.9519653
 
 # APK
 APK_VERSION ?= $(shell sed -e '1s/__version__ = //g' -e '1s/"//g' -e '2,//d' mindref/__version__.py)
@@ -83,8 +85,8 @@ build-apk :  *.aar clean-bytecode clean-cythonized
   	--bootstrap=sdl2 \
   	--window \
   	--dist-name=$(PROJECT_NAME) \
-  	--sdk-dir ~/Android/Sdk \
-  	--ndk-dir ~/Android/Sdk/ndk/25.1.8937393 \
+  	--sdk-dir $(HOME)/Documents/Android/ \
+  	--ndk-dir ~/Documents/Android/ndk/25.2.9519653 \
   	--ndk-api $(NDK_VERSION) \
   	--android-api $(SDK_VERSION) \
   	--requirements=$(PROJECT_REQUIREMENTS) \
