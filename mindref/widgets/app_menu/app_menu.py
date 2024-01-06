@@ -35,3 +35,5 @@ class AppMenu(AnchorLayout):
                 event = CreateCategoryEvent(action=CreateCategoryEvent.Action.OPEN_FORM)
                 push_event = schedulable(app.registry.push_event, event)
                 sch_cb(dismiss_self, push_event, timeout=0.1)
+            case "Exit":
+                sch_cb(dismiss_self, app.stop, timeout=0.1)
