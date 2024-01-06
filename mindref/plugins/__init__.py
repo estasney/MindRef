@@ -75,9 +75,7 @@ class ScreenSaverPlugin(EventDispatcher):
     elapsed_minutes = NumericProperty(defaultvalue=0)
     enabled = BooleanProperty(defaultvalue=False)
     screen_saved = BooleanProperty(defaultvalue=False)
-    sys_fs_path = StringProperty(
-        defaultvalue="/sys/class/backlight/rpi_backlight/bl_power"
-    )
+    sys_fs_path = StringProperty(defaultvalue="/sys/class/backlight", allownone=True)
 
     # noinspection PyUnresolvedReferences
     def __init__(self, *args, **kwargs):
@@ -87,6 +85,9 @@ class ScreenSaverPlugin(EventDispatcher):
         self.screen_save_trigger = Clock.create_trigger(self.save_screen)
         self.fbind("enabled", self.handle_enabled)
         self.fbind("screen_saved", self.screen_save_trigger)
+        self.sys_fs_path = next(
+            map(str, Path(self.sys_fs_path).rglob("*/**/bl_power")), None
+        )
 
     def handle_event(self, event):
         if event == "on_interact":

@@ -8,15 +8,17 @@ _SETTINGS_PLUGIN_DATA = None
 
 
 def _has_rpi_backlight() -> bool:
-    BL_DIR = Path("/") / "sys" / "class" / "backlight" / "rpi_backlight" / "bl_power"
-    if not BL_DIR.exists():
-        Logger.debug(f"rpi_backlight: {BL_DIR} does not exist")
+    BL_SEARCH = next(
+        (Path("/") / "sys" / "class" / "backlight").rglob("*/**/bl_power"), None
+    )
+    if BL_SEARCH is None:
+        Logger.info(f"rpi_backlight: No backlight found")
         return False
     # Check if we can read/write
     try:
-        val = int(BL_DIR.read_bytes())
-        BL_DIR.write_bytes(bytes(val))
-        Logger.debug(f"rpi_backlight: Has backlight")
+        val = int(BL_SEARCH.read_bytes())
+        BL_SEARCH.write_bytes(bytes(val))
+        Logger.info(f"rpi_backlight: Has backlight")
         return True
     except (PermissionError, ValueError) as e:
         Logger.info(f"rpi_backlight: Path exists but got - {e}")
