@@ -1,1 +1,3 @@
-graft mindref/*
+graft mindref/assets
+graft mindref/static
+global-include *.kv

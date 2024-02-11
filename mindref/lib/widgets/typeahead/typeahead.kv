@@ -1,0 +1,17 @@
+#: import TextTyper lib.widgets.typeahead.typer
+
+<TypeAhead>:
+    orientation: 'vertical'
+    id: typeahead
+    typer: typer
+    size_hint_y: None
+    height: typer.minimum_height
+
+    TextTyper:
+        id: typer
+        multiline: False
+        on_text: root.handle_text(self, self.text)
+        on_suggestion_scroll: root.handle_scroll(args[1])
+        on_suggestion_select: typeahead.handle_select(None, None, keyed=True)
+        font_size: app.base_font_size
+        mipmap: True

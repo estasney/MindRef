@@ -1,0 +1,40 @@
+#:import ThemedButton lib.widgets.buttons.buttons
+#:import e lib.domain.events
+
+<DropDownButton@ThemedButton>:
+    text: ''
+    size_hint_y: None
+    size: dp(40), dp(40)
+    font_size: app.base_font_size + sp(4)
+    BaseLabel:
+        text: root.text
+
+<NoteActionDropDown>:
+
+    DropDownButton:
+        text: 'Back'
+        on_release: root.select('back')
+    DropDownButton:
+        text: 'List View'
+        on_release: root.select('list')
+    PrimaryHSep:
+        color: app.colors['Gray-300']
+    DropDownButton:
+        text: 'Edit'
+        on_release: root.select('edit')
+    DropDownButton:
+        text: 'New'
+        on_release: root.select('add')
+
+<NoteActionButton>:
+    canvas:
+        Color:
+            rgb: app.colors['Primary']
+        Line:
+            rounded_rectangle: (self.pos[0], self.pos[1], self.size[0]+4, self.size[1], 4)
+            width: dp(1)
+    BaseLabel:
+        text: 'Notes'
+        font_size: app.base_font_size + sp(4)
+
+

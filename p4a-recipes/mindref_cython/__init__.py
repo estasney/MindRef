@@ -41,6 +41,7 @@ class MindRefCythonRecipe(IncludedFilesBehaviour, CythonRecipe):
         src_files = self._get_source_files()
         for src_file in src_files:
             dest_file = Path(build_dir) / self.name / src_file.name
+            print(f"Copying {src_file} to {dest_file}")
             shprint(sh.cp, str(src_file), str(dest_file))
 
 

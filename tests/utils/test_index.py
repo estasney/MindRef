@@ -1,6 +1,6 @@
 import pytest
 from contextlib import nullcontext as does_not_raise
-from utils.index import RollingIndex
+from lib.utils.index import RollingIndex
 from functools import partial
 
 

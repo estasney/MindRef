@@ -101,7 +101,7 @@ build-apk :  *.aar clean-bytecode clean-cythonized
   	--no-byte-compile-python
 .PHONY : build-apk
 
-install : build-apk
+install :
 	adb install mindref*.apk
 .PHONY : install
 

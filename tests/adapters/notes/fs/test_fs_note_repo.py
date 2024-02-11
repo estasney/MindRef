@@ -5,18 +5,17 @@ from itertools import product
 from operator import and_, attrgetter
 from typing import Callable, Optional, TYPE_CHECKING
 
-
 if TYPE_CHECKING:
-    from domain.note_resource import CategoryResourceFiles
-    from widgets.typeahead.typeahead_dropdown import Suggestion
+    from lib.domain.note_resource import CategoryResourceFiles
+    from lib.widgets.typeahead.typeahead_dropdown import Suggestion
 
 import pytest
 from toolz import sliding_window
 
-from adapters.notes.fs.fs_note_repository import FileSystemNoteRepository
+from lib.adapters.notes.fs.fs_note_repository import FileSystemNoteRepository
 from pathlib import Path
 
-from domain.markdown_note import MarkdownNote
+from lib.domain.markdown_note import MarkdownNote
 
 
 @pytest.fixture
@@ -259,8 +258,8 @@ def test_note_repo_factory(platform, monkeypatch):
 
     monkeypatch.setattr(kivy, "platform", platform)
 
-    from adapters.notes.android.android_note_repository import AndroidNoteRepository
-    from adapters.notes.note_repository import (
+    from lib.adapters.notes.android.android_note_repository import AndroidNoteRepository
+    from lib.adapters.notes.note_repository import (
         AbstractNoteRepository,
         NoteRepositoryFactory,
     )

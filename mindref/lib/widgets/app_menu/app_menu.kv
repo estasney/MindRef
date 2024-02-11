@@ -1,0 +1,46 @@
+#:import HSeparator lib.widgets.separator
+#:import ew kivy.uix.effectwidget
+#:import effects lib.widgets.effects
+#:import buttons lib.widgets.buttons
+#:import ThemedButton lib.widgets.buttons.buttons
+
+<GlowLine@EffectWidget>:
+    effects: [effects.PulsingEffect(pulse_period=-.5, pulse_width=0.6, min_color=0.9)]
+    size_hint_y: None
+    height: sep.height
+    HSeparator:
+        id: sep
+        color: app.colors['Accent-One']
+
+
+
+<MenuButton@ThemedLabelButton>:
+    size_hint_y: None
+    size: dp(40), dp(40)
+    font_size: app.base_font_size + sp(4)
+
+<AppMenu>:
+    anchor_y: 'top'
+    padding: dp(10)
+    BoxLayout:
+        orientation: 'vertical'
+        size_hint_y: None
+        spacing: dp(0)
+        height: self.minimum_height
+        id: btnroot
+        XButton:
+            size_hint_x: None
+            size_hint_y: None
+            pos_hint: {"right": 1}
+        GlowLine:
+            size_hint_y: None
+            size_hint_x: 1
+        MenuButton:
+            text: 'New Category'
+            on_release: root.dispatch('on_release', 'New Category')
+        MenuButton:
+            text: 'Settings'
+            on_release: root.dispatch('on_release', 'Settings')
+        MenuButton:
+            text: 'Exit'
+            on_release: root.dispatch('on_release', 'Exit')

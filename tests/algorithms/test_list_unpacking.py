@@ -4,7 +4,7 @@ from itertools import product
 import pytest
 from toolz import get_in
 
-from widgets.markdown.markdown_widget_parser import MarkdownWidgetParser
+from lib.widgets.markdown.markdown_widget_parser import MarkdownWidgetParser
 
 report = MarkdownWidgetParser._report_nested_lists  # noqa
 

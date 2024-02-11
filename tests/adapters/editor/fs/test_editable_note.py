@@ -1,4 +1,4 @@
-from domain.editable import EditableNote
+from lib.domain.editable import EditableNote
 
 
 def test_editable_note_post_init(md_note):

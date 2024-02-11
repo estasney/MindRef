@@ -1,0 +1,17 @@
+#:import NoteEditor lib.widgets.editor.note_editor
+
+<NoteEditScreen>:
+    id: edit_screen
+    note_editor: note_editor
+    container: container
+    canvas:
+        Color:
+            rgba: app.colors['Dark']
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    BoxLayout:
+        orientation: 'vertical'
+        id: container
+        NoteEditor:
+            id: note_editor

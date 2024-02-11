@@ -1,0 +1,19 @@
+#:import styles lib.widgets.style
+#:import LabelHighlightInline lib.widgets.behavior.inline_behavior
+
+<MarkdownListItem>:
+    label: label
+    cols: 1
+    size_hint_y: None
+    height: label.texture_size[1] + dp(20)
+    x: 0
+    LabelHighlightInline:
+        id: label
+        snippets: root.snippets
+        bg_color: app.colors['Primary']
+        highlight_color: app.colors['Codespan']
+        text_threshold: 170
+        valign: root.valign
+        halign: root.halign
+        height: self.texture_size[1]
+        size_hint_y: None

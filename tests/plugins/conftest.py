@@ -11,23 +11,19 @@ def pytest_generate_tests(metafunc):
 @pytest.fixture
 def platform_(request, monkeypatch):
     if request.param == "pi_platform":
-        import mindref.domain.plugin_settings
+        import lib.domain.plugin_settings
 
         monkeypatch.setattr(
-            mindref.domain.plugin_settings, "_has_rpi_backlight", lambda: True
+            lib.domain.plugin_settings, "_has_rpi_backlight", lambda: True
         )
-        monkeypatch.setattr(
-            mindref.domain.plugin_settings, "_SETTINGS_PLUGIN_DATA", None
-        )
+        monkeypatch.setattr(lib.domain.plugin_settings, "_SETTINGS_PLUGIN_DATA", None)
         return True
 
     else:
-        import mindref.domain.plugin_settings
+        import lib.domain.plugin_settings
 
         monkeypatch.setattr(
-            mindref.domain.plugin_settings, "_has_rpi_backlight", lambda: False
+            lib.domain.plugin_settings, "_has_rpi_backlight", lambda: False
         )
-        monkeypatch.setattr(
-            mindref.domain.plugin_settings, "_SETTINGS_PLUGIN_DATA", None
-        )
+        monkeypatch.setattr(lib.domain.plugin_settings, "_SETTINGS_PLUGIN_DATA", None)
         return False

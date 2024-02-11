@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from adapters.atlas.fs.fs_atlas_repository import AtlasService
+from lib.adapters.atlas.fs.fs_atlas_repository import AtlasService
 
 
 @pytest.mark.parametrize("atlas_type", ["mono", "multi"])

@@ -1,0 +1,50 @@
+#:import TitleInput lib.widgets.style.TitleInput
+
+<NoteEditor>:
+    orientation: 'vertical'
+    editor: editor
+    CodeInput:
+        id: editor
+        pos_hint: {"top": 1}
+        size_hint_x: 1
+        size_hint_y: .9
+        lexer: root.lexer
+        style_name: root.style_name
+        font_family: app.fonts['mono']
+        font_size: app.base_font_size
+        input_type: 'text'
+    BoxLayout:
+        size_hint_x: 1
+        size_hint_y: 0.1
+        orientation: 'horizontal'
+        ThemedSecondaryLabelButton:
+            text: 'Cancel'
+            on_release: root.dispatch('on_cancel')
+        ThemedLabelButton:
+            text: 'Save'
+            on_release: root.handle_press_save()
+
+
+<NoteTitleInput>:
+    id: layout
+    input_widget: input_widget
+    padding: '5sp', '1sp', '5sp', '0sp'
+    canvas:
+        Color:
+            rgba: app.colors['Dark']
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    LargeLabel:
+        color: app.colors['White']
+        text: f"{'New Note' if not root.title else root.title}.md"
+        bold: True
+        text_size: sp(self.size[0]*0.9), None
+        pos_hint: {"x": 0, "y": 0}
+        size_hint: (0.7, 1)
+        halign: "center"
+        valign: "center"
+    TitleInput:
+        input_type: 'text'
+        id: input_widget
+        multiline: False

@@ -1,7 +1,7 @@
 import os
 
 from Cython.Build import cythonize
-from setuptools import find_packages, setup, Extension
+from setuptools import setup, Extension, find_packages
 
 NAME = "MindRef"
 DESCRIPTION = "Cross-Platform Application for maintaining Markdown formatted notes"
@@ -11,13 +11,13 @@ AUTHOR = "Eric Stasney"
 REQUIRES_PYTHON = ">=3.10"
 
 REQUIRED = [
-    "Cython==0.29.32",
-    "Kivy==2.2.1",
-    "mistune==2.0.4",
-    "Pillow==9.3.0",
-    "Pygments==2.13.0",
-    "python-dotenv==0.21.0",
-    "toolz==0.12.0",
+    "Cython<3",
+    "Kivy==2.3.0",
+    "mistune>=2,<3",
+    "Pillow>=9",
+    "Pygments>=2.1",
+    "python-dotenv>=1",
+    "toolz>=0.12",
 ]
 
 EXTRAS = {
@@ -41,21 +41,26 @@ setup(
     author_email=EMAIL,
     python_requires=REQUIRES_PYTHON,
     url=URL,
-    packages=find_packages(exclude=("tests",)),
+    packages=find_packages(
+        exclude=[
+            "tests",
+            "*.tests",
+            "*.tests.*",
+            "tests.*",
+            "p4a-recipes",
+            "p4a-recipes.*",
+        ]
+    ),
     install_requires=REQUIRED,
     extras_require=EXTRAS,
     zip_safe=False,
     include_package_data=True,
-    data_files=[
-        (
-            "data",
-            [
-                "mindref/static/icons/*",
-                "mindref/static/textures/*",
-            ],
-        )
-    ],
     license="LGPLv3+",
+    entry_points={
+        "console_scripts": [
+            "mindref = mindref.main:main",
+        ],
+    },
     classifiers=[
         # Trove classifiers
         # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
@@ -68,17 +73,16 @@ setup(
         *cythonize(
             [
                 Extension(
-                    "mindref.utils.calculation",
-                    ["mindref/utils/calculation.pyx"],
+                    "mindref.lib.utils.calculation",
+                    ["mindref/lib/utils/calculation.pyx"],
                 ),
-                Extension("mindref.utils.index", ["mindref/utils/index.pyx"]),
+                Extension("mindref.lib.utils.index", ["mindref/lib/utils/index.pyx"]),
                 Extension(
-                    "mindref.widgets.effects.scrolling_c",
-                    ["mindref/widgets/effects/scrolling_c.pyx"],
+                    "mindref.lib.widgets.effects.scrolling_c",
+                    ["mindref/lib/widgets/effects/scrolling_c.pyx"],
                 ),
             ],
             compiler_directives={"language_level": 3},
-            annotate=True,
         ),
     ],
 )

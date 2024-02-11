@@ -1,0 +1,31 @@
+#:import parse_color kivy.parser.parse_color
+#:import LabelHighlightInline lib.widgets.behavior.inline_behavior
+
+<MarkdownTable>:
+    size_hint_y: None
+    cols: 1
+    height: self.minimum_height
+<MarkdownRow>:
+    orientation: 'horizontal'
+    padding: dp(4),dp(2)
+    size_hint_y: None
+    size_hint_x: 1
+    height: self.minimum_height
+
+
+<MarkdownCell>:
+    orientation: 'horizontal'
+    size_hint_y: None
+    height: self.minimum_height
+    size_hint_x: 1
+    padding: (dp(10), dp(2), dp(10), dp(2))
+    label: label
+    LabelHighlightInline:
+        id: label
+        snippets: root.snippets
+        bg_color: app.colors['Primary']
+        highlight_color: app.colors['Codespan']
+        valign: 'center'
+        halign: 'left'
+        height: self.texture_size[1]
+        size_hint_y: None

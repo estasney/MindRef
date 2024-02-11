@@ -1,0 +1,18 @@
+#:import Toolbar lib.widgets.toolbar
+#:import LargeLabel lib.widgets.style
+
+<ErrorMessageScreen>:
+    canvas.before:
+        Color:
+            rgba: app.colors['Dark']
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    BoxLayout:
+        orientation: 'vertical'
+        Toolbar:
+            size_hint_y: None
+            padding: dp(20), dp(10), dp(10), dp(5)
+            height: dp(50)
+        LargeLabel:
+            text: app.error_message

@@ -1,0 +1,15 @@
+#:import BorderBox lib.widgets.box_model.border
+#:import PaddingBox lib.widgets.box_model.padding
+
+<BoxModel>:
+    box_margin: (0,0,0,0)
+    box_padding: (0,0,0,0)
+    border_color: (1,0,0,1.0)
+    border_size: dp(4)
+    content_box: content_box
+    BorderBox:
+        border_size: root.border_size
+        border_color: root.border_color
+        PaddingBox:
+            id: content_box
+            padding: root.box_padding

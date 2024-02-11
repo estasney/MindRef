@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/../MindRef/.idea/MindRef.iml" filepath="$PROJECT_DIR$/../MindRef/.idea/MindRef.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/MindRef.iml" filepath="$PROJECT_DIR$/.idea/MindRef.iml" />
+      <module fileurl="file:///nfs/kvnotes/.idea/kvnotes.iml" filepath="/nfs/kvnotes/.idea/kvnotes.iml" />
     </modules>
   </component>
 </project>
