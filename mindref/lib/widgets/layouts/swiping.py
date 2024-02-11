@@ -62,6 +62,8 @@ class SwipingLayout(Scatter):
     min_translation = NumericProperty(dp(20))
     _swiping = BooleanProperty(False)
     _last_touch_pos_x = NumericProperty(0)
+    _last_touch_pos_y = NumericProperty(0)
+    _touch_translate_y = NumericProperty(0)
 
     def __init__(self, **kwargs):
         # We need to add content here instead of in the kv file as we've overridden add_widget
@@ -139,21 +141,34 @@ class SwipingLayout(Scatter):
             self.animate_snap_back.cancel(self)
             touch.grab(self)
             self._last_touch_pos_x = touch.x
+            self._last_touch_pos_y = touch.y
+            self._touch_translate_y = 0
             self.dispatch_children("on_touch_down", touch)
         return super().on_touch_down(touch)
 
     def on_touch_move(self, touch):
         if touch.grab_current is self:
-            x_touch = touch.x
+            x_touch, y_touch = touch.pos
             curr_trans = self.translation
             x_last = self._last_touch_pos_x
+            y_last = self._last_touch_pos_y
+            self._last_touch_pos_y = y_touch
+
+            # Update our total y translation
+            self._touch_translate_y += y_touch - y_last
 
             # First determine if we should be moving the widget, by checking if this touch event would move us past the min_translation
             delta_x = x_touch - x_last
 
-            # Now that we have delta, we can determine if we've passed the min_translation
             if abs(curr_trans + delta_x) < self.min_translation:
+                # We haven't moved past the minimum translation, so we don't activate swiping display behavior
                 return
+
+            # We may have moved past the minimum translation, but we need to check if the user is trying to scroll vertically
+            if abs(self._touch_translate_y) > self.swipe_threshold * (abs(delta_x)):
+                # The user is trying to scroll vertically
+                return
+
             self._swiping = True
 
             self.dispatch_children("on_touch_down", touch)
