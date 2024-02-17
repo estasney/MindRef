@@ -22,6 +22,7 @@ from lib.adapters.notes.fs.fs_note_repository import (
 )
 from lib.domain.events import DiscoverCategoryEvent
 from lib.domain.markdown_note import MarkdownNote
+from lib.domain.settings import SortOptions
 from lib.utils import fmt_attrs, get_app, sch_cb, schedulable
 
 if TYPE_CHECKING:
@@ -70,7 +71,7 @@ class MindRefCallCodes(Flag):
         return (x & n) != 0
 
     @classmethod
-    def deconstruct_int(cls, val: int) -> tuple[tuple[CodeNames], bool]:
+    def deconstruct_int(cls, val: int) -> tuple[tuple[CodeNames, ...], bool]:
         fields_true = []
         a_val = abs(val)
         n_bits = a_val.bit_count()
@@ -103,8 +104,23 @@ class AndroidNoteRepository(FileSystemNoteRepository):
     _mediator_callbacks: dict[int, Callable]
     py_mediator: "MindRefUtilsCallbackPyMediator"
 
-    def __init__(self, get_app: "GetApp", new_first: bool):
-        super().__init__(get_app, new_first)
+    def __init__(
+        self,
+        get_app: "GetApp",
+        note_sorting: SortOptions = "Creation Date",
+        note_sorting_ascending: bool = False,
+        category_sorting: SortOptions = "Creation Date",
+        category_sorting_ascending: bool = False,
+        **kwargs,
+    ):
+        super().__init__(
+            get_app,
+            note_sorting,
+            note_sorting_ascending,
+            category_sorting,
+            category_sorting_ascending,
+            **kwargs,
+        )
         self._native_path = None
         self._mediator_callbacks = {}
         AndroidStorageManager._mindref_callback_py_mediator = self.py_mediator
