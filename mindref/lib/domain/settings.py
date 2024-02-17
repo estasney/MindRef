@@ -15,13 +15,6 @@ _common_settings = [
         "section": "Behavior",
         "key": "NEW_FIRST",
     },
-    {
-        "type": "string",
-        "title": "Initial Category",
-        "desc": "If set, skip the category selection screen and load this category when MindRef launches",
-        "key": "CATEGORY_SELECTED",
-        "section": "Behavior",
-    },
     {"type": "title", "title": "Display"},
     {
         "type": "numeric",

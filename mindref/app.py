@@ -285,12 +285,6 @@ class MindRefApp(App):
 
             case NoteCategoryFailureEvent(value=value):
                 Logger.error(event)
-                if self.config.get("Behavior", "CATEGORY_SELECTED") == value:
-                    # Clear the config
-                    app_config = Config.get_configparser("app")
-                    app_config.set("Behavior", "CATEGORY_SELECTED", "")
-                    app_config.write()
-
                 # We'll get another event to clear app's note category
                 return registry.set_note_category(None, on_complete=None)
             case NoteCategoryEvent(value=value):
@@ -477,7 +471,6 @@ class MindRefApp(App):
                     "Behavior",
                     {
                         "NEW_FIRST": True,
-                        "CATEGORY_SELECTED": "",
                     },
                 )
                 config.setdefaults(
@@ -494,7 +487,6 @@ class MindRefApp(App):
                     "Behavior",
                     {
                         "NEW_FIRST": True,
-                        "CATEGORY_SELECTED": "",
                     },
                 )
                 config.setdefaults(
