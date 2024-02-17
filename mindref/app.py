@@ -60,7 +60,7 @@ if TYPE_CHECKING:
 class MindRefApp(App):
     APP_NAME = "MindRef"
     atlas_service = AtlasService(storage_path=Path(__file__).parent / "static")
-    note_service = NoteRepositoryFactory.get_repo()(get_app=get_app, new_first=True)
+    note_service = NoteRepositoryFactory.get_repo()(get_app=get_app)
     editor_service = FileSystemEditor(get_app=get_app)
     plugin_manager = PluginManager()
     platform_android = BooleanProperty(defaultvalue=False)
@@ -441,8 +441,19 @@ class MindRefApp(App):
 
         if storage_path:
             self.registry.set_note_storage_path(storage_path)
-        self.note_service.new_first = (
-            True if self.config.get("Behavior", "NEW_FIRST") in truthy else False
+        self.note_service.note_sorting = self.config.get("Behavior", "NOTE_SORTING")
+        self.note_service.note_sorting_ascending = (
+            True
+            if self.config.get("Behavior", "NOTE_SORTING_ASCENDING") in truthy
+            else False
+        )
+        self.note_service.category_sorting = self.config.get(
+            "Behavior", "CATEGORY_SORTING"
+        )
+        self.note_service.category_sorting_ascending = (
+            True
+            if self.config.get("Behavior", "CATEGORY_SORTING_ASCENDING") in truthy
+            else False
         )
         sm = NoteAppScreenManager()
         self.screen_manager = sm
@@ -463,16 +474,20 @@ class MindRefApp(App):
         settings.add_json_panel("MindRef", self.config, data=json.dumps(app_settings))
 
     def build_config(self, config):
+        config.setdefaults(
+            "Behavior",
+            {
+                "NOTE_SORTING": "Creation Date",
+                "NOTE_SORTING_ASCENDING": False,
+                "CATEGORY_SORTING": "Creation Date",
+                "CATEGORY_SORTING_ASCENDING": False,
+            },
+        )
+
         match platform:  # We can't use self.platform_android yet
             case "android":
                 config.setdefaults("Storage", {"NOTES_PATH": None})
                 config.setdefaults("Display", {"BASE_FONT_SIZE": 18})
-                config.setdefaults(
-                    "Behavior",
-                    {
-                        "NEW_FIRST": True,
-                    },
-                )
                 config.setdefaults(
                     "Plugins", {"SCREEN_SAVER_ENABLE": False, "SCREEN_SAVER_DELAY": 60}
                 )
@@ -483,12 +498,6 @@ class MindRefApp(App):
                     {"NOTES_PATH": self.user_data_dir},
                 )
                 config.setdefaults("Display", {"BASE_FONT_SIZE": 16})
-                config.setdefaults(
-                    "Behavior",
-                    {
-                        "NEW_FIRST": True,
-                    },
-                )
                 config.setdefaults(
                     "Plugins", {"SCREEN_SAVER_ENABLE": False, "SCREEN_SAVER_DELAY": 60}
                 )
@@ -506,11 +515,26 @@ class MindRefApp(App):
                 self.registry.set_note_storage_path(value)
                 self.display_state_trigger("choose")
                 self.registry.push_event(RefreshNotesEvent(on_complete=None))
-            case "Behavior", "NEW_FIRST":
-                self.note_service.new_first = True if value in truthy else False
+            case "Behavior", "NOTE_SORTING":
+                self.note_service.note_sorting = value
                 self.display_state_trigger("choose")
                 self.registry.push_event(RefreshNotesEvent(on_complete=None))
-
+            case "Behavior", "NOTE_SORTING_ASCENDING":
+                self.note_service.note_sorting_ascending = (
+                    value if value in truthy else False
+                )
+                self.display_state_trigger("choose")
+                self.registry.push_event(RefreshNotesEvent(on_complete=None))
+            case "Behavior", "CATEGORY_SORTING":
+                self.note_service.category_sorting = value
+                self.display_state_trigger("choose")
+                self.registry.push_event(RefreshNotesEvent(on_complete=None))
+            case "Behavior", "CATEGORY_SORTING_ASCENDING":
+                self.note_service.category_sorting_ascending = (
+                    value if value in truthy else False
+                )
+                self.display_state_trigger("choose")
+                self.registry.push_event(RefreshNotesEvent(on_complete=None))
             case "Display", "BASE_FONT_SIZE":
                 self.base_font_size = int(value)
             case "Plugins", _:

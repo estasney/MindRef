@@ -12,9 +12,14 @@ from kivy import Logger
 from lib.adapters.notes.note_repository import (
     AbstractNoteRepository,
 )
-from lib.domain.events import DiscoverCategoryEvent, NotesQueryNotSetFailureEvent
+from lib.domain.events import (
+    DiscoverCategoryEvent,
+    NotesQueryNotSetFailureEvent,
+    NotesQueryErrorFailureEvent,
+)
 from lib.domain.markdown_note import MarkdownNote
 from lib.domain.note_resource import CategoryResourceFiles
+from lib.domain.settings import SortOptions
 from lib.utils import def_cb, sch_cb, schedulable
 from lib.utils.index import RollingIndex
 from lib.widgets.typeahead.typeahead_dropdown import Suggestion
@@ -30,6 +35,11 @@ TGetCategoriesCallback = Callable[[Iterable[str]], None]
 
 class FileSystemNoteRepository(AbstractNoteRepository):
     category_files: dict[str, CategoryResourceFiles]
+    category_sorting: SortOptions
+    category_sorting_ascending: bool
+    note_sorting: SortOptions
+    note_sorting_ascending: bool
+
     _storage_path: Optional[Path]
     _index: Optional[RollingIndex]
 
@@ -40,13 +50,24 @@ class FileSystemNoteRepository(AbstractNoteRepository):
         - .png | .jpg | .jpeg Category Image File, Optional
     """
 
-    def __init__(self, get_app: "GetApp", new_first: bool):
+    def __init__(
+        self,
+        get_app: "GetApp",
+        note_sorting: SortOptions = "Creation Date",
+        note_sorting_ascending: bool = False,
+        category_sorting: SortOptions = "Creation Date",
+        category_sorting_ascending: bool = False,
+        **kwargs,
+    ):
         self._storage_path = None
         self._index = None
         self._current_category = None
-
         self.get_app = get_app
-        self.new_first = new_first
+        self.note_sorting = note_sorting
+        self.note_sorting_ascending = note_sorting_ascending
+        self.category_sorting = category_sorting
+        self.category_sorting_ascending = category_sorting_ascending
+
         self.category_files = {}
 
     def get_categories(self, on_complete: TGetCategoriesCallback) -> list[str]:
@@ -66,6 +87,39 @@ class FileSystemNoteRepository(AbstractNoteRepository):
             return []
 
         category_folders = (f for f in self.storage_path.iterdir() if f.is_dir())
+
+        match self.category_sorting:
+            case "Creation Date":
+                category_folders = sorted(
+                    category_folders,
+                    key=lambda x: x.stat().st_ctime,
+                    reverse=not self.category_sorting_ascending,
+                )
+            case "Title":
+                category_folders = sorted(
+                    category_folders,
+                    key=attrgetter("name"),
+                    reverse=not self.category_sorting_ascending,
+                )
+
+            case "Last Modified Date":
+                category_folders = sorted(
+                    category_folders,
+                    key=lambda x: x.stat().st_mtime,
+                    reverse=not self.category_sorting_ascending,
+                )
+            case _:
+                Logger.error(
+                    f"{type(self).__name__} : Unhandled category_sorting {self.category_sorting}"
+                )
+                self.get_app().registry.push_event(
+                    NotesQueryErrorFailureEvent(
+                        on_complete=None,
+                        error="not_found",
+                        message=f"{self.category_sorting} is not a valid category_sorting option",
+                    )
+                )
+
         categories = [f.name for f in category_folders]
         on_complete(categories)
         Logger.info(
@@ -139,9 +193,14 @@ class FileSystemNoteRepository(AbstractNoteRepository):
         """
         category_folder = self.storage_path / category
         category_files = category_folder.iterdir()
+
         category_resource = CategoryResourceFiles.from_files(
-            category, category_files, self.new_first
+            category,
+            category_files,
+            sort_strategy=self.note_sorting,
+            ascending=self.note_sorting_ascending,
         )
+
         if on_complete:
             on_complete(category_resource)
         return category_resource

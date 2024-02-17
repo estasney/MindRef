@@ -8,6 +8,7 @@ from kivy import Logger
 from toolz import groupby
 
 from lib.domain.markdown_note import MarkdownNote, MarkdownNoteDict
+from lib.domain.settings import SortOptions
 
 
 @dataclass(slots=True)
@@ -90,17 +91,43 @@ class ImageResourceFile(ResourceFile):
 class CategoryResourceFiles:
     category: str
     image: Optional[ImageResourceFile]
-    new_first: bool = True
+    sort_strategy: SortOptions
+    ascending: bool
     notes: list[NoteResourceFile] = field(default_factory=list)
 
     @classmethod
-    def from_files(cls, category: str, files: Iterable[Path], new_first: bool = True):
-        resources = [ResourceFile.to_concrete(f, category) for f in files]
+    def from_files(
+        cls,
+        category: str,
+        files: Iterable[Path],
+        sort_strategy: SortOptions,
+        ascending: bool,
+    ):
+
+        match sort_strategy:
+            case "Creation Date":
+                sorted_files = sorted(
+                    files, key=lambda x: x.stat().st_mtime_ns, reverse=not ascending
+                )
+            case "Title":
+                sorted_files = sorted(
+                    files, key=lambda x: x.name, reverse=not ascending
+                )
+            case "Last Modified Date":
+                sorted_files = sorted(
+                    files, key=lambda x: x.stat().st_mtime_ns, reverse=not ascending
+                )
+            case _:
+                Logger.error(f"Invalid sort_strategy: {sort_strategy}")
+                sorted_files = sorted(
+                    files, key=lambda x: x.stat().st_mtime_ns, reverse=not ascending
+                )
+
+        resources = [ResourceFile.to_concrete(f, category) for f in sorted_files]
         resource_groups = groupby(attrgetter("is_image"), resources)
         image = resource_groups.get(True, None)
         notes: list[NoteResourceFile] = resource_groups.get(False, [])
         resource_groups.clear()
-        notes = sorted(notes, reverse=new_first)
 
         # Assign the index for notes
         for i, note in enumerate(notes):
@@ -118,7 +145,11 @@ class CategoryResourceFiles:
                 image = None
 
         return CategoryResourceFiles(
-            category=category, image=image, new_first=new_first, notes=notes
+            category=category,
+            image=image,
+            notes=notes,
+            sort_strategy=sort_strategy,
+            ascending=ascending,
         )
 
     def update_note_ages(self, *args):
@@ -144,7 +175,18 @@ class CategoryResourceFiles:
         `update_note_ages`
         """
 
-        self.notes.sort(reverse=self.new_first)
+        match self.sort_strategy:
+            case "Creation Date":
+                sort_func = lambda x: x.path.stat().st_ctime_ns
+            case "Title":
+                sort_func = lambda x: x.path.name
+            case "Last Modified Date":
+                sort_func = lambda x: x.path.stat().st_mtime_ns
+            case _:
+                Logger.error(f"Invalid sort_strategy: {self.sort_strategy}")
+                sort_func = lambda x: x.path.stat().st_mtime_ns
+
+        self.notes.sort(key=sort_func, reverse=not self.ascending)
         for i, note in enumerate(self.notes):
             note.set_index(i)
 

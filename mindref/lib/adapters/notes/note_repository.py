@@ -5,6 +5,8 @@ from abc import ABC
 from pathlib import Path
 from typing import Callable, Literal, Optional, Protocol, TYPE_CHECKING, Type, overload
 
+from ...domain.settings import SortOptions
+
 if TYPE_CHECKING:
     from os import PathLike
     from lib.domain.markdown_note import MarkdownNote
@@ -19,7 +21,15 @@ if TYPE_CHECKING:
 
 # noinspection PyUnusedLocal
 class NoteRepositoryInitProtocol(Protocol):
-    def __init__(self, get_app: "GetApp", new_first: bool):
+    def __init__(
+        self,
+        get_app: "GetApp",
+        note_sorting: SortOptions,
+        note_sorting_ascending: bool,
+        category_sorting: SortOptions,
+        category_sorting_ascending: bool,
+        **kwargs,
+    ):
         ...
 
 
