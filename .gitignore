@@ -1,3 +1,5 @@
+mindref/**/*.c
+*.egg-info
 **.pyc
 **/.coverage
 .coverage
