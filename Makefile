@@ -1,5 +1,5 @@
 PROJECT_NAME:=mindref
-PROJECT_REQUIREMENTS=python3==3.10.9,hostpython3==3.10.9,kivy,python-dotenv,toolz,pygments,docutils,urllib3,chardet,idna,android,pillow,mistune==2.0.4,mindref_cython
+PROJECT_REQUIREMENTS=python3==3.10.13,hostpython3==3.10.13,kivy,python-dotenv,toolz,pygments,docutils,urllib3,chardet,idna,android,pillow,mistune==2.0.4,mindref_cython
 UTIL_ROOT:=$(HOME)/AndroidStudioProjects/MindRefUtils
 UTIL_OUTPUT:=$(UTIL_ROOT)/mindrefutils/build/outputs/aar
 UTIL_AAR:=$(UTIL_OUTPUT)/mindrefutils-debug.aar
@@ -54,31 +54,31 @@ clean-cythonized:
 	find $(PROJECT_ROOT) -name "*.so" -delete
 	find $(PROJECT_ROOT) -name "*.html" -delete
 	. venv/bin/activate \
-	&& python -m pythonforandroid.entrypoints clean-recipe-build mindref_cython
+	&& p4a clean-recipe-build mindref_cython
 
 clean-builds :
 	. venv/bin/activate \
-	&& python -m pythonforandroid.entrypoints clean builds
+	&& p4a clean builds
 .PHONY : clean-builds
 
 clean-dists :
 	. venv/bin/activate \
-	&& python -m pythonforandroid.entrypoints clean dists
+	&& p4a clean dists
 .PHONY : clean-dists
 
 clean-all : clean-aar clean-apk clean-bytecode clean-builds clean-dists clean-cythonized
 	. venv/bin/activate \
-	&& python -m pythonforandroid.entrypoints clean-all
+	&& p4a clean-all
 .PHONY : clean-all
 
 *.aar : clean-aar
 	cd $(UTIL_ROOT) \
-		&& ./gradlew :mindrefutils:build
+		&& ./gradlew mindrefutils:build
 	cp $(UTIL_AAR) .
 
 build-apk :  *.aar clean-bytecode clean-cythonized
 	. venv/bin/activate \
-	&& python -m pythonforandroid.entrypoints apk --private $(PROJECT_ROOT) \
+	&& p4a apk --private $(PROJECT_ROOT) \
   	--package=org.test.mindref \
   	--name "MindRef" \
   	--version $(APK_VERSION) \
