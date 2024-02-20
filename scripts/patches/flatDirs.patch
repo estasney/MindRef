@@ -1,0 +1,12 @@
+--- ./a/build.tmpl.gradle	2024-02-19 20:40:06.679516195 -0500
++++ ./b/build.tmpl.gradle	2024-02-19 20:40:34.315211806 -0500
+@@ -16,6 +16,9 @@
+         {%- for repo in args.gradle_repositories %}
+         {{repo}}
+         {%- endfor %}
++        flatDir {
++            dirs 'libs'
++        }
+     }
+ }
+ 

@@ -25,10 +25,7 @@ if [[ ! -e $SITE_PKG_PATH ]]; then
 fi
 
 declare -A patchTargets
-
-patchTargets[filechooser.patch]="$SITE_PKG_PATH/kivy/uix/filechooser.py"
-patchTargets[app.patch]="$SITE_PKG_PATH/kivy/app.py"
-patchTargets[pathlib.patch]="$SITE_PKG_PATH/_pytest/pathlib.py"
+patchTargets[flatDirs.patch]="$SITE_PKG_PATH/pythonforandroid/bootstraps/common/build/templates/build.tmpl.gradle"
 
 for patchFile in "${!patchTargets[@]}"; do
   target="${patchTargets[$patchFile]}"
@@ -38,3 +35,10 @@ for patchFile in "${!patchTargets[@]}"; do
     patch --batch -s -i "$patchFile" "$target"
   fi
 done
+
+
+#patchTargets[filechooser.patch]="$SITE_PKG_PATH/kivy/uix/filechooser.py"
+#patchTargets[app.patch]="$SITE_PKG_PATH/kivy/app.py"
+#patchTargets[pathlib.patch]="$SITE_PKG_PATH/_pytest/pathlib.py"
+#
+#

@@ -13,7 +13,7 @@ NDK_DIR:=$(HOME)/Documents/Android/ndk/25.2.9519653
 # APK
 APK_VERSION ?= $(shell sed -e '1s/__version__ = //g' -e '1s/"//g' -e '2,//d' mindref/__version__.py)
 NDK_VERSION ?= 29
-SDK_VERSION ?= 33
+SDK_VERSION ?= 34
 
 # ADB
 PYTHON_LOG_LEVEL ?= 'I'
