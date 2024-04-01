@@ -139,6 +139,13 @@ class CategoryResourceFiles:
                 Logger.warning(
                     f"{cls.__class__.__name__}: from_files - multiple images found - [category='{category}']"
                 )
+                matched_image = next(
+                    (img for img in image if img.path.stem == category.lower()), None
+                )
+                if matched_image:
+                    image = matched_image
+                else:
+                    image = image[0]
             elif n_img == 1:
                 image = image[0]
             else:
