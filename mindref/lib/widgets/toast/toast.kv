@@ -1,0 +1,12 @@
+#:import Window kivy.core.window.Window
+
+<Toast>:
+    content: content
+    size_hint: None, None
+    size: (min(dp(344), Window.width - 2 * dp(24)), dp(48)) if Window.width > Window.height else (Window.width, dp(48))
+    pos_hint: {"center_x": 0.5 if Window.width < Window.height else 0.25, "center_y": 0.1}
+    padding_horizontal: dp(24) if Window.width > Window.height else dp(16)
+    Label:
+        id: content
+        text: root.text
+

@@ -24,6 +24,7 @@ from kivy.properties import (
 from lib.adapters.atlas.fs.fs_atlas_repository import AtlasService
 from lib.adapters.editor.fs.fs_editor_repository import FileSystemEditor
 from lib.adapters.notes.note_repository import NoteRepositoryFactory
+from lib.adapters.notifications.notifications import NotificationService
 from lib.domain.events import (
     AddNoteEvent,
     BackButtonEvent,
@@ -42,6 +43,7 @@ from lib.domain.events import (
     TypeAheadQueryEvent,
     FilePickerEvent,
     CreateCategoryEvent,
+    NotificationEvent,
 )
 from lib.domain.settings import app_settings
 from lib.plugins import PluginManager
@@ -64,6 +66,7 @@ class MindRefApp(App):
     editor_service = FileSystemEditor(get_app=get_app)
     plugin_manager = PluginManager()
     platform_android = BooleanProperty(defaultvalue=False)
+    notification_service = NotificationService(get_app=get_app)
     registry = Registry()
 
     note_categories = ListProperty()
@@ -214,6 +217,9 @@ class MindRefApp(App):
                 if category not in self.note_categories:
                     Logger.info(
                         f"{type(self).__name__}: Found New Category - {event!r}"
+                    )
+                    self.registry.push_event(
+                        NotificationEvent("New Category", category)
                     )
                     self.note_categories.append(category)
                 return
@@ -408,6 +414,8 @@ class MindRefApp(App):
                             category, img_path, on_complete=on_category_created
                         )
                         return self.display_state_trigger(self.display_state_last)
+            case NotificationEvent() as notification:
+                self.notification_service.add_notification(notification)
 
             case _:
                 Logger.info(

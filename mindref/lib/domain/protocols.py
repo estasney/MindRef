@@ -10,6 +10,9 @@ if TYPE_CHECKING:
     from lib.adapters.editor.fs.fs_editor_repository import FileSystemEditor
     from lib.adapters.notes.fs.fs_note_repository import FileSystemNoteRepository
     from lib.adapters.notes.android.android_note_repository import AndroidNoteRepository
+    from lib.adapters.notifications.notification_repository import (
+        NotificationRepository,
+    )
     from lib.plugins import PluginManager
     from kivy._clock import ClockEvent  # noqa
     from kivy.uix.screenmanager import ScreenManager
@@ -21,6 +24,7 @@ class AppRegistryProtocol(Protocol):
     note_service: "Union[FileSystemNoteRepository, AndroidNoteRepository]"
     editor_service: "FileSystemEditor"
     plugin_manager: "PluginManager"
+    notification_service: "NotificationRepository"
     registry: "Registry"
 
     platform_android: bool

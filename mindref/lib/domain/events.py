@@ -3,11 +3,12 @@ from dataclasses import dataclass, field
 from enum import Flag, auto
 from pathlib import Path
 from typing import Any, Callable, Literal, Optional, TYPE_CHECKING
+from uuid import uuid4
 
 if TYPE_CHECKING:
     from lib.domain.markdown_note import MarkdownNote
     from lib.domain.protocols import NoteDiscoveryProtocol
-    from mindref.mindref import DISPLAY_STATE
+    from mindref.app import DISPLAY_STATE
     from lib.widgets.typeahead.typeahead_dropdown import Suggestion
 
     QUERY_FAILURE_TYPE = Literal["not_set", "not_found", "permission_error"]
@@ -263,3 +264,19 @@ class FilePickerEvent(Event):
     def __repr__(self):
         attrs = ("event_type",)
         return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+
+
+@dataclass
+class NotificationEvent(Event):
+    event_type = "notification"
+    title: str
+    message: str
+    duration: int = 5
+    id: str = field(default_factory=lambda: str(uuid4()))
+
+    def __repr__(self):
+        attrs = ("id", "event_type", "title", "message", "duration")
+        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+
+    def __eq__(self, other):
+        return self.id == other.id
