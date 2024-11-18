@@ -50,6 +50,8 @@ class PluginManager(EventDispatcher):
             if k == "screen_saver_enable":
                 if value in truthy:
                     ss = self.ensure_plugin(ScreenSaverPlugin, make=True)
+                    if not ss:
+                        return
                     ss.enabled = ss.is_compatible()
                 elif value in falsy:
                     ss = self.ensure_plugin(ScreenSaverPlugin, make=False)
