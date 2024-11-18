@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Protocol, TYPE_CHECKING
+from typing import Protocol, TYPE_CHECKING, TypeVar, Optional
 
 from kivy import Logger
 from kivy.clock import Clock
@@ -13,6 +13,12 @@ if TYPE_CHECKING:
 class PluginProtocol(Protocol):
     def handle_event(self, event: str):
         ...
+
+    def is_compatible(self) -> bool:
+        ...
+
+
+T = TypeVar("T", bound=PluginProtocol)
 
 
 class PluginManager(EventDispatcher):
@@ -44,7 +50,7 @@ class PluginManager(EventDispatcher):
             if k == "screen_saver_enable":
                 if value in truthy:
                     ss = self.ensure_plugin(ScreenSaverPlugin, make=True)
-                    ss.enabled = True
+                    ss.enabled = ss.is_compatible()
                 elif value in falsy:
                     ss = self.ensure_plugin(ScreenSaverPlugin, make=False)
                     if ss:
@@ -55,12 +61,17 @@ class PluginManager(EventDispatcher):
                     ss.active_after_minutes = int(value)
         return
 
-    def ensure_plugin(self, plugin_type, make: bool):
+    def ensure_plugin(self, plugin_type: type[T], make: bool) -> Optional[T]:
         matched = next((pl for pl in self.plugins if isinstance(pl, plugin_type)), None)
         if matched:
             return matched
         if make:
-            pl = plugin_type()
+            pl: T = plugin_type()
+            if not pl.is_compatible():
+                Logger.info(
+                    f"PluginManager: Plugin {pl.__class__.__name__} is not compatible"
+                )
+                return None
             self.plugins.append(pl)
             return pl
         return None
@@ -89,6 +100,10 @@ class ScreenSaverPlugin(EventDispatcher):
             map(str, Path(self.sys_fs_path).rglob("*/**/bl_power")), None
         )
 
+    def is_compatible(self) -> bool:
+        """If this plugin is enabled, would handle_event raise an Exception"""
+        return self.sys_fs_path is not None
+
     def handle_event(self, event):
         if event == "on_interact":
             self.elapsed_minutes = 0
@@ -111,6 +126,8 @@ class ScreenSaverPlugin(EventDispatcher):
             self.screen_saved = False
 
     def save_screen(self, *_args):
+        if not self.sys_fs_path:
+            return
         if self.screen_saved:
             # Power off screen
             Path(self.sys_fs_path).write_text("1", encoding="ascii")
