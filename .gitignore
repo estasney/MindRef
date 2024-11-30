@@ -21,4 +21,4 @@ bin
 tests/**/*.png
 **/.mypy_cache
 build
-
+*.aider*
