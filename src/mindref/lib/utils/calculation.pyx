@@ -1,25 +1,26 @@
-# cython: language_level=3, cdivision=True
+# cython: language_level=3, cdivision=True, embedsignature=True
 
-def normalize_coordinates(double touch_x, double touch_y, double self_x, double self_y,
-                          double self_height, double self_width):
-    cdef double x_local, y_local
+cdef inline double CLAMP(double x, double lower, double upper):
+    return lower if x < lower else (upper if x > upper else x)
 
-    if self_width != 0:
 
-        x_local = (touch_x - self_x) / self_width
-        x_local = 1.0 if x_local > 1.0 else x_local
-        x_local = 0.0 if x_local < 0.0 else x_local
-    else:
-        x_local = 0.0
+def normalize_coordinates(double touch_x, double touch_y, double self_x, double self_y, double self_height=0.0, double self_width=0.0):
 
-    if self_height != 0:
-        y_local = 1.0 - (touch_y - self_y) / self_height
-        y_local = 1.0 if y_local > 1.0 else y_local
-        y_local = 0.0 if y_local < 0.0 else y_local
-    else:
-        y_local = 0.0
+    cdef (double, double) result = (0.0, 0.0)
+    
+    if self_width == 0.0:
+        return result
 
-    return x_local, y_local
+    result[0] = CLAMP((touch_x - self_x) / self_width, 0.0, 1.0)
+
+
+    
+    result[1] = CLAMP((1.0 - (touch_y - self_y) / self_height), 0.0, 1.0)
+
+
+        
+        
+    return result
 
 def compute_ref_coords(double width, double height, double wX, double wY, double texture_width, double texture_height,
                        double span_x1, double span_y1, double span_x2, double span_y2,

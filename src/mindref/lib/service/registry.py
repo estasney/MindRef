@@ -1,28 +1,28 @@
 from collections import deque
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable, Optional, TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, Optional
 
 from kivy import Logger
-
 from lib.domain.events import (
+    EventFailure,
+    FilePickerEvent,
     NoteCategoryEvent,
     NoteCategoryFailureEvent,
     NoteFetchedEvent,
-    NotesQueryNotSetFailureEvent,
-    FilePickerEvent,
-    EventFailure,
-    NotesQueryFailureEvent,
     NotesQueryErrorFailureEvent,
+    NotesQueryFailureEvent,
+    NotesQueryNotSetFailureEvent,
 )
 from lib.utils import def_cb, sch_cb, schedulable
 from lib.utils.caching import kivy_cache
 from lib.widgets.typeahead.typeahead_dropdown import Suggestion
 
 if TYPE_CHECKING:
-    from lib.domain.protocols import AppRegistryProtocol
-    from lib.domain.markdown_note import MarkdownNote, MarkdownNoteDict
-    from lib.domain.events import Event
     from lib.domain.editable import EditableNote
+    from lib.domain.events import Event
+    from lib.domain.markdown_note import MarkdownNote, MarkdownNoteDict
+    from lib.domain.protocols import AppRegistryProtocol
 
 
 class Registry:
@@ -39,7 +39,7 @@ class Registry:
     @property
     def app(self):
         if self._app is None:
-            raise AttributeError(f"Registry has no App")
+            raise AttributeError("Registry has no App")
         return self._app
 
     @app.setter
@@ -139,7 +139,7 @@ class Registry:
         sch_cb(set_note_index, fetch_note)
         Logger.info(f"{type(self).__name__}: set_note_index - {value}")
 
-    def set_note_category(self, value: Optional[str], on_complete: Optional[Callable]):
+    def set_note_category(self, value: str | None, on_complete: Callable | None):
         """
         Update note_service current category.
 
@@ -163,7 +163,7 @@ class Registry:
         self,
         category: str,
         query: str,
-        on_complete: Callable[[Optional[list[Suggestion]]], None],
+        on_complete: Callable[[list[Suggestion] | None], None],
     ):
         """
         String search for a category
@@ -175,7 +175,7 @@ class Registry:
         result = note_repo.query_notes(category=category, query=query, on_complete=None)
         on_complete(result)
 
-    def query_all(self, on_complete: Optional[Callable] = None):
+    def query_all(self, on_complete: Callable | None = None):
         """
         Returns immediately after invoking note_repo.discover_notes
 
@@ -204,7 +204,7 @@ class Registry:
     def clear_caches(self):
         from kivy.cache import Cache
 
-        categories_seen = getattr(kivy_cache, "categories_seen")
+        categories_seen = getattr(kivy_cache, "categories_seen", [])
         for category in categories_seen:
             Cache.remove(category, key=None)
 
@@ -213,20 +213,18 @@ class Registry:
 
         Cache.remove(category, key)
 
-    def new_note(self, category: Optional[str], idx: Optional[int]) -> "EditableNote":
+    def new_note(self, category: str | None, idx: int | None) -> "EditableNote":
         category = category if category else self.app.note_category
         idx = idx if idx is not None else self.app.note_service.index_size() + 1
-        note = self.app.editor_service.new_note(category=category, idx=idx)
-        return note
+        return self.app.editor_service.new_note(category=category, idx=idx)
 
-    def edit_note(self, category: Optional[str], idx: Optional[int]) -> "EditableNote":
+    def edit_note(self, category: str | None, idx: int | None) -> "EditableNote":
         category = category if category else self.app.note_category
         idx = idx if idx is not None else self.app.note_service.index.current
         md_note = self.app.note_service.get_note(
             category=category, idx=idx, on_complete=None
         )
-        data_note = self.app.editor_service.edit_note(md_note)
-        return data_note
+        return self.app.editor_service.edit_note(md_note)
 
     def save_note(self, note: "EditableNote"):
         """
@@ -239,10 +237,10 @@ class Registry:
         - Clear Editor
         """
 
-        def update_app_meta(meta: list["MarkdownNoteDict"]):
+        def update_app_meta(meta: list["MarkdownNoteDict"]) -> None:
             self.app.note_category_meta = meta
 
-        def push_fetched_event(md_note: "MarkdownNote"):
+        def push_fetched_event(md_note: "MarkdownNote") -> None:
             Logger.info(f"{type(self).__name__} : Note Service says note was saved")
             self.clear_cache("category_meta")
             self.clear_cache("note_widget")
@@ -286,7 +284,7 @@ class Registry:
                 return app.screen_manager.open_file_picker(event)
 
             case FilePickerEvent(action=e.CLOSE), False:
-                raise NotImplementedError()
+                raise NotImplementedError
 
     def create_category(
         self,

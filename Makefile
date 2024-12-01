@@ -5,7 +5,7 @@ UTIL_OUTPUT:=$(UTIL_ROOT)/mindrefutils/build/outputs/aar
 UTIL_AAR:=$(UTIL_OUTPUT)/mindrefutils-debug.aar
 # https://stackoverflow.com/questions/18136918/how-to-get-current-relative-directory-of-your-makefile/23324703#23324703
 ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
-PROJECT_ROOT:=$(ROOT_DIR)/$(PROJECT_NAME)
+PROJECT_ROOT:=$(ROOT_DIR)/src/$(PROJECT_NAME)
 BUILD_REF_DIR:=$(ROOT_DIR)/scripts/build
 SDK_DIR:=$(HOME)/Documents/Android/
 NDK_DIR:=$(HOME)/Documents/Android/ndk/25.2.9519653
@@ -30,7 +30,7 @@ echo-vars:
 	@echo UTIL_AAR = \"$(UTIL_AAR)\"
 	@echo APK_VERSION = \"$(APK_VERSION)\"
 	@echo NDK_VERSION = \"$(NDK_VERSION)\"
-	@echo APK_VERSION = \"$(APK_VERSION)\"
+	@echo SDK_VERSION = \"$(SDK_VERSION)\"
 	@echo LOGCAT_FILTER = \"$(LOGCAT_FILTER)\"
 .PHONY : echo-vars
 
@@ -75,6 +75,9 @@ clean-all : clean-aar clean-apk clean-bytecode clean-builds clean-dists clean-cy
 	cd $(UTIL_ROOT) \
 		&& ./gradlew mindrefutils:build
 	cp $(UTIL_AAR) .
+
+cythonize:
+	find ./src -name "*.pyx" -exec uv run python -m cython {} --3str \;
 
 build-apk :  *.aar clean-bytecode clean-cythonized
 	. venv/bin/activate \

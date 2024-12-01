@@ -1,16 +1,18 @@
+import atexit
 import os
+from collections.abc import Callable
 from datetime import datetime
 from functools import partial, wraps
 from operator import itemgetter
 from pathlib import Path
 from typing import (
-    Callable,
+    TYPE_CHECKING,
+    Any,
     Generic,
-    Optional,
     ParamSpec,
     Protocol,
     TypeVar,
-    TYPE_CHECKING,
+    Unpack,
 )
 
 from kivy import Logger
@@ -19,6 +21,7 @@ from kivy.lang import Builder
 
 if TYPE_CHECKING:
     from lib.domain.protocols import AppRegistryProtocol
+    from line_profiler import LineProfiler
 
 _LOG_LEVEL = None
 
@@ -27,13 +30,12 @@ P = ParamSpec("P")
 K = TypeVar("K", bound=str)
 V = TypeVar("V")
 
-import atexit
 
-_PROFILER = None
+_PROFILER: "LineProfiler | None" = None
 
 
-def get_stats():
-    global _PROFILER
+def get_stats() -> None:
+    global _PROFILER  # noqa: PLW0602
     if _PROFILER is None:
         print("No Profiler")
         return
@@ -70,7 +72,7 @@ def mindref_path() -> Path:
     return Path(__file__).parent.parent.resolve()
 
 
-def import_kv(path: str | Path):
+def import_kv(path: str | Path) -> None:
     base_path = Path(path).resolve()
     kv_path = base_path.with_suffix(".kv")
     if kv_path.exists() and (sp := str(kv_path)) not in Builder.files:
@@ -136,7 +138,7 @@ def def_cb(*args: Callable[P, T], timeout: float = 0) -> Callable[[], None]:
 
     func_pipe = (f for f in args)
 
-    def _scheduled_func(*s_args: P.args, **kwargs: P.kwargs):
+    def _scheduled_func(*s_args: P.args, **kwargs: P.kwargs) -> None:
         func: Callable[P, T] = kwargs.pop("func")
         func(*s_args, **kwargs)
         next_func = next(func_pipe, None)
@@ -144,11 +146,10 @@ def def_cb(*args: Callable[P, T], timeout: float = 0) -> Callable[[], None]:
             cb = partial(_scheduled_func, func=next_func)
             Clock.schedule_once(cb, timeout)
 
-    head_func = partial(_scheduled_func, func=next(func_pipe))
-    return head_func
+    return partial(_scheduled_func, func=next(func_pipe))
 
 
-def attrsetter(instance, attr: str, value) -> Callable[[], None]:
+def attrsetter(instance: object, attr: str, value: Any) -> Callable[[], None]:
     """
     Set an attribute of an instance operator style
     Parameters
@@ -158,13 +159,13 @@ def attrsetter(instance, attr: str, value) -> Callable[[], None]:
     value
     """
 
-    def attrsetter_inner(*_args):
+    def attrsetter_inner(*_args: Any) -> None:
         setattr(instance, attr, value)
 
     return attrsetter_inner
 
 
-def fmt_attrs(instance, *attr) -> str:
+def fmt_attrs(instance: object, *attr: Unpack[tuple[str]]) -> str:
     """
     Build a param string formatted for logging with form
     [attr=getattr(instance, attr)]
@@ -187,7 +188,7 @@ def fmt_items(instance: "SupportsGetItem", *attr) -> str:
     -------
     """
     keys, values = attr, itemgetter(*attr)(instance)
-    params = ((k, v) for k, v in zip(keys, values))
+    params = ((k, v) for k, v in zip(keys, values, strict=True))
     fmt_params = (f"{k!s}={v!s}" for k, v in params if v)
     param_str = ", ".join(fmt_params)
     return f"[{param_str}]"
@@ -197,7 +198,7 @@ def get_app() -> "AppRegistryProtocol":
     """Calls App.get_running_app() but casts as expected protocol"""
     from kivy.app import App
 
-    app: "AppRegistryProtocol" = App.get_running_app()
+    app: AppRegistryProtocol = App.get_running_app()
     return app
 
 
@@ -230,12 +231,11 @@ class Singleton(type):
         if cls.__instance is None:
             cls.__instance = super(Singleton, cls).__call__(*args, **kwargs)
             return cls.__instance
-        else:
-            return cls.__instance
+        return cls.__instance
 
 
 class LazyLoaded(Generic[T]):
-    def __init__(self, default: "Optional[Callable]" = None):
+    def __init__(self, default: "Callable | None" = None):
         self.default = default if default is None else default()
 
     def __set_name__(self, owner, name):

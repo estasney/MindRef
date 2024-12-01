@@ -1,12 +1,13 @@
 import json
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable, Literal, TYPE_CHECKING
+from typing import Any
 
 from kivy import platform
 from kivy._clock import ClockEvent  # noqa
 from kivy.app import App
 from kivy.clock import Clock
-from kivy.config import Config
+from kivy.config import Config, ConfigParser
 from kivy.core.window import Window
 from kivy.logger import Logger
 from kivy.parser import parse_color
@@ -20,7 +21,8 @@ from kivy.properties import (
     OptionProperty,
     StringProperty,
 )
-
+from kivy.uix.settings import Settings
+from lib import DisplayState
 from lib.adapters.atlas.fs.fs_atlas_repository import AtlasService
 from lib.adapters.editor.fs.fs_editor_repository import FileSystemEditor
 from lib.adapters.notes.note_repository import NoteRepositoryFactory
@@ -28,8 +30,10 @@ from lib.domain.events import (
     AddNoteEvent,
     BackButtonEvent,
     CancelEditEvent,
+    CreateCategoryEvent,
     DiscoverCategoryEvent,
     EditNoteEvent,
+    FilePickerEvent,
     ListViewButtonEvent,
     NoteCategoryEvent,
     NoteCategoryFailureEvent,
@@ -40,21 +44,13 @@ from lib.domain.events import (
     RefreshNotesEvent,
     SaveNoteEvent,
     TypeAheadQueryEvent,
-    FilePickerEvent,
-    CreateCategoryEvent,
 )
 from lib.domain.settings import app_settings
 from lib.plugins import PluginManager
 from lib.service.registry import Registry
-from lib.utils import attrsetter, sch_cb, get_app, schedulable
+from lib.utils import attrsetter, get_app, sch_cb, schedulable
 from lib.utils.triggers import trigger_factory
 from lib.widgets.screens.manager import NoteAppScreenManager
-
-if TYPE_CHECKING:
-    DISPLAY_STATES = Literal[
-        "choose", "display", "list", "edit", "add", "error", "category_editor"
-    ]
-    DISPLAY_STATE = tuple[DISPLAY_STATES, DISPLAY_STATES]
 
 
 class MindRefApp(App):
@@ -75,30 +71,14 @@ class MindRefApp(App):
     menu_open = BooleanProperty(False)
 
     display_state_last = OptionProperty(
-        "choose",
-        options=[
-            "choose",
-            "display",
-            "list",
-            "edit",
-            "add",
-            "error",
-            "category_editor",
-        ],
+        options=list(DisplayState),
+        defaultvalue=DisplayState.CHOOSE.value,
     )
     display_state_current = OptionProperty(
-        "choose",
-        options=[
-            "choose",
-            "display",
-            "list",
-            "edit",
-            "add",
-            "error",
-            "category_editor",
-        ],
+        options=list(DisplayState),
+        defaultvalue=DisplayState.CHOOSE.value,
     )
-    display_state_trigger: Callable[["DISPLAY_STATES"], None]
+    display_state_trigger: Callable[[DisplayState], None]
 
     error_message = StringProperty()
 
@@ -158,10 +138,10 @@ class MindRefApp(App):
 
     settings_cls = "MindRefSettings"
 
-    def get_display_state(self):
+    def get_display_state(self) -> tuple[DisplayState, DisplayState]:
         return self.display_state_last, self.display_state_current
 
-    def set_display_state(self, value: "DISPLAY_STATES"):
+    def set_display_state(self, value: DisplayState) -> None:
         self.display_state_last = self.display_state_current
         self.display_state_current = value
 
@@ -172,24 +152,24 @@ class MindRefApp(App):
         cache=True,
     )
 
-    def on_display_state(self, _, value: "DISPLAY_STATE"):
+    def on_display_state(self, _: Any, value: DisplayState) -> None:
         old, new = value
         match (old, new):
-            case _, "edit":
+            case _, DisplayState.EDIT:
                 self.editor_note = self.editor_service.edit_current_note()
 
-            case _, "add":
+            case _, DisplayState.ADD:
                 self.editor_note = self.editor_service.new_note(
                     category=self.note_category, idx=self.note_service.index_size()
                 )
 
-    def on_paginate(self, *args, **kwargs):
+    def on_paginate(self, *args, **kwargs) -> None:
         ...
 
     def select_index(self, value: int):
         self.registry.set_note_index(value)
 
-    def paginate_note(self, direction=1):
+    def paginate_note(self, direction: int = 1):
         """
         Update our note_data, and the direction transition for our ScreenManager
         """
@@ -200,7 +180,7 @@ class MindRefApp(App):
         """Pop an Event from Registry and Process"""
         registry = self.registry
         if len(registry.events) == 0:
-            return
+            return None
         event = registry.events.popleft()
         Logger.debug(f"Processing Event: {type(event).__name__}")
         match event:
@@ -216,43 +196,43 @@ class MindRefApp(App):
                         f"{type(self).__name__}: Found New Category - {event!r}"
                     )
                     self.note_categories.append(category)
-                return
+                return None
             case BackButtonEvent(display_state=(old, new)):
                 match (old, new):
-                    case _, "choose":
+                    case _, DisplayState.CHOOSE:
                         # Cannot go further back
                         Logger.info(
                             f"{type(self).__name__}: process_back_button_event: Exiting"
                         )
                         get_app().stop()
-                    case _, "display":
+                    case _, DisplayState.DISPLAY:
                         clear_registry_category = schedulable(
                             registry.set_note_category, value=None, on_complete=None
                         )
                         trigger_display_choose = schedulable(
-                            self.display_state_trigger, "choose"
+                            self.display_state_trigger, DisplayState.CHOOSE
                         )
                         sch_cb(clear_registry_category, trigger_display_choose)
                         Logger.info(
-                            f"{type(self).__name__}: process_back_button_event - scheduled display_state: choose"
+                            f"{type(self).__name__}: process_back_button_event - scheduled display_state: {DisplayState.CHOOSE}"
                         )
-                    case _, "list":
+                    case _, DisplayState.LIST:
                         trigger_display = schedulable(
-                            self.display_state_trigger, "display"
+                            self.display_state_trigger, DisplayState.DISPLAY
                         )
                         sch_cb(trigger_display)
                         Logger.info(
-                            f"{type(self).__name__}: process_back_button_event - scheduled display_state: display"
+                            f"{type(self).__name__}: process_back_button_event - scheduled display_state: {DisplayState.DISPLAY}"
                         )
-                    case _, "edit" | "add":
+                    case _, DisplayState.EDIT | DisplayState.ADD:
                         registry.push_event(CancelEditEvent())
-                    case previous, "category_editor":
+                    case previous, DisplayState.CATEGORY_EDITOR:
                         self.display_state_trigger(previous)
                     case _:
                         Logger.warning(
                             f"Unknown display state encountered when handling back button: {old},{new}"
                         )
-                return
+                return None
             case NotesQueryFailureEvent(
                 error=error, message=message, on_complete=on_complete
             ):
@@ -262,9 +242,12 @@ class MindRefApp(App):
                 match error:
                     case "permission_error" | "not_found":
                         self.note_service.storage_path = None
-                        app_config = Config.get_configparser("app")
-                        app_config.set("Storage", "NOTES_PATH", App.user_data_dir)
-                        app_config.write()
+                        app_config: ConfigParser | None = Config.get_configparser("app")
+                        if app_config:
+                            app_config.set(
+                                "Storage", "NOTES_PATH", str(App.user_data_dir)
+                            )
+                            app_config.write()
 
                 match (error, platform):
                     case ("permission_error", "android"):
@@ -276,7 +259,8 @@ class MindRefApp(App):
                         )
                     case _:
                         self.error_message = message
-                        self.display_state_trigger("error")
+                        self.display_state_trigger(DisplayState.ERROR)
+                        return None
 
             case NotesQueryEvent(on_complete=on_complete):
                 if on_complete:
@@ -311,6 +295,7 @@ class MindRefApp(App):
                             self.note_service.get_category_meta,
                             category=value,
                             on_complete=set_note_category_meta,
+                            refresh=False,
                         )
 
                         # Paginate the note
@@ -318,7 +303,7 @@ class MindRefApp(App):
 
                         # Display the notes
                         trigger_display_state = schedulable(
-                            self.display_state_trigger, "display"
+                            self.display_state_trigger, DisplayState.DISPLAY
                         )
 
                         sch_cb(get_category_meta, timeout=0.1)
@@ -333,7 +318,7 @@ class MindRefApp(App):
                         )
                     case _:
                         raise AssertionError(f"Unhandled {event!r}.value : {value}")
-                return
+                return None
             case ListViewButtonEvent():
                 """List Button was Pressed"""
                 return self.display_state_trigger("list")
@@ -359,22 +344,27 @@ class MindRefApp(App):
             case AddNoteEvent():
                 data_note = registry.new_note(category=self.note_category, idx=None)
                 add_edit_note_widget = attrsetter(self, "editor_note", data_note)
-                trigger_display_add = schedulable(self.display_state_trigger, "add")
+                trigger_display_add = schedulable(
+                    self.display_state_trigger, DisplayState.ADD
+                )
                 return sch_cb(add_edit_note_widget, trigger_display_add, timeout=0.1)
             case EditNoteEvent(category=category, idx=idx):
                 data_note = registry.edit_note(category=category, idx=idx)
                 add_edit_note_widget = attrsetter(self, "editor_note", data_note)
-                trigger_display_edit = schedulable(self.display_state_trigger, "edit")
+                trigger_display_edit = schedulable(
+                    self.display_state_trigger, DisplayState.EDIT
+                )
                 return sch_cb(add_edit_note_widget, trigger_display_edit, timeout=0.1)
             case CancelEditEvent():
-                trigger_display = schedulable(self.display_state_trigger, "display")
+                trigger_display = schedulable(
+                    self.display_state_trigger, DisplayState.DISPLAY
+                )
                 registry_paginate = schedulable(registry.paginate_note, direction=0)
                 remove_edit_note = attrsetter(self, "editor_note", None)
                 return sch_cb(
                     trigger_display, registry_paginate, remove_edit_note, timeout=0.1
                 )
             case PaginationEvent(direction=direction):
-
                 registry_paginate = schedulable(
                     registry.paginate_note, direction=direction
                 )
@@ -382,13 +372,15 @@ class MindRefApp(App):
             case FilePickerEvent() as pick_event:
                 return self.registry.handle_picker_event(pick_event)
 
-            case CreateCategoryEvent(
-                action=action, category=category, img_path=img_path
-            ) as event:
+            case (
+                CreateCategoryEvent(
+                    action=action, category=category, img_path=img_path
+                ) as event
+            ):
                 event_action = event.Action
                 match action, category, img_path:
                     case event_action.OPEN_FORM, _, _:
-                        return self.display_state_trigger("category_editor")
+                        return self.display_state_trigger(DisplayState.CATEGORY_EDITOR)
                     case event_action.CLOSE_FORM | event_action.CLOSE_REJECT, _, _:
                         return self.display_state_trigger(self.display_state_last)
                     case event_action.CLOSE_ACCEPT, str(category), img_path:
@@ -400,7 +392,6 @@ class MindRefApp(App):
                         # as well as push a refresh event to the registry
                         @schedulable
                         def on_category_created():
-
                             self.display_state_trigger("choose")
                             self.registry.query_all(on_complete=None)
 
@@ -413,20 +404,19 @@ class MindRefApp(App):
                 Logger.info(
                     f"{type(self).__name__}: process_event - Unhandled Event {type(event).__name__}"
                 )
-                return
+                return None
 
     def key_input(self, _window, key, _scancode, _codepoint, _modifier):
         if key == 27:  # Esc Key
             # Back Button Event
             self.registry.push_event(BackButtonEvent(display_state=self.display_state))
             return True
-        else:
-            return False
+        return False
 
     """Kivy"""
 
     def build(self):
-        truthy = {True, 1, "1", "True"}
+        truthy = {True, "1", "True"}
         # noinspection PyUnresolvedReferences
         self.register_event_type("on_paginate")
         self.platform_android = platform == "android"
@@ -443,17 +433,13 @@ class MindRefApp(App):
             self.registry.set_note_storage_path(storage_path)
         self.note_service.note_sorting = self.config.get("Behavior", "NOTE_SORTING")
         self.note_service.note_sorting_ascending = (
-            True
-            if self.config.get("Behavior", "NOTE_SORTING_ASCENDING") in truthy
-            else False
+            self.config.get("Behavior", "NOTE_SORTING_ASCENDING") in truthy
         )
         self.note_service.category_sorting = self.config.get(
             "Behavior", "CATEGORY_SORTING"
         )
         self.note_service.category_sorting_ascending = (
-            True
-            if self.config.get("Behavior", "CATEGORY_SORTING_ASCENDING") in truthy
-            else False
+            self.config.get("Behavior", "CATEGORY_SORTING_ASCENDING") in truthy
         )
         sm = NoteAppScreenManager()
         self.screen_manager = sm
@@ -462,18 +448,18 @@ class MindRefApp(App):
         self.registry.query_all()
 
         self.base_font_size = self.config.get("Display", "BASE_FONT_SIZE")
-        Clock.schedule_interval(self.process_event, 0.1)
+        Clock.schedule_interval(self.process_event, 1e-4)
         self.plugin_manager.init_app(self)
         sm.fbind(
-            "on_interact", lambda x: self.plugin_manager.plugin_event("on_interact")
+            "on_interact", lambda _: self.plugin_manager.plugin_event("on_interact")
         )
 
         return sm
 
-    def build_settings(self, settings):
+    def build_settings(self, settings: Settings):
         settings.add_json_panel("MindRef", self.config, data=json.dumps(app_settings))
 
-    def build_config(self, config):
+    def build_config(self, config: Config):
         config.setdefaults(
             "Behavior",
             {
@@ -502,38 +488,37 @@ class MindRefApp(App):
                     "Plugins", {"SCREEN_SAVER_ENABLE": False, "SCREEN_SAVER_DELAY": 60}
                 )
 
-    def on_config_change(self, config, section, key, value):
-
-        truthy = {True, 1, "1", "True"}
+    def on_config_change(self, config: Config, section: str, key: str, value: Any):
+        truthy = {True, "1", "True"}
         Logger.info(f"{type(self).__name__}: on_config_change - {section},{key}")
         match section, key:
             case "Storage", "NOTES_PATH" if not self.platform_android:
                 self.note_service.storage_path = value
-                self.display_state_trigger("choose")
+                self.display_state_trigger(DisplayState.CHOOSE)
                 self.registry.push_event(RefreshNotesEvent(on_complete=None))
             case "Storage", "NOTES_PATH" if self.platform_android:
                 self.registry.set_note_storage_path(value)
-                self.display_state_trigger("choose")
+                self.display_state_trigger(DisplayState.CHOOSE)
                 self.registry.push_event(RefreshNotesEvent(on_complete=None))
             case "Behavior", "NOTE_SORTING":
                 self.note_service.note_sorting = value
-                self.display_state_trigger("choose")
+                self.display_state_trigger(DisplayState.CHOOSE)
                 self.registry.push_event(RefreshNotesEvent(on_complete=None))
             case "Behavior", "NOTE_SORTING_ASCENDING":
                 self.note_service.note_sorting_ascending = (
                     value if value in truthy else False
                 )
-                self.display_state_trigger("choose")
+                self.display_state_trigger(DisplayState.CHOOSE)
                 self.registry.push_event(RefreshNotesEvent(on_complete=None))
             case "Behavior", "CATEGORY_SORTING":
                 self.note_service.category_sorting = value
-                self.display_state_trigger("choose")
+                self.display_state_trigger(DisplayState.CHOOSE)
                 self.registry.push_event(RefreshNotesEvent(on_complete=None))
             case "Behavior", "CATEGORY_SORTING_ASCENDING":
                 self.note_service.category_sorting_ascending = (
                     value if value in truthy else False
                 )
-                self.display_state_trigger("choose")
+                self.display_state_trigger(DisplayState.CHOOSE)
                 self.registry.push_event(RefreshNotesEvent(on_complete=None))
             case "Display", "BASE_FONT_SIZE":
                 self.base_font_size = int(value)

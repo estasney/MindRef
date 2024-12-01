@@ -1,5 +1,6 @@
 from enum import Flag, auto
 from functools import partial
+from os import PathLike
 from pathlib import Path
 from typing import (
     Any,
@@ -134,20 +135,20 @@ class AndroidNoteRepository(FileSystemNoteRepository):
         return super().storage_path
 
     @storage_path.setter
-    def storage_path(self, value: str):
+    def storage_path(self, path: PathLike | None):
         """
         Pass the Android Native URI
 
         Parameters
         ----------
-        value : str
+        path : str
             E.g. content://com.android.externalstorage.documents/tree/primary:
         """
-        s_native = str(value)
+        s_native = str(path)
         if self._native_path == s_native:
             return
         Logger.info(f"{type(self).__name__} : set native path :  {s_native}")
-        self._native_path = str(value)
+        self._native_path = str(path)
         self._storage_path = Path(get_app().user_data_dir) / "notes"
         self._storage_path.mkdir(exist_ok=True, parents=True)
         self.current_category = None

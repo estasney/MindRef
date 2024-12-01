@@ -1,12 +1,12 @@
-from typing import Callable, TYPE_CHECKING
+from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from kivy import Logger
 from kivy.properties import BooleanProperty, ObjectProperty
 from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import ScreenManager, SlideTransition
-
 from lib.domain.events import FilePickerEvent
-from lib.utils import schedulable, import_kv, sch_cb
+from lib.utils import import_kv, sch_cb, schedulable
 from lib.utils.index import RollingIndex
 from lib.utils.triggers import trigger_factory
 from lib.widgets.app_menu.app_menu import AppMenu
@@ -17,7 +17,7 @@ from lib.widgets.dialog.filepicker_dialog import LoadDialog
 from lib.widgets.editor.category_editor import CategoryEditor
 
 if TYPE_CHECKING:
-    from app import DISPLAY_STATE
+
     from lib.domain.events import PAGINATION_DIRECTION
     from lib.domain.markdown_note import MarkdownNoteDict
 

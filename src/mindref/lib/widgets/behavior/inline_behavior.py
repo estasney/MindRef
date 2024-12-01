@@ -134,7 +134,7 @@ class LabelHighlightInline(Label):
         self.text_color_highlight = get_cached_text_contrast(
             background_color=self.bg_color,
             threshold=self.text_threshold,
-            highlight_color=self.highlight_color,
+            highlight_color=tuple(self.highlight_color),
         )
         return True
 

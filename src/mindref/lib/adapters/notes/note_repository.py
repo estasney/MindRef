@@ -2,17 +2,23 @@ from __future__ import annotations
 
 import abc
 from abc import ABC
-from pathlib import Path
-from typing import Callable, Literal, Optional, Protocol, TYPE_CHECKING, Type, overload
-
-from ...domain.settings import SortOptions
+from typing import (
+    TYPE_CHECKING,
+    Literal,
+    Protocol,
+)
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from os import PathLike
-    from lib.domain.markdown_note import MarkdownNote
+    from pathlib import Path
+
     from lib.domain.editable import EditableNote
+    from lib.domain.markdown_note import MarkdownNote
     from lib.domain.protocols import GetApp
     from lib.utils.index import RollingIndex
+
+    from ...domain.settings import SortOptions
     from .android.android_note_repository import AndroidNoteRepository
     from .fs.fs_note_repository import FileSystemNoteRepository
 
@@ -23,7 +29,7 @@ if TYPE_CHECKING:
 class NoteRepositoryInitProtocol(Protocol):
     def __init__(
         self,
-        get_app: "GetApp",
+        get_app: GetApp,
         note_sorting: SortOptions,
         note_sorting_ascending: bool,
         category_sorting: SortOptions,
@@ -35,33 +41,30 @@ class NoteRepositoryInitProtocol(Protocol):
 
 class NoteRepositoryFactory:
     @classmethod
-    @overload
-    def get_repo(cls) -> "Type[AndroidNoteRepository]":
-        ...
+    def _get_repo_android(cls) -> type[AndroidNoteRepository]:
+        from .android.android_note_repository import AndroidNoteRepository
+
+        return AndroidNoteRepository
 
     @classmethod
-    @overload
-    def get_repo(cls) -> "Type[FileSystemNoteRepository]":
-        ...
+    def _get_repo_default(cls) -> type[FileSystemNoteRepository]:
+        from .fs.fs_note_repository import FileSystemNoteRepository
+
+        return FileSystemNoteRepository
 
     @classmethod
-    def get_repo(cls):
+    def get_repo(cls) -> type[FileSystemNoteRepository] | type[AndroidNoteRepository]:
         """
         Dynamic Class returned based on platform.
         """
 
-        from kivy import platform  # noqa
+        from kivy import platform
 
-        platform: PLATFORM
         match platform:
             case "android":
-                from .android.android_note_repository import AndroidNoteRepository
-
-                return AndroidNoteRepository
+                return cls._get_repo_android()
             case _:
-                from .fs.fs_note_repository import FileSystemNoteRepository
-
-                return FileSystemNoteRepository
+                return cls._get_repo_default()
 
 
 class AbstractNoteRepository(ABC):
@@ -76,7 +79,7 @@ class AbstractNoteRepository(ABC):
         raise NotImplementedError
 
     @storage_path.setter
-    def storage_path(self, path: "PathLike"):
+    def storage_path(self, path: PathLike | None):
         raise NotImplementedError
 
     def get_categories(self, on_complete: Callable) -> list[str]:
@@ -96,7 +99,9 @@ class AbstractNoteRepository(ABC):
     def create_category(self, name: str, image_path: Path | str, on_complete: Callable):
         raise NotImplementedError
 
-    def get_category_meta(self, category: str, on_complete: Callable, refresh=False):
+    def get_category_meta(
+        self, category: str, on_complete: Callable, refresh: bool = False
+    ):
         """For self.current_category, get MarkdownNoteDict for all files in category
 
         Parameters
@@ -115,36 +120,36 @@ class AbstractNoteRepository(ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_next_note(self, on_complete: Optional[Callable]) -> "MarkdownNote":
+    def get_next_note(self, on_complete: Callable | None) -> MarkdownNote:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_previous_note(self, on_complete: Optional[Callable]) -> "MarkdownNote":
+    def get_previous_note(self, on_complete: Callable | None) -> MarkdownNote:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_current_note(self, on_complete: Optional[Callable]):
+    def get_current_note(self, on_complete: Callable | None):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_note(self, category: str, idx: int, on_complete: Optional[Callable]):
+    def get_note(self, category: str, idx: int, on_complete: Callable | None):
         raise NotImplementedError
 
     @abc.abstractmethod
     def save_note(
         self,
-        note: "EditableNote",
+        note: EditableNote,
         on_complete: Callable,
     ):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def set_index(self, n: Optional[int]):
+    def set_index(self, n: int | None):
         raise NotImplementedError
 
     @property
     @abc.abstractmethod
-    def index(self) -> "RollingIndex":
+    def index(self) -> RollingIndex:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -161,7 +166,7 @@ class AbstractNoteRepository(ABC):
         self,
         category: str,
         query: str,
-        on_complete: Optional[Callable],
+        on_complete: Callable | None,
     ):
         """Search Notes
 

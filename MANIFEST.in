@@ -1,3 +1,0 @@
-graft mindref/assets
-graft mindref/static
-global-include mindref/*.kv

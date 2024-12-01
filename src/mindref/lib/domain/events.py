@@ -1,34 +1,32 @@
 import abc
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Flag, auto
 from pathlib import Path
-from typing import Any, Callable, Literal, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
+
+from lib import DisplayState
 
 if TYPE_CHECKING:
     from lib.domain.markdown_note import MarkdownNote
     from lib.domain.protocols import NoteDiscoveryProtocol
-    from mindref.mindref import DISPLAY_STATE
     from lib.widgets.typeahead.typeahead_dropdown import Suggestion
 
     QUERY_FAILURE_TYPE = Literal["not_set", "not_found", "permission_error"]
     PAGINATION_DIRECTION = Literal[-1, 0, 1]
 
 
-class Event(abc.ABC):
-    @property
-    @abc.abstractmethod
-    def event_type(self):
-        raise NotImplementedError
+class Event:
+
+    event_type: ClassVar[str]
 
 
-class EventFailure(abc.ABC):
-    @property
-    @abc.abstractmethod
-    def message(self) -> str:
-        raise NotImplementedError
+class EventFailure:
+
+    message: ClassVar[str]
 
 
-@dataclass
+@dataclass(slots=True)
 class PaginationEvent(Event):
     """Emitted when we want to display a note_screen"""
 
@@ -37,28 +35,28 @@ class PaginationEvent(Event):
 
     def __repr__(self):
         attrs = ("event_type", "direction")
-        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+        return f"{type(self).__name__}({','.join(f'{p}={getattr(self, p)}' for p in attrs)})"
 
 
-@dataclass
+@dataclass(slots=True)
 class CancelEditEvent(Event):
     event_type = "cancel_edit"
 
     def __repr__(self):
         attrs = ("event_type",)
-        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+        return f"{type(self).__name__}({','.join(f'{p}={getattr(self, p)}' for p in attrs)})"
 
 
-@dataclass
+@dataclass(slots=True)
 class AddNoteEvent(Event):
     event_type = "add_note"
 
     def __repr__(self):
         attrs = ("event_type",)
-        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+        return f"{type(self).__name__}({','.join(f'{p}={getattr(self, p)}' for p in attrs)})"
 
 
-@dataclass
+@dataclass(slots=True)
 class EditNoteEvent(Event):
     event_type = "edit_note"
     category: str
@@ -66,43 +64,43 @@ class EditNoteEvent(Event):
 
     def __repr__(self):
         attrs = ("event_type", "category", "idx")
-        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+        return f"{type(self).__name__}({','.join(f'{p}={getattr(self, p)}' for p in attrs)})"
 
 
-@dataclass
+@dataclass(slots=True)
 class SaveNoteEvent(Event):
     event_type = "save_note"
     text: str
-    title: Optional[str]
+    title: str | None
     category: str
 
     def __repr__(self):
         attrs = ("event_type", "title", "category")
-        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+        return f"{type(self).__name__}({','.join(f'{p}={getattr(self, p)}' for p in attrs)})"
 
 
-@dataclass
+@dataclass(slots=True)
 class NoteFetchedEvent(Event):
     event_type = "note_fetched"
     note: "MarkdownNote"
 
     def __repr__(self):
         attrs = ("event_type", "note")
-        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+        return f"{type(self).__name__}({','.join(f'{p}={getattr(self, p)}' for p in attrs)})"
 
 
-@dataclass
+@dataclass(slots=True)
 class NoteCategoryEvent(Event):
     event_type = "note_category"
-    value: Optional[str]
-    on_complete: Optional[Callable]
+    value: str | None
+    on_complete: Callable | None
 
     def __repr__(self):
         attrs = ("event_type", "value", "on_complete")
-        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+        return f"{type(self).__name__}({','.join(f'{p}={getattr(self, p)}' for p in attrs)})"
 
 
-@dataclass
+@dataclass(slots=True)
 class NoteCategoryFailureEvent(EventFailure, NoteCategoryEvent):
     event_type = "note_category_failure"
     message = "Could not find the category"
@@ -110,31 +108,31 @@ class NoteCategoryFailureEvent(EventFailure, NoteCategoryEvent):
 
     def __repr__(self):
         attrs = ("event_type", "error")
-        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+        return f"{type(self).__name__}({','.join(f'{p}={getattr(self, p)}' for p in attrs)})"
 
 
-@dataclass
+@dataclass(slots=True)
 class NotesQueryEvent(Event):
     event_type = "notes_query"
-    on_complete: Optional[Callable]
+    on_complete: Callable | None
 
     def __repr__(self):
         attrs = ("event_type", "on_complete")
-        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+        return f"{type(self).__name__}({','.join(f'{p}={getattr(self, p)}' for p in attrs)})"
 
 
-@dataclass
+@dataclass(slots=True)
 class NotesDiscoveryEvent(Event):
     event_type = "notes_discovery"
     payload: "NoteDiscoveryProtocol"
-    on_complete: Optional[Callable[[Any], None]]
+    on_complete: Callable[[Any], None] | None
 
     def __repr__(self):
         attrs = ("event_type", "payload", "on_complete")
-        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+        return f"{type(self).__name__}({','.join(f'{p}={getattr(self, p)}' for p in attrs)})"
 
 
-@dataclass
+@dataclass(slots=True)
 class DiscoverCategoryEvent(Event):
     """Event Emitted when a Category is detected"""
 
@@ -143,10 +141,10 @@ class DiscoverCategoryEvent(Event):
 
     def __repr__(self):
         attrs = ("event_type", "category")
-        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+        return f"{type(self).__name__}({','.join(f'{p}={getattr(self, p)}' for p in attrs)})"
 
 
-@dataclass
+@dataclass(slots=True)
 class CreateCategoryEvent(Event):
     class Action(Flag):
         OPEN_FORM = auto()
@@ -158,89 +156,87 @@ class CreateCategoryEvent(Event):
 
     action: Action
     event_type = "create_category"
-    category: Optional[str] = None
-    img_path: Optional[str | Path] = None
+    category: str | None = None
+    img_path: str | Path | None = None
 
 
-@dataclass
+@dataclass(slots=True)
 class NotesQueryFailureEvent(EventFailure, NotesQueryEvent):
     event_type = "notes_query_failure"
     message = "To view notes, open Settings > Storage\n\nAnd set 'Note Storage'"
-    on_complete: Optional[Callable]
+    on_complete: Callable | None
     error: "QUERY_FAILURE_TYPE"
 
     def __repr__(self):
         attrs = ("event_type", "on_complete", "error")
-        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+        return f"{type(self).__name__}({','.join(f'{p}={getattr(self, p)}' for p in attrs)})"
 
 
-@dataclass
+@dataclass(slots=True)
 class NotesQueryNotSetFailureEvent(NotesQueryFailureEvent):
-    on_complete: Optional[Callable]
-    error: str = field(default="not_set")
-    message: str = field(
-        default="To view notes, open Settings > Storage\n\nAnd set 'Note Storage'"
-    )
+    on_complete: Callable | None
+    error: "QUERY_FAILURE_TYPE" = field(default="not_set")
+    message = "To view notes, open Settings > Storage\n\nAnd set 'Note Storage'"
 
     def __repr__(self):
         attrs = ("event_type", "error", "on_complete")
-        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+        return f"{type(self).__name__}({','.join(f'{p}={getattr(self, p)}' for p in attrs)})"
 
 
-@dataclass
+@dataclass(slots=True)
 class NotesQueryErrorFailureEvent(NotesQueryFailureEvent):
-    on_complete: Optional[Callable]
+    on_complete: Callable | None
     error: Literal["not_found", "permission_error"]
     message: str
 
     def __repr__(self):
         attrs = ("error", "on_complete")
-        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+        return f"{type(self).__name__}({','.join(f'{p}={getattr(self, p)}' for p in attrs)})"
 
 
-@dataclass
+@dataclass(slots=True)
 class RefreshNotesEvent(Event):
     event_type = "refresh_notes"
-    on_complete: Optional[Callable[[], None]]
+    on_complete: Callable[[], None] | None
 
     def __repr__(self):
         attrs = ("event_type", "on_complete")
-        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+        return f"{type(self).__name__}({','.join(f'{p}={getattr(self, p)}' for p in attrs)})"
 
 
-@dataclass
+@dataclass(slots=True)
 class BackButtonEvent(Event):
     event_type = "back_button"
-    display_state: "DISPLAY_STATE"
+    display_state: DisplayState
 
     def __repr__(self):
         attrs = ("event_type", "display_state")
-        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+        return f"{type(self).__name__}({','.join(f'{p}={getattr(self, p)}' for p in attrs)})"
 
 
-@dataclass
+@dataclass(slots=True)
 class ListViewButtonEvent(Event):
     event_type = "list_view"
 
     def __repr__(self):
         attrs = ("event_type",)
-        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+        return f"{type(self).__name__}({','.join(f'{p}={getattr(self, p)}' for p in attrs)})"
 
 
-@dataclass
+@dataclass(slots=True)
 class TypeAheadQueryEvent(Event):
     """Event emitted by TypeAhead Query"""
 
     event_type = "typeahead_query"
     query: str
-    on_complete: Callable[[Optional[list["Suggestion"]]], None]
+    on_complete: Callable[[list["Suggestion"] | None], None]
 
     def __repr__(self):
         attrs = ("event_type", "query", "on_complete")
-        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+        return f"{type(self).__name__}({','.join(f'{p}={getattr(self, p)}' for p in attrs)})"
 
 
-@dataclass
+@dataclass(slots=True)
 class FilePickerEvent(Event):
     """
     Any event dispatched when the event is to open a platform specific file/folder picker
@@ -262,4 +258,4 @@ class FilePickerEvent(Event):
 
     def __repr__(self):
         attrs = ("event_type",)
-        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+        return f"{type(self).__name__}({','.join(f'{p}={getattr(self, p)}' for p in attrs)})"

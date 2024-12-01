@@ -1,16 +1,13 @@
-from typing import TYPE_CHECKING, Union
+from typing import Union
 
 from kivy import Logger
 from kivy.properties import ObjectProperty, OptionProperty, StringProperty
-
+from lib import DisplayState
 from lib.domain.editable import EditableNote
 from lib.domain.events import CancelEditEvent, SaveNoteEvent
-from lib.utils import attrsetter, import_kv, sch_cb, get_app
+from lib.utils import attrsetter, get_app, import_kv, sch_cb
 from lib.widgets.editor.note_editor import NoteEditor
 from lib.widgets.screens import InteractScreen
-
-if TYPE_CHECKING:
-    from lib import DISPLAY_STATE
 
 import_kv(__file__)
 
@@ -40,7 +37,7 @@ class NoteEditScreen(InteractScreen):
         app.bind(editor_note=self.handle_app_editor_note)
         app.bind(display_state=self.handle_app_display_state)
 
-    def handle_app_display_state(self, _, value: "DISPLAY_STATE"):
+    def handle_app_display_state(self, _, value: DisplayState):
         _, new = value
         if new in {"add", "edit"}:
             Logger.debug(f"App Changed Mode : {value}")

@@ -12,7 +12,7 @@ cdef class RollingIndex:
         self._current = current
 
     cdef bint _set_current(self, int n):
-        if n >= self._size:
+        if n > self._size:
             return False
         self._current = n
         return True
@@ -28,7 +28,7 @@ cdef class RollingIndex:
     @current.setter
     def current(self, n):
         if not self._set_current(n):
-            raise IndexError(f"{n} is greater the {self._size}")
+            raise IndexError(f"{n} is greater than {self._size}")
 
     cdef int _next(self, bint peek):
         cdef int next_index

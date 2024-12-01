@@ -1,4 +1,4 @@
-mindref/**/*.c
+src/mindref/**.so
 *.egg-info
 **.pyc
 **/.coverage
@@ -22,3 +22,4 @@ tests/**/*.png
 **/.mypy_cache
 build
 *.aider*
+/.python-version

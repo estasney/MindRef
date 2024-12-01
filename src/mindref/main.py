@@ -1,8 +1,8 @@
 import sys
 from pathlib import Path
+
 from dotenv import load_dotenv
-from kivy import Logger
-from kivy import platform
+from kivy import Logger, platform
 from kivy.config import Config
 from kivy.core.text import LabelBase
 
@@ -64,8 +64,6 @@ def run_desktop():
     load_dotenv()
     if os.environ.get("ENVIRONMENT", "PRODUCTION") == "DEBUG":
         Config.set("modules", "inspector", "")
-        # Config.set("modules", "monitor", "")
-        # Config.set("modules", "webdebugger", "")
     else:
         Config.remove_option("modules", "monitor")
         Config.remove_option("modules", "inspector")
