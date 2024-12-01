@@ -12,14 +12,8 @@ def normalize_coordinates(double touch_x, double touch_y, double self_x, double 
         return result
 
     result[0] = CLAMP((touch_x - self_x) / self_width, 0.0, 1.0)
-
-
-    
     result[1] = CLAMP((1.0 - (touch_y - self_y) / self_height), 0.0, 1.0)
 
-
-        
-        
     return result
 
 def compute_ref_coords(double width, double height, double wX, double wY, double texture_width, double texture_height,
