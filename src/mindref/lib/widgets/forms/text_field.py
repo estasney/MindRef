@@ -1,13 +1,13 @@
 from kivy.clock import Clock
 from kivy.properties import (
-    StringProperty,
     AliasProperty,
-    ObjectProperty,
     NumericProperty,
+    ObjectProperty,
+    StringProperty,
 )
 from kivy.uix.boxlayout import BoxLayout
 
-from lib.utils import import_kv
+from mindref.lib.utils import import_kv
 
 import_kv(__file__)
 

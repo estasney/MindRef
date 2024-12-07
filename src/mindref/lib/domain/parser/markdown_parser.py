@@ -2,7 +2,8 @@ from typing import TYPE_CHECKING
 
 import mistune
 
-from lib.utils import Singleton
+from mindref.lib.utils import Singleton
+
 from .kbd_plugin import plugin_kbd
 
 if TYPE_CHECKING:
@@ -37,5 +38,4 @@ def get_md_node_text(node: "MD_TYPES"):
     if "text" in node:
         return node["text"]
 
-    else:
-        return " ".join([get_md_node_text(c) for c in node["children"]])
+    return " ".join([get_md_node_text(c) for c in node["children"]])

@@ -1,25 +1,22 @@
-from typing import TYPE_CHECKING
-
 from kivy.clock import Clock
 from kivy.graphics import Color, Line
 
-from lib.utils import import_kv, get_app
-from lib.widgets.markdown.markdown_parsing_mixin import MarkdownLabelParsingMixin
+from mindref.lib.utils import get_app, import_kv
+from mindref.lib.widgets.markdown.markdown_parsing_mixin import (
+    MarkdownLabelParsingMixin,
+)
 
 import_kv(__file__)
 
 from kivy.properties import (
     BooleanProperty,
+    ListProperty,
     ObjectProperty,
     OptionProperty,
     StringProperty,
-    ListProperty,
 )
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
-
-if TYPE_CHECKING:
-    pass
 
 
 class MarkdownTable(GridLayout):

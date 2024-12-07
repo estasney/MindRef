@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from typing import Any, Literal, NamedTuple, Optional
+from typing import Any, Literal, NamedTuple
 
 from kivy.clock import Clock
 from kivy.graphics import Color, RoundedRectangle
-from kivy.metrics import dp, sp
+from kivy.metrics import sp
 from kivy.properties import (
     BooleanProperty,
     ColorProperty,
@@ -17,11 +17,15 @@ from kivy.properties import (
 from kivy.uix.label import Label
 from kivy.utils import escape_markup
 
-from lib.utils import import_kv
-from lib.utils.caching import cache_key_color_norm, cache_key_text_contrast, kivy_cache
-from lib.utils.calculation import (
-    compute_ref_coords,
+from mindref.lib.utils import import_kv
+from mindref.lib.utils.caching import (
+    cache_key_color_norm,
+    cache_key_text_contrast,
+    kivy_cache,
+)
+from mindref.lib.utils.calculation import (
     color_str_components,
+    compute_ref_coords,
     compute_text_contrast,
 )
 
@@ -35,7 +39,7 @@ if TYPE_CHECKING:
 
 class TextSnippet(NamedTuple):
     text: str
-    highlight_tag: Optional[Literal["hl", "kbd"]]
+    highlight_tag: Literal["hl", "kbd"] | None
 
 
 class LabelHighlightInline(Label):
@@ -260,7 +264,7 @@ def get_cached_text_contrast(
     *,
     background_color: tuple[float, float, float, float],
     threshold: float,
-    highlight_color: Optional[Any] = None,
+    highlight_color: Any | None = None,
 ):
     """
     Set text as white or black depending on bg
@@ -271,7 +275,7 @@ def get_cached_text_contrast(
 @kivy_cache(cache_name="color_norm", key_func=cache_key_color_norm, limit=1000)
 def get_cached_color_norm(color) -> tuple[float, float, float, float]:
     def color_float_components(
-        s: tuple[int] | tuple[float] | "ObservableList",
+        s: tuple[int] | tuple[float] | ObservableList,
     ) -> tuple[float, float, float, float]:
         """Return r, g, b (0.0-1.0) as (0-1) and opacity as (0-1)"""
         match s:

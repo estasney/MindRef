@@ -20,8 +20,9 @@ from kivy.clock import Clock
 from kivy.lang import Builder
 
 if TYPE_CHECKING:
-    from lib.domain.protocols import AppRegistryProtocol
     from line_profiler import LineProfiler
+
+    from mindref.lib.domain.protocols import AppRegistryProtocol
 
 _LOG_LEVEL = None
 
@@ -203,8 +204,7 @@ def get_app() -> "AppRegistryProtocol":
 
 
 class SupportsGetItem(Protocol):
-    def __getitem__(self, item):
-        ...
+    def __getitem__(self, item): ...
 
 
 class EnvironContext:

@@ -9,8 +9,8 @@ from kivy.properties import (
     StringProperty,
 )
 from kivy.uix.floatlayout import FloatLayout
-from .scrolling_c import compute_overscroll
-from lib.utils import import_kv, get_app
+from mindref.lib.ext import compute_overscroll
+from mindref.lib.utils import import_kv, get_app
 
 import_kv(__file__)
 
@@ -36,7 +36,6 @@ class RefreshSymbol(FloatLayout):
             self._scheduler()
 
     def increment_spin(self, dt):
-
         self.event_dt = self.event_dt + dt
         rot = (sin(self.event_dt) * 3) - 5
         self.rotation = self.rotation + rot

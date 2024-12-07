@@ -1,14 +1,14 @@
+from collections.abc import Iterable
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from operator import attrgetter, ge, gt, le, lt
 from pathlib import Path
-from typing import Iterable, Optional
 
 from kivy import Logger
 from toolz import groupby
 
-from lib.domain.markdown_note import MarkdownNote, MarkdownNoteDict
-from lib.domain.settings import SortOptions
+from mindref.lib.domain.markdown_note import MarkdownNote, MarkdownNoteDict
+from mindref.lib.domain.settings import SortOptions
 
 
 @dataclass(slots=True)
@@ -23,7 +23,6 @@ class ResourceFile:
     def to_concrete(
         cls, fp: Path, category: str
     ) -> "NoteResourceFile | ImageResourceFile":
-
         age = fp.stat().st_mtime_ns
         fp_suffix = fp.suffix.lower() if fp.suffix else None
         match fp_suffix:
@@ -56,7 +55,7 @@ class ResourceFile:
 @dataclass(slots=True)
 class NoteResourceFile(ResourceFile):
     is_image = False
-    note_: Optional[MarkdownNote] = None
+    note_: MarkdownNote | None = None
 
     def get_note(self, refresh=False) -> MarkdownNote:
         match (self.note_, refresh):
@@ -90,7 +89,7 @@ class ImageResourceFile(ResourceFile):
 @dataclass
 class CategoryResourceFiles:
     category: str
-    image: Optional[ImageResourceFile]
+    image: ImageResourceFile | None
     sort_strategy: SortOptions
     ascending: bool
     notes: list[NoteResourceFile] = field(default_factory=list)
@@ -103,7 +102,6 @@ class CategoryResourceFiles:
         sort_strategy: SortOptions,
         ascending: bool,
     ):
-
         match sort_strategy:
             case "Creation Date":
                 sorted_files = sorted(
@@ -243,10 +241,9 @@ class CategoryResourceFiles:
         return self
 
     def get_md_note_metas(self) -> list[MarkdownNoteDict]:
-
         return [note.get_note().to_dict() for note in self.notes]
 
-    def get_image_uri(self) -> Optional[Path]:
+    def get_image_uri(self) -> Path | None:
         if img := self.image:
             return img.path
 

@@ -1,14 +1,13 @@
 from kivy.logger import Logger
 from kivy.uix.dropdown import DropDown
 
-from lib.utils import import_kv
-from lib.widgets.buttons.buttons import ThemedButton
+from mindref.lib.utils import import_kv
+from mindref.lib.widgets.buttons.buttons import ThemedButton
 
 import_kv(__file__)
 
 
-class NoteActionDropDown(DropDown):
-    ...
+class NoteActionDropDown(DropDown): ...
 
 
 class NoteActionButton(ThemedButton):
@@ -19,8 +18,7 @@ class NoteActionButton(ThemedButton):
         fbind("on_release", self.open_dropdown)
         self.register_event_type("on_select")
 
-    def on_select(self, value):
-        ...
+    def on_select(self, value): ...
 
     def handle_select(self, _, value):
         Logger.info(f"{type(self).__name__}: dispatching 'on_select' : '{value}'")

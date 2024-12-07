@@ -9,27 +9,28 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from kivy import Logger
-from lib.adapters.notes.note_repository import (
+
+from mindref.lib.adapters.notes.note_repository import (
     AbstractNoteRepository,
 )
-from lib.domain.events import (
+from mindref.lib.domain.events import (
     DiscoverCategoryEvent,
     NotesQueryErrorFailureEvent,
     NotesQueryNotSetFailureEvent,
 )
-from lib.domain.markdown_note import MarkdownNote
-from lib.domain.note_resource import CategoryResourceFiles
-from lib.domain.settings import SortOptions
-from lib.utils import def_cb, sch_cb, schedulable
-from lib.utils.index import RollingIndex
-from lib.widgets.typeahead.typeahead_dropdown import Suggestion
+from mindref.lib.domain.markdown_note import MarkdownNote
+from mindref.lib.domain.note_resource import CategoryResourceFiles
+from mindref.lib.domain.settings import SortOptions
+from mindref.lib.utils import def_cb, sch_cb, schedulable
+from mindref.lib.utils.index import RollingIndex
+from mindref.lib.widgets.typeahead.typeahead_dropdown import Suggestion
 
 if TYPE_CHECKING:
     from os import PathLike
 
-    from lib.domain.editable import EditableNote
-    from lib.domain.markdown_note import MarkdownNoteDict
-    from lib.domain.protocols import GetApp
+    from mindref.lib.domain.editable import EditableNote
+    from mindref.lib.domain.markdown_note import MarkdownNoteDict
+    from mindref.lib.domain.protocols import GetApp
 
 TGetCategoriesCallback = Callable[[Iterable[str]], None]
 
@@ -494,7 +495,6 @@ class FileSystemNoteRepository(AbstractNoteRepository):
                 sch_cb(write_note, after_write)
                 Logger.info(f"{type(self).__name__}: save_note - new note")
             case False, None:
-
                 fp = note.md_note.filepath
                 write_note = schedulable(
                     fp.write_text, data=note.edit_text, encoding="utf-8"

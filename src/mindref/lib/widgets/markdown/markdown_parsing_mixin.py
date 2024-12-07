@@ -6,20 +6,18 @@ from kivy import Logger
 from kivy.uix.layout import Layout
 from kivy.uix.widget import Widget
 
-from lib.domain.md_parser_types import (
+from mindref.lib.domain.md_parser_types import (
     MD_INLINE_TYPES,
-    MdTextStrong,
     MdTextEmphasis,
+    MdTextStrong,
 )
-from lib.widgets.behavior.inline_behavior import TextSnippet
+from mindref.lib.widgets.behavior.inline_behavior import TextSnippet
 
 
 class VisitorProtocol(Protocol):
-    def pop(self):
-        ...
+    def pop(self): ...
 
-    def push(self, node: Widget | Layout):
-        ...
+    def push(self, node: Widget | Layout): ...
 
 
 class MarkdownLabelParsingProtocol(Protocol):
@@ -29,11 +27,9 @@ class MarkdownLabelParsingProtocol(Protocol):
 
     __name__: str
 
-    def handle_intercept(self, node: "MD_INLINE_TYPES"):
-        ...
+    def handle_intercept(self, node: MD_INLINE_TYPES): ...
 
-    def handle_intercept_exit(self):
-        ...
+    def handle_intercept_exit(self): ...
 
 
 class MarkdownLabelParsingMixin:
@@ -48,7 +44,7 @@ class MarkdownLabelParsingMixin:
 
     """
 
-    snippets: list["TextSnippet"]
+    snippets: list[TextSnippet]
     open_bbcode_tag: str
 
     def __new__(cls: MarkdownLabelParsingProtocol, *args, **kwargs):
@@ -61,7 +57,6 @@ class MarkdownLabelParsingMixin:
         self.open_bbcode_tag = ""
 
     def visit(self, node: MD_INLINE_TYPES) -> MD_INLINE_TYPES | None:
-
         match node:
             case {"type": "strong", "children": list()}:
                 matched_node = cast(MdTextStrong, node)
@@ -69,14 +64,14 @@ class MarkdownLabelParsingMixin:
                 for child in matched_node["children"]:
                     if unh := self.visit(child):
                         return unh
-                return
+                return None
             case {"type": "emphasis", "children": list()}:
                 matched_node = cast(MdTextEmphasis, node)
                 self.open_bbcode_tag = "i"
                 for child in matched_node["children"]:
                     if unh := self.visit(child):
                         return unh
-                return
+                return None
             case {
                 "type": "text" | "kbd" | "codespan" | "inline_html" as span_type,
                 "text": str(),
@@ -94,21 +89,21 @@ class MarkdownLabelParsingMixin:
                             *self.snippets[:],
                             TextSnippet(text, highlight_tag=None),
                         ]
-                        return
+                        return None
                     case "kbd":
                         self.snippets = [
                             *self.snippets[:],
                             TextSnippet(text, highlight_tag="kbd"),
                         ]
 
-                        return
+                        return None
                     case "codespan":
                         self.snippets = [
                             *self.snippets[:],
                             TextSnippet(text, highlight_tag="hl"),
                         ]
 
-                        return
+                        return None
                     case _:
                         Logger.warning(
                             f"{type(self).__name__}: visit - unhandled highlight type {span_type}"
@@ -145,7 +140,7 @@ class WidgetIntercept:
         self.visitor_push = visitor.push
         self.visitor_pop = visitor.pop
 
-    def intercept_push(self, widget: "MD_INLINE_TYPES"):
+    def intercept_push(self, widget: MD_INLINE_TYPES):
         self.widget.handle_intercept(widget)
         return False
 

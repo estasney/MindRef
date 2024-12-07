@@ -77,7 +77,8 @@ clean-all : clean-aar clean-apk clean-bytecode clean-builds clean-dists clean-cy
 	cp $(UTIL_AAR) .
 
 cythonize:
-	find ./src -name "*.pyx" -exec uv run python -m cython {} --3str \;
+	uv run cythonize -i -f src/mindref/lib/ext/ext.pyx -3
+
 
 build-apk :  *.aar clean-bytecode clean-cythonized
 	. venv/bin/activate \

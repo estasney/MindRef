@@ -22,11 +22,12 @@ from kivy.properties import (
     StringProperty,
 )
 from kivy.uix.settings import Settings
-from lib import DisplayState
-from lib.adapters.atlas.fs.fs_atlas_repository import AtlasService
-from lib.adapters.editor.fs.fs_editor_repository import FileSystemEditor
-from lib.adapters.notes.note_repository import NoteRepositoryFactory
-from lib.domain.events import (
+
+from mindref.lib import DisplayState
+from mindref.lib.adapters.atlas.fs.fs_atlas_repository import AtlasService
+from mindref.lib.adapters.editor.fs.fs_editor_repository import FileSystemEditor
+from mindref.lib.adapters.notes.note_repository import NoteRepositoryFactory
+from mindref.lib.domain.events import (
     AddNoteEvent,
     BackButtonEvent,
     CancelEditEvent,
@@ -45,12 +46,12 @@ from lib.domain.events import (
     SaveNoteEvent,
     TypeAheadQueryEvent,
 )
-from lib.domain.settings import app_settings
-from lib.plugins import PluginManager
-from lib.service.registry import Registry
-from lib.utils import attrsetter, get_app, sch_cb, schedulable
-from lib.utils.triggers import trigger_factory
-from lib.widgets.screens.manager import NoteAppScreenManager
+from mindref.lib.domain.settings import app_settings
+from mindref.lib.plugins import PluginManager
+from mindref.lib.service.registry import Registry
+from mindref.lib.utils import attrsetter, get_app, sch_cb, schedulable
+from mindref.lib.utils.triggers import trigger_factory
+from mindref.lib.widgets.screens.manager import NoteAppScreenManager
 
 
 class MindRefApp(App):
@@ -163,8 +164,7 @@ class MindRefApp(App):
                     category=self.note_category, idx=self.note_service.index_size()
                 )
 
-    def on_paginate(self, *args, **kwargs) -> None:
-        ...
+    def on_paginate(self, *args, **kwargs) -> None: ...
 
     def select_index(self, value: int):
         self.registry.set_note_index(value)

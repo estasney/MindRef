@@ -1,5 +1,3 @@
-from typing import Optional
-
 from kivy import Logger
 from kivy.properties import AliasProperty, ObjectProperty, StringProperty
 from kivy.uix.gridlayout import GridLayout
@@ -8,7 +6,7 @@ from pygments.formatters.bbcode import BBCodeFormatter
 from pygments.lexers import PythonLexer
 from pygments.util import ClassNotFound
 
-from lib.utils import import_kv
+from mindref.lib.utils import import_kv
 
 import_kv(__file__)
 
@@ -30,7 +28,7 @@ class MarkdownCode(GridLayout):
         _get_text_content, _set_text_content, bind=["_text_content"]
     )
 
-    def __init__(self, lexer: Optional[str], **kwargs):
+    def __init__(self, lexer: str | None, **kwargs):
         super(MarkdownCode, self).__init__(**kwargs)
         self.styler = styles.get_style_by_name("paraiso-dark")
         self.formatter = BBCodeFormatter(style=self.styler)

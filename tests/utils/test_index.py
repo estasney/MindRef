@@ -1,7 +1,9 @@
-import pytest
 from contextlib import nullcontext as does_not_raise
-from lib.utils.index import RollingIndex
 from functools import partial
+
+import pytest
+
+from mindref.lib.utils.index import RollingIndex
 
 
 @pytest.fixture

@@ -1,16 +1,16 @@
+from collections.abc import Callable
 from typing import (
+    TYPE_CHECKING,
     Any,
-    Callable,
     Literal,
     NewType,
     Protocol,
-    TYPE_CHECKING,
-    runtime_checkable,
     overload,
+    runtime_checkable,
 )
 
 if TYPE_CHECKING:
-    from lib.adapters.notes.android.interface import OnDocumentCallback
+    from mindref.lib.adapters.notes.android.interface import OnDocumentCallback
 
 ACTIVITY_CLASS_NAME = "org.kivy.android.PythonActivity"
 ACTIVITY_CLASS_NAMESPACE = "org/kivy/android/PythonActivity"
@@ -60,8 +60,7 @@ class FileDescriptorProtocol(Protocol):
 
 # noinspection PyUnusedLocal
 class AutoCloseInputStreamProtocol(Protocol):
-    def __init__(self, pfd: "ParcelFileDescriptorProtocol"):
-        ...
+    def __init__(self, pfd: "ParcelFileDescriptorProtocol"): ...
 
     close: Callable[[], None]
     read: Callable[[], int]
@@ -82,8 +81,7 @@ class ContextProtocol(Protocol):
     getContentResolver: Callable[[ContentResolverProtocol], None]
 
 
-class AndroidApplicationProtocol(Protocol):
-    ...
+class AndroidApplicationProtocol(Protocol): ...
 
 
 class ActivityProtocol(Protocol):
@@ -105,19 +103,15 @@ class MindRefUtilsCallback(Protocol):
 
 class MindRefUtilsCallbackPyMediator(Protocol):
     @overload
-    def __call__(self, _key: int, category: str):
-        ...
+    def __call__(self, _key: int, category: str): ...
 
     @overload
-    def __call__(self, _key: int, categories: list[str]):
-        ...
+    def __call__(self, _key: int, categories: list[str]): ...
 
     @overload
-    def __call__(self, _key: int):
-        ...
+    def __call__(self, _key: int): ...
 
-    def __call__(self, _key, *args):
-        ...
+    def __call__(self, _key, *args): ...
 
 
 # noinspection PyUnusedLocal
@@ -128,25 +122,18 @@ class MindRefUtilsProtocol(Protocol):
 
     def __init__(
         self, externalStorageRoot: str, appStorageRoot: str, context: ContextProtocol
-    ):
-        ...
+    ): ...
 
-    def setMindRefCallback(self, callback: MindRefUtilsCallback):
-        ...
+    def setMindRefCallback(self, callback: MindRefUtilsCallback): ...
 
-    def getNoteCategories(self, key: int):
-        ...
+    def getNoteCategories(self, key: int): ...
 
-    def copyToAppStorage(self, key: int):
-        ...
+    def copyToAppStorage(self, key: int): ...
 
-    def copyToManagedExternal(self, key: int, sourceUri: str, targetRoot: str):
-        ...
+    def copyToManagedExternal(self, key: int, sourceUri: str, targetRoot: str): ...
 
     def copyToExternalStorage(
         self, key: int, sourcePath: str, category: str, name: str, mimeType: str
-    ):
-        ...
+    ): ...
 
-    def createCategory(self, key: int, category: str):
-        ...
+    def createCategory(self, key: int, category: str): ...

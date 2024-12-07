@@ -1,7 +1,7 @@
 import abc
 
-from lib.adapters.notes.fs.fs_note_repository import FileSystemNoteRepository
-from lib.adapters.notes.note_repository import AbstractNoteRepository
+from mindref.lib.adapters.notes.fs.fs_note_repository import FileSystemNoteRepository
+from mindref.lib.adapters.notes.note_repository import AbstractNoteRepository
 
 
 class AbstractUnitOfWork(abc.ABC):

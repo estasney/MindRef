@@ -1,17 +1,14 @@
-from typing import Literal, TYPE_CHECKING
+from typing import Literal
 
 from kivy.properties import ObjectProperty
 from kivy.uix.anchorlayout import AnchorLayout
 
-from lib.domain.events import CreateCategoryEvent
-from lib.utils import import_kv, get_app, sch_cb, schedulable
+from mindref.lib.domain.events import CreateCategoryEvent
+from mindref.lib.utils import get_app, import_kv, sch_cb, schedulable
 
 import_kv(__file__)
 
 MENU_BUTTON_NAMES = Literal["Settings", "New Category"]
-
-if TYPE_CHECKING:
-    pass
 
 
 class AppMenu(AnchorLayout):
@@ -22,8 +19,7 @@ class AppMenu(AnchorLayout):
         self.register_event_type("on_release")
         self.register_event_type("on_dismiss")
 
-    def on_dismiss(self, *_args):
-        ...
+    def on_dismiss(self, *_args): ...
 
     def on_release(self, release: MENU_BUTTON_NAMES):
         app = get_app()

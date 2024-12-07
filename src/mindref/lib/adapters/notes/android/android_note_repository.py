@@ -1,13 +1,11 @@
+from collections.abc import Callable, Iterable
 from enum import Flag, auto
 from functools import partial
 from os import PathLike
 from pathlib import Path
 from typing import (
-    Any,
-    Callable,
-    Iterable,
-    Optional,
     TYPE_CHECKING,
+    Any,
     Literal,
     cast,
 )
@@ -15,21 +13,23 @@ from typing import (
 from kivy import Logger
 from kivy.clock import Clock, mainthread
 
-from lib.adapters.notes.android.interface import AndroidStorageManager
-from lib.adapters.notes.android.annotations import MIME_TYPE
-from lib.adapters.notes.fs.fs_note_repository import (
+from mindref.lib.adapters.notes.android.annotations import MIME_TYPE
+from mindref.lib.adapters.notes.android.interface import AndroidStorageManager
+from mindref.lib.adapters.notes.fs.fs_note_repository import (
     FileSystemNoteRepository,
     TGetCategoriesCallback,
 )
-from lib.domain.events import DiscoverCategoryEvent
-from lib.domain.markdown_note import MarkdownNote
-from lib.domain.settings import SortOptions
-from lib.utils import fmt_attrs, get_app, sch_cb, schedulable
+from mindref.lib.domain.events import DiscoverCategoryEvent
+from mindref.lib.domain.markdown_note import MarkdownNote
+from mindref.lib.domain.settings import SortOptions
+from mindref.lib.utils import fmt_attrs, get_app, sch_cb, schedulable
 
 if TYPE_CHECKING:
-    from lib.domain.editable import EditableNote
-    from lib.domain.protocols import GetApp
-    from lib.adapters.notes.android.annotations import MindRefUtilsCallbackPyMediator
+    from mindref.lib.adapters.notes.android.annotations import (
+        MindRefUtilsCallbackPyMediator,
+    )
+    from mindref.lib.domain.editable import EditableNote
+    from mindref.lib.domain.protocols import GetApp
 
 CodeNames = Literal[
     "MIRROR",
@@ -100,8 +100,8 @@ class AndroidNoteRepository(FileSystemNoteRepository):
         Android content URI
     """
 
-    _storage_path: Optional[Path]
-    _native_path: Optional[str]
+    _storage_path: Path | None
+    _native_path: str | None
     _mediator_callbacks: dict[int, Callable]
     py_mediator: "MindRefUtilsCallbackPyMediator"
 
@@ -180,7 +180,7 @@ class AndroidNoteRepository(FileSystemNoteRepository):
             self._native_path, self._storage_path, key
         )
 
-    def discover_categories(self, on_complete: Optional[Callable[[], None]], *args):
+    def discover_categories(self, on_complete: Callable[[], None] | None, *args):
         """
         Find Categories, and associated Note Files
         For Each Category, Found, Pushes a DiscoverCategoryEvent.
@@ -202,7 +202,7 @@ class AndroidNoteRepository(FileSystemNoteRepository):
         """
 
         def after_reflect_external_storage_files(
-            categories: Iterable[str], on_complete_inner: Optional[Callable], *_iargs
+            categories: Iterable[str], on_complete_inner: Callable | None, *_iargs
         ):
             app = self.get_app()
             for category_name in categories:
@@ -335,10 +335,10 @@ class AndroidNoteRepository(FileSystemNoteRepository):
             img_mime = MIME_TYPE("image/*")
             doc_mime = MIME_TYPE("document/*")
             any_mime = MIME_TYPE("*/*")
-            if any(any((ef.endswith(ie) for ie in image_exts)) for ef in filters):
+            if any(any(ef.endswith(ie) for ie in image_exts) for ef in filters):
                 result.add(img_mime)
 
-            if any(any((ef.endswith(de) for de in doc_exts)) for ef in filters):
+            if any(any(ef.endswith(de) for de in doc_exts) for ef in filters):
                 result.add(doc_mime)
             if not result:
                 result.add(any_mime)

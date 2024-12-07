@@ -1,5 +1,5 @@
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
 
 from kivy import Logger
 from kivy.metrics import dp
@@ -7,8 +7,8 @@ from kivy.properties import ListProperty, NumericProperty, StringProperty
 from kivy.uix.dropdown import DropDown
 from kivy.weakproxy import WeakProxy
 
-from lib.utils import import_kv
-from lib.widgets.buttons.buttons import ThemedButton
+from mindref.lib.utils import import_kv
+from mindref.lib.widgets.buttons.buttons import ThemedButton
 
 import_kv(__file__)
 

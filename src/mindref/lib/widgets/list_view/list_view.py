@@ -13,10 +13,10 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
 
-from lib.utils import fmt_items, import_kv, sch_cb, schedulable
+from mindref.lib.utils import fmt_items, import_kv, sch_cb, schedulable
 
 if TYPE_CHECKING:
-    from lib.domain.markdown_note import MarkdownNoteDict
+    from mindref.lib.domain.markdown_note import MarkdownNoteDict
 
 import_kv(__file__)
 
@@ -52,10 +52,9 @@ class ListView(GridLayout):
             Logger.debug(
                 f"{type(self).__name__}: add_item - {fmt_items(note_data, 'title', 'idx')}"
             )
-            return
-        else:
-            Logger.info(f"{type(self).__name__}: add_item - complete - cancel trigger")
-            return False
+            return None
+        Logger.info(f"{type(self).__name__}: add_item - complete - cancel trigger")
+        return False
 
     def on_meta_notes(self, _, value: list["MarkdownNoteDict"]):
         Logger.info(f"{type(self).__name__} : on_meta_notes : {len(value)} items")

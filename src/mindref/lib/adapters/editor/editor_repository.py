@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import abc
 
-from lib.domain.editable import EditableNote
-from lib.domain.markdown_note import MarkdownNote
-from lib.domain.protocols import AppRegistryProtocol, GetApp
+from mindref.lib.domain.editable import EditableNote
+from mindref.lib.domain.markdown_note import MarkdownNote
+from mindref.lib.domain.protocols import AppRegistryProtocol, GetApp
 
 
 class AbstractEditorRepository(abc.ABC):
@@ -19,17 +19,13 @@ class AbstractEditorRepository(abc.ABC):
         self.get_app = get_app
 
     @abc.abstractmethod
-    def new_note(self, category: str, idx: int) -> EditableNote:
-        ...
+    def new_note(self, category: str, idx: int) -> EditableNote: ...
 
     @abc.abstractmethod
-    def edit_note(self, note: MarkdownNote) -> EditableNote:
-        ...
+    def edit_note(self, note: MarkdownNote) -> EditableNote: ...
 
     @abc.abstractmethod
-    def cancel_note(self, note: EditableNote):
-        ...
+    def cancel_note(self, note: EditableNote): ...
 
     @abc.abstractmethod
-    def edit_current_note(self) -> EditableNote:
-        ...
+    def edit_current_note(self) -> EditableNote: ...

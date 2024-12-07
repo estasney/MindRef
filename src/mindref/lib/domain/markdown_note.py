@@ -2,23 +2,22 @@ from __future__ import annotations
 
 import io
 from _operator import itemgetter
+from collections.abc import Generator
 from dataclasses import asdict, dataclass
 from os import PathLike
 from pathlib import Path
-from typing import Generator, Optional, Protocol, TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING, Protocol, TypedDict
 
-from lib.domain.parser.markdown_parser import MarkdownParser
+from mindref.lib.domain.parser.markdown_parser import MarkdownParser
 
 if TYPE_CHECKING:
-    from lib.domain.md_parser_types import MD_DOCUMENT, MdHeading, MdBlockCode
+    from mindref.lib.domain.md_parser_types import MD_DOCUMENT, MdBlockCode, MdHeading
 
 
 class FileLikeProtocol(Protocol):
-    def read(self):
-        ...
+    def read(self): ...
 
-    def write(self):
-        ...
+    def write(self): ...
 
 
 class MarkdownNoteDict(TypedDict):
@@ -26,8 +25,8 @@ class MarkdownNoteDict(TypedDict):
     text: str
     title: str
     idx: int
-    filepath: Optional[Path]
-    document: "MD_DOCUMENT"
+    filepath: Path | None
+    document: MD_DOCUMENT
 
 
 @dataclass
@@ -37,12 +36,12 @@ class MarkdownNote:
     text: str
     title: str
     idx: int
-    filepath: Optional[Path]
-    document: "MD_DOCUMENT"
+    filepath: Path | None
+    document: MD_DOCUMENT
 
     def __repr__(self):
         attrs = ("category", "title", "idx", "filepath")
-        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+        return f"{type(self).__name__}({','.join(f'{p}={getattr(self, p)}' for p in attrs)})"
 
     def to_dict(self) -> MarkdownNoteDict:
         return asdict(self, dict_factory=MarkdownNoteDict)
@@ -71,7 +70,7 @@ class MarkdownNote:
         idx: int,
         buffer: io.StringIO,
         title: str,
-        filepath: Optional[Path],
+        filepath: Path | None,
     ):
         text = buffer.read()
         document = cls.parser.parse(text)
@@ -87,9 +86,9 @@ class MarkdownNote:
 
     @classmethod
     def _get_title_from_doc(
-        cls, document: "MD_DOCUMENT"
-    ) -> tuple["MD_DOCUMENT", Optional[str]]:
-        def get_header_blocks() -> Generator["MdHeading", None, None]:
+        cls, document: MD_DOCUMENT
+    ) -> tuple[MD_DOCUMENT, str | None]:
+        def get_header_blocks() -> Generator[MdHeading, None, None]:
             return (node for node in document if node["type"] == "heading")
 
         headers = get_header_blocks()
@@ -107,6 +106,6 @@ class MarkdownNote:
 
     @classmethod
     def _get_block_code(
-        cls, document: "MD_DOCUMENT"
-    ) -> Generator["MdBlockCode", None, None]:
+        cls, document: MD_DOCUMENT
+    ) -> Generator[MdBlockCode, None, None]:
         return (node for node in document if node["type"] == "block_code")

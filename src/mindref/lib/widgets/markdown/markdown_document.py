@@ -6,11 +6,11 @@ from kivy.properties import (
 )
 from kivy.uix.scrollview import ScrollView
 
-from lib.utils import import_kv
-from lib.widgets.markdown.markdown_widget_parser import MarkdownWidgetParser
+from mindref.lib.utils import import_kv
+from mindref.lib.widgets.markdown.markdown_widget_parser import MarkdownWidgetParser
 
 if TYPE_CHECKING:
-    from lib.domain.markdown_note import MarkdownNoteDict
+    from mindref.lib.domain.markdown_note import MarkdownNoteDict
 
 import_kv(__file__)
 

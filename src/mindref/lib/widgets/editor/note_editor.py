@@ -8,7 +8,7 @@ from kivy.properties import (
 from kivy.uix.boxlayout import BoxLayout
 from pygments.lexers import get_lexer_by_name
 
-from lib.utils import import_kv, attrsetter, sch_cb
+from mindref.lib.utils import attrsetter, import_kv, sch_cb
 
 import_kv(__file__)
 
@@ -44,11 +44,10 @@ class NoteEditor(BoxLayout):
         self.register_event_type("on_cancel")
 
     def handle_init_text(self, *_args):
-        editor: "CodeInput" = self.editor
+        editor: CodeInput = self.editor
         editor.text = self.init_text
 
     def on_mode(self, *_args):
-
         if self.mode == "add":
             self.add_widget(self.title_widget, len(self.children))
         else:
@@ -67,11 +66,9 @@ class NoteEditor(BoxLayout):
         else:
             self.dispatch("on_save", **{"text": self.editor.text, "title": None})
 
-    def on_save(self, *args, **kwargs):
-        ...
+    def on_save(self, *args, **kwargs): ...
 
-    def on_cancel(self, *args, **kwargs):
-        ...
+    def on_cancel(self, *args, **kwargs): ...
 
 
 class NoteTitleInput(BoxLayout):

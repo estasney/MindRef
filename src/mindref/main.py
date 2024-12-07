@@ -52,7 +52,7 @@ def run_android():
 
     Logger.info("Running Android")
 
-    from app import MindRefApp
+    from mindref.app import MindRefApp
 
     app = MindRefApp()
     app.run()
@@ -70,7 +70,7 @@ def run_desktop():
 
     Config.set("input", "mouse", "mouse,disable_multitouch")
 
-    from app import MindRefApp
+    from mindref.app import MindRefApp
 
     app = MindRefApp()
 

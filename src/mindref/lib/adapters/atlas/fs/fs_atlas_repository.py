@@ -5,17 +5,20 @@ import os
 import re
 import shutil
 import tempfile
-from _operator import itemgetter
+from operator import itemgetter
 from pathlib import Path
-from typing import NamedTuple, NewType, Optional, Sequence, Union
+from typing import TYPE_CHECKING, ClassVar, NamedTuple, NewType
 
 import PIL.Image
 from kivy.atlas import Atlas as KivyAtlas
 
-from lib.adapters.atlas.atlas_repository import AbstractAtlasRepository
-from lib.utils import EnvironContext, LazyLoaded
+from mindref.lib.adapters.atlas import AbstractAtlasRepository
+from mindref.lib.utils import EnvironContext, LazyLoaded
 
-ImgParamType = Union[str, Path, PIL.Image.Image]
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+type ImgParamType = str | Path | PIL.Image.Image
 
 
 class AtlasItem(NamedTuple):
@@ -39,12 +42,12 @@ class AtlasService(AbstractAtlasRepository):
     - Provides path for kivy usage
     """
 
-    builtin_atlases = {"icons", "textures"}
+    builtin_atlases: ClassVar[set[str]] = {"icons", "textures"}
     atlases: LazyLoaded[list[AtlasItem]] = LazyLoaded()
-    _storage_path: Optional[Path]
+    _storage_path: Path | None
     _instance = None
 
-    def __init__(self, storage_path: Optional[Path | str] = None):
+    def __init__(self, storage_path: Path | str | None = None):
         self.storage_path = storage_path
         self._atlases = None
 
@@ -58,12 +61,12 @@ class AtlasService(AbstractAtlasRepository):
             raise ValueError(f"Expected {item} to be of form atlas_name.image_name")
         atlas_name, image_name = item.split(".")
         atlas_data = self._read_atlas(atlas_name)
-        image_names = set(name for name_grp in atlas_data.values() for name in name_grp)
+        image_names = {name for name_grp in atlas_data.values() for name in name_grp}
         return image_name in image_names
 
     @property
-    def storage_path(self):
-        if not self._storage_path:
+    def storage_path(self) -> Path:
+        if self._storage_path is None:
             raise AttributeError("Storage Path not set")
         return self._storage_path
 
@@ -72,13 +75,15 @@ class AtlasService(AbstractAtlasRepository):
         self._storage_path = Path(value)
 
     @atlases
-    def _discover_atlases(self):
-        atlas = []
+    def _discover_atlases(self) -> list[AtlasItem]:
+        """
+        Discover all atlases in storage path
+        """
+        atlas: list[AtlasItem] = []
         for item in self.storage_path.iterdir():
-            if item.is_dir():
-                if af := next(item.glob(f"*.atlas"), None):
-                    atlas.append(AtlasItem(item.stem, af))
-        missed = self.builtin_atlases - set((name for name, _ in atlas))
+            if item.is_dir() and (af := next(item.glob("*.atlas"), None)):
+                atlas.append(AtlasItem(item.stem, af))
+        missed = self.builtin_atlases - {name for name, _ in atlas}
         if not missed:
             return atlas
         for missed_atlas in missed:
@@ -91,12 +96,10 @@ class AtlasService(AbstractAtlasRepository):
             atlas.append(AtlasItem(missed_atlas, fp))
         return atlas
 
-    def _match_atlas(self, atlas_name: str):
+    def _match_atlas(self, atlas_name: str) -> AtlasItem:
         try:
-            matched = next(atlas for atlas in self.atlases if atlas.name == atlas_name)
-            return matched
+            return next(atlas for atlas in self.atlases if atlas.name == atlas_name)
         except StopIteration as e:
-
             raise KeyError(f"{atlas_name} does not exist") from e
 
     def _read_atlas(self, atlas_name: str) -> AtlasFileData:
@@ -118,8 +121,8 @@ class AtlasService(AbstractAtlasRepository):
         images: Sequence[Path | str],
         image_names: Sequence[str],
         atlas_name: str,
-        atlas_size: Optional[tuple[int, int]] = None,
-        padding=2,
+        atlas_size: tuple[int, int] | None = None,
+        padding: int = 2,
     ):
         """
         Lazy implementation that will create an n+1 atlas image large enough to contain the passed images.
@@ -149,13 +152,9 @@ class AtlasService(AbstractAtlasRepository):
 
         def get_max_dimension(data: AtlasFileData):
             w_max, h_max = 0, 0
-            for img, img_names in data.items():
-                w_max = max(
-                    w_max, max((get_width(img_names[k])) for k in img_names.keys())
-                )
-                h_max = max(
-                    h_max, max((get_height(img_names[k])) for k in img_names.keys())
-                )
+            for _, img_names in data.items():
+                w_max = max(w_max, *(get_width(img_names[k]) for k in img_names))
+                h_max = max(h_max, *(get_height(img_names[k]) for k in img_names))
             return w_max, h_max
 
         def get_last_image(data: AtlasFileData) -> int:
@@ -172,9 +171,9 @@ class AtlasService(AbstractAtlasRepository):
 
         def ensure_name_integrity(data: AtlasFileData) -> bool:
             img_name_set = set(image_names)
-            img_names = set(
-                (name for name_grp in (v for v in data.values()) for name in name_grp)
-            )
+            img_names = {
+                name for name_grp in (v for v in data.values()) for name in name_grp
+            }
             matched = img_names & img_name_set
             if matched:
                 raise KeyError(f"{', '.join(matched)} are already preset in the atlas!")
@@ -190,7 +189,7 @@ class AtlasService(AbstractAtlasRepository):
         temp_dir_container = tempfile.TemporaryDirectory()
         temp_dir_atlas = Path(temp_dir_container.name) / "kv_temp_atlas"
 
-        with EnvironContext(dict(KIVY_NO_ARGS="1")):
+        with EnvironContext({"KIVY_NO_ARGS": "1"}):
             out_name, meta = KivyAtlas.create(
                 os.fspath(temp_dir_atlas), images, (atlas_w, atlas_w)
             )
@@ -244,8 +243,7 @@ class AtlasService(AbstractAtlasRepository):
         atlas_img_path = atlas_path / matched_atlas_img
         img_obj = PIL.Image.open(atlas_img_path)
         x, y, w, h = matched_img_size
-        cropped_im = img_obj.crop((x, (img_obj.height - h - y), x + w, y + h))
-        return cropped_im
+        return img_obj.crop((x, (img_obj.height - h - y), x + w, y + h))
 
     def _match_atlas_member(
         self, atlas_data: AtlasFileData, atlas_name: str, name: str

@@ -1,12 +1,13 @@
-from typing import Optional
-
 from kivy import Logger
 from kivy.properties import NumericProperty, ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
 
-from lib.domain.events import TypeAheadQueryEvent
-from lib.utils import import_kv, sch_cb, get_app, attrsetter
-from lib.widgets.typeahead.typeahead_dropdown import Suggestion, TypeAheadDropDown
+from mindref.lib.domain.events import TypeAheadQueryEvent
+from mindref.lib.utils import attrsetter, get_app, import_kv, sch_cb
+from mindref.lib.widgets.typeahead.typeahead_dropdown import (
+    Suggestion,
+    TypeAheadDropDown,
+)
 
 import_kv(__file__)
 
@@ -18,7 +19,7 @@ class TypeAhead(BoxLayout):
 
     typer = ObjectProperty()
     min_query_length = NumericProperty(3)
-    dd: Optional[TypeAheadDropDown]
+    dd: TypeAheadDropDown | None
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -66,7 +67,7 @@ class TypeAhead(BoxLayout):
             self.dd.unbind(on_select=self.handle_select)
             self.dd = None
 
-    def handle_suggestions(self, suggestions: Optional[list[Suggestion]]):
+    def handle_suggestions(self, suggestions: list[Suggestion] | None):
         Logger.debug("TypeAhead: Handle Suggestions")
         if not self.dd:
             self.dd = TypeAheadDropDown()

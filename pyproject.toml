@@ -40,9 +40,7 @@ mindref = "mindref.main:main"
 
 [tool.setuptools]
 ext-modules = [
-    { name = "mindref.lib.utils.calculation", sources = ["src/mindref/lib/utils/calculation.c"] },
-    { name = "mindref.lib.utils.index", sources = ["src/mindref/lib/utils/index.c"] },
-    { name = "mindref.lib.widgets.effects.scrolling_c", sources = ["src/mindref/lib/widgets/effects/scrolling_c.c"] }
+    { name = "mindref.lib.ext.ext", sources = ["src/mindref/lib/ext/ext.c"] }
 ]
 
 [tool.uv]

@@ -1,26 +1,26 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from lib.domain.markdown_note import MarkdownNote
+    from mindref.lib.domain.markdown_note import MarkdownNote
 
 
 @dataclass
 class EditableNote:
     category: str
     idx: int
-    md_note: Optional["MarkdownNote"]
+    md_note: MarkdownNote | None
     edit_title: str = field(default="")
     edit_text: str = field(default="")
 
     def __repr__(self):
         attrs = ("category", "idx", "edit_title")
-        return f"{type(self).__name__}({','.join((f'{p}={getattr(self, p)}' for p in attrs))})"
+        return f"{type(self).__name__}({','.join(f'{p}={getattr(self, p)}' for p in attrs)})"
 
     @classmethod
-    def from_markdown_note(cls, note: "MarkdownNote"):
+    def from_markdown_note(cls, note: MarkdownNote):
         return EditableNote(
             category=note.category,
             idx=note.idx,

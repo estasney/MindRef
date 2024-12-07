@@ -1,6 +1,6 @@
 from kivy.uix.gridlayout import GridLayout
 
-from lib.utils import import_kv
+from mindref.lib.utils import import_kv
 
 import_kv(__file__)
 

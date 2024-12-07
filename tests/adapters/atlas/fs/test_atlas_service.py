@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from lib.adapters.atlas.fs.fs_atlas_repository import AtlasService
+from mindref.lib.adapters.atlas.fs.fs_atlas_repository import AtlasService
 
 
 @pytest.mark.parametrize("atlas_type", ["mono", "multi"])
@@ -69,12 +69,15 @@ def test_append_atlas(stored_atlas, atlas_type, n, img_name, duplicated, img_mak
 
     if duplicated:
         with pytest.raises(KeyError):
-            service.save_to_atlas(
-                [app_img_fp],
-                [app_img_name],
-                atlas_name="test_atlas",
-                atlas_size=(512, 512),
-            ), "Duplicate not caught"
+            (
+                service.save_to_atlas(
+                    [app_img_fp],
+                    [app_img_name],
+                    atlas_name="test_atlas",
+                    atlas_size=(512, 512),
+                ),
+                "Duplicate not caught",
+            )
         return
 
     service.save_to_atlas(

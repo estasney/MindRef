@@ -1,21 +1,22 @@
 import random
 import string
+from collections.abc import Callable
 from functools import partial, reduce
 from itertools import product
 from operator import and_, attrgetter
-from typing import Callable, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from lib.domain.note_resource import CategoryResourceFiles
-    from lib.widgets.typeahead.typeahead_dropdown import Suggestion
+    from mindref.lib.domain.note_resource import CategoryResourceFiles
+    from mindref.lib.widgets.typeahead.typeahead_dropdown import Suggestion
+
+from pathlib import Path
 
 import pytest
 from toolz import sliding_window
 
-from lib.adapters.notes.fs.fs_note_repository import FileSystemNoteRepository
-from pathlib import Path
-
-from lib.domain.markdown_note import MarkdownNote
+from mindref.lib.adapters.notes.fs.fs_note_repository import FileSystemNoteRepository
+from mindref.lib.domain.markdown_note import MarkdownNote
 
 
 @pytest.fixture
@@ -90,7 +91,7 @@ def title_query_generator():
     """
 
     def title_query_generator_(
-        matched: list[MarkdownNote], unmatched: Optional[list[MarkdownNote]]
+        matched: list[MarkdownNote], unmatched: list[MarkdownNote] | None
     ):
         get_title: Callable[[MarkdownNote], str] = attrgetter("title")
         matched_titles = [get_title(n).lower() for n in matched] if matched else None
@@ -102,10 +103,7 @@ def title_query_generator():
             # Generate queries that will match the grp
             common_chars = reduce(
                 and_,
-                (
-                    set((char for char in t if char not in string.whitespace))
-                    for t in grp
-                ),
+                (set(char for char in t if char not in string.whitespace) for t in grp),
             )
             if len(common_chars) < 3:
                 raise AssertionError(
@@ -122,7 +120,7 @@ def title_query_generator():
                 )
             )
             for chunk in chunks:
-                sc = set(("".join(chars) for chars in chunk))
+                sc = set("".join(chars) for chars in chunk)
                 if len(sc) == 1:
                     yield "".join(chunk[0])
 
@@ -134,7 +132,7 @@ def title_query_generator():
                 case list(), list():
                     matched_title_gen = query_gen(matched_titles)
                     for query in matched_title_gen:
-                        if not any((query in ut for ut in unmatched_titles)):
+                        if not any(query in ut for ut in unmatched_titles):
                             return query
                 case None, list() | None:
                     # Generate random sequences
@@ -144,7 +142,7 @@ def title_query_generator():
                     )
                     for query in make_chars:
                         if unmatched_titles:
-                            if not any((query in ut for ut in unmatched_titles)):
+                            if not any(query in ut for ut in unmatched_titles):
                                 return query
                         else:
                             return query
@@ -258,8 +256,10 @@ def test_note_repo_factory(platform, monkeypatch):
 
     monkeypatch.setattr(kivy, "platform", platform)
 
-    from lib.adapters.notes.android.android_note_repository import AndroidNoteRepository
-    from lib.adapters.notes.note_repository import (
+    from mindref.lib.adapters.notes.android.android_note_repository import (
+        AndroidNoteRepository,
+    )
+    from mindref.lib.adapters.notes.note_repository import (
         AbstractNoteRepository,
         NoteRepositoryFactory,
     )

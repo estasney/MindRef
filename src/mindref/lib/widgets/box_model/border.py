@@ -1,7 +1,7 @@
-from kivy.properties import NumericProperty, ColorProperty
+from kivy.properties import ColorProperty, NumericProperty
 from kivy.uix.anchorlayout import AnchorLayout
 
-from lib.utils import import_kv
+from mindref.lib.utils import import_kv
 
 import_kv(__file__)
 

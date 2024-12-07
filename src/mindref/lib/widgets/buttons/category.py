@@ -2,10 +2,9 @@ from kivy.clock import Clock
 from kivy.loader import Loader
 from kivy.properties import ObjectProperty, StringProperty
 
-from lib.utils import import_kv, get_app
-from lib.utils.calculation import normalize_coordinates
-from lib.widgets.buttons.buttons import ThemedButton
-from lib.widgets.effects.ripple import RippleMixin
+from mindref.lib.utils import get_app, import_kv
+from mindref.lib.widgets.buttons.buttons import ThemedButton
+from mindref.lib.widgets.effects.ripple import RippleMixin
 
 import_kv(__file__)
 

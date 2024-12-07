@@ -1,16 +1,11 @@
-from typing import TYPE_CHECKING
-
 from kivy import Logger, platform
 from kivy.factory import Factory
 from kivy.properties import StringProperty
 from kivy.uix.settings import SettingPath, SettingsWithSpinner
 
-from lib.domain.events import FilePickerEvent
-from lib.utils import get_app
-from lib.widgets.behavior.interact_behavior import InteractBehavior
-
-if TYPE_CHECKING:
-    pass
+from mindref.lib.domain.events import FilePickerEvent
+from mindref.lib.utils import get_app
+from mindref.lib.widgets.behavior.interact_behavior import InteractBehavior
 
 
 class MindRefSettingsNative(InteractBehavior, SettingsWithSpinner):

@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from lib.adapters.editor.editor_repository import (
+from mindref.lib.adapters.editor.editor_repository import (
     AbstractEditorRepository,
 )
-from lib.domain.editable import EditableNote
-from lib.domain.markdown_note import MarkdownNote
+from mindref.lib.domain.editable import EditableNote
+from mindref.lib.domain.markdown_note import MarkdownNote
 
 
 class FileSystemEditor(AbstractEditorRepository):

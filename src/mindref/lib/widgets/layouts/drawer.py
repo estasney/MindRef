@@ -1,20 +1,20 @@
 from functools import partial
+from typing import Literal
 
 from kivy.animation import Animation
 from kivy.properties import (
+    AliasProperty,
     BooleanProperty,
+    ColorProperty,
     NumericProperty,
     ObjectProperty,
-    ColorProperty,
-    AliasProperty,
     OptionProperty,
 )
 from kivy.uix.anchorlayout import AnchorLayout
-from typing import Literal
 
 OPEN_STATE = Literal["open", "closed", "opening", "closing"]
 
-from lib.utils import import_kv
+from mindref.lib.utils import import_kv
 
 import_kv(__file__)
 

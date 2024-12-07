@@ -1,6 +1,6 @@
 import pytest
 
-from lib.domain.markdown_note import MarkdownNote
+from mindref.lib.domain.markdown_note import MarkdownNote
 
 
 @pytest.fixture
@@ -9,10 +9,9 @@ def md_kbd_generator(request, markdown_generator):
     param = request.param
     if param == "kbd":
         return f"{next(gen)}\n<kbd>A</kbd>\n{next(gen)}", True
-    elif param == "partial":
+    if param == "partial":
         return f"{next(gen)}\n<kbd>A\n{next(gen)}", False
-    else:
-        return next(gen), False
+    return next(gen), False
 
 
 def flatten_doc(doc: list[dict]):
@@ -49,6 +48,6 @@ def test_kbd_parsing(md_kbd_generator):
     pieces = list(flatten_doc(doc))
     tags = [md.get("type") for md in pieces]
     if expected:
-        assert any((t == "kbd" for t in tags)), f"NOT DETECTED: {tags}, {md_file.text}"
+        assert any(t == "kbd" for t in tags), f"NOT DETECTED: {tags}, {md_file.text}"
     else:
-        assert not any((t == "kbd" for t in tags)), f"DETECTED: {tags}, {md_file.text}"
+        assert not any(t == "kbd" for t in tags), f"DETECTED: {tags}, {md_file.text}"

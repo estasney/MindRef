@@ -3,17 +3,16 @@ from typing import Optional
 from kivy.clock import Clock
 from kivy.uix.screenmanager import Screen
 
-from lib.widgets.behavior.interact_behavior import InteractBehavior
-from lib.widgets.behavior.refresh_behavior import RefreshBehavior
-from lib.widgets.effects.scrolling import RefreshSymbol
+from mindref.lib.widgets.behavior.interact_behavior import InteractBehavior
+from mindref.lib.widgets.behavior.refresh_behavior import RefreshBehavior
+from mindref.lib.widgets.effects.scrolling import RefreshSymbol
 
 
-class InteractScreen(InteractBehavior, Screen):
-    ...
+class InteractScreen(InteractBehavior, Screen): ...
 
 
 class RefreshableScreen(InteractBehavior, RefreshBehavior, Screen):
-    refresh_icon: Optional[RefreshSymbol]
+    refresh_icon: RefreshSymbol | None
 
     """
     Mixin class that adds custom event 'on_refresh'

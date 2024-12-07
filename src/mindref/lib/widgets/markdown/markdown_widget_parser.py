@@ -1,41 +1,47 @@
 from __future__ import annotations
 
-from typing import cast, Optional, Container
+from collections.abc import Container
+from typing import cast
 
 from kivy import Logger
 from kivy.uix.widget import Widget
 from toolz import get_in
 
-from lib.domain.md_parser_types import (
-    MdHeading,
-    MdParagraph,
+from mindref.lib.domain.md_parser_types import (
     MdBlockCode,
-    MdCodeSpan,
     MdBlockQuote,
     MdBlockText,
-    MdTable,
-    MdTableHeadCell,
-    MdTableBodyRow,
-    MdTableBodyCell,
-    MdTableHead,
-    MdTextStrong,
+    MdCodeSpan,
+    MdHeading,
     MdInlineKeyboard,
+    MdListItem,
     MdListOrdered,
     MdListUnordered,
-    MdListItem,
     MdNewLine,
+    MdParagraph,
+    MdTable,
+    MdTableBodyCell,
+    MdTableBodyRow,
+    MdTableHead,
+    MdTableHeadCell,
+    MdTextStrong,
 )
-from lib.widgets.markdown.block.markdown_block import MarkdownHeading, MarkdownBlock
-from lib.widgets.markdown.code.code_span import MarkdownCodeSpan
-from lib.widgets.markdown.code.markdown_code import MarkdownCode
-from lib.widgets.markdown.list.markdown_list import MarkdownList
-from lib.widgets.markdown.list.markdown_list_item import MarkdownListItem
-from lib.widgets.markdown.markdown_parsing_mixin import MarkdownLabelParsingMixin
-from lib.widgets.markdown.paragraph.blocks import MarkdownBlockQuote
-from lib.widgets.markdown.table.markdown_table import (
-    MarkdownTable,
-    MarkdownRow,
+from mindref.lib.widgets.markdown.block.markdown_block import (
+    MarkdownBlock,
+    MarkdownHeading,
+)
+from mindref.lib.widgets.markdown.code.code_span import MarkdownCodeSpan
+from mindref.lib.widgets.markdown.code.markdown_code import MarkdownCode
+from mindref.lib.widgets.markdown.list.markdown_list import MarkdownList
+from mindref.lib.widgets.markdown.list.markdown_list_item import MarkdownListItem
+from mindref.lib.widgets.markdown.markdown_parsing_mixin import (
+    MarkdownLabelParsingMixin,
+)
+from mindref.lib.widgets.markdown.paragraph.blocks import MarkdownBlockQuote
+from mindref.lib.widgets.markdown.table.markdown_table import (
     MarkdownCell,
+    MarkdownRow,
+    MarkdownTable,
 )
 
 
@@ -49,7 +55,7 @@ class MarkdownWidgetParser:
 
     @staticmethod
     def _report_nested_lists(
-        data, idx: Optional[tuple[int | str, ...]], report_nodes: Container[str]
+        data, idx: tuple[int | str, ...] | None, report_nodes: Container[str]
     ):
         """
         Find any nodes with children, and notify return a tuple of keys/index to find them from `data`
@@ -88,7 +94,7 @@ class MarkdownWidgetParser:
             return parser_delegate.parse(n)
 
         match node:
-            case ({"type": "heading", "level": int(level), "children": list()}):
+            case {"type": "heading", "level": int(level), "children": list()}:
                 parsed_node = cast(MdHeading, node)
                 widget = MarkdownHeading(level=level)
                 for child in parsed_node["children"]:

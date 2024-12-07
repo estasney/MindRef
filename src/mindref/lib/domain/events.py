@@ -1,28 +1,25 @@
-import abc
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Flag, auto
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
-from lib import DisplayState
+from mindref.lib import DisplayState
 
 if TYPE_CHECKING:
-    from lib.domain.markdown_note import MarkdownNote
-    from lib.domain.protocols import NoteDiscoveryProtocol
-    from lib.widgets.typeahead.typeahead_dropdown import Suggestion
+    from mindref.lib.domain.markdown_note import MarkdownNote
+    from mindref.lib.domain.protocols import NoteDiscoveryProtocol
+    from mindref.lib.widgets.typeahead.typeahead_dropdown import Suggestion
 
     QUERY_FAILURE_TYPE = Literal["not_set", "not_found", "permission_error"]
     PAGINATION_DIRECTION = Literal[-1, 0, 1]
 
 
 class Event:
-
     event_type: ClassVar[str]
 
 
 class EventFailure:
-
     message: ClassVar[str]
 
 

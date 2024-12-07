@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from lib.domain.markdown_note import MarkdownNote
+from mindref.lib.domain.markdown_note import MarkdownNote
 
 
 @pytest.fixture

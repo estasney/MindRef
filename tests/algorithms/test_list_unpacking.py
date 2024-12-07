@@ -4,9 +4,9 @@ from itertools import product
 import pytest
 from toolz import get_in
 
-from lib.widgets.markdown.markdown_widget_parser import MarkdownWidgetParser
+from mindref.lib.widgets.markdown.markdown_widget_parser import MarkdownWidgetParser
 
-report = MarkdownWidgetParser._report_nested_lists  # noqa
+report = MarkdownWidgetParser._report_nested_lists
 
 
 def generate_dictionaries(nesting_level, num_children):
@@ -160,7 +160,7 @@ def matches_first_level(expected: dict, result: dict):
         for r in result["children"]
         if "type" in r and r["type"] not in {"list", "list_item"}
     ]
-    for ec, rc in zip(expected_children, result_children):
+    for ec, rc in zip(expected_children, result_children, strict=False):
         assert ec == rc
     return True
 
@@ -187,6 +187,8 @@ def test_list_unpacking(variant):
     assert len(expected_children) == len(
         result_children
     ), "Different number of children"
-    for expected_child, result_child in zip(expected_children, result_children):
+    for expected_child, result_child in zip(
+        expected_children, result_children, strict=False
+    ):
         assert matching_keys(expected_child, result_child)
         assert matches_first_level(expected_child, result_child)

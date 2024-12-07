@@ -1,15 +1,16 @@
-from typing import Literal, Callable
+from collections.abc import Callable
+from typing import Literal
 
 from kivy import Logger
 from kivy.properties import (
-    ObjectProperty,
     BooleanProperty,
+    ObjectProperty,
 )
 from kivy.uix.boxlayout import BoxLayout
 
-from lib.domain.events import CreateCategoryEvent, FilePickerEvent
-from lib.utils import import_kv, get_app, sch_cb, schedulable
-from lib.widgets.forms.text_field import TextField
+from mindref.lib.domain.events import CreateCategoryEvent, FilePickerEvent
+from mindref.lib.utils import get_app, import_kv, sch_cb, schedulable
+from mindref.lib.widgets.forms.text_field import TextField
 
 import_kv(__file__)
 
@@ -43,7 +44,7 @@ class CategoryEditor(BoxLayout):
 
         w_field = self.category_name_input if field == "name" else self.image_path_input
         if touched and (field_txt := w_field.text):
-            msg: str | None = self.validator(field, field_txt)  # noqa
+            msg: str | None = self.validator(field, field_txt)
             Logger.info(f"{type(self).__name__}: validate - {field}[msg={msg}]")
             if msg:
                 w_field.error_message = msg
@@ -80,7 +81,6 @@ class CategoryEditor(BoxLayout):
                 push_cat_event = schedulable(app.registry.push_event, cat_event)
                 sch_cb(push_cat_event, self.clear_inputs, timeout=0.1)
             case "browse":
-
                 set_result = lambda x: setattr(
                     self.image_path_input.w_text_input, "text", x
                 )

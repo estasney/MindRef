@@ -5,8 +5,8 @@ from kivy.properties import (
 )
 from kivy.uix.boxlayout import BoxLayout
 
-from lib.utils import import_kv
-from lib.widgets.buttons.category import NoteCategoryButton
+from mindref.lib.utils import import_kv
+from mindref.lib.widgets.buttons.category import NoteCategoryButton
 
 import_kv(__file__)
 
@@ -25,7 +25,6 @@ class NoteCategories(BoxLayout):
         self.parent.category_selected(instance)
 
     def draw_categories(self, *_args):
-
         container = self.category_container
 
         screen_categories = set((child.text for child in container.children))

@@ -1,17 +1,13 @@
-from __future__ import annotations
-
 import abc
-from abc import ABC
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Optional, Sequence, TYPE_CHECKING
 
-if TYPE_CHECKING:
-    import PIL.Image
+import PIL
 
 
-class AbstractAtlasRepository(ABC):
+class AbstractAtlasRepository(abc.ABC):
     @abc.abstractmethod
-    def get_from_atlas(self, name: str, atlas_name: str) -> "PIL.Image.Image":
+    def get_from_atlas(self, name: str, atlas_name: str) -> PIL.Image:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -20,8 +16,8 @@ class AbstractAtlasRepository(ABC):
         images: Sequence[Path | str],
         image_names: Sequence[str],
         atlas_name: str,
-        atlas_size: Optional[tuple[int, int]] = None,
-        padding=2,
+        atlas_size: tuple[int, int] | None = None,
+        padding: int = 2,
     ):
         raise NotImplementedError
 

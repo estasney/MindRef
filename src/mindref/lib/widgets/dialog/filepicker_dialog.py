@@ -1,13 +1,13 @@
 from kivy import Logger
 from kivy.properties import (
-    ObjectProperty,
     BooleanProperty,
     ListProperty,
+    ObjectProperty,
     StringProperty,
 )
 from kivy.uix.floatlayout import FloatLayout
 
-from lib.utils import import_kv
+from mindref.lib.utils import import_kv
 
 import_kv(__file__)
 

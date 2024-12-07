@@ -3,7 +3,7 @@ from kivy.uix.gridlayout import GridLayout
 from pygments import styles
 from pygments.token import Token
 
-from lib.utils import import_kv
+from mindref.lib.utils import import_kv
 
 import_kv(__file__)
 

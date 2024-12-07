@@ -6,15 +6,10 @@ from kivy.properties import (
 )
 from kivy.uix.boxlayout import BoxLayout
 
-from lib.utils import import_kv
-from lib.widgets.markdown.base.base import MarkdownLabelBase
+from mindref.lib.utils import import_kv
+from mindref.lib.widgets.markdown.base.base import MarkdownLabelBase
 
 import_kv(__file__)
-
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    pass
 
 
 class MarkdownHeading(MarkdownLabelBase):

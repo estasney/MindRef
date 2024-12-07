@@ -4,19 +4,23 @@ from collections.abc import Callable
 from typing import TYPE_CHECKING, NoReturn, Protocol, TypeVar
 
 if TYPE_CHECKING:
-
     from pathlib import Path
 
     from kivy._clock import ClockEvent
     from kivy.uix.screenmanager import ScreenManager
-    from lib import DisplayState
-    from lib.adapters.atlas.fs.fs_atlas_repository import AtlasService
-    from lib.adapters.editor.fs.fs_editor_repository import FileSystemEditor
-    from lib.adapters.notes.android.android_note_repository import AndroidNoteRepository
-    from lib.adapters.notes.fs.fs_note_repository import FileSystemNoteRepository
-    from lib.plugins import PluginManager
-    from lib.service.registry import Registry
-    from lib.widgets import MindRefSettingsAndroid, MindRefSettingsNative
+
+    from mindref.lib import DisplayState
+    from mindref.lib.adapters.atlas.fs.fs_atlas_repository import AtlasService
+    from mindref.lib.adapters.editor.fs.fs_editor_repository import FileSystemEditor
+    from mindref.lib.adapters.notes.android.android_note_repository import (
+        AndroidNoteRepository,
+    )
+    from mindref.lib.adapters.notes.fs.fs_note_repository import (
+        FileSystemNoteRepository,
+    )
+    from mindref.lib.plugins import PluginManager
+    from mindref.lib.service.registry import Registry
+    from mindref.lib.widgets import MindRefSettingsAndroid, MindRefSettingsNative
 
 
 class AppRegistryProtocol(Protocol):
@@ -44,23 +48,17 @@ class AppRegistryProtocol(Protocol):
     settings_cls: str | MindRefSettingsAndroid | MindRefSettingsNative
     user_data_dir: str
 
-    def dispatch(self, *args, **kwargs) -> None:
-        ...
+    def dispatch(self, *args, **kwargs) -> None: ...
 
-    def display_state_trigger(self, state: DisplayState) -> None:
-        ...
+    def display_state_trigger(self, state: DisplayState) -> None: ...
 
-    def select_index(self, value: int) -> None:
-        ...
+    def select_index(self, value: int) -> None: ...
 
-    def open_settings(self) -> None:
-        ...
+    def open_settings(self) -> None: ...
 
-    def bind(self, **kwargs: Callable):
-        ...
+    def bind(self, **kwargs: Callable): ...
 
-    def stop(self) -> NoReturn:
-        ...
+    def stop(self) -> NoReturn: ...
 
 
 T = TypeVar("T", bound=AppRegistryProtocol)

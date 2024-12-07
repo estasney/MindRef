@@ -1,16 +1,16 @@
 from kivy.properties import (
+    BooleanProperty,
     ColorProperty,
+    NumericProperty,
     StringProperty,
     VariableListProperty,
-    NumericProperty,
-    BooleanProperty,
 )
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout
 
-from lib.utils import import_kv, mindref_path
-from lib.utils.calculation import normalize_coordinates
-from lib.widgets.effects.ripple import RippleMixin
+from mindref.lib.ext import normalize_coordinates
+from mindref.lib.utils import import_kv, mindref_path
+from mindref.lib.widgets.effects.ripple import RippleMixin
 
 texture_atlas = "atlas://" + str(mindref_path() / "static" / "textures" / "textures")
 icon_atlas = "atlas://" + str(mindref_path() / "static" / "icons" / "icons")
@@ -56,13 +56,13 @@ class ThemedButton(ButtonBehavior, BoxLayout, RippleMixin):
 
     def toggle_ripple_effect(self, *_args):
         if self.enable_ripple_effect:
-            setattr(self, "on_touch_down", self._on_touch_down_ripple)
-            setattr(self, "on_touch_move", self._on_touch_move)
-            setattr(self, "on_touch_up", self._on_touch_up)
+            self.on_touch_down = self._on_touch_down_ripple
+            self.on_touch_move = self._on_touch_move
+            self.on_touch_up = self._on_touch_up
         else:
-            setattr(self, "on_touch_down", self._on_touch_down_plain)
-            setattr(self, "on_touch_move", self._on_touch_move_plain)
-            setattr(self, "on_touch_up", self._on_touch_up_plain)
+            self.on_touch_down = self._on_touch_down_plain
+            self.on_touch_move = self._on_touch_move_plain
+            self.on_touch_up = self._on_touch_up_plain
 
     def _on_touch_down_ripple(self, touch):
         if super().on_touch_down(touch):

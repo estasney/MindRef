@@ -10,22 +10,21 @@ from kivy.properties import (
 )
 from kivy.uix.boxlayout import BoxLayout
 
-from lib.domain.events import (
+from mindref.lib.domain.events import (
     AddNoteEvent,
     BackButtonEvent,
     EditNoteEvent,
     ListViewButtonEvent,
     PaginationEvent,
 )
-from lib.utils import import_kv, get_app
-from lib.utils.caching import cache_key_note, kivy_cache
-from lib.widgets.markdown.markdown_document import MarkdownDocument
+from mindref.lib.utils import get_app, import_kv
+from mindref.lib.utils.caching import cache_key_note, kivy_cache
+from mindref.lib.widgets.markdown.markdown_document import MarkdownDocument
 
 import_kv(__file__)
 
 if TYPE_CHECKING:
-    from lib.domain.markdown_note import MarkdownNoteDict
-    from typing import Optional
+    from mindref.lib.domain.markdown_note import MarkdownNoteDict
 
 Cache.register("note_widget", limit=10, timeout=3600)
 
@@ -50,7 +49,7 @@ class Note(BoxLayout):
         app.registry.push_event(PaginationEvent(direction=-1 if direction else 1))
         return True
 
-    def set_note_content(self, note_data: "Optional[MarkdownNoteDict]"):
+    def set_note_content(self, note_data: "MarkdownNoteDict | None"):
         self.note_title = note_data.get("title", "")
         self.note_index = note_data.get("idx", -1)
         self.note_content = note_data if note_data else {}
@@ -85,7 +84,6 @@ class NoteTitleBar(BoxLayout):
         self.action_button.bind(on_select=self.handle_select)
 
     def handle_select(self, _, value):
-
         app = get_app()
         match value:
             case "add":

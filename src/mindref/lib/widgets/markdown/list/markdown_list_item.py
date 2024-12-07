@@ -1,8 +1,8 @@
-from kivy.properties import NumericProperty, ListProperty, AliasProperty
+from kivy.properties import AliasProperty, ListProperty, NumericProperty
 
-from lib.utils import import_kv
-from lib.widgets.behavior.inline_behavior import TextSnippet
-from lib.widgets.markdown.base.base import MarkdownLabelBase
+from mindref.lib.utils import import_kv
+from mindref.lib.widgets.behavior.inline_behavior import TextSnippet
+from mindref.lib.widgets.markdown.base.base import MarkdownLabelBase
 
 import_kv(__file__)
 

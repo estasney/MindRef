@@ -1,7 +1,7 @@
 from kivy.properties import ColorProperty, NumericProperty, ObjectProperty
 
-from lib.utils import import_kv
-from lib.widgets.box_model.margin import MarginBox
+from mindref.lib.utils import import_kv
+from mindref.lib.widgets.box_model.margin import MarginBox
 
 import_kv(__file__)
 

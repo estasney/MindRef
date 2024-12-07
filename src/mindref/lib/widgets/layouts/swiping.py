@@ -1,17 +1,16 @@
 from kivy.animation import Animation
-from kivy.clock import Clock
 from kivy.graphics.transformation import Matrix
 from kivy.metrics import dp
 from kivy.properties import (
-    ObjectProperty,
-    NumericProperty,
     AliasProperty,
     BooleanProperty,
+    NumericProperty,
+    ObjectProperty,
 )
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.scatter import Scatter
 
-from lib.utils import import_kv, schedulable, sch_cb
+from mindref.lib.utils import import_kv, sch_cb, schedulable
 
 import_kv(__file__)
 
@@ -122,8 +121,7 @@ class SwipingLayout(Scatter):
         cache=True,
     )
 
-    def on_swipe(self, swipe_direction: bool):
-        ...
+    def on_swipe(self, swipe_direction: bool): ...
 
     def add_widget(self, *args, **kwargs):
         self.content.add_widget(*args, **kwargs)
@@ -135,7 +133,6 @@ class SwipingLayout(Scatter):
         self.content.clear_widgets(*args, **kwargs)
 
     def on_touch_down(self, touch):
-
         if self.collide_point(*touch.pos):
             # Cancel any animations that are currently running
             self.animate_snap_back.cancel(self)
@@ -162,12 +159,12 @@ class SwipingLayout(Scatter):
 
             if abs(curr_trans + delta_x) < self.min_translation:
                 # We haven't moved past the minimum translation, so we don't activate swiping display behavior
-                return
+                return None
 
             # We may have moved past the minimum translation, but we need to check if the user is trying to scroll vertically
             if abs(self._touch_translate_y) > self.swipe_threshold * (abs(delta_x)):
                 # The user is trying to scroll vertically
-                return
+                return None
 
             self._swiping = True
 

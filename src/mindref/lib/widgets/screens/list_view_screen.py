@@ -1,7 +1,7 @@
 from kivy.properties import ObjectProperty
 
-from lib.utils import import_kv
-from lib.widgets.screens import InteractScreen
+from mindref.lib.utils import import_kv
+from mindref.lib.widgets.screens import InteractScreen
 
 import_kv(__file__)
 

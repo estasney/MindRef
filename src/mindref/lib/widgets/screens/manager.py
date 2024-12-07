@@ -5,21 +5,21 @@ from kivy import Logger
 from kivy.properties import BooleanProperty, ObjectProperty
 from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import ScreenManager, SlideTransition
-from lib.domain.events import FilePickerEvent
-from lib.utils import import_kv, sch_cb, schedulable
-from lib.utils.index import RollingIndex
-from lib.utils.triggers import trigger_factory
-from lib.widgets.app_menu.app_menu import AppMenu
-from lib.widgets.behavior.interact_behavior import InteractBehavior
-from lib.widgets.behavior.refresh_behavior import RefreshBehavior
-from lib.widgets.buttons.category import NoteCategoryButton
-from lib.widgets.dialog.filepicker_dialog import LoadDialog
-from lib.widgets.editor.category_editor import CategoryEditor
+
+from mindref.lib.domain.events import FilePickerEvent
+from mindref.lib.ext import RollingIndex
+from mindref.lib.utils import import_kv, sch_cb, schedulable
+from mindref.lib.utils.triggers import trigger_factory
+from mindref.lib.widgets.app_menu.app_menu import AppMenu
+from mindref.lib.widgets.behavior.interact_behavior import InteractBehavior
+from mindref.lib.widgets.behavior.refresh_behavior import RefreshBehavior
+from mindref.lib.widgets.buttons.category import NoteCategoryButton
+from mindref.lib.widgets.dialog.filepicker_dialog import LoadDialog
+from mindref.lib.widgets.editor.category_editor import CategoryEditor
 
 if TYPE_CHECKING:
-
-    from lib.domain.events import PAGINATION_DIRECTION
-    from lib.domain.markdown_note import MarkdownNoteDict
+    from mindref.lib.domain.events import PAGINATION_DIRECTION
+    from mindref.lib.domain.markdown_note import MarkdownNoteDict
 
 import_kv(__file__)
 
@@ -106,8 +106,7 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
             case _:
                 raise Exception(f"Unhandled display state {value}")
 
-    def handle_notes_display_view(self):
-        ...
+    def handle_notes_display_view(self): ...
 
     def handle_pagination(
         self, _, value: tuple["PAGINATION_DIRECTION", "MarkdownNoteDict"]
@@ -183,8 +182,10 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
 
         match event:
             case FilePickerEvent(
-                action=action.OPEN_FOLDER | action.OPEN_FILE as event_action,
-                ext_filter=list() | None as ext_filter,
+                action=action.OPEN_FOLDER
+                | action.OPEN_FILE as event_action,
+                ext_filter=list()
+                | None as ext_filter,
                 on_complete=on_complete,
                 start_folder=start_folder,
             ):

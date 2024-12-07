@@ -1,7 +1,7 @@
-from kivy.properties import VariableListProperty, AliasProperty
+from kivy.properties import AliasProperty, VariableListProperty
 from kivy.uix.anchorlayout import AnchorLayout
 
-from lib.utils import import_kv
+from mindref.lib.utils import import_kv
 
 import_kv(__file__)
 

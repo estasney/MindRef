@@ -1,9 +1,11 @@
-from kivy.properties import StringProperty, ListProperty
+from kivy.properties import ListProperty, StringProperty
 from kivy.uix.gridlayout import GridLayout
 
-from lib.domain.md_parser_types import MdBlockQuote
-from lib.utils import import_kv
-from lib.widgets.markdown.markdown_parsing_mixin import MarkdownLabelParsingMixin
+from mindref.lib.domain.md_parser_types import MdBlockQuote
+from mindref.lib.utils import import_kv
+from mindref.lib.widgets.markdown.markdown_parsing_mixin import (
+    MarkdownLabelParsingMixin,
+)
 
 import_kv(__file__)
 

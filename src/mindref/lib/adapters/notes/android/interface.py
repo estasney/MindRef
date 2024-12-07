@@ -1,31 +1,30 @@
 import operator
 import threading
+from collections.abc import Callable
 from enum import IntEnum
 from functools import wraps
 from pathlib import Path
 from typing import (
-    Callable,
-    Optional,
-    Type,
     TYPE_CHECKING,
-    TypeVar,
-    ParamSpec,
     Concatenate,
+    Optional,
+    ParamSpec,
+    TypeVar,
 )
 
 from jnius import PythonJavaClass, autoclass, java_method
 from kivy import Logger
 from kivy.clock import Clock
 
-from lib.adapters.notes.android.annotations import (
+from mindref.lib.adapters.notes.android.annotations import (
     ACTIVITY_CLASS_NAME,
     ACTIVITY_CLASS_NAMESPACE,
+    MIME_TYPE,
     MINDREF_CLASS_NAME,
     MINDREF_CLASS_NAMESPACE,
     UriProtocol,
-    MIME_TYPE,
 )
-from lib.utils import schedulable
+from mindref.lib.utils import schedulable
 
 if TYPE_CHECKING:
     from .annotations import (
@@ -33,8 +32,8 @@ if TYPE_CHECKING:
         ContentResolverProtocol,
         ContextProtocol,
         IntentProtocol,
-        MindRefUtilsProtocol,
         MindRefUtilsCallbackPyMediator,
+        MindRefUtilsProtocol,
     )
 
 
@@ -134,9 +133,9 @@ F = TypeVar("F")
 # noinspection PyPep8Naming
 class AndroidStorageManager:
     _lock = threading.Lock()
-    _utils_cls_static: Optional[Type["MindRefUtilsProtocol"]] = None
+    _utils_cls_static: type["MindRefUtilsProtocol"] | None = None
     _utils_cls: Optional["MindRefUtilsProtocol"] = None
-    _prompt_picker_callback: Optional[Callable[[str], None]] = None
+    _prompt_picker_callback: Callable[[str], None] | None = None
     _prompt_picker_callback_java: Optional["OnDocumentCallback"] = None
     _mindref_callback_java: Optional["MindRefUtilsCallback"] = None
     _mindref_callback_py_mediator: Optional["MindRefUtilsCallbackPyMediator"] = None
@@ -163,7 +162,7 @@ class AndroidStorageManager:
     """
 
     @classmethod
-    def _get_mindref_utils_static_cls(cls) -> Type["MindRefUtilsProtocol"]:
+    def _get_mindref_utils_static_cls(cls) -> type["MindRefUtilsProtocol"]:
         """Autoclass MindRefUtils Java class. Keep the definition, but do not initialize"""
         if cls._utils_cls_static is None:
             cls._utils_cls_static = autoclass(MINDREF_CLASS_NAME)
@@ -194,25 +193,24 @@ class AndroidStorageManager:
             mrUtils = mrUtilsCls(externalStorageRoot, appStorageRoot, context)
             cls._utils_cls = mrUtils
             return cls._utils_cls
-        else:
-            # See if our cached instance has same parameters
-            cs = cls._utils_cls
-            if not all(
-                operator.eq(getattr(cs, attr), val)
-                for attr, val in (
-                    ("externalStorageRoot", externalStorageRoot),
-                    ("appStorageRoot", appStorageRoot),
-                )
-            ):
-                Logger.info(
-                    f"{type(cls).__name__}: _get_mindref_utils_cls - Recreating MindRefUtils - Parameters Changed"
-                )
-                cls._utils_cls = None
-                cls._mindref_callback_java = None
-                return cls._get_mindref_utils_cls(
-                    externalStorageRoot, appStorageRoot, context
-                )
-            return cls._utils_cls
+        # See if our cached instance has same parameters
+        cs = cls._utils_cls
+        if not all(
+            operator.eq(getattr(cs, attr), val)
+            for attr, val in (
+                ("externalStorageRoot", externalStorageRoot),
+                ("appStorageRoot", appStorageRoot),
+            )
+        ):
+            Logger.info(
+                f"{type(cls).__name__}: _get_mindref_utils_cls - Recreating MindRefUtils - Parameters Changed"
+            )
+            cls._utils_cls = None
+            cls._mindref_callback_java = None
+            return cls._get_mindref_utils_cls(
+                externalStorageRoot, appStorageRoot, context
+            )
+        return cls._utils_cls
 
     @classmethod
     def _get_activity(cls) -> "ActivityProtocol":
@@ -269,9 +267,9 @@ class AndroidStorageManager:
     @classmethod
     def take_persistable_permission(cls, uri: str | UriProtocol) -> str | UriProtocol:
         """After user selects DocumentTree, we want to persist the permission"""
-        Intent: "IntentProtocol" = autoclass("android.content.Intent")
-        pyActivity: "ActivityProtocol" = cls._get_activity()
-        resolver: "ContentResolverProtocol" = cls._get_resolver(pyActivity)
+        Intent: IntentProtocol = autoclass("android.content.Intent")
+        pyActivity: ActivityProtocol = cls._get_activity()
+        resolver: ContentResolverProtocol = cls._get_resolver(pyActivity)
         uri_native: UriProtocol = cls.ensure_uri_type(uri, UriProtocol)
         resolver.takePersistableUriPermission(
             uri_native,
@@ -299,22 +297,22 @@ class AndroidStorageManager:
 
     @classmethod
     def ensure_uri_type(
-        cls, uri: str | UriProtocol, target: Type[str] | Type[UriProtocol]
+        cls, uri: str | UriProtocol, target: type[str] | type[UriProtocol]
     ):
         match (uri, target):
             case str(), str():
-                Logger.debug(f"URI is str, target is str")
+                Logger.debug("URI is str, target is str")
                 return uri
             case str(), x if x is UriProtocol:
-                Logger.debug(f"URI is str, target is URI")
+                Logger.debug("URI is str, target is URI")
                 URI: UriProtocol = autoclass("android.net.Uri")
                 uri_native = URI.parse(uri)
                 return uri_native
             case UriProtocol(), str():
-                Logger.debug(f"URI is URI, target is str")
+                Logger.debug("URI is URI, target is str")
                 return uri.toString()
             case UriProtocol(), x if x is UriProtocol:
-                Logger.debug(f"URI is URI, target is URI")
+                Logger.debug("URI is URI, target is URI")
                 return uri
             case _:
                 Logger.debug("Unmatched")
@@ -338,7 +336,7 @@ class AndroidStorageManager:
                 cls._register_prompt_picker_callback()
             activity = cls._get_activity()
             Intent = autoclass("android.content.Intent")
-            intent: "IntentProtocol" = (
+            intent: IntentProtocol = (
                 Intent()
                 .setAction(Intent.ACTION_OPEN_DOCUMENT_TREE)
                 .addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
@@ -354,7 +352,7 @@ class AndroidStorageManager:
             if not cls._prompt_picker_callback_java:
                 cls._register_prompt_picker_callback()
             activity = cls._get_activity()
-            Intent: "Type[IntentProtocol]" = autoclass("android.content.Intent")
+            Intent: type[IntentProtocol] = autoclass("android.content.Intent")
             intent = (
                 Intent()
                 .setAction(Intent.ACTION_OPEN_DOCUMENT)
@@ -383,11 +381,10 @@ class AndroidStorageManager:
 
     @classmethod
     def get_categories(cls, source: str, target: str | Path, key: int):
-
         target = str(target)
         with cls._lock:
             activity = cls._get_activity()
-            context: "ContextProtocol" = cls._get_context(activity)
+            context: ContextProtocol = cls._get_context(activity)
             mrUtils = cls._get_mindref_utils_cls(source, target, context)
             if not cls._mindref_callback_java:
                 cls._register_mindref_utils_callback(mrUtils)
@@ -400,7 +397,7 @@ class AndroidStorageManager:
         target = str(target)
         with cls._lock:
             activity = cls._get_activity()
-            context: "ContextProtocol" = cls._get_context(activity)
+            context: ContextProtocol = cls._get_context(activity)
             mrUtils = cls._get_mindref_utils_cls(source, target, context)
             if not cls._mindref_callback_java:
                 cls._register_mindref_utils_callback(mrUtils)

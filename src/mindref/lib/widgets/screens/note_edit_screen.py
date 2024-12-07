@@ -2,12 +2,13 @@ from typing import Union
 
 from kivy import Logger
 from kivy.properties import ObjectProperty, OptionProperty, StringProperty
-from lib import DisplayState
-from lib.domain.editable import EditableNote
-from lib.domain.events import CancelEditEvent, SaveNoteEvent
-from lib.utils import attrsetter, get_app, import_kv, sch_cb
-from lib.widgets.editor.note_editor import NoteEditor
-from lib.widgets.screens import InteractScreen
+
+from mindref.lib import DisplayState
+from mindref.lib.domain.editable import EditableNote
+from mindref.lib.domain.events import CancelEditEvent, SaveNoteEvent
+from mindref.lib.utils import attrsetter, get_app, import_kv, sch_cb
+from mindref.lib.widgets.editor.note_editor import NoteEditor
+from mindref.lib.widgets.screens import InteractScreen
 
 import_kv(__file__)
 

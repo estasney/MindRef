@@ -4,7 +4,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Literal, Optional
 
 from kivy import Logger
-from lib.domain.events import (
+
+from mindref.lib.domain.events import (
     EventFailure,
     FilePickerEvent,
     NoteCategoryEvent,
@@ -14,15 +15,15 @@ from lib.domain.events import (
     NotesQueryFailureEvent,
     NotesQueryNotSetFailureEvent,
 )
-from lib.utils import def_cb, sch_cb, schedulable
-from lib.utils.caching import kivy_cache
-from lib.widgets.typeahead.typeahead_dropdown import Suggestion
+from mindref.lib.utils import def_cb, sch_cb, schedulable
+from mindref.lib.utils.caching import kivy_cache
+from mindref.lib.widgets.typeahead.typeahead_dropdown import Suggestion
 
 if TYPE_CHECKING:
-    from lib.domain.editable import EditableNote
-    from lib.domain.events import Event
-    from lib.domain.markdown_note import MarkdownNote, MarkdownNoteDict
-    from lib.domain.protocols import AppRegistryProtocol
+    from mindref.lib.domain.editable import EditableNote
+    from mindref.lib.domain.events import Event
+    from mindref.lib.domain.markdown_note import MarkdownNote, MarkdownNoteDict
+    from mindref.lib.domain.protocols import AppRegistryProtocol
 
 
 class Registry:
@@ -100,7 +101,6 @@ class Registry:
                 raise NotImplementedError(f"Pagination of {direction} not supported")
 
     def set_note_index(self, value: int):
-
         """
         Manually set note_index and orchestrate backend
 

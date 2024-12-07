@@ -1,13 +1,13 @@
 from kivy.animation import Animation
 from kivy.properties import (
-    ColorProperty,
-    BooleanProperty,
-    NumericProperty,
     AliasProperty,
+    BooleanProperty,
+    ColorProperty,
+    NumericProperty,
 )
 from kivy.uix.widget import Widget
 
-from lib.utils import import_kv
+from mindref.lib.utils import import_kv
 
 import_kv(__file__)
 
@@ -17,12 +17,10 @@ class Separator(Widget):
     ...
 
 
-class HSeparator(Separator):
-    ...
+class HSeparator(Separator): ...
 
 
-class VSeparator(Separator):
-    ...
+class VSeparator(Separator): ...
 
 
 class AnimatedHSeparator(HSeparator):
