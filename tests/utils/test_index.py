@@ -3,7 +3,7 @@ from functools import partial
 
 import pytest
 
-from mindref.lib.utils.index import RollingIndex
+from mindref.lib.ext import RollingIndex
 
 
 @pytest.fixture

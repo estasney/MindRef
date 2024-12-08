@@ -8,7 +8,7 @@ from mindref.lib.domain.editable import EditableNote
 from mindref.lib.domain.events import CancelEditEvent, SaveNoteEvent
 from mindref.lib.utils import attrsetter, get_app, import_kv, sch_cb
 from mindref.lib.widgets.editor.note_editor import NoteEditor
-from mindref.lib.widgets.screens import InteractScreen
+from mindref.lib.widgets.screens.interactive import InteractScreen
 
 import_kv(__file__)
 

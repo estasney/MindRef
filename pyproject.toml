@@ -63,3 +63,6 @@ ignore = ["ANN401", "ANN204", "ANN201", "ANN202", "ARG002", "TRY003"]
 [tool.ruff.lint.flake8-annotations]
 ignore-fully-untyped = true
 suppress-dummy-args = true
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]

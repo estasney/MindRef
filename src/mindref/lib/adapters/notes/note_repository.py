@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from mindref.lib.domain.editable import EditableNote
     from mindref.lib.domain.markdown_note import MarkdownNote
     from mindref.lib.domain.protocols import GetApp
-    from mindref.lib.utils.index import RollingIndex
+    from mindref.lib.ext import RollingIndex
 
     from ...domain.settings import SortOptions
     from .android.android_note_repository import AndroidNoteRepository

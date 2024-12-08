@@ -21,8 +21,8 @@ from mindref.lib.domain.events import (
 from mindref.lib.domain.markdown_note import MarkdownNote
 from mindref.lib.domain.note_resource import CategoryResourceFiles
 from mindref.lib.domain.settings import SortOptions
+from mindref.lib.ext import RollingIndex
 from mindref.lib.utils import def_cb, sch_cb, schedulable
-from mindref.lib.utils.index import RollingIndex
 from mindref.lib.widgets.typeahead.typeahead_dropdown import Suggestion
 
 if TYPE_CHECKING:

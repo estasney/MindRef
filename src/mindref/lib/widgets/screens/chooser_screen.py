@@ -6,7 +6,7 @@ from kivy.uix.scrollview import ScrollView
 from mindref.lib.domain.events import RefreshNotesEvent
 from mindref.lib.utils import def_cb, get_app, import_kv
 from mindref.lib.widgets.buttons.category import NoteCategoryButton
-from mindref.lib.widgets.screens import RefreshableScreen
+from mindref.lib.widgets.screens.interactive import RefreshableScreen
 
 import_kv(__file__)
 

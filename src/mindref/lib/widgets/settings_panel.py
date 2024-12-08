@@ -51,12 +51,12 @@ class MindRefSettingsAndroid(InteractBehavior, SettingsWithSpinner):
     ...
 
     def __init__(self, *args, **kwargs):
-        super(MindRefSettingsAndroid, self).__init__(*args, **kwargs)
-        # override type
+        super().__init__(*args, **kwargs)
+
 
     def create_json_panel(self, title, config, filename=None, data=None):
         self.register_type("android_path", AndroidSettingPath)
-        return super(MindRefSettingsAndroid, self).create_json_panel(
+        return super().create_json_panel(
             title, config, filename, data
         )
 

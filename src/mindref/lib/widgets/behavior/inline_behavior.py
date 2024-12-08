@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Any, Literal, NamedTuple
 
 from kivy.clock import Clock
@@ -17,25 +15,19 @@ from kivy.properties import (
 from kivy.uix.label import Label
 from kivy.utils import escape_markup
 
+from mindref.lib.ext import (
+    color_str_components,
+    compute_ref_coords,
+    compute_text_contrast,
+)
 from mindref.lib.utils import import_kv
 from mindref.lib.utils.caching import (
     cache_key_color_norm,
     cache_key_text_contrast,
     kivy_cache,
 )
-from mindref.lib.utils.calculation import (
-    color_str_components,
-    compute_ref_coords,
-    compute_text_contrast,
-)
 
 import_kv(__file__)
-
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from kivy.properties import ObservableList
-
 
 class TextSnippet(NamedTuple):
     text: str
@@ -93,7 +85,7 @@ class LabelHighlightInline(Label):
     highlight_radius = VariableListProperty([sp(1)])
 
     def __init__(self, **kwargs):
-        super(LabelHighlightInline, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.markup_text_trigger = Clock.create_trigger(self.markup_text)
         self.handle_contrast_trigger = Clock.create_trigger(self.handle_contrast)
         self.draw_ref_spans_trigger = Clock.create_trigger(self.draw_ref_spans)
@@ -273,9 +265,9 @@ def get_cached_text_contrast(
 
 
 @kivy_cache(cache_name="color_norm", key_func=cache_key_color_norm, limit=1000)
-def get_cached_color_norm(color) -> tuple[float, float, float, float]:
+def get_cached_color_norm(color: str | tuple[float]) -> tuple[float, float, float, float]:
     def color_float_components(
-        s: tuple[int] | tuple[float] | ObservableList,
+        s: tuple[int] | tuple[float],
     ) -> tuple[float, float, float, float]:
         """Return r, g, b (0.0-1.0) as (0-1) and opacity as (0-1)"""
         match s:
@@ -292,4 +284,4 @@ def get_cached_color_norm(color) -> tuple[float, float, float, float]:
         case _:
             components = color_float_components(color)
 
-    return tuple(components)
+    return components

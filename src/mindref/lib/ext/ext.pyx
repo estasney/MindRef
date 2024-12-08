@@ -3,11 +3,10 @@
 cdef inline double CLAMP(double x, double lower, double upper):
     return lower if x < lower else (upper if x > upper else x)
 
-
-def normalize_coordinates(double touch_x, double touch_y, double self_x, double self_y, double self_height=0.0, double self_width=0.0):
-
+def normalize_coordinates(double touch_x, double touch_y, double self_x, double self_y, double self_height=0.0,
+                          double self_width=0.0):
     cdef (double, double) result = (0.0, 0.0)
-    
+
     if self_width == 0.0:
         return result
 
@@ -63,7 +62,7 @@ def compute_ref_coords(double width, double height, double wX, double wY, double
     Y Coordinate
     For Y coordinate, we need to consider the top padding and the height of the texture.
     Then we need to invert the y coordinate because the y coordinate increases as you go down.
-     
+
     """
     cdef double pY = (height - texture_height) / 2.0
     # Convert span_y to be relative to the bottom of the widget.
@@ -150,3 +149,105 @@ def compute_text_contrast(background_color: tuple[float, float, float, float], t
         return '#000000'
     else:
         return '#ffffff'
+
+def compute_overscroll(overscroll, target_height, overscroll_threshold,
+                       overscroll_refresh_threshold, min_opacity):
+    """
+    Given our thresholds and target height, determine if:
+        - We have overscrolled enough to adjust opacity
+        - If so, compute the opacity
+        - If overscrolled enough to trigger a refresh
+    """
+    cdef double overscroll_, target_height_, overscroll_threshold_
+    overscroll_ = overscroll
+    target_height_ = target_height
+    overscroll_threshold_ = overscroll_threshold
+    # If overscroll is positive or target height is zero, we're not overscrolled
+    if overscroll_ >= 0.0 or target_height_ == 0.0 or overscroll_threshold_ <= 0.0:
+        return 1.0, False
+
+    # Calculate our overscroll percentage which is the absolute value of the overscroll divided by the height of the
+    # target widget
+    cdef double overscroll_pct_ = (-1.0 * overscroll_) / target_height_
+
+    # If our overscroll_pct is less than the overscroll_threshold, we can quit early
+    if overscroll_pct_ < overscroll_threshold_:
+        return 1.0, False
+
+    # Now we know we're going to affect the opacity of the target widget
+    # Opacity will begin decreasing at the overscroll_threshold and will be self.min_opacity at the overscroll_refresh_threshold
+    # We'll use a linear interpolation to calculate the opacity
+    cdef double overscroll_refresh_threshold_ = overscroll_refresh_threshold
+    cdef double min_opacity_ = min_opacity
+    cdef double opacity_
+    opacity_ = 1.0 - (overscroll_pct_ - overscroll_threshold_) / (
+            overscroll_refresh_threshold_ - overscroll_threshold_)
+    opacity_ = opacity_ if opacity_ > min_opacity_ else min_opacity_
+
+    # Determine if we've overscrolled enough to trigger a refresh
+    if overscroll_pct_ >= overscroll_refresh_threshold_:
+        return opacity_, True
+    else:
+        return opacity_, False
+
+cdef class RollingIndex:
+    """
+    Implements rolling index so that we can always call 'next' or 'previous'
+
+    As with `range`, `end` is not inclusive
+    """
+
+    def __init__(self, size, current=0):
+        self._size = size
+        self._start = 0
+        self._end = size - 1 if size > 0 else 0
+        self._current = current
+
+    cdef bint _set_current(self, int n):
+        if n > self._size:
+            return False
+        self._current = n
+        return True
+
+    @property
+    def size(self):
+        return self._size
+
+    @property
+    def current(self):
+        return self._current
+
+    @current.setter
+    def current(self, n):
+        if not self._set_current(n):
+            raise IndexError(f"{n} is greater than {self._size}")
+
+    cdef int _next(self, bint peek):
+        cdef int next_index
+        next_index = self._current + 1
+        if next_index > self._end:
+            next_index = 0
+        if peek:
+            return next_index
+        self._current = next_index
+        return next_index
+
+    def next(self, peek=False):
+        cdef bint flag
+        flag = True if peek else False
+        return self._next(flag)
+
+    cdef int _prev(self, bint peek):
+        cdef int prev_index
+        prev_index = self._current - 1
+        if prev_index < self._start:
+            prev_index = self._end
+        if peek:
+            return prev_index
+        self._current = prev_index
+        return prev_index
+
+    def previous(self, peek=False):
+        cdef bint flag
+        flag = True if peek else False
+        return self._prev(flag)
