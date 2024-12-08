@@ -1,4 +1,4 @@
-from .border import BorderBox
-from .box_model import BoxModel
-from .margin import MarginBox
+from .border import BorderBox  # noqa: I001
 from .padding import PaddingBox
+from .margin import MarginBox
+from .box_model import BoxModel

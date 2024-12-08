@@ -8,8 +8,7 @@ from kivy.uix.screenmanager import ScreenManager, SlideTransition
 
 from mindref.lib.domain.events import FilePickerEvent
 from mindref.lib.ext import RollingIndex
-from mindref.lib.utils import import_kv, sch_cb, schedulable
-from mindref.lib.utils.triggers import trigger_factory
+from mindref.lib.utils import import_kv, sch_cb, schedulable, trigger_factory
 from mindref.lib.widgets.app_menu.app_menu import AppMenu
 from mindref.lib.widgets.behavior.interact_behavior import InteractBehavior
 from mindref.lib.widgets.behavior.refresh_behavior import RefreshBehavior

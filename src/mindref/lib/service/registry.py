@@ -17,13 +17,13 @@ from mindref.lib.domain.events import (
 )
 from mindref.lib.utils import def_cb, sch_cb, schedulable
 from mindref.lib.utils.caching import kivy_cache
-from mindref.lib.widgets.typeahead.typeahead_dropdown import Suggestion
 
 if TYPE_CHECKING:
     from mindref.lib.domain.editable import EditableNote
     from mindref.lib.domain.events import Event
     from mindref.lib.domain.markdown_note import MarkdownNote, MarkdownNoteDict
     from mindref.lib.domain.protocols import AppRegistryProtocol
+    from mindref.lib.widgets.typeahead.typeahead_dropdown import Suggestion
 
 
 class Registry:
@@ -163,7 +163,7 @@ class Registry:
         self,
         category: str,
         query: str,
-        on_complete: Callable[[list[Suggestion] | None], None],
+        on_complete: Callable[[list["Suggestion"] | None], None],
     ):
         """
         String search for a category

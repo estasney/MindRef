@@ -19,6 +19,8 @@ from kivy import Logger
 from kivy.clock import Clock
 from kivy.lang import Builder
 
+from .triggers import trigger_factory
+
 if TYPE_CHECKING:
     from line_profiler import LineProfiler
 

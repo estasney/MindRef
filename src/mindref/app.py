@@ -24,9 +24,9 @@ from kivy.properties import (
 from kivy.uix.settings import Settings
 
 from mindref.lib import DisplayState
-from mindref.lib.adapters.atlas.fs.fs_atlas_repository import AtlasService
-from mindref.lib.adapters.editor.fs.fs_editor_repository import FileSystemEditor
-from mindref.lib.adapters.notes.note_repository import NoteRepositoryFactory
+from mindref.lib.adapters.atlas import AtlasService
+from mindref.lib.adapters.editor import FileSystemEditor
+from mindref.lib.adapters.notes import NoteRepositoryFactory
 from mindref.lib.domain.events import (
     AddNoteEvent,
     BackButtonEvent,
@@ -48,9 +48,8 @@ from mindref.lib.domain.events import (
 )
 from mindref.lib.domain.settings import app_settings
 from mindref.lib.plugins import PluginManager
-from mindref.lib.service.registry import Registry
-from mindref.lib.utils import attrsetter, get_app, sch_cb, schedulable
-from mindref.lib.utils.triggers import trigger_factory
+from mindref.lib.service import Registry
+from mindref.lib.utils import attrsetter, get_app, sch_cb, schedulable, trigger_factory
 from mindref.lib.widgets.screens.manager import NoteAppScreenManager
 
 
