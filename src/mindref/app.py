@@ -48,9 +48,8 @@ from mindref.lib.domain.events import (
 )
 from mindref.lib.domain.settings import app_settings
 from mindref.lib.plugins import PluginManager
-from mindref.lib.service.registry import Registry
-from mindref.lib.utils import attrsetter, get_app, sch_cb, schedulable
-from mindref.lib.utils.triggers import trigger_factory
+from mindref.lib.service import Registry
+from mindref.lib.utils import attrsetter, get_app, sch_cb, schedulable, trigger_factory
 from mindref.lib.widgets.screens.manager import NoteAppScreenManager
 
 
