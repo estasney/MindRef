@@ -9,8 +9,9 @@ from kivy.properties import (
     StringProperty,
 )
 from kivy.uix.floatlayout import FloatLayout
+
 from mindref.lib.ext import compute_overscroll
-from mindref.lib.utils import import_kv, get_app
+from mindref.lib.utils import get_app, import_kv
 
 import_kv(__file__)
 
@@ -112,4 +113,3 @@ class RefreshOverscrollEffect(OpacityScrollEffect):
         )
         self.target_widget.opacity = target_opacity
         self.refresh_triggered_ = should_refresh
-        return

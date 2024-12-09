@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Literal
 
 from kivy import platform
+
 from .plugin_settings import SETTINGS_PLUGIN_DATA as _SETTINGS_PLUGIN_DATA
 
 SETTINGS_BEHAVIOR_PATH = Path(__file__).parent / "settings" / "app_settings.json"

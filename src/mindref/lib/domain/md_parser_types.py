@@ -54,8 +54,8 @@ MD_LIT_TYPES = Union[
 class MdLinkItem(TypedDict):
     type: LINK
     link: str
-    children: Optional[MdText]
-    title: Optional[str]
+    children: MdText | None
+    title: str | None
 
 
 class MdListItem(TypedDict):
@@ -81,7 +81,7 @@ class MdListOrdered(TypedDict):
 class MdBlockCode(TypedDict):
     type: BLOCK_CODE
     text: str
-    info: Optional[str]
+    info: str | None
 
 
 class MdThematicBreak(TypedDict):
@@ -168,7 +168,7 @@ class MdTableBody(TypedDict):
 
 class MdTable(TypedDict):
     type: TABLE
-    children: list[Union[MdTableHead, MdTableBody]]
+    children: list[MdTableHead | MdTableBody]
 
 
 class MdInlineHTML(TypedDict):

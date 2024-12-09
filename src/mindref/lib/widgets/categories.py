@@ -27,7 +27,7 @@ class NoteCategories(BoxLayout):
     def draw_categories(self, *_args):
         container = self.category_container
 
-        screen_categories = set((child.text for child in container.children))
+        screen_categories = set(child.text for child in container.children)
         prop_categories = set(self.categories)
 
         remove_categories = screen_categories - prop_categories

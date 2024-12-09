@@ -1,5 +1,6 @@
+from collections.abc import Callable, Sequence
 from functools import partial
-from typing import Callable, Sequence, TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING, TypeVar
 
 from kivy import Logger
 from kivy.clock import Clock
