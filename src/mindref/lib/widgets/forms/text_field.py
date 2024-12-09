@@ -11,6 +11,9 @@ from mindref.lib.utils import import_kv
 
 import_kv(__file__)
 
+_DEFAULT_FOCUS = 0b00
+_LOST_FOCUS = 0b10
+
 
 class TextField(BoxLayout):
     text = StringProperty()
@@ -46,7 +49,7 @@ class TextField(BoxLayout):
     def get_touched(self):
         """We are detecting what is analogous to a falling edge in a circuit.
         So when _touch_state is 0b10, *and* text we return True"""
-        return self._touched_state == 0b10 and self.text != ""
+        return self._touched_state == _LOST_FOCUS and self.text != ""
 
     def set_touched(self, value: bool):
         """Ideally, we wouldn't use this, but it's implemented to easily reset the state from a higher level widget
@@ -54,7 +57,7 @@ class TextField(BoxLayout):
 
         # If we force a reset, we reset the state to 0b00
         # Otherwise, we set the _touched_state to 0b10 to reflect the falling edge
-        self._touched_state = 0b10 if value else 0b00
+        self._touched_state = _LOST_FOCUS if value else _DEFAULT_FOCUS
         return True
 
     touched = AliasProperty(

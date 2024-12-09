@@ -18,11 +18,12 @@ def _has_rpi_backlight() -> bool:
     try:
         val = int(BL_SEARCH.read_bytes())
         BL_SEARCH.write_bytes(bytes(val))
-        Logger.info("rpi_backlight: Has backlight")
-        return True
     except (PermissionError, ValueError) as e:
         Logger.info(f"rpi_backlight: Path exists but got - {e}")
         return False
+    else:
+        Logger.info("rpi_backlight: Has backlight")
+        return True
 
 
 def _generate_screen_saver_dict(checker: Callable[[], bool]) -> list[dict]:
