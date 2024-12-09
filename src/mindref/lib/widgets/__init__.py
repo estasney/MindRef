@@ -1,4 +1,7 @@
 # Standalone
+from .behavior import InteractBehavior, LabelHighlightInline, RefreshBehavior
+
+# Standalone
 from .separator import (
     AnimatedHSeparator,
     HSeparator,
