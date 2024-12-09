@@ -24,7 +24,7 @@ class SuggestionButton(ThemedButton):
     text = StringProperty()
 
     def __init__(self, **kwargs):
-        super(SuggestionButton, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
 
 class TypeAheadDropDown(DropDown):
@@ -54,7 +54,7 @@ class TypeAheadDropDown(DropDown):
     items_score_getter_: Callable[[Suggestion], float]
 
     def __init__(self, **kwargs):
-        super(TypeAheadDropDown, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def on_sel_idx(self, *_args):
         if self.last_idx > 0:

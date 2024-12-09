@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import abc
+from typing import TYPE_CHECKING
 
-from mindref.lib.domain.editable import EditableNote
-from mindref.lib.domain.markdown_note import MarkdownNote
-from mindref.lib.domain.protocols import AppRegistryProtocol, GetApp
+if TYPE_CHECKING:
+    from mindref.lib.domain.editable import EditableNote
+    from mindref.lib.domain.markdown_note import MarkdownNote
+    from mindref.lib.domain.protocols import AppRegistryProtocol, GetApp
 
 
 class AbstractEditorRepository(abc.ABC):

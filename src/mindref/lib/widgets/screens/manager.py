@@ -12,13 +12,13 @@ from mindref.lib.utils import import_kv, sch_cb, schedulable, trigger_factory
 from mindref.lib.widgets.app_menu.app_menu import AppMenu
 from mindref.lib.widgets.behavior.interact_behavior import InteractBehavior
 from mindref.lib.widgets.behavior.refresh_behavior import RefreshBehavior
-from mindref.lib.widgets.buttons.category import NoteCategoryButton
 from mindref.lib.widgets.dialog.filepicker_dialog import LoadDialog
 from mindref.lib.widgets.editor.category_editor import CategoryEditor
 
 if TYPE_CHECKING:
     from mindref.lib.domain.events import PAGINATION_DIRECTION
     from mindref.lib.domain.markdown_note import MarkdownNoteDict
+    from mindref.lib.widgets.buttons.category import NoteCategoryButton
 
 import_kv(__file__)
 

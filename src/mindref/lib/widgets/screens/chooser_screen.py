@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+
 from kivy import Logger
 from kivy.clock import Clock
 from kivy.properties import BooleanProperty, ObjectProperty
@@ -5,8 +7,10 @@ from kivy.uix.scrollview import ScrollView
 
 from mindref.lib.domain.events import RefreshNotesEvent
 from mindref.lib.utils import def_cb, get_app, import_kv
-from mindref.lib.widgets.buttons.category import NoteCategoryButton
 from mindref.lib.widgets.screens.interactive import RefreshableScreen
+
+if TYPE_CHECKING:
+    from mindref.lib.widgets.buttons.category import NoteCategoryButton
 
 import_kv(__file__)
 

@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-from typing import Protocol, cast
+from typing import TYPE_CHECKING, Protocol, cast
 
 from kivy import Logger
-from kivy.uix.layout import Layout
-from kivy.uix.widget import Widget
 
 from mindref.lib.domain.md_parser_types import (
     MD_INLINE_TYPES,
@@ -12,6 +10,10 @@ from mindref.lib.domain.md_parser_types import (
     MdTextStrong,
 )
 from mindref.lib.widgets.behavior.inline_behavior import TextSnippet
+
+if TYPE_CHECKING:
+    from kivy.uix.layout import Layout
+    from kivy.uix.widget import Widget
 
 
 class VisitorProtocol(Protocol):
@@ -114,6 +116,7 @@ class MarkdownLabelParsingMixin:
                 Logger.warning(
                     f"{type(self).__name__}: visit - unhandled node type {node}"
                 )
+                return None
 
 
 class WidgetIntercept:

@@ -15,7 +15,7 @@ class AppMenu(AnchorLayout):
     btnroot = ObjectProperty()
 
     def __init__(self, **kwargs):
-        super(AppMenu, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.register_event_type("on_release")
         self.register_event_type("on_dismiss")
 

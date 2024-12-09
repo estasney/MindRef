@@ -27,7 +27,7 @@ class MarkdownRow(BoxLayout):
     ...
 
     def __init__(self, **kwargs):
-        super(MarkdownRow, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         fbind = self.fbind
         draw = self.schedule_draw
         fbind("x", draw)

@@ -29,5 +29,5 @@ class SpinningEffect(EffectBase):
 
     def __init__(self, *args, **kwargs):
         self.spin_rate = kwargs.pop("spin_rate", 10)
-        super(SpinningEffect, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.glsl = effect_spinning.format(spinRate=self.spin_rate)

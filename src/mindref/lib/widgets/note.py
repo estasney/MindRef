@@ -41,7 +41,7 @@ class Note(BoxLayout):
     note_content = DictProperty()
 
     def __init__(self, **kwargs):
-        super(Note, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.bind(on_swipe=self.handle_swipe)
 
     def handle_swipe(self, direction: bool):
@@ -59,7 +59,7 @@ class NoteContent(BoxLayout):
     content = DictProperty()
 
     def __init__(self, **kwargs):
-        super(NoteContent, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.bind(content=self.handle_content)
 
     def handle_content(self, _, content_data: "MarkdownNoteDict"):
@@ -120,3 +120,4 @@ class NoteTitleBar(BoxLayout):
                 Logger.warning(
                     f"{type(self).__name__}: handle_select - Unhandled value {value}"
                 )
+                return None

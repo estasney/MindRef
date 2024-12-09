@@ -1,14 +1,16 @@
-from typing import Union
+from typing import TYPE_CHECKING, Union
 
 from kivy import Logger
 from kivy.properties import ObjectProperty, OptionProperty, StringProperty
 
 from mindref.lib import DisplayState
-from mindref.lib.domain.editable import EditableNote
 from mindref.lib.domain.events import CancelEditEvent, SaveNoteEvent
 from mindref.lib.utils import attrsetter, get_app, import_kv, sch_cb
-from mindref.lib.widgets.editor.note_editor import NoteEditor
 from mindref.lib.widgets.screens.interactive import InteractScreen
+
+if TYPE_CHECKING:
+    from mindref.lib.domain.editable import EditableNote
+    from mindref.lib.widgets.editor.note_editor import NoteEditor
 
 import_kv(__file__)
 
@@ -33,7 +35,7 @@ class NoteEditScreen(InteractScreen):
     note_editor: "NoteEditor" = ObjectProperty(rebind=True)
 
     def __init__(self, **kwargs):
-        super(NoteEditScreen, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         app = get_app()
         app.bind(editor_note=self.handle_app_editor_note)
         app.bind(display_state=self.handle_app_display_state)

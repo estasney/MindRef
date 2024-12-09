@@ -39,7 +39,7 @@ class ListView(GridLayout):
     """
 
     def __init__(self, **kwargs):
-        super(ListView, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.add_item_trigger = Clock.create_trigger(
             self.add_item, timeout=0.01, interval=True
         )

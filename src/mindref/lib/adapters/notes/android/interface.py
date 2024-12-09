@@ -280,7 +280,7 @@ class AndroidStorageManager:
         return uri
 
     @classmethod
-    def _python_picker_callback(cls, uri: str | UriProtocol):
+    def _python_picker_callback(cls, uri: str | UriProtocol) -> None:
         """
         Wraps a call from OnDocumentCallback. Ensures we make permission persistable
         Parameters
@@ -306,8 +306,7 @@ class AndroidStorageManager:
             case str(), x if x is UriProtocol:
                 Logger.debug("URI is str, target is URI")
                 URI: UriProtocol = autoclass("android.net.Uri")
-                uri_native = URI.parse(uri)
-                return uri_native
+                return URI.parse(uri)
             case UriProtocol(), str():
                 Logger.debug("URI is URI, target is str")
                 return uri.toString()
@@ -316,9 +315,10 @@ class AndroidStorageManager:
                 return uri
             case _:
                 Logger.debug("Unmatched")
+                return None
 
     @classmethod
-    def prompt_for_external_folder(cls, activity_code: int):
+    def prompt_for_external_folder(cls, activity_code: int) -> None:
         """
         Use Android System Document Picker to have user select a folder as a root directory for App Data
 
@@ -347,7 +347,9 @@ class AndroidStorageManager:
         activity.startActivityForResult(intent, activity_code)
 
     @classmethod
-    def prompt_for_external_file(cls, activity_code: int, mime_types: set[MIME_TYPE]):
+    def prompt_for_external_file(
+        cls, activity_code: int, mime_types: set[MIME_TYPE]
+    ) -> None:
         with cls._lock:
             if not cls._prompt_picker_callback_java:
                 cls._register_prompt_picker_callback()
@@ -380,7 +382,7 @@ class AndroidStorageManager:
         activity.startActivityForResult(intent, activity_code)
 
     @classmethod
-    def get_categories(cls, source: str, target: str | Path, key: int):
+    def get_categories(cls, source: str, target: str | Path, key: int) -> None:
         target = str(target)
         with cls._lock:
             activity = cls._get_activity()
@@ -392,7 +394,7 @@ class AndroidStorageManager:
         Logger.info(f"{type(cls).__name__}: get_categories - invoked")
 
     @classmethod
-    def clone_external_storage(cls, source: str, target: str | Path, key: int):
+    def clone_external_storage(cls, source: str, target: str | Path, key: int) -> None:
         """Copy externalStorage to target directory with Android"""
         target = str(target)
         with cls._lock:
@@ -410,7 +412,7 @@ class AndroidStorageManager:
         appStorageRoot: str,
         externalStorageRoot: str,
         key: int,
-    ):
+    ) -> None:
         """Persist a file to external storage on Android"""
         with cls._lock:
             activity = cls._get_activity()
@@ -438,7 +440,7 @@ class AndroidStorageManager:
     @classmethod
     def create_category_directory(
         cls, directoryName: str, appStorageRoot: str, externalStorageRoot: str, key: int
-    ):
+    ) -> None:
         """
         Create a directory on external storage on Android
 
@@ -472,7 +474,7 @@ class AndroidStorageManager:
         externalStorageRoot: str,
         imageUri: str,
         key: int,
-    ):
+    ) -> None:
         """
         Add an image to a category directory on external storage on Android.
 

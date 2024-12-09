@@ -28,22 +28,23 @@ def _has_rpi_backlight() -> bool:
 def _generate_screen_saver_dict(checker: Callable[[], bool]) -> list[dict]:
     if checker():
         return [
-            dict(type="title", title="Plugins"),
-            dict(
-                type="bool",
-                title="ScreenSaver",
-                desc="Enable a ScreenSaver",
-                section="Plugins",
-                key="SCREEN_SAVER_ENABLE",
-            ),
-            dict(
-                type="numeric",
-                title="ScreenSaver Delay",
-                desc="Enable ScreenSaver after this many minutes",
-                section="Plugins",
-                key="SCREEN_SAVER_DELAY",
-            ),
+            {"type": "title", "title": "Plugins"},
+            {
+                "type": "bool",
+                "title": "ScreenSaver",
+                "desc": "Enable a ScreenSaver",
+                "section": "Plugins",
+                "key": "SCREEN_SAVER_ENABLE",
+            },
+            {
+                "type": "numeric",
+                "title": "ScreenSaver Delay",
+                "desc": "Enable ScreenSaver after this many minutes",
+                "section": "Plugins",
+                "key": "SCREEN_SAVER_DELAY",
+            },
         ]
+    return None
 
 
 def _generate_plugin_data(

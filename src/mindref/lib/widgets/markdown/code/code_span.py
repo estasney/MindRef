@@ -15,7 +15,7 @@ class MarkdownCodeSpan(GridLayout):
     background_color = StringProperty()
 
     def __init__(self, text, **kwargs):
-        super(MarkdownCodeSpan, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.styler = styles.get_style_by_name("paraiso-dark")
         self.background_color = self.styler.background_color
         self.raw_text = text

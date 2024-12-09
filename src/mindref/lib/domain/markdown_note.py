@@ -1,16 +1,17 @@
 from __future__ import annotations
 
-import io
 from _operator import itemgetter
-from collections.abc import Generator
 from dataclasses import asdict, dataclass
-from os import PathLike
 from pathlib import Path
 from typing import TYPE_CHECKING, Protocol, TypedDict
 
 from mindref.lib.domain.parser.markdown_parser import MarkdownParser
 
 if TYPE_CHECKING:
+    import io
+    from collections.abc import Generator
+    from os import PathLike
+
     from mindref.lib.domain.md_parser_types import MD_DOCUMENT, MdBlockCode, MdHeading
 
 

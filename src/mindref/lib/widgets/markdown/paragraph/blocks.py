@@ -15,7 +15,7 @@ class MarkdownBlockQuote(GridLayout, MarkdownLabelParsingMixin):
     open_bbcode_tag = StringProperty()
 
     def __init__(self, **kwargs):
-        super(MarkdownBlockQuote, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def visit(self, node: MdBlockQuote):
         for node in node["children"]:

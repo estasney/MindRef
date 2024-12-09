@@ -220,7 +220,7 @@ class EnvironContext:
             os.environ[k] = v
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        for k in self.vals.keys():
+        for k in self.vals:
             del os.environ[k]
 
 
@@ -231,7 +231,7 @@ class Singleton(type):
 
     def __call__(cls, *args, **kwargs):
         if cls.__instance is None:
-            cls.__instance = super(Singleton, cls).__call__(*args, **kwargs)
+            cls.__instance = super().__call__(*args, **kwargs)
             return cls.__instance
         return cls.__instance
 

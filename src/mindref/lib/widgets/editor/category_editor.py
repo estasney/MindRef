@@ -81,9 +81,10 @@ class CategoryEditor(BoxLayout):
                 push_cat_event = schedulable(app.registry.push_event, cat_event)
                 sch_cb(push_cat_event, self.clear_inputs, timeout=0.1)
             case "browse":
-                set_result = lambda x: setattr(
-                    self.image_path_input.w_text_input, "text", x
-                )
+
+                def set_result(x):
+                    return setattr(self.image_path_input.w_text_input, "text", x)
+
                 browse_event = FilePickerEvent(
                     on_complete=set_result,
                     action=FilePickerEvent.Action.OPEN_FILE,

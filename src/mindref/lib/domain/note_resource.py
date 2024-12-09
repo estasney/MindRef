@@ -140,10 +140,7 @@ class CategoryResourceFiles:
                 matched_image = next(
                     (img for img in image if img.path.stem == category.lower()), None
                 )
-                if matched_image:
-                    image = matched_image
-                else:
-                    image = image[0]
+                image = matched_image if matched_image else image[0]
             elif n_img == 1:
                 image = image[0]
             else:
@@ -182,14 +179,22 @@ class CategoryResourceFiles:
 
         match self.sort_strategy:
             case "Creation Date":
-                sort_func = lambda x: x.path.stat().st_ctime_ns
+
+                def sort_func(x):
+                    return x.path.stat().st_ctime_ns
             case "Title":
-                sort_func = lambda x: x.path.name
+
+                def sort_func(x):
+                    return x.path.name
             case "Last Modified Date":
-                sort_func = lambda x: x.path.stat().st_mtime_ns
+
+                def sort_func(x):
+                    return x.path.stat().st_mtime_ns
             case _:
                 Logger.error(f"Invalid sort_strategy: {self.sort_strategy}")
-                sort_func = lambda x: x.path.stat().st_mtime_ns
+
+                def sort_func(x):
+                    return x.path.stat().st_mtime_ns
 
         self.notes.sort(key=sort_func, reverse=not self.ascending)
         for i, note in enumerate(self.notes):
@@ -226,10 +231,10 @@ class CategoryResourceFiles:
         """
         if not refresh:
             targets = (note for note in self.notes if note.note_ is None)
-            params = dict(refresh=False)
+            params = {"refresh": False}
         else:
             targets = (note for note in self.notes)
-            params = dict(refresh=True)
+            params = {"refresh": True}
 
         func = attrgetter("get_note")
 
@@ -246,6 +251,7 @@ class CategoryResourceFiles:
     def get_image_uri(self) -> Path | None:
         if img := self.image:
             return img.path
+        return None
 
     def get_note_by_idx(self, idx) -> NoteResourceFile:
         matched_note = next((note for note in self.notes if note.index_ == idx), None)

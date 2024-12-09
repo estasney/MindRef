@@ -18,9 +18,7 @@ from mindref.lib.domain.events import (
     NotesQueryErrorFailureEvent,
     NotesQueryNotSetFailureEvent,
 )
-from mindref.lib.domain.markdown_note import MarkdownNote
 from mindref.lib.domain.note_resource import CategoryResourceFiles
-from mindref.lib.domain.settings import SortOptions
 from mindref.lib.ext import RollingIndex
 from mindref.lib.utils import def_cb, sch_cb, schedulable
 from mindref.lib.widgets.typeahead.typeahead_dropdown import Suggestion
@@ -29,8 +27,9 @@ if TYPE_CHECKING:
     from os import PathLike
 
     from mindref.lib.domain.editable import EditableNote
-    from mindref.lib.domain.markdown_note import MarkdownNoteDict
+    from mindref.lib.domain.markdown_note import MarkdownNote, MarkdownNoteDict
     from mindref.lib.domain.protocols import GetApp
+    from mindref.lib.domain.settings import SortOptions
 
 TGetCategoriesCallback = Callable[[Iterable[str]], None]
 
@@ -131,9 +130,7 @@ class FileSystemNoteRepository(AbstractNoteRepository):
 
     def _get_category_meta(self, category: str, refresh: bool):
         category_resource = self.category_files[category]
-        md_notes = category_resource.get_md_notes(refresh=refresh).get_md_note_metas()
-
-        return md_notes
+        return category_resource.get_md_notes(refresh=refresh).get_md_note_metas()
 
     def get_category_meta(
         self,
@@ -574,7 +571,7 @@ class FileSystemNoteRepository(AbstractNoteRepository):
         """
         lcat = category.lower().strip()
         # Perform a case-insensitive check in our category_files dict
-        if lcat in (k.lower().strip() for k in self.category_files.keys()):
+        if lcat in (k.lower().strip() for k in self.category_files):
             return False
 
         # We want to check the filesystem for any other categories but can only do this if we have a storage path.
@@ -593,6 +590,4 @@ class FileSystemNoteRepository(AbstractNoteRepository):
             ),
             None,
         )
-        if matched:
-            return False
-        return True
+        return not matched

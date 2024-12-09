@@ -32,4 +32,4 @@ class MarkdownThematicBreak(BoxLayout):
     ...
 
     def __init__(self, **kwargs):
-        super(MarkdownThematicBreak, self).__init__(**kwargs)
+        super().__init__(**kwargs)

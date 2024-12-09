@@ -25,7 +25,7 @@ class RefreshSymbol(FloatLayout):
 
     def __init__(self, **kwargs):
         self.source = get_app().atlas_service.uri_for("refresh", atlas_name="icons")
-        super(RefreshSymbol, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self._scheduler = None
 
     def on_parent(self, *_args):

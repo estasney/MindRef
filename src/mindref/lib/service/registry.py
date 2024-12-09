@@ -90,6 +90,7 @@ class Registry:
                 )
                 sch_cb(fetch_note)
                 Logger.info(f"{type(self).__name__}: paginate_note - forwards")
+                return None
             case -1:
                 fetch_note = schedulable(
                     self.app.note_service.get_previous_note,
@@ -97,6 +98,7 @@ class Registry:
                 )
                 sch_cb(fetch_note)
                 Logger.info(f"{type(self).__name__}: paginate_note - backwards")
+                return None
             case _:
                 raise NotImplementedError(f"Pagination of {direction} not supported")
 
@@ -364,10 +366,12 @@ class Registry:
                     return "Category name cannot be empty"
                 if not self.app.note_service.category_name_unique(value):
                     return "Category name must be unique"
+                return None
 
             case "image" if self.app.platform_android:
                 if not value:
                     return "Category image cannot be empty"
+                return None
 
             case "image":
                 if not value:
@@ -376,3 +380,4 @@ class Registry:
                     return "Category image must be a valid path to an existing file"
                 if Path(value).suffix.lower() not in (".png", ".jpg", ".jpeg"):
                     return "Category image must be a .png, .jpg, or .jpeg file"
+                return None
