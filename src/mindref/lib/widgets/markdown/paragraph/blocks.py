@@ -18,5 +18,5 @@ class MarkdownBlockQuote(GridLayout, MarkdownLabelParsingMixin):
         super().__init__(**kwargs)
 
     def visit(self, node: MdBlockQuote):
-        for node in node["children"]:
-            super().visit(node)
+        for child_node in node["children"]:
+            super().visit(child_node)

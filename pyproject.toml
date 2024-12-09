@@ -58,7 +58,7 @@ target-version = "py312"
 [tool.ruff.lint]
 select = ["E4", "E7", "E9", "F", "I001", "UP", "ANN", "B", "C", "I", "LOG", "G", "RSE", "RET", "SLOT", "SIM", "TC", "INT", "ARG",
     "PTH", "ERA", "PL", "TRY", "FLY", "RUF"]
-ignore = ["ANN401", "ANN204", "ANN201", "ANN202", "ARG002", "TRY003"]
+ignore = ["ANN401", "ANN204", "ANN201", "ANN202", "ARG002", "TRY003", "C901", "PLR0915", "PLR0912", "PLR0911"]
 
 [tool.ruff.lint.flake8-annotations]
 ignore-fully-untyped = true

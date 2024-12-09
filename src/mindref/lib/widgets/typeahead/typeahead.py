@@ -58,7 +58,7 @@ class TypeAhead(BoxLayout):
 
         app = get_app()
 
-        def set_index(dt):
+        def set_index(_dt):
             return app.select_index(value.index)
 
         sch_cb(self.clear_text, set_index, timeout=0.1)

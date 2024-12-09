@@ -51,7 +51,7 @@ class NoteCategoryChooserScreen(RefreshableScreen):
             app = get_app()
             cb = def_cb(
                 self.remove_refresh_symbol_trigger,
-                lambda dt: setattr(self, "refresh_dispatched", False),
+                lambda _dt: setattr(self, "refresh_dispatched", False),
             )
             app.registry.push_event(RefreshNotesEvent(on_complete=cb))
 

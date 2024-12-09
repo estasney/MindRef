@@ -6,6 +6,7 @@ from kivy.properties import BooleanProperty, ObjectProperty
 from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import ScreenManager, SlideTransition
 
+from mindref.lib import DisplayState
 from mindref.lib.domain.events import FilePickerEvent
 from mindref.lib.ext import RollingIndex
 from mindref.lib.utils import import_kv, sch_cb, schedulable, trigger_factory
@@ -68,7 +69,7 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
         else:
             self.transition = SlideTransition(direction="left")
 
-    def handle_app_display_state(self, _, value: "DISPLAY_STATE"):
+    def handle_app_display_state(self, _, value: DisplayState):
         old, new = value
         Logger.debug(f"ScreenManager: app_display_state - {old} -> {new}")
         match (old, new):
@@ -87,7 +88,6 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
             case (_, "error"):
                 self.handle_error_message()
             case (_, "category_editor"):
-                # return self.screen_triggers("category_editor_screen")
                 # Attach a CategoryEditor to the ScreenContainer
                 container_screen = next(
                     (
@@ -103,7 +103,7 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
                 trigger_screen = schedulable(self.screen_triggers, "screen_container")
                 sch_cb(trigger_screen, timeout=0.1)
             case _:
-                raise Exception(f"Unhandled display state {value}")
+                raise ValueError(f"Unhandled display state {value=}")
 
     def handle_notes_display_view(self): ...
 
