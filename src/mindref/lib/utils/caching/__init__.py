@@ -1,5 +1,6 @@
+from collections.abc import Callable, Hashable
 from functools import wraps
-from typing import Callable, Optional, TypeVar, Hashable, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional, TypeVar
 
 from kivy.cache import Cache
 
@@ -16,8 +17,8 @@ if TYPE_CHECKING:
 def kivy_cache(
     cache_name: str,
     key_func: "KeyedCallable",
-    limit: Optional[int] = None,
-    timeout: Optional[int] = None,
+    limit: int | None = None,
+    timeout: int | None = None,
 ) -> "InnerCallable":
     """
     Used as decorator to wrap a function in a Kivy Cache
@@ -36,13 +37,13 @@ def kivy_cache(
     if cache_name not in categories_seen:
         Cache.register(cache_name, limit=limit, timeout=timeout)
         categories_seen.add(cache_name)
-    setattr(kivy_cache, "categories_seen", categories_seen)
+    kivy_cache.categories_seen = categories_seen
 
     def dec_kivy_cache(func: "InnerCallable"):
         @wraps(func)
         def wrapped_func(*args: "PInner.args", **kwargs: "PInner.kwargs") -> "TInner":
             key = key_func(**kwargs)
-            cached_result: "TInner" = Cache.get(cache_name, key)
+            cached_result: TInner = Cache.get(cache_name, key)
             if cached_result is not None:
                 return cached_result
             result = func(*args, **kwargs)
@@ -62,7 +63,7 @@ def cache_key_text_extents(**kwargs) -> str:
     return f"{text}-{opts['font_size']}-{opts['font_family']}"
 
 
-def cache_key_text_contrast(*_args, **kwargs) -> tuple[tuple, int, Optional[tuple]]:
+def cache_key_text_contrast(*_args, **kwargs) -> tuple[tuple, int, tuple | None]:
     """Generate key for 'text_contrast'"""
     background_color = kwargs.get("background_color")
     threshold = kwargs.get("threshold")

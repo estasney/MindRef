@@ -2,9 +2,9 @@ from kivy.base import EventLoop
 from kivy.clock import Clock
 from kivy.graphics import RenderContext
 from kivy.properties import (
+    BoundedNumericProperty,
     ListProperty,
     NumericProperty,
-    BoundedNumericProperty,
     StringProperty,
 )
 

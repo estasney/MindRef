@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Protocol, TYPE_CHECKING, TypeVar, Optional
+from typing import TYPE_CHECKING, Optional, Protocol, TypeVar
 
 from kivy import Logger
 from kivy.clock import Clock
@@ -11,11 +11,9 @@ if TYPE_CHECKING:
 
 
 class PluginProtocol(Protocol):
-    def handle_event(self, event: str):
-        ...
+    def handle_event(self, event: str): ...
 
-    def is_compatible(self) -> bool:
-        ...
+    def is_compatible(self) -> bool: ...
 
 
 T = TypeVar("T", bound=PluginProtocol)
@@ -38,11 +36,10 @@ class PluginManager(EventDispatcher):
         self.update_plugins(plugin_config)
 
     def config_change_handler(self, *args):
-
         value, key, section, *rest = list(reversed(args))
 
-        truthy = {True, 1, "1", "True"}
-        falsy = {False, 0, "0", "False"}
+        truthy = {True, "1", "True"}
+        falsy = {False, "0", "False"}
 
         if section != "Plugins":
             return
@@ -63,7 +60,7 @@ class PluginManager(EventDispatcher):
                     ss.active_after_minutes = int(value)
         return
 
-    def ensure_plugin(self, plugin_type: type[T], make: bool) -> Optional[T]:
+    def ensure_plugin(self, plugin_type: type[T], make: bool) -> T | None:
         matched = next((pl for pl in self.plugins if isinstance(pl, plugin_type)), None)
         if matched:
             return matched
