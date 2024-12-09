@@ -51,7 +51,7 @@ class PulsingEffect(EffectBase):
 
     def __init__(self, *args, **kwargs):
         EventLoop.ensure_window()
-        super(PulsingEffect, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.bind(
             pulse_width=self.build_shader,
             pulse_period=self.build_shader,

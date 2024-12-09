@@ -37,7 +37,7 @@ class NoteEditor(BoxLayout):
     title_widget = ObjectProperty()
 
     def __init__(self, **kwargs):
-        super(NoteEditor, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.bind(init_text=self.handle_init_text)
         self.title_widget = NoteTitleInput(size_hint_y=0.1, pos_hint={"top": 0})
         self.register_event_type("on_save")
@@ -76,5 +76,5 @@ class NoteTitleInput(BoxLayout):
     input_widget = ObjectProperty()
 
     def __init__(self, **kwargs):
-        super(NoteTitleInput, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.input_widget.bind(text=self.setter("title"))

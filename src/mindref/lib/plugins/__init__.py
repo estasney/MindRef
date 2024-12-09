@@ -21,7 +21,7 @@ T = TypeVar("T", bound=PluginProtocol)
 
 class PluginManager(EventDispatcher):
     def __init__(self, *args, **kwargs):
-        super(PluginManager, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.plugins: list[PluginProtocol] = []
 
     def plugin_event(self, event):
@@ -89,7 +89,7 @@ class ScreenSaverPlugin(EventDispatcher):
 
     # noinspection PyUnresolvedReferences
     def __init__(self, *args, **kwargs):
-        super(ScreenSaverPlugin, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         # Every ~ 60 seconds
         self.trigger = Clock.create_trigger(self.check_time, interval=True, timeout=60)
         self.screen_save_trigger = Clock.create_trigger(self.save_screen)

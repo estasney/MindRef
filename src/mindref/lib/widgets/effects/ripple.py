@@ -97,6 +97,7 @@ class RippleMixin:
             # Cancel the trigger
             return False
         self.touch_time = touch_time
+        return None
 
     def on_touch(self, _instance, value):
         canvas = self.canvas

@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from mindref.lib.adapters.editor.editor_repository import (
     AbstractEditorRepository,
 )
 from mindref.lib.domain.editable import EditableNote
-from mindref.lib.domain.markdown_note import MarkdownNote
+
+if TYPE_CHECKING:
+    from mindref.lib.domain.markdown_note import MarkdownNote
 
 
 class FileSystemEditor(AbstractEditorRepository):
@@ -15,15 +19,13 @@ class FileSystemEditor(AbstractEditorRepository):
         """
         Get an editable note from empty source
         """
-        data_note = EditableNote(category=category, idx=idx, md_note=None)
-        return data_note
+        return EditableNote(category=category, idx=idx, md_note=None)
 
     def edit_note(self, note: MarkdownNote) -> EditableNote:
         """
         Get an editable note from an existing MarkdownNote
         """
-        data_note = EditableNote.from_markdown_note(note=note)
-        return data_note
+        return EditableNote.from_markdown_note(note=note)
 
     def cancel_note(self, note: EditableNote):
         """

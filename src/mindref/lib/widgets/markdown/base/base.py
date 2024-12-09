@@ -16,4 +16,4 @@ class MarkdownLabelBase(BoxLayout, MarkdownLabelParsingMixin):
     valign = OptionProperty("bottom", options=["bottom", "middle", "center", "top"])
 
     def __init__(self, **kwargs):
-        super(MarkdownLabelBase, self).__init__(**kwargs)
+        super().__init__(**kwargs)

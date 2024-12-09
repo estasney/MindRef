@@ -12,9 +12,9 @@ from kivy.properties import (
 )
 from kivy.uix.anchorlayout import AnchorLayout
 
-OPEN_STATE = Literal["open", "closed", "opening", "closing"]
-
 from mindref.lib.utils import import_kv
+
+OPEN_STATE = Literal["open", "closed", "opening", "closing"]
 
 import_kv(__file__)
 

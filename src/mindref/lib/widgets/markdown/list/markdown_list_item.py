@@ -32,4 +32,4 @@ class MarkdownListItem(MarkdownLabelBase):
     )
 
     def __init__(self, **kwargs):
-        super(MarkdownListItem, self).__init__(**kwargs)
+        super().__init__(**kwargs)

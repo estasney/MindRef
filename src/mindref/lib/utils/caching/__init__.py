@@ -1,10 +1,10 @@
-from collections.abc import Callable, Hashable
 from functools import wraps
 from typing import TYPE_CHECKING, Optional, TypeVar
 
 from kivy.cache import Cache
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Hashable
     from typing import ParamSpec
 
     POuter = ParamSpec("POuter")

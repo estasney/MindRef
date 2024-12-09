@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Literal, Optional, TypedDict, Union
+from typing import Literal, TypedDict
 
 TEXT = Literal["text"]
 HEADING = Literal["heading"]
@@ -9,7 +9,8 @@ TABLE_HEAD = Literal["table_head"]
 TABLE_BODY = Literal["table_body"]
 TABLE_ROW = Literal["table_row"]
 TABLE_CELL = Literal["table_cell"]
-TABLE_CELL_ALIGN = Optional[Literal["left", "right", "center"]]
+TABLE_CELL_ALIGN_NAME = Literal["left", "right", "center"]
+TABLE_CELL_ALIGN = TABLE_CELL_ALIGN_NAME | None
 STRONG = Literal["strong"]
 EMPHASIS = Literal["emphasis"]
 CODESPAN = Literal["codespan"]
@@ -26,29 +27,29 @@ PARAGRAPH = Literal["paragraph"]
 INLINE_HTML = Literal["inline_html"]
 INLINE_KBD = Literal["kbd"]
 
-MD_LIT_TYPES = Union[
-    TEXT,
-    HEADING,
-    TABLE,
-    TABLE_HEAD,
-    TABLE_BODY,
-    TABLE_ROW,
-    TABLE_CELL,
-    TABLE_CELL_ALIGN,
-    STRONG,
-    CODESPAN,
-    LINEBREAK,
-    NEWLINE,
-    THEMATIC_BREAK,
-    BLOCK_CODE,
-    BLOCK_TEXT,
-    LIST,
-    LIST_ITEM,
-    PARAGRAPH,
-    LINK,
-    INLINE_HTML,
-    INLINE_KBD,
-]
+MD_LIT_TYPES = (
+    TEXT
+    | HEADING
+    | TABLE
+    | TABLE_HEAD
+    | TABLE_BODY
+    | TABLE_ROW
+    | TABLE_CELL
+    | TABLE_CELL_ALIGN
+    | STRONG
+    | CODESPAN
+    | LINEBREAK
+    | NEWLINE
+    | THEMATIC_BREAK
+    | BLOCK_CODE
+    | BLOCK_TEXT
+    | LIST
+    | LIST_ITEM
+    | PARAGRAPH
+    | LINK
+    | INLINE_HTML
+    | INLINE_KBD
+)
 
 
 class MdLinkItem(TypedDict):
@@ -194,59 +195,65 @@ class AnyTextMd(TypedDict):
     text: str
 
 
-MD_TYPES = Union[
-    MdListItem,
-    MdListUnordered,
-    MdListOrdered,
-    MdBlockCode,
-    MdThematicBreak,
-    MdNewLine,
-    MdLineBreak,
-    MdCodeSpan,
-    MdBlockText,
-    MdBlockQuote,
-    MdText,
-    MdTextStrong,
-    MdHeading,
-    MdTableBodyCell,
-    MdTableBodyRow,
-    MdTableHead,
-    MdTableBody,
-    MdTable,
-    MdTableHeadCell,
-    MdParagraph,
-    MdInlineHTML,
-]
+MD_TYPES = (
+    MdListItem
+    | MdListUnordered
+    | MdListOrdered
+    | MdBlockCode
+    | MdThematicBreak
+    | MdNewLine
+    | MdLineBreak
+    | MdCodeSpan
+    | MdBlockText
+    | MdBlockQuote
+    | MdText
+    | MdTextStrong
+    | MdHeading
+    | MdTableBodyCell
+    | MdTableBodyRow
+    | MdTableHead
+    | MdTableBody
+    | MdTable
+    | MdTableHeadCell
+    | MdParagraph
+    | MdInlineHTML
+)
 
 MD_DOCUMENT = list[MD_TYPES]
 
-MD_LIT_BLOCK_TYPES = Union[
-    NEWLINE,
-    THEMATIC_BREAK,
-    HEADING,
-    BLOCK_CODE,
-    BLOCK_QUOTE,
-    BLOCK_TEXT,
-    LIST,
-    LIST_ITEM,
-    PARAGRAPH,
-]
+MD_LIT_BLOCK_TYPES = (
+    NEWLINE
+    | THEMATIC_BREAK
+    | HEADING
+    | BLOCK_CODE
+    | BLOCK_QUOTE
+    | BLOCK_TEXT
+    | LIST
+    | LIST_ITEM
+    | PARAGRAPH
+)
 
-MD_BLOCK_TYPES = Union[
-    MdNewLine,
-    MdThematicBreak,
-    MdHeading,
-    MdBlockCode,
-    MdBlockText,
-    MdBlockQuote,
-    MdListOrdered,
-    MdListUnordered,
-    MdListItem,
-    MdParagraph,
-]
+MD_BLOCK_TYPES = (
+    MdNewLine
+    | MdThematicBreak
+    | MdHeading
+    | MdBlockCode
+    | MdBlockText
+    | MdBlockQuote
+    | MdListOrdered
+    | MdListUnordered
+    | MdListItem
+    | MdParagraph
+)
 
-MD_LIT_INLINE_TYPES = Union[CODESPAN, STRONG, TEXT, EMPHASIS, INLINE_HTML, INLINE_KBD]
 
-MD_INLINE_TYPES = Union[
-    MdCodeSpan, MdTextStrong, MdText, MdTextEmphasis, MdInlineHTML, MdInlineKeyboard
-]
+MD_LIT_INLINE_TYPES = CODESPAN | STRONG | TEXT | EMPHASIS | INLINE_HTML | INLINE_KBD
+
+MD_INLINE_TYPES = (
+    MdCodeSpan
+    | MdTextStrong
+    | MdText
+    | MdTextEmphasis
+    | MdInlineHTML
+    | MdInlineKeyboard
+)

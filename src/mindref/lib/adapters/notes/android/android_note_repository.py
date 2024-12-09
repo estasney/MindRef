@@ -329,7 +329,7 @@ class AndroidNoteRepository(FileSystemNoteRepository):
         self._mediator_callbacks[code] = on_complete
 
         def get_mime_types(filters: list[str]) -> set[MIME_TYPE]:
-            result = set(())
+            result = set()
             image_exts = (".jpg", ".jpeg", ".png")
             doc_exts = (".md",)
             img_mime = MIME_TYPE("image/*")

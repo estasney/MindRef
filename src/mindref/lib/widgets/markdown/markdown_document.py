@@ -22,7 +22,7 @@ class MarkdownDocument(ScrollView):
     content = ObjectProperty()
 
     def __init__(self, content_data: dict, **kwargs):
-        super(MarkdownDocument, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.document = content_data["document"]
         self.text = content_data["text"]
         self.title = content_data["title"]

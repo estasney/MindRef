@@ -33,7 +33,7 @@ class ThemedButton(ButtonBehavior, BoxLayout, RippleMixin):
         self._on_touch_down_plain = super().on_touch_down
         self._on_touch_move_plain = super().on_touch_move
         self._on_touch_up_plain = super().on_touch_up
-        super(ThemedButton, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.bind(enable_ripple_effect=self.toggle_ripple_effect)
         self.toggle_ripple_effect()
 
@@ -108,4 +108,4 @@ class ImageButton(ThemedButton):
     source = StringProperty()
 
     def __init__(self, **kwargs):
-        super(ImageButton, self).__init__(**kwargs)
+        super().__init__(**kwargs)

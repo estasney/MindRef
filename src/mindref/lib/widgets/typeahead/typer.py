@@ -13,7 +13,7 @@ class TextTyper(TextInput):
     """
 
     def __init__(self, **kwargs):
-        super(TextTyper, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.register_event_type("on_suggestion_scroll")
         self.register_event_type("on_suggestion_select")
 
@@ -27,3 +27,4 @@ class TextTyper(TextInput):
         if keycode[1] == "enter":
             return self.dispatch("on_suggestion_select")
         super().keyboard_on_key_down(window, keycode, text, modifiers)
+        return None

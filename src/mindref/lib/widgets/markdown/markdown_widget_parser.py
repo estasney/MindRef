@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Container
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from kivy import Logger
 from kivy.uix.widget import Widget
@@ -44,6 +43,9 @@ from mindref.lib.widgets.markdown.table.markdown_table import (
     MarkdownTable,
 )
 
+if TYPE_CHECKING:
+    from collections.abc import Container
+
 
 class MarkdownWidgetParser:
     state: Widget | None
@@ -71,9 +73,7 @@ class MarkdownWidgetParser:
                 # Don't report, but still check children
                 for i, child in enumerate(children):
                     child_idx = (
-                        tuple((*idx, "children", i))
-                        if idx is not None
-                        else tuple(("children", i))
+                        (*idx, "children", i) if idx is not None else ("children", i)
                     )
                     child_report = report(child, child_idx, report_nodes)
                     if child_report:

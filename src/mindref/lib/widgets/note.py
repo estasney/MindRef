@@ -31,7 +31,7 @@ Cache.register("note_widget", limit=10, timeout=3600)
 
 # noinspection PyUnusedLocal
 @kivy_cache(cache_name="note_widget", key_func=cache_key_note)
-def get_cached_note(*, content_data: "MarkdownNoteDict", parent: "NoteContent"):
+def get_cached_note(*, content_data: "MarkdownNoteDict", _parent: "NoteContent"):
     return MarkdownDocument(content_data=content_data)
 
 
@@ -41,7 +41,7 @@ class Note(BoxLayout):
     note_content = DictProperty()
 
     def __init__(self, **kwargs):
-        super(Note, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.bind(on_swipe=self.handle_swipe)
 
     def handle_swipe(self, direction: bool):
@@ -59,7 +59,7 @@ class NoteContent(BoxLayout):
     content = DictProperty()
 
     def __init__(self, **kwargs):
-        super(NoteContent, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.bind(content=self.handle_content)
 
     def handle_content(self, _, content_data: "MarkdownNoteDict"):
@@ -67,7 +67,7 @@ class NoteContent(BoxLayout):
         self._set_markdown(content_data)
 
     def _set_markdown(self, content_data: "MarkdownNoteDict"):
-        md_widget = get_cached_note(content_data=content_data, parent=self)
+        md_widget = get_cached_note(content_data=content_data, _parent=self)
         self.add_widget(md_widget)
 
 
@@ -120,3 +120,4 @@ class NoteTitleBar(BoxLayout):
                 Logger.warning(
                     f"{type(self).__name__}: handle_select - Unhandled value {value}"
                 )
+                return None

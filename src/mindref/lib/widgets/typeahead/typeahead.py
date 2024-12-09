@@ -57,9 +57,12 @@ class TypeAhead(BoxLayout):
         Logger.debug(f"TypeAhead: Selecting App Index {value.index}")
 
         app = get_app()
-        set_index = lambda dt: app.select_index(value.index)
+
+        def set_index(_dt):
+            return app.select_index(value.index)
 
         sch_cb(self.clear_text, set_index, timeout=0.1)
+        return None
 
     def handle_dismissed_dd(self, *_args):
         """Dropdown was dismissed ensure we reflect that"""

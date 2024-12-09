@@ -1,13 +1,5 @@
 from kivy.clock import Clock
 from kivy.graphics import Color, Line
-
-from mindref.lib.utils import get_app, import_kv
-from mindref.lib.widgets.markdown.markdown_parsing_mixin import (
-    MarkdownLabelParsingMixin,
-)
-
-import_kv(__file__)
-
 from kivy.properties import (
     BooleanProperty,
     ListProperty,
@@ -18,6 +10,13 @@ from kivy.properties import (
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 
+from mindref.lib.utils import get_app, import_kv
+from mindref.lib.widgets.markdown.markdown_parsing_mixin import (
+    MarkdownLabelParsingMixin,
+)
+
+import_kv(__file__)
+
 
 class MarkdownTable(GridLayout):
     pass
@@ -27,7 +26,7 @@ class MarkdownRow(BoxLayout):
     ...
 
     def __init__(self, **kwargs):
-        super(MarkdownRow, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         fbind = self.fbind
         draw = self.schedule_draw
         fbind("x", draw)

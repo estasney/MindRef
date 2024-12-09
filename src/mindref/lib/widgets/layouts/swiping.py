@@ -71,7 +71,7 @@ class SwipingLayout(Scatter):
         super().__init__(
             **{
                 **kwargs,
-                **dict(do_translation=False, do_scale=False, do_rotation=False),
+                **{"do_translation": False, "do_scale": False, "do_rotation": False},
             }
         )
         if self.content.size != self.size:

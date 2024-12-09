@@ -19,8 +19,7 @@ class MarkdownParser(metaclass=Singleton):
         )
 
     def parse(self, text: str) -> "MD_DOCUMENT":
-        result = self._parser(text)
-        return result
+        return self._parser(text)
 
 
 def get_md_node_text(node: "MD_TYPES"):
