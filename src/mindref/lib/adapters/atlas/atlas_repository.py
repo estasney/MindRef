@@ -2,7 +2,7 @@ import abc
 from collections.abc import Sequence
 from pathlib import Path
 
-import PIL
+import PIL.Image
 
 
 class AbstractAtlasRepository(abc.ABC):
