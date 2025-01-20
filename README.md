@@ -16,9 +16,12 @@ MindRef renders Markdown notes with a special emphasis on technical notes, such 
 
 #### p4a Fork
 
-~~I've forked [python-for-android](https://github.com/kivy/python-for-android)
+I've forked [python-for-android](https://github.com/kivy/python-for-android)
 at [forked p4a](https://github.com/estasney/python-for-android)
-to provide Python 3.10 support~~
+to provide Python 3.12 support
+
+Building with p4a requires a python installation that is not binary. Disabling the uv managed python downloads was
+required.
 
 Now using [kivy/python-for-android](https://github.com/kivy/python-for-android) which is Python 3.10 compatible
 However, it still requires a single patch to build.tmpl.gradle to include

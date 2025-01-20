@@ -16,10 +16,11 @@ htmlcov/
 *.apk
 **/*.aar
 *.aar
-.idea
+.idea/*
 bin
 tests/**/*.png
 **/.mypy_cache
 build
 *.aider*
 /.python-version
+build_p4a

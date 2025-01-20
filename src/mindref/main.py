@@ -1,4 +1,3 @@
-import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -11,44 +10,27 @@ def run_android():
     import shutil
 
     def bootstrap_c_build():
-        # Copy the .so files from the python-for-android build which will be located in the site-packages directory
-        cython_build_path = Path(__file__).parent / "_python_bundle" / "site-packages"
+        # Copy the mindref compiled .so file(s) from the python-for-android build which will be located in the site-packages directory
+        # This is architecture dependent but at runtime, the architecture specific site-packages directory will be used automatically
+        site_packages = Path(__file__).parent / "_python_bundle" / "site-packages"
 
         app_lib = Path(__file__).parent / "lib"
-        app_utils = app_lib / "utils"
-        app_widgets = app_lib / "widgets"
+        app_lib_ext = app_lib / "ext"
 
-        lib_calc = "calculation.so"
-        lib_index = "index.so"
-        lib_scrolling = "scrolling_c.so"
+        lib_ext = "ext.so"
+        lib_ext_src = site_packages / "mindref_ext" / lib_ext
+        lib_ext_dest = app_lib_ext / lib_ext
 
-        lib_calc_src = cython_build_path / lib_calc
-        lib_index_src = cython_build_path / lib_index
-        lib_scrolling_src = cython_build_path / lib_scrolling
+        def copy_lib(src, dest):
+            if not dest.exists():
+                Logger.info(f"Copying {src} to {dest}")
+                shutil.copy(src, dest)
+            else:
+                Logger.info(f"{dest} exists")
 
-        lib_calc_dest = app_utils / lib_calc
-        lib_index_dest = app_utils / lib_index
-        lib_scrolling_dest = app_widgets / "effects" / lib_scrolling
+        # copy_lib(lib_ext_src, lib_ext_dest)
 
-        if not lib_calc_dest.exists():
-            Logger.info(f"Copying {lib_calc_src} to {lib_calc_dest}")
-            shutil.copy(lib_calc_src, lib_calc_dest)
-        else:
-            Logger.info("calculation.so exists")
-
-        if not lib_index_dest.exists():
-            Logger.info(f"Copying {lib_index_src} to {lib_index_dest}")
-            shutil.copy(lib_index_src, lib_index_dest)
-        else:
-            Logger.info("index.so exists")
-
-        if not lib_scrolling_dest.exists():
-            Logger.info(f"Copying {lib_scrolling_src} to {lib_scrolling_dest}")
-            shutil.copy(lib_scrolling_src, lib_scrolling_dest)
-        else:
-            Logger.info("scrolling_c.so exists")
-
-    bootstrap_c_build()
+    # bootstrap_c_build()
 
     Logger.info("Running Android")
 
@@ -86,11 +68,6 @@ def main():
         name="Icon",
         fn_regular=str(Path(__file__).parent / "assets" / "MaterialIcons.ttf"),
     )
-
-    # Ensure that the current directory is in the path
-    package_path = Path(__file__).parent
-    if str(package_path) not in sys.path:
-        sys.path.append(str(package_path))
 
     match platform:
         case "android":

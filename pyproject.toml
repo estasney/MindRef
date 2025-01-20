@@ -7,7 +7,7 @@ name = "MindRef"
 version = "0.4.3"
 description = "Cross-Platform Application for maintaining Markdown formatted notes"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 license = { text = "LGPLv3+" }
 authors = [
     { name = "Eric Stasney", email = "estasney@users.noreply.github.com" }
@@ -21,18 +21,19 @@ classifiers = [
 urls = { "Homepage" = "https://github.com/estasney/MindRef" }
 
 dependencies = [
-    "Cython>=3.0",
-    "Kivy==2.3.0",
-    "mistune>=2,<3",
-    "Pillow>=9",
-    "Pygments>=2.1",
-    "python-dotenv>=1",
-    "toolz>=0.12",
+    "Kivy==2.3.*",
+    "mistune==2.0.5",
+    "pillow<11.1.0",
+    "Pygments==2.19.0",
+    "python-dotenv==1.0.1",
+    "toolz==1.0.0",
 ]
 
 [project.optional-dependencies]
-dev = ["pre-commit", "pytest", "PyYAML", "click", "line_profiler"]
-android = ["python-for-android", "pyjnius"]
+android = [
+    "pyjnius==1.6.1",
+    "python-for-android",
+]
 
 
 [project.scripts]
@@ -46,18 +47,26 @@ ext-modules = [
 [tool.uv]
 package = true
 dev-dependencies = [
+    "click>=8.1.8",
     "line-profiler>=4.1.3",
+    "pip>=24.3.1",
     "pyright>=1.1.389",
     "ruff>=0.8.1",
+    "setuptools>=75.6.0",
     "typing-extensions>=4.12.2",
+    "Cython>3.0,<=3.0.11",
+    "pre-commit>=4.0.1",
 ]
 
+[tool.uv.sources]
+python-for-android = { path = "../python-for-android", editable = true }
+
 [tool.ruff]
-target-version = "py312"
+target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E4", "E7", "E9", "F", "I001", "UP", "ANN", "B", "C", "I", "LOG", "G", "RSE", "RET", "SLOT", "SIM", "TC", "INT", "ARG",
-    "PTH", "ERA", "PL", "TRY", "FLY", "RUF"]
+    "PTH", "ERA", "PL", "TRY", "FLY", "RUF", "FA"]
 ignore = ["ANN401", "ANN204", "ANN201", "ANN202", "ARG002", "TRY003", "C901", "PLR0915", "PLR0912", "PLR0911"]
 
 [tool.ruff.lint.flake8-annotations]

@@ -18,8 +18,6 @@ from mindref.lib.utils import EnvironContext, LazyLoaded
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-type ImgParamType = str | Path | PIL.Image.Image
-
 
 class AtlasItem(NamedTuple):
     name: str
@@ -221,7 +219,7 @@ class AtlasService(AbstractAtlasRepository):
 
         self._store_atlas(atlas_name, atlas_data)
 
-    def get_from_atlas(self, name: str, atlas_name: str) -> PIL.Image.Image:
+    def get_from_atlas(self, name: str, atlas_name: str) -> "PIL.Image.Image":
         """
         Retrieve an image by name and atlas name
         Parameters
