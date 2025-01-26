@@ -16,7 +16,7 @@ setup(
     packages=find_packages(where="src", include=["mindref*"]),
     include_package_data=True,
     zip_safe=False,
-    install_requires=[],
+    install_requires=["mistune==2.0.5"],
     data_files=[],
     ext_modules=modules,
 )

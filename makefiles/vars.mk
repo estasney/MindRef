@@ -11,7 +11,7 @@ MINDREF_UTILS_DEBUG:=mindrefutils-debug.aar
 PROJECT_NAME:=mindref
 PROJECT_NAME_READABLE:=MindRef
 PROJECT_JAVA_PACKAGE:=org.test.mindref
-PROJECT_REQUIREMENTS=kivy,python-dotenv,toolz,pygments,pillow,mistune==2.0.4,mindref_android
+PROJECT_REQUIREMENTS=kivy,python-dotenv,toolz,pygments,pillow,mistune==2.0.5,mindref_android
 PROJECT_ROOT:=$(ROOT_DIR)/src/mindref
 PROJECT_VERSION ?= $(shell python3.12 -c "import tomllib;fp=open('pyproject.toml', 'rb');d=tomllib.load(fp);print(d['project']['version']);fp.close()" )
 

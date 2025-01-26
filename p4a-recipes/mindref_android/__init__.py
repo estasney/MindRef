@@ -1,7 +1,6 @@
 import glob
 from os.path import join, exists
 from pathlib import Path
-from time import sleep
 
 import sh
 from pythonforandroid.archs import Arch
@@ -70,6 +69,10 @@ class MindRefAndroidRecipe(CythonRecipe):
         info(f"Copying setup.py to {build_dir}")
         setup_py_path = Path(__file__).parent / "setup.py"
         shprint(sh.cp, str(setup_py_path), str(build_dir))
+
+        info(f"Copying MANIFEST.in to {build_dir}")
+        manifest_in_path = Path(__file__).parent / "MANIFEST.in"
+        shprint(sh.cp, str(manifest_in_path), str(build_dir))
 
         # Remove the pyproject.toml file
         pyproject_toml_path = build_dir / "pyproject.toml"
