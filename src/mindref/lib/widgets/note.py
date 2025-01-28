@@ -31,7 +31,7 @@ Cache.register("note_widget", limit=10, timeout=3600)
 
 # noinspection PyUnusedLocal
 @kivy_cache(cache_name="note_widget", key_func=cache_key_note)
-def get_cached_note(*, content_data: "MarkdownNoteDict", _parent: "NoteContent"):
+def get_cached_note(*, content_data: "MarkdownNoteDict", parent: "NoteContent"):
     return MarkdownDocument(content_data=content_data)
 
 
@@ -67,7 +67,7 @@ class NoteContent(BoxLayout):
         self._set_markdown(content_data)
 
     def _set_markdown(self, content_data: "MarkdownNoteDict"):
-        md_widget = get_cached_note(content_data=content_data, _parent=self)
+        md_widget = get_cached_note(content_data=content_data, parent=self)
         self.add_widget(md_widget)
 
 
