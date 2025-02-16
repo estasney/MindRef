@@ -12,16 +12,16 @@
     OpenMenuButton:
         enable_ripple_effect: False
         on_release: app.menu_open = not app.menu_open
-        icon_size: app.base_font_size * 2
         size_hint: None, None
-        width: self.height
+        width: self.height * sp(1)
+        height: self.height
+        pos_hint: {'center_y': 0.5}
         padding: 0
         border: 0
-
 
     ExpandingLabel:
         text: app.APP_NAME
         halign: 'center'
         valign: 'center'
-        font_size: app.base_font_size + sp(2)
+        font_size: app.base_font_size * dp(1)
 
