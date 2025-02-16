@@ -41,7 +41,6 @@ build-apk :  $(MINDREF_UTILS_DEBUG) clean-bytecode prebuild
   	--depend "org.apache.commons:commons-io:1.3.2" \
   	--add-aar $(ROOT_DIR)/$(MINDREF_UTILS_DEBUG) \
   	--no-byte-compile-python \
-  	--add-debug-symbols \
   	--local-recipes $(LOCAL_RECIPES)
 .PHONY : build-apk
 
