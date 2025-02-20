@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "MindRef"
-version = "0.5.0"
+version = "0.5.1"
 description = "Cross-Platform Application for maintaining Markdown formatted notes"
 readme = "README.md"
 requires-python = ">=3.11"
