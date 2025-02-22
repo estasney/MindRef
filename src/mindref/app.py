@@ -54,7 +54,7 @@ from mindref.lib.widgets.screens.manager import NoteAppScreenManager
 
 
 class MindRefApp(App):
-    APP_NAME = "MindRef"
+    title = "MindRef"
     atlas_service = AtlasService(storage_path=Path(__file__).parent / "static")
     note_service = NoteRepositoryFactory.get_repo()(get_app=get_app)
     editor_service = FileSystemEditor(get_app=get_app)
