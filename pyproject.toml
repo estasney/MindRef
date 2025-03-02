@@ -24,6 +24,7 @@ dependencies = [
     "Kivy==2.3.*",
     "mistune==2.0.5",
     "pillow<11.1.0",
+    "pydantic>2",
     "Pygments==2.19.0",
     "python-dotenv==1.0.1",
     "python-for-android",
@@ -92,5 +93,5 @@ ignore-fully-untyped = true
 suppress-dummy-args = true
 
 [tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["F401"]
+"__init__.py" = ["F401", "I001"]
 
