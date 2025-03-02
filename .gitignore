@@ -24,3 +24,5 @@ build
 *.aider*
 /.python-version
 build_p4a
+**/*.so
+uv.lock
