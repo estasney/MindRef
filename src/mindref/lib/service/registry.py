@@ -183,7 +183,9 @@ class Registry:
 
         note_repo.discover_notes will push a NotesDiscoveryEvent with results
         """
+        # Showing the refresh spinner
         self.app.screen_manager.dispatch("on_refresh", True)
+
         Logger.debug(f"{type(self).__name__}: query_all - Dispatched 'on_refresh'")
         note_repo = self.app.note_service
         if not note_repo.configured:
@@ -194,13 +196,16 @@ class Registry:
             )
             return
 
+        # Callback to clear the refresh spinner
         clear_refresh = schedulable(
             self.app.screen_manager.dispatch, "on_refresh", False
         )
+
         if on_complete:
             chained_complete = def_cb(on_complete, clear_refresh)
         else:
             chained_complete = clear_refresh
+
         note_repo.discover_categories(chained_complete)
 
     def clear_caches(self):
