@@ -415,7 +415,6 @@ class MindRefApp(App):
     """Kivy"""
 
     def build(self):
-        truthy = {True, "1", "True"}
         # noinspection PyUnresolvedReferences
         self.register_event_type("on_paginate")
         self.platform_android = platform == "android"
@@ -430,16 +429,6 @@ class MindRefApp(App):
 
         if storage_path:
             self.registry.set_note_storage_path(storage_path)
-        self.note_service.note_sorting = self.config.get("Behavior", "NOTE_SORTING")
-        self.note_service.note_sorting_ascending = (
-            self.config.get("Behavior", "NOTE_SORTING_ASCENDING") in truthy
-        )
-        self.note_service.category_sorting = self.config.get(
-            "Behavior", "CATEGORY_SORTING"
-        )
-        self.note_service.category_sorting_ascending = (
-            self.config.get("Behavior", "CATEGORY_SORTING_ASCENDING") in truthy
-        )
         sm = NoteAppScreenManager()
         self.screen_manager = sm
 
