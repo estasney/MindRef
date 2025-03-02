@@ -101,7 +101,7 @@ class CategoryResourceFiles:
         files: Iterable[Path],
         sort_strategy: SortOptions,
         ascending: bool,
-    ):
+    ) -> "CategoryResourceFiles":
         match sort_strategy:
             case "Creation Date":
                 sorted_files = sorted(
