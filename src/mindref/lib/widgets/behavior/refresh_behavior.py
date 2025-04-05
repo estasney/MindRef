@@ -1,7 +1,7 @@
-from kivy.uix.widget import Widget
+from kivy.event import EventDispatcher
 
 
-class RefreshBehavior(Widget):
+class RefreshBehavior(EventDispatcher):
     """
     Mixin class that adds custom event 'on_refresh'
     """
@@ -10,5 +10,4 @@ class RefreshBehavior(Widget):
         super().__init__(**kwargs)
         self.register_event_type("on_refresh")
 
-    def on_refresh(self, state: bool):
-        ...
+    def on_refresh(self, state: bool): ...

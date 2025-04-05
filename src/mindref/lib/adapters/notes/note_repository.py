@@ -119,6 +119,10 @@ class AbstractNoteRepository(ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
+    def discover_notes(self, on_complete: Callable) -> None:
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def get_next_note(self, on_complete: Callable | None) -> MarkdownNote:
         raise NotImplementedError
 

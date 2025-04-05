@@ -3,9 +3,12 @@ from __future__ import annotations
 from _operator import itemgetter
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Protocol, TypedDict
+from typing import TYPE_CHECKING, ClassVar, Protocol, TypedDict
+
+from pydantic import ConfigDict
 
 from mindref.lib.domain.parser.markdown_parser import MarkdownParser
+from mindref.lib.models import Model
 
 if TYPE_CHECKING:
     import io
@@ -28,6 +31,30 @@ class MarkdownNoteDict(TypedDict):
     idx: int
     filepath: Path | None
     document: MD_DOCUMENT
+
+
+class MarkdownNoteV2(Model):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+    )
+    _parser: ClassVar[MarkdownParser] = MarkdownParser()
+    text: str
+    title: str
+    filepath: Path | None
+    document: MD_DOCUMENT
+
+    @classmethod
+    def from_file(cls, filepath: PathLike) -> MarkdownNoteV2:
+        fp = Path(filepath)
+        text = fp.read_text(encoding="utf-8")
+        document, doc_title = cls._parser.parse_with_title(text)
+        doc_title = doc_title or fp.stem.title()
+        return MarkdownNoteV2(
+            text=text,
+            title=doc_title,
+            filepath=fp,
+            document=document,
+        )
 
 
 @dataclass

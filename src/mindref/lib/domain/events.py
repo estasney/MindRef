@@ -194,7 +194,7 @@ class NotesQueryErrorFailureEvent(NotesQueryFailureEvent):
 @dataclass(slots=True)
 class RefreshNotesEvent(Event):
     event_type = "refresh_notes"
-    on_complete: Callable[[], None] | None
+    on_complete: Callable[[float], None] | None
 
     def __repr__(self):
         attrs = ("event_type", "on_complete")

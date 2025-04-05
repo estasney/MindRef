@@ -24,6 +24,8 @@
             size_hint_y: None
             padding: dp(20), dp(10), dp(10), dp(5)
             height: dp(50)
+        Label:
+            text: '{} files'.format(len(app.note_files))
         CategoryScreenScrollWrapper:
             screen: category_screen
             id: chooser

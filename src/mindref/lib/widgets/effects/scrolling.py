@@ -1,12 +1,15 @@
+from enum import Enum
 from math import sin
 
+from kivy.animation import Animation
 from kivy.clock import Clock
+from kivy.core.window import Window
 from kivy.effects.opacityscroll import OpacityScrollEffect
 from kivy.properties import (
-    BooleanProperty,
+    Logger,
     NumericProperty,
-    ObjectProperty,
     StringProperty,
+    BooleanProperty,
 )
 from kivy.uix.floatlayout import FloatLayout
 
@@ -16,29 +19,45 @@ from mindref.lib.utils import get_app, import_kv
 import_kv(__file__)
 
 
+class RefreshState(str, Enum):
+    """
+    Enum for the refresh state
+    """
+
+    HIDDEN = "hidden"
+    VISIBLE = "visible"
+    ACTIVE = "active"
+
+    def __str__(self) -> str:
+        return str.__str__(self)
+
+
 class RefreshSymbol(FloatLayout):
     """Spinning Refresh Symbol"""
 
     rotation = NumericProperty(0)
     event_dt = NumericProperty(0)
+    opacity = NumericProperty(0)
     source = StringProperty(None)
+    animate = BooleanProperty(False)
 
     def __init__(self, **kwargs):
         self.source = get_app().atlas_service.uri_for("refresh", atlas_name="icons")
         super().__init__(**kwargs)
         self._scheduler = None
 
-    def on_parent(self, *_args):
-        if self._scheduler:
-            self._scheduler.cancel()
-            self._scheduler = None
-        if self.parent:
+    def on_animate(self, _, value):
+        if value:
             self._scheduler = Clock.schedule_interval(self.increment_spin, 1 / 60)
             self._scheduler()
+        else:
+            self._scheduler.cancel()
+            self._scheduler = None
+            Animation(opacity=0, d=0.2).start(self)
 
     def increment_spin(self, dt):
         self.event_dt = self.event_dt + dt
-        rot = (sin(self.event_dt) * 3) - 5
+        rot = (sin(self.event_dt) * 4) + 5
         self.rotation = self.rotation + rot
 
 
@@ -47,53 +66,19 @@ class RefreshOverscrollEffect(OpacityScrollEffect):
     Reduces opacity when over-scrolling up
     """
 
-    refresh_triggered_ = BooleanProperty(False)
-    refresh_triggered = BooleanProperty(False)
-    target_height = NumericProperty(0)
-    overscroll_refresh_threshold = NumericProperty(0.25)
-    overscroll_threshold = NumericProperty(0.10)
     min_opacity = NumericProperty(0.25)
-    min_state_time = NumericProperty(0.75)
-    parent: ObjectProperty
+    target_height = NumericProperty(0)
+    refresh_threshold = NumericProperty(
+        0.25
+    )  # how far to pull (0..1) to trigger refresh
+    refresh_threshold_met = BooleanProperty(False)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.refresh_scheduler = None
-        self.bind(refresh_triggered_=self.schedule_refresh_check)
 
-    def on_target_widget(self, *_args):
-        if self.target_widget:
-            self.bind(
-                refresh_triggered=self.target_widget.parent.setter("refresh_triggered"),
-                refresh_triggered_=self.refresh_unset,
-            )
-            self.target_widget.bind(height=self.setter("target_height"))
-        else:
-            self.unbind(
-                refresh_triggered=self.target_widget.parent.setter("refresh_triggered"),
-                refresh_triggered_=self.refresh_unset,
-            )
-            self.target_widget.unbind(height=self.setter("target_height"))
-
-    def refresh_unset(self, *_args):
-        if not self.refresh_triggered_:
-            self.refresh_triggered = False
-
-    def refresh_hold_callback(self, *_args):
-        """Check if refresh_triggered_ is still True after delay"""
-        if self.refresh_triggered_:
-            self.refresh_triggered = True
-        return False
-
-    def schedule_refresh_check(self, *_args):
-        if self.refresh_scheduler:
-            self.refresh_scheduler.cancel()
-            self.refresh_scheduler = None
-        if self.refresh_triggered_:
-            self.refresh_scheduler = Clock.schedule_interval(
-                self.refresh_hold_callback, self.min_state_time
-            )
-            self.refresh_scheduler()
+    def on_refresh_threshold_met(self, *args):
+        Logger.info(f"Refresh threshold met: {self.refresh_threshold_met}")
 
     def on_overscroll(self, *args):
         """
@@ -103,13 +88,10 @@ class RefreshOverscrollEffect(OpacityScrollEffect):
         Additionally, we want to trigger a refresh but only when the user has held the overscroll for a configurable
         amount of time AND past a configurable threshold for overscroll.
         """
+        if self.overscroll >= 0:
+            return
 
-        target_opacity, should_refresh = compute_overscroll(
-            self.overscroll,
-            self.target_height,
-            self.overscroll_threshold,
-            self.overscroll_refresh_threshold,
-            self.min_opacity,
+        normalized_overscroll = compute_overscroll(
+            self.overscroll, Window.height, self.refresh_threshold
         )
-        self.target_widget.opacity = target_opacity
-        self.refresh_triggered_ = should_refresh
+        self.refresh_threshold_met = normalized_overscroll == 1

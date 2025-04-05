@@ -1,3 +1,4 @@
+from operator import itemgetter
 from typing import TYPE_CHECKING
 
 import mistune
@@ -20,6 +21,21 @@ class MarkdownParser(metaclass=Singleton):
 
     def parse(self, text: str) -> "MD_DOCUMENT":
         return self._parser(text)
+
+    def parse_with_title(self, text: str) -> tuple["MD_DOCUMENT", str | None]:
+        document = self._parser(text)
+        headers = (node for node in document if node["type"] == "heading")
+        try:
+            title_header = min(headers, key=itemgetter("level"))
+            title_header_text = title_header["children"][0]["text"]
+            if not title_header_text:
+                return document, None
+            return [
+                node for node in document if node != title_header
+            ], title_header_text
+        except ValueError:
+            # no matching headers
+            return document, None
 
 
 def get_md_node_text(node: "MD_TYPES"):

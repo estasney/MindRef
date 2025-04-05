@@ -27,7 +27,10 @@ if TYPE_CHECKING:
     from os import PathLike
 
     from mindref.lib.domain.editable import EditableNote
-    from mindref.lib.domain.markdown_note import MarkdownNote, MarkdownNoteDict
+    from mindref.lib.domain.markdown_note import (
+        MarkdownNote,
+        MarkdownNoteDict,
+    )
     from mindref.lib.domain.protocols import GetApp
     from mindref.lib.domain.settings import SortOptions
 
@@ -68,7 +71,7 @@ class FileSystemNoteRepository(AbstractNoteRepository):
         self.note_sorting_ascending = note_sorting_ascending
         self.category_sorting = category_sorting
         self.category_sorting_ascending = category_sorting_ascending
-
+        self.note_files = []
         self.category_files = {}
 
     def get_categories(self, on_complete: TGetCategoriesCallback) -> list[str]:
@@ -180,7 +183,7 @@ class FileSystemNoteRepository(AbstractNoteRepository):
         on_complete: Callable[[CategoryResourceFiles], None] | None,
     ) -> CategoryResourceFiles:
         """
-        Find a categories notes and image file
+        Find a categories' notes and image file
 
         Parameters
         ----------
@@ -203,6 +206,18 @@ class FileSystemNoteRepository(AbstractNoteRepository):
         if on_complete:
             on_complete(category_resource)
         return category_resource
+
+    def discover_notes(
+        self, on_complete: Callable[[list[Path]], None] | None, *args
+    ) -> None:
+        """
+        Recursively scan our storage_path for valid note file paths
+        """
+        note_files: list[Path] = [
+            f for f in self.storage_path.rglob("*.md") if f.is_file()
+        ]
+        if on_complete:
+            on_complete(note_files)
 
     def discover_categories(self, on_complete: Callable[[], None] | None, *args):
         """

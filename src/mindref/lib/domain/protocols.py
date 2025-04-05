@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, NoReturn, Protocol, TypeVar
+from typing import TYPE_CHECKING, NoReturn, Protocol, TypeVar, Literal
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -47,6 +47,7 @@ class AppRegistryProtocol(Protocol):
     colors: dict[str, tuple[float, float, float] | tuple[float, float, float, float]]
     settings_cls: str | MindRefSettingsAndroid | MindRefSettingsNative
     user_data_dir: str
+    note_files: list[Path]
 
     def dispatch(self, *args, **kwargs) -> None: ...
 
@@ -59,6 +60,8 @@ class AppRegistryProtocol(Protocol):
     def bind(self, **kwargs: Callable): ...
 
     def stop(self) -> NoReturn: ...
+
+    def setter(self, prop: Literal["note_files"]) -> Callable: ...
 
 
 T = TypeVar("T", bound=AppRegistryProtocol)

@@ -12,7 +12,7 @@
             origin: self.center
     canvas:
         Color:
-            rgb: app.colors['White']
+            rgba: (*app.colors['White'], self.opacity)
         Rectangle:
             size: root.size
             pos: self.pos

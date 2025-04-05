@@ -3,6 +3,16 @@
 cdef inline double CLAMP(double x, double lower, double upper):
     return lower if x < lower else (upper if x > upper else x)
 
+
+cdef inline normalize_domain_range(double value, double lower, double upper):
+    """
+    Normalize a value to a range between 0.0 and 1.0 based on the given lower and upper bounds.
+    """
+    cdef double domain_diff = upper - lower
+    if domain_diff == 0.0:
+        return 0.0  # Avoid division by zero, return min_value
+    return (value - lower) / domain_diff
+
 def normalize_coordinates(double touch_x, double touch_y, double self_x, double self_y, double self_height=0.0,
                           double self_width=0.0):
     cdef (double, double) result = (0.0, 0.0)
@@ -150,45 +160,14 @@ def compute_text_contrast(background_color: tuple[float, float, float, float], t
     else:
         return '#ffffff'
 
-def compute_overscroll(overscroll, target_height, overscroll_threshold,
-                       overscroll_refresh_threshold, min_opacity):
+
+def compute_overscroll(overscroll: float, target_height: float, overscroll_threshold: float):
     """
-    Given our thresholds and target height, determine if:
-        - We have overscrolled enough to adjust opacity
-        - If so, compute the opacity
-        - If overscrolled enough to trigger a refresh
+    Given our thresholds and target height, normalize the overscroll to a value between 0.0 and 1.0.
     """
-    cdef double overscroll_, target_height_, overscroll_threshold_
-    overscroll_ = overscroll
-    target_height_ = target_height
-    overscroll_threshold_ = overscroll_threshold
-    # If overscroll is positive or target height is zero, we're not overscrolled
-    if overscroll_ >= 0.0 or target_height_ == 0.0 or overscroll_threshold_ <= 0.0:
-        return 1.0, False
+    cdef double domain_height = target_height * overscroll_threshold
+    return normalize_domain_range(CLAMP(abs(overscroll), 0, domain_height), 0.0, domain_height)
 
-    # Calculate our overscroll percentage which is the absolute value of the overscroll divided by the height of the
-    # target widget
-    cdef double overscroll_pct_ = (-1.0 * overscroll_) / target_height_
-
-    # If our overscroll_pct is less than the overscroll_threshold, we can quit early
-    if overscroll_pct_ < overscroll_threshold_:
-        return 1.0, False
-
-    # Now we know we're going to affect the opacity of the target widget
-    # Opacity will begin decreasing at the overscroll_threshold and will be self.min_opacity at the overscroll_refresh_threshold
-    # We'll use a linear interpolation to calculate the opacity
-    cdef double overscroll_refresh_threshold_ = overscroll_refresh_threshold
-    cdef double min_opacity_ = min_opacity
-    cdef double opacity_
-    opacity_ = 1.0 - (overscroll_pct_ - overscroll_threshold_) / (
-            overscroll_refresh_threshold_ - overscroll_threshold_)
-    opacity_ = opacity_ if opacity_ > min_opacity_ else min_opacity_
-
-    # Determine if we've overscrolled enough to trigger a refresh
-    if overscroll_pct_ >= overscroll_refresh_threshold_:
-        return opacity_, True
-    else:
-        return opacity_, False
 
 cdef class RollingIndex:
     """

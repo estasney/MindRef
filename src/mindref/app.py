@@ -62,6 +62,7 @@ class MindRefApp(App):
     platform_android = BooleanProperty(defaultvalue=False)
     registry = Registry()
 
+    note_files = ListProperty()
     note_categories = ListProperty()
     note_category = StringProperty(allownone=True)
     note_category_meta = ListProperty()
@@ -89,16 +90,21 @@ class MindRefApp(App):
     colors = DictProperty(
         {
             "White": (1, 1, 1),
-            "Gray-100": parse_color("#f3f3f3"),
-            "Gray-200": parse_color("#dddedf"),
-            "Gray-300": parse_color("#c7c8ca"),
-            "Gray-400": parse_color("#9a9da1"),  # White text
-            "Gray-500": parse_color("#6d7278"),
+            "Black": (0, 0, 0),
+            "Gray-100": parse_color("#f5f5f5"),
+            "Gray-200": parse_color("#dadbda"),
+            "Gray-300": parse_color("#c1c1c1"),
+            "Gray-400": parse_color("#a7a7a7"),
+            "Gray-500": parse_color("#8f8f8f"),
+            "Gray-600": parse_color("#777777"),
+            "Gray-700": parse_color("#606060"),
+            "Gray-800": parse_color("#4a4a4a"),
+            "Gray-900": parse_color("#353535"),
             "Codespan": parse_color("#00000026"),
             "Keyboard": parse_color("#ffffffaf"),
             "KeyboardShadow": parse_color("#656565ff"),
             "Primary": parse_color("#37464f"),
-            "Dark": parse_color("#101f27"),
+            "Dark": parse_color("#1f1f1f"),
             "Accent-One": parse_color("#388fe5"),
             "Accent-Two": parse_color("#56e39f"),
             "Warn": parse_color("#fa1919"),
@@ -433,7 +439,7 @@ class MindRefApp(App):
         self.screen_manager = sm
 
         # Invokes note_service.discover_notes
-        self.registry.query_all()
+        self.registry.query_all_v2()
 
         self.base_font_size = self.config.get("Display", "BASE_FONT_SIZE")
         Clock.schedule_interval(self.process_event, 1e-4)

@@ -2,6 +2,7 @@ from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 from kivy import Logger
+from kivy.lang import Builder
 from kivy.properties import BooleanProperty, ObjectProperty
 from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import ScreenManager, SlideTransition
@@ -21,7 +22,50 @@ if TYPE_CHECKING:
     from mindref.lib.domain.markdown_note import MarkdownNoteDict
     from mindref.lib.widgets.buttons.category import NoteCategoryButton
 
-import_kv(__file__)
+Builder.load_string(
+    """
+#:import SlideTransition kivy.uix.screenmanager.SlideTransition
+#:import NoteCategoryChooserScreen mindref.lib.widgets.screens.chooser_screen
+#:import NoteCategoryScreen mindref.lib.widgets.screens.note_screen
+#:import NoteListViewScreen mindref.lib.widgets.screens.list_view_screen
+#:import NoteEditScreen mindref.lib.widgets.screens.note_edit_screen
+#:import ErrorMessageScreen mindref.lib.widgets.screens.message_screen
+#:import ScreenContainer mindref.lib.widgets.screens.screen_container
+#:import DrawerLayout mindref.lib.widgets.layouts.drawer.DrawerLayout
+#:import AppMenu mindref.lib.widgets.app_menu.app_menu.AppMenu
+#:import V2NoteListViewScreen mindref.lib.widgets.screens.v2_note_list_screen.V2NoteListViewScreen
+
+<NoteAppScreenManager>:
+    id: screen_manager
+    app: app
+    drawer_cls: DrawerLayout
+    transition: SlideTransition()
+    V2NoteListViewScreen:
+        id: v2_note_list_view_screen
+        name: 'v2_note_list_view_screen'
+    NoteCategoryChooserScreen:
+        id: chooser_screen
+        name: 'chooser_screen'
+    NoteCategoryScreen:
+        id: note_screen_0
+        name: 'note_screen_0'
+    NoteCategoryScreen:
+        id: note_screen_1
+        name: 'note_screen_1'
+    NoteListViewScreen:
+        id: list_view_screen
+        name: 'list_view_screen'
+    NoteEditScreen:
+        id: note_edit_screen
+        name: 'note_edit_screen'
+    ScreenContainer:
+        id: screen_container
+        name: 'screen_container'
+    ErrorMessageScreen:
+        id: error_message_screen
+        name: 'error_message_screen'
+"""
+)
 
 
 class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
@@ -36,7 +80,7 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.note_screen_cycler = RollingIndex(size=2)
-        self.current = "chooser_screen"
+        self.current = "v2_note_list_view_screen"
         self.app.bind(display_state=self.handle_app_display_state)
         self.app.bind(on_paginate=self.handle_pagination)
         self.app.bind(menu_open=self.setter("menu_open"))
@@ -47,7 +91,8 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
         self.drawer.bind(on_close=lambda *_: setattr(self.app, "menu_open", False))
 
     def on_refresh(self, state: bool):
-        self.dispatch_children("on_refresh", state)
+        Logger.info(f"{type(self).__name__} : on_refresh called with state={state}")
+        self.dispatch_children(self, "on_refresh", state)
         return True
 
     def handle_menu_state(self, _, menu_open: bool):
@@ -181,10 +226,8 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
 
         match event:
             case FilePickerEvent(
-                action=action.OPEN_FOLDER
-                | action.OPEN_FILE as event_action,
-                ext_filter=list()
-                | None as ext_filter,
+                action=action.OPEN_FOLDER | action.OPEN_FILE as event_action,
+                ext_filter=list() | None as ext_filter,
                 on_complete=on_complete,
                 start_folder=start_folder,
             ):

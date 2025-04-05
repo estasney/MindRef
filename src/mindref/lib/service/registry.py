@@ -1,6 +1,7 @@
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
+from time import sleep
 from typing import TYPE_CHECKING, Literal, Optional
 
 from kivy import Logger
@@ -15,7 +16,7 @@ from mindref.lib.domain.events import (
     NotesQueryFailureEvent,
     NotesQueryNotSetFailureEvent,
 )
-from mindref.lib.utils import def_cb, sch_cb, schedulable
+from mindref.lib.utils import sch_cb, schedulable
 from mindref.lib.utils.caching import kivy_cache
 
 if TYPE_CHECKING:
@@ -177,6 +178,30 @@ class Registry:
         result = note_repo.query_notes(category=category, query=query, on_complete=None)
         on_complete(result)
 
+    def query_all_v2(self):
+        """
+        Returns immediately after invoking note_repo.discover_notes
+
+        note_repo.discover_notes will push a NotesDiscoveryEvent with results
+        """
+        # Showing the refresh spinner
+
+        note_repo = self.app.note_service
+        if not note_repo.configured:
+            e = NotesQueryNotSetFailureEvent(on_complete=None)
+            self.push_event(NotesQueryNotSetFailureEvent(on_complete=None))
+            Logger.info(
+                f"{type(self).__name__}: query_all - app.note_service not configured. Pushed {e!r}"
+            )
+            return
+
+        def set_notes(notes: list["Path"]):
+            self.app.note_files = notes
+            self.app.screen_manager.dispatch("on_refresh", False)
+
+        self.app.screen_manager.dispatch("on_refresh", True)
+        note_repo.discover_notes(on_complete=set_notes)
+
     def query_all(self, on_complete: Callable | None = None):
         """
         Returns immediately after invoking note_repo.discover_notes
@@ -184,7 +209,6 @@ class Registry:
         note_repo.discover_notes will push a NotesDiscoveryEvent with results
         """
         # Showing the refresh spinner
-        self.app.screen_manager.dispatch("on_refresh", True)
 
         Logger.debug(f"{type(self).__name__}: query_all - Dispatched 'on_refresh'")
         note_repo = self.app.note_service
@@ -197,16 +221,8 @@ class Registry:
             return
 
         # Callback to clear the refresh spinner
-        clear_refresh = schedulable(
-            self.app.screen_manager.dispatch, "on_refresh", False
-        )
 
-        if on_complete:
-            chained_complete = def_cb(on_complete, clear_refresh)
-        else:
-            chained_complete = clear_refresh
-
-        note_repo.discover_categories(chained_complete)
+        note_repo.discover_categories(on_complete)
 
     def clear_caches(self):
         from kivy.cache import Cache
