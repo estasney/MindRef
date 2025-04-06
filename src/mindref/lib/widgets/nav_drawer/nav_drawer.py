@@ -31,7 +31,14 @@ class OpenState(str, Enum):
 
 
 TOpenState = Literal["open", "opening", "closed", "closing"]
-
+TAnimatedProperty = Literal[
+    "size_hint_x_closed",
+    "size_hint_x_open",
+    "animation_open_duration",
+    "animation_open_timing",
+    "animation_closed_duration",
+    "animation_closed_timing",
+]
 
 Builder.load_string(
     """
@@ -50,6 +57,8 @@ Builder.load_string(
             on_release: root.toggle(self)
             pos_hint: root._menu_button_pos_hint_closed
         GridLayout:
+            id: side_button_grid
+            opacity: 0
             cols: 2
             pos_hint: {"top": 1, "right": 1}
             width: top_bar.width - menu_button.width
@@ -60,7 +69,7 @@ Builder.load_string(
                 Line:
                     rectangle: self.x, self.y, self.width, self.height
             AnchorLayout:
-                id: side_button_grid
+                id: side_button_box
                 anchor_x: "right"
                 anchor_y: "center"
     V2RefreshContainer:
@@ -93,7 +102,10 @@ class NavDrawer(FloatLayout, CustomBehavior):
 
     search_button = ObjectProperty(allownone=True)
 
-    _anim: Animation | None = ObjectProperty(allownone=True)
+    drawer_open_animation: Animation
+    drawer_close_animation: Animation
+    fade_in_animation: Animation
+    fade_out_animation: Animation
 
     _menu_button_pos_hint_closed = DictProperty({"center_x": 0.5, "center_y": 0.5})
     _menu_button_pos_hint_open = DictProperty({"left": 0, "center_y": 0.5})
@@ -102,9 +114,128 @@ class NavDrawer(FloatLayout, CustomBehavior):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.drawer_open_animation = Animation(
+            size_hint_x=self.size_hint_x_open,
+            duration=self.animation_open_duration,
+            t=self.animation_open_timing,
+        )
+        self.drawer_open_animation.bind(
+            on_complete=lambda _: setattr(self, "open_state", OpenState.open)
+        )
+        self.drawer_close_animation = Animation(
+            size_hint_x=self.size_hint_x_closed,
+            duration=self.animation_closed_duration,
+            t=self.animation_closed_timing,
+        )
+        self.drawer_close_animation.bind(
+            on_complete=lambda _: setattr(self, "open_state", OpenState.closed)
+        )
+        self.fade_in_animation = Animation(
+            opacity=1,
+            duration=self.animation_open_duration,
+            t=self.animation_open_timing,
+        )
+        self.fade_out_animation = Animation(
+            opacity=0,
+            duration=self.animation_closed_duration,
+            t=self.animation_closed_timing,
+        )
 
-    def on_size_hint_x_closed(self, _instance, _value):
-        self.size_hint_x = _value
+        self.fbind(
+            "size_hint_x_closed", self.handle_animation_change, "size_hint_x_closed"
+        )
+        self.fbind("size_hint_x_open", self.handle_animation_change, "size_hint_x_open")
+        self.fbind(
+            "animation_open_duration",
+            self.handle_animation_change,
+            "animation_open_duration",
+        )
+        self.fbind(
+            "animation_open_timing",
+            self.handle_animation_change,
+            "animation_open_timing",
+        )
+        self.fbind(
+            "animation_closed_duration",
+            self.handle_animation_change,
+            "animation_closed_duration",
+        )
+        self.fbind(
+            "animation_closed_timing",
+            self.handle_animation_change,
+            "animation_closed_timing",
+        )
+
+    def handle_animation_change(
+        self, property_name: TAnimatedProperty, _instance, value: float
+    ):
+        match property_name:
+            case "size_hint_x_closed":
+                self.size_hint_x = value
+                self.drawer_close_animation = Animation(
+                    size_hint_x=value,
+                    duration=self.animation_open_duration,
+                    t=self.animation_open_timing,
+                )
+                self.drawer_close_animation.bind(
+                    on_complete=lambda *_: setattr(self, "open_state", OpenState.closed)
+                )
+            case "size_hint_x_open":
+                self.drawer_open_animation = Animation(
+                    size_hint_x=value,
+                    duration=self.animation_open_duration,
+                    t=self.animation_open_timing,
+                )
+                self.drawer_open_animation.bind(
+                    on_complete=lambda *_: setattr(self, "open_state", OpenState.open)
+                )
+            case "animation_open_duration":
+                self.drawer_open_animation = Animation(
+                    size_hint_x=self.size_hint_x_open,
+                    duration=value,
+                    t=self.animation_open_timing,
+                )
+                self.fade_in_animation = Animation(
+                    opacity=1,
+                    duration=value,
+                    t=self.animation_open_timing,
+                )
+            case "animation_open_timing":
+                self.drawer_open_animation = Animation(
+                    size_hint_x=self.size_hint_x_open,
+                    duration=self.animation_open_duration,
+                    t=value,
+                )
+                self.fade_in_animation = Animation(
+                    opacity=1,
+                    duration=self.animation_open_duration,
+                    t=value,
+                )
+            case "animation_closed_duration":
+                self.drawer_close_animation = Animation(
+                    size_hint_x=self.size_hint_x_closed,
+                    duration=value,
+                    t=self.animation_closed_timing,
+                )
+                self.fade_out_animation = Animation(
+                    opacity=0,
+                    duration=value,
+                    t=self.animation_closed_timing,
+                )
+            case "animation_closed_timing":
+                self.drawer_close_animation = Animation(
+                    size_hint_x=self.size_hint_x_closed,
+                    duration=self.animation_closed_duration,
+                    t=value,
+                )
+                self.fade_out_animation = Animation(
+                    opacity=0,
+                    duration=self.animation_closed_duration,
+                    t=value,
+                )
+            case _:
+                Logger.warning(f"Unknown property: {property_name}")
+                raise ValueError(f"Unknown property: {property_name}")
 
     def on_open_state(self, _instance, _value: TOpenState | OpenState):
         match _value:
@@ -121,29 +252,12 @@ class NavDrawer(FloatLayout, CustomBehavior):
                 raise ValueError(msg)
 
     def on_open(self, _instance, _value):
-        self._anim = None
         self.open_state = OpenState.open
 
     def on_opening(self, _instance, _value):
-        if self._anim:
-            self._anim.cancel(self)
-            self._anim = None
-        self._anim = Animation(
-            size_hint_x=self.size_hint_x_open,
-            duration=self.animation_open_duration,
-            t=self.animation_open_timing,
-        )
-        self._anim.bind(on_complete=partial(self.dispatch, "on_open"))
+        self.drawer_close_animation.cancel(self)
+        self.fade_out_animation.cancel(self.ids.nav_items)
         self.ids.menu_button.pos_hint = self._menu_button_pos_hint_open
-        nav_anim = Animation(
-            opacity=1,
-            duration=self.animation_open_duration,
-            t=self.animation_open_timing,
-        )
-        nav_anim.start(self.ids.nav_items)
-        self._anim.start(self)
-
-        # Check if search_button doesn't exist and create it
         if self.search_button is None:
             # Create a new search button
             self.search_button = ThemedIconButton(
@@ -151,41 +265,26 @@ class NavDrawer(FloatLayout, CustomBehavior):
             )
             self.search_button.bind(height=self.search_button.setter("width"))
             self.search_button.on_release = lambda: print("Search button pressed")
-
-            # Add to the side button grid
-            self.ids.side_button_grid.add_widget(self.search_button)
-
-            # Animate the button's opacity
-            button_anim = Animation(
-                opacity=1,
-                duration=self.animation_open_duration,
-                t=self.animation_open_timing,
-            )
-            button_anim.start(self.search_button)
+            self.ids.side_button_box.add_widget(self.search_button)
+        self.fade_out_animation.cancel(self.search_button)
+        self.fade_in_animation.start(self.search_button)
+        self.fade_in_animation.start(self.ids.nav_items)
+        self.drawer_open_animation.start(self)
 
     def on_closing(self, _instance, _value):
-        if self._anim:
-            self._anim.cancel(self)
-            self._anim = None
-        self._anim = Animation(
-            size_hint_x=self.size_hint_x_closed,
-            duration=self.animation_close_duration,
-            t=self.animation_closed_timing,
-        )
-        self._anim.bind(on_complete=partial(self.dispatch, "on_close"))
-        nav_anim = Animation(
-            opacity=0,
-            duration=self.animation_open_duration,
-            t=self.animation_open_timing,
-        )
-        nav_anim.start(self.ids.nav_items)
-        self._anim.start(self)
+        self.fade_in_animation.cancel(self.ids.nav_items)
+        self.drawer_open_animation.cancel(self)
+        self.fade_in_animation.cancel(self.search_button)
+
+        self.fade_out_animation.start(self.search_button)
+        self.fade_out_animation.start(self.ids.nav_items)
+        self.drawer_close_animation.start(self)
 
     def on_close(self, _instance, _value):
-        self._anim = None
         self.open_state = OpenState.closed
         self.ids.menu_button.pos_hint = self._menu_button_pos_hint_closed
-        self.ids.nav_items.opacity = 0
+        self.ids.side_button_box.remove_widget(self.search_button)
+        self.search_button = None
 
     def toggle(self, _instance):
         match self.open_state:

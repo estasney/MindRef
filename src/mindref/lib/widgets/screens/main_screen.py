@@ -25,7 +25,7 @@ Builder.load_string(
 #:import AnimatedHSeparator mindref.lib.widgets.separator
 
     
-<V2NoteListViewScreen>:
+<MainScreen>:
     app: app
     canvas:
         Color:
@@ -59,7 +59,7 @@ class V2NoteListViewScreenIds(NamedTuple):
     scroller: "V2RefreshContainer"
 
 
-class V2NoteListViewScreen(Screen):
+class MainScreen(Screen):
     app = ObjectProperty()
     ids: V2NoteListViewScreenIds
 

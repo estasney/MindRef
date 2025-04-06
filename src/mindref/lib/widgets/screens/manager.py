@@ -33,16 +33,16 @@ Builder.load_string(
 #:import ScreenContainer mindref.lib.widgets.screens.screen_container
 #:import DrawerLayout mindref.lib.widgets.layouts.drawer.DrawerLayout
 #:import AppMenu mindref.lib.widgets.app_menu.app_menu.AppMenu
-#:import V2NoteListViewScreen mindref.lib.widgets.screens.v2_note_list_screen.V2NoteListViewScreen
+#:import MainScreen mindref.lib.widgets.screens.main_screen.MainScreen
 
 <NoteAppScreenManager>:
     id: screen_manager
     app: app
     drawer_cls: DrawerLayout
     transition: SlideTransition()
-    V2NoteListViewScreen:
-        id: v2_note_list_view_screen
-        name: 'v2_note_list_view_screen'
+    MainScreen:
+        id: main_screen
+        name: 'main_screen'
     NoteCategoryChooserScreen:
         id: chooser_screen
         name: 'chooser_screen'
@@ -80,7 +80,7 @@ class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.note_screen_cycler = RollingIndex(size=2)
-        self.current = "v2_note_list_view_screen"
+        self.current = "main_screen"
         self.app.bind(display_state=self.handle_app_display_state)
         self.app.bind(on_paginate=self.handle_pagination)
         self.app.bind(menu_open=self.setter("menu_open"))
