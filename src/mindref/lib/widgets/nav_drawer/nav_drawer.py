@@ -11,9 +11,11 @@ from kivy.properties import (
     OptionProperty,
     partial,
     DictProperty,
+    AliasProperty,
 )
 from kivy.uix.floatlayout import FloatLayout
 
+from mindref.lib.models import AnimationTiming
 from mindref.lib.widgets.behavior import CustomBehavior
 from mindref.lib.widgets.buttons.buttons import ThemedIconButton
 
@@ -33,15 +35,26 @@ TOpenState = Literal["open", "opening", "closed", "closing"]
 
 Builder.load_string(
     """
+#:import OpenMenuButton mindref.lib.widgets.buttons
+#:import V2RefreshContainer mindref.lib.widgets.refreshable.refresh_container
 <NavDrawer>:
     pos_hint: {"left": 0}
-    orientation: "vertical"
-    canvas.before:
-        Color:
-            rgba: app.colors['Dark']
-        Rectangle:
-            size: self.size
-            pos: self.pos
+    FloatLayout:
+        id: top_bar
+        pos_hint: {"top": 1}
+        size_hint_y: 0.1
+        OpenMenuButton:
+            id: menu_button
+            size_hint: None, None
+            width: self.height
+            on_release: root.toggle(self)
+            pos_hint: root._menu_button_pos_hint_closed
+    V2RefreshContainer:
+        id: nav_items
+        size_hint_y: 0.9
+        pos_hint: {"top": 0.9}
+        opacity: 0
+        
 """
 )
 
@@ -51,30 +64,27 @@ class NavDrawer(FloatLayout, CustomBehavior):
     size_hint_x_open = NumericProperty(0)
     size_hint_x = NumericProperty(0, allownone=False)
     animation_open_duration = NumericProperty(0.2)
+    animation_open_timing = OptionProperty(
+        AnimationTiming.in_out_quad, options=[AnimationTiming.__members__.values()]
+    )
+    animation_closed_duration = NumericProperty(0.2)
+    animation_closed_timing = OptionProperty(
+        AnimationTiming.in_out_quad, options=[AnimationTiming.__members__.values()]
+    )
+
     animation_close_duration = NumericProperty(0.2)
     open_state = OptionProperty(
         OpenState.closed, options=list(OpenState.__members__.values())
     )
     _anim: Animation | None = ObjectProperty(allownone=True)
-    _menu_button: ThemedIconButton | None = ObjectProperty(allownone=True)
-    _menu_button_pos_hint_closed = DictProperty({"center_x": 0.5, "top": 1})
+
+    _menu_button_pos_hint_closed = DictProperty({"center_x": 0.5, "center_y": 0.5})
+    _menu_button_pos_hint_open = DictProperty({"left": 0, "center_y": 0.5})
 
     __custom_events__ = frozenset({"on_open", "on_close", "on_opening", "on_closing"})
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        Clock.schedule_once(self._bind_button, 0)
-
-    def _bind_button(self, _dt):
-        btn = ThemedIconButton(
-            icon_code="\ue5d2",
-            size_hint=(None, None),
-            pos_hint=self._menu_button_pos_hint_closed,
-        )
-        btn.bind(height=btn.setter("width"))
-        btn.bind(on_release=self.toggle)
-        self.add_widget(btn)
-        self._menu_button = btn
 
     def on_size_hint_x_closed(self, _instance, _value):
         self.size_hint_x = _value
@@ -94,46 +104,51 @@ class NavDrawer(FloatLayout, CustomBehavior):
                 raise ValueError(msg)
 
     def on_open(self, _instance, _value):
-        Logger.info("Drawer opened")
         self._anim = None
         self.open_state = OpenState.open
 
     def on_opening(self, _instance, _value):
-        Logger.info("Opening drawer")
         if self._anim:
             self._anim.cancel(self)
             self._anim = None
         self._anim = Animation(
             size_hint_x=self.size_hint_x_open,
             duration=self.animation_open_duration,
-            t="out_quad",
+            t=self.animation_open_timing,
         )
-
         self._anim.bind(on_complete=partial(self.dispatch, "on_open"))
-
-        # Keep our menu button in a static position
-        self._menu_button.pos_hint = {"left": 0, "top": 1}
+        self.ids.menu_button.pos_hint = self._menu_button_pos_hint_open
+        nav_anim = Animation(
+            opacity=1,
+            duration=self.animation_open_duration,
+            t=self.animation_open_timing,
+        )
+        nav_anim.start(self.ids.nav_items)
         self._anim.start(self)
 
     def on_closing(self, _instance, _value):
-        Logger.info("Closing drawer")
         if self._anim:
             self._anim.cancel(self)
             self._anim = None
-
         self._anim = Animation(
             size_hint_x=self.size_hint_x_closed,
             duration=self.animation_close_duration,
-            t="out_quad",
+            t=self.animation_closed_timing,
         )
         self._anim.bind(on_complete=partial(self.dispatch, "on_close"))
+        nav_anim = Animation(
+            opacity=0,
+            duration=self.animation_open_duration,
+            t=self.animation_open_timing,
+        )
+        nav_anim.start(self.ids.nav_items)
         self._anim.start(self)
 
     def on_close(self, _instance, _value):
-        Logger.info("Drawer opened")
         self._anim = None
-        self._menu_button.pos_hint = self._menu_button_pos_hint_closed
         self.open_state = OpenState.closed
+        self.ids.menu_button.pos_hint = self._menu_button_pos_hint_closed
+        self.ids.nav_items.opacity = 0
 
     def toggle(self, _instance):
         match self.open_state:
@@ -145,3 +160,9 @@ class NavDrawer(FloatLayout, CustomBehavior):
                 self.on_open_state(self, OpenState.closing)
             case OpenState.closing:
                 self.on_open_state(self, OpenState.opening)
+
+    def add_widget_to_drawer(self, widget):
+        self.ids.nav_items.add_widget_to_grid(widget)
+
+    def clear_widgets_from_drawer(self):
+        self.ids.nav_items.clear_widgets_from_grid()

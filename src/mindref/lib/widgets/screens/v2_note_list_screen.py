@@ -22,6 +22,7 @@ Builder.load_string(
 #:import OpenMenuButton mindref.lib.widgets.buttons
 #:import NavDrawer mindref.lib.widgets.nav_drawer
 #:import OpenMenuButton mindref.lib.widgets.buttons
+#:import AnimatedHSeparator mindref.lib.widgets.separator
 
     
 <V2NoteListViewScreen>:
@@ -32,15 +33,21 @@ Builder.load_string(
         Rectangle:
             size: self.size
             pos: self.pos
-    FloatLayout:
+    RelativeLayout:
         V2RefreshContainer:
             id: scroller
             size_hint_y: 1
             pos_hint: {"x": 0.1, "y": 0}
         NavDrawer:
+            id: nav_drawer
             size_hint_x_closed: 0.07
             size_hint_x_open: 0.5
-            id: nav_drawer
+            canvas.before:
+                Color:
+                    rgba: app.colors['Dark']
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
             
         
         
@@ -82,5 +89,11 @@ class V2NoteListViewScreen(Screen):
         layout.clear_widgets_from_grid()
         for note in value:
             layout.add_widget_to_grid(
+                Label(text=str(note.stem), size_hint_y=None, height=40)
+            )
+        nav_layout = self.ids.nav_drawer
+        nav_layout.clear_widgets_from_drawer()
+        for note in value:
+            nav_layout.add_widget_to_drawer(
                 Label(text=str(note.stem), size_hint_y=None, height=40)
             )

@@ -1,7 +1,8 @@
-from enum import StrEnum
+from enum import Enum
+from typing import Literal
 
 
-class DisplayState(StrEnum):
+class DisplayState(str, Enum):
     CHOOSE = "choose"
     DISPLAY = "display"
     LIST = "list"
@@ -9,3 +10,77 @@ class DisplayState(StrEnum):
     ADD = "add"
     ERROR = "error"
     CATEGORY_EDITOR = "category_editor"
+
+    def __str__(self) -> str:
+        return str.__str__(self)
+
+
+class AnimationTiming(str, Enum):
+    in_back = "in_back"
+    in_bounce = "in_bounce"
+    in_circ = "in_circ"
+    in_cubic = "in_cubic"
+    in_elastic = "in_elastic"
+    in_expo = "in_expo"
+    in_out_back = "in_out_back"
+    in_out_bounce = "in_out_bounce"
+    in_out_circ = "in_out_circ"
+    in_out_cubic = "in_out_cubic"
+    in_out_elastic = "in_out_elastic"
+    in_out_expo = "in_out_expo"
+    in_out_quad = "in_out_quad"
+    in_out_quart = "in_out_quart"
+    in_out_quint = "in_out_quint"
+    in_out_sine = "in_out_sine"
+    in_quad = "in_quad"
+    in_quart = "in_quart"
+    in_quint = "in_quint"
+    in_sine = "in_sine"
+    linear = "linear"
+    out_back = "out_back"
+    out_bounce = "out_bounce"
+    out_circ = "out_circ"
+    out_cubic = "out_cubic"
+    out_elastic = "out_elastic"
+    out_expo = "out_expo"
+    out_quad = "out_quad"
+    out_quart = "out_quart"
+    out_quint = "out_quint"
+    out_sine = "out_sine"
+
+
+AnimationTimingLit = Literal[
+    "in_back",
+    "in_bounce",
+    "in_circ",
+    "in_cubic",
+    "in_elastic",
+    "in_expo",
+    "in_out_back",
+    "in_out_bounce",
+    "in_out_circ",
+    "in_out_cubic",
+    "in_out_elastic",
+    "in_out_expo",
+    "in_out_quad",
+    "in_out_quart",
+    "in_out_quint",
+    "in_out_sine",
+    "in_quad",
+    "in_quart",
+    "in_quint",
+    "in_sine",
+    "linear",
+    "out_back",
+    "out_bounce",
+    "out_circ",
+    "out_cubic",
+    "out_elastic",
+    "out_expo",
+    "out_quad",
+    "out_quart",
+    "out_quint",
+    "out_sine",
+]
+
+TAnimationTiming = AnimationTiming | AnimationTimingLit
