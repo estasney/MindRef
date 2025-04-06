@@ -49,6 +49,20 @@ Builder.load_string(
             width: self.height
             on_release: root.toggle(self)
             pos_hint: root._menu_button_pos_hint_closed
+        GridLayout:
+            cols: 2
+            pos_hint: {"top": 1, "right": 1}
+            width: top_bar.width - menu_button.width
+            size_hint_x: None
+            canvas.before:
+                Color:
+                    rgba: 1, 0, 0, 1  # Red color
+                Line:
+                    rectangle: self.x, self.y, self.width, self.height
+            AnchorLayout:
+                id: side_button_grid
+                anchor_x: "right"
+                anchor_y: "center"
     V2RefreshContainer:
         id: nav_items
         size_hint_y: 0.9
@@ -76,6 +90,9 @@ class NavDrawer(FloatLayout, CustomBehavior):
     open_state = OptionProperty(
         OpenState.closed, options=list(OpenState.__members__.values())
     )
+
+    search_button = ObjectProperty(allownone=True)
+
     _anim: Animation | None = ObjectProperty(allownone=True)
 
     _menu_button_pos_hint_closed = DictProperty({"center_x": 0.5, "center_y": 0.5})
@@ -125,6 +142,26 @@ class NavDrawer(FloatLayout, CustomBehavior):
         )
         nav_anim.start(self.ids.nav_items)
         self._anim.start(self)
+
+        # Check if search_button doesn't exist and create it
+        if self.search_button is None:
+            # Create a new search button
+            self.search_button = ThemedIconButton(
+                icon_code="\ue8b6", size_hint=(None, None), opacity=0
+            )
+            self.search_button.bind(height=self.search_button.setter("width"))
+            self.search_button.on_release = lambda: print("Search button pressed")
+
+            # Add to the side button grid
+            self.ids.side_button_grid.add_widget(self.search_button)
+
+            # Animate the button's opacity
+            button_anim = Animation(
+                opacity=1,
+                duration=self.animation_open_duration,
+                t=self.animation_open_timing,
+            )
+            button_anim.start(self.search_button)
 
     def on_closing(self, _instance, _value):
         if self._anim:
