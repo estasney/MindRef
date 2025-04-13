@@ -1,6 +1,10 @@
+from kivy import Logger
 from kivy.graphics import Color, Line
 from kivy.graphics.instructions import InstructionGroup
+from kivy.metrics import sp
 from kivy.properties import BooleanProperty, ObjectProperty
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.layout import Layout
 from kivy.uix.widget import Widget
 
 
@@ -19,7 +23,7 @@ class CustomBehavior:
             self.register_event_type(event)
 
 
-class DebugLayout(Widget):
+class DebugLayout(Layout):
     """
     This subclass will add a new property, `debug_layout`
 
@@ -27,7 +31,7 @@ class DebugLayout(Widget):
     """
 
     debug_layout = BooleanProperty(False)
-    outline = ObjectProperty(None)
+    outline = ObjectProperty(None, rebind=True)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -39,14 +43,7 @@ class DebugLayout(Widget):
         fbind("size_hint", update_debug_layout)
         fbind("size", update_debug_layout)
         fbind("debug_layout", update_debug_layout)
-
-    # def get_rectangle(self):
-    #     group = InstructionGroup()
-    #     group.add(Color(1, 0, 0, 1))
-    #     group.add(Line(rectangle=(self.x, self.y, self.width, self.height), width=1))
-    #     return group
-    #
-    # rectangle = AliasProperty(getter=get_rectangle, bind=["x", "y", "width", "height"], cache=True)
+        fbind("on_debug_layout", update_debug_layout)
 
     def update_debug_layout(self, instance, value):
         if self.debug_layout:
@@ -55,7 +52,14 @@ class DebugLayout(Widget):
             outline = InstructionGroup()
             outline.add(Color(1, 0, 0, 1))
             outline.add(
-                Line(rectangle=(self.x, self.y, self.width, self.height), width=1)
+                Line(rectangle=(self.x, self.y, self.width, self.height), width=sp(1))
+            )
+            Logger.info(
+                f"DebugLayout: {self} - {self.x}, {self.y}, {self.width}, {self.height}"
             )
             self.outline = outline
             self.canvas.add(outline)
+            self.canvas.ask_update()
+
+
+class DebugGridLayout(GridLayout, DebugLayout): ...

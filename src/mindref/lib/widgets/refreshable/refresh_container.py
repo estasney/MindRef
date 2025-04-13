@@ -7,6 +7,7 @@ from kivy.properties import (
     Clock,
     Logger,
     NumericProperty,
+    VariableListProperty,
 )
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.relativelayout import RelativeLayout
@@ -35,12 +36,15 @@ Builder.load_string(
 #:import OpacityScrollEffect kivy.effects.opacityscroll.OpacityScrollEffect
 <V2RefreshContainer>:
     scroll_view: scroll_view
+    item_spacing: [0, 0]
+    item_padding: [0, 0, 0, 0]
     RefreshScrollView:
         id: scroll_view
         do_scroll_x: False
         do_scroll_y: True
         GridLayout:
             id: grid_layout
+            spacing: root.item_spacing
             cols: 1
             size_hint_y: None
             height: self.minimum_height
@@ -62,6 +66,8 @@ class V2RefreshContainer(FloatLayout, V2RefreshBehavior):
     can be positioned in the center of the screen. The ScrollView is used to enable the overscroll effect for refreshing.
     """
 
+    item_spacing = VariableListProperty([0, 0], length=2)
+    item_padding = VariableListProperty([0, 0, 0, 0])
     overscroll_progress = NumericProperty(0.0)
     refresh_threshold = NumericProperty(0.25)
     refreshing = BooleanProperty(False)
@@ -105,6 +111,7 @@ class V2RefreshContainer(FloatLayout, V2RefreshBehavior):
         if not self.ids.grid_layout:
             Logger.error(f"{type(self).__name__} : No grid layout found")
             return
+        widget.padding = self.item_padding
         self.ids.grid_layout.add_widget(widget)
 
     def clear_widgets_from_grid(self):

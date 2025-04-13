@@ -1,23 +1,26 @@
 from enum import Enum
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from kivy import Logger
 from kivy.animation import Animation
-from kivy.clock import Clock
 from kivy.lang import Builder
 from kivy.properties import (
+    DictProperty,
     NumericProperty,
     ObjectProperty,
     OptionProperty,
-    partial,
-    DictProperty,
-    AliasProperty,
+    VariableListProperty,
+    StringProperty,
+    ListProperty,
 )
 from kivy.uix.floatlayout import FloatLayout
 
 from mindref.lib.models import AnimationTiming
-from mindref.lib.widgets.behavior import CustomBehavior
+from mindref.lib.widgets.behavior import CustomBehavior, DebugLayout
 from mindref.lib.widgets.buttons.buttons import ThemedIconButton
+
+if TYPE_CHECKING:
+    from mindref.lib.widgets.nav_drawer.nav_item import NavItem
 
 
 class OpenState(str, Enum):
@@ -42,18 +45,33 @@ TAnimatedProperty = Literal[
 
 Builder.load_string(
     """
-#:import OpenMenuButton mindref.lib.widgets.buttons
+#:import ThemedMenuButton mindref.lib.widgets.buttons
 #:import V2RefreshContainer mindref.lib.widgets.refreshable.refresh_container
+#:import DebugGridLayout mindref.lib.widgets.behavior.DebugGridLayout
+<OpenMenuButton@ThemedIconButton>:
+    width: self.height
+    size_hint: None, None
+    icon_code: "\ue5d2"
+    
+<SearchButton@ThemedIconButton>:
+    width: self.height
+    size_hint: None, None
+    icon_code: "\ue8b6"
+    
+
+
 <NavDrawer>:
     pos_hint: {"left": 0}
+    nav_link_padding: [dp(0), dp(12), dp(0), dp(12)]
+    nav_link_spacing: [dp(0), dp(0)]
+    nav_links: []
+    debug_layout: False
     FloatLayout:
         id: top_bar
         pos_hint: {"top": 1}
         size_hint_y: 0.1
         OpenMenuButton:
             id: menu_button
-            size_hint: None, None
-            width: self.height
             on_release: root.toggle(self)
             pos_hint: root._menu_button_pos_hint_closed
         GridLayout:
@@ -74,6 +92,8 @@ Builder.load_string(
                 anchor_y: "center"
     V2RefreshContainer:
         id: nav_items
+        item_spacing: root.nav_link_spacing
+        item_padding: root.nav_link_padding
         size_hint_y: 0.9
         pos_hint: {"top": 0.9}
         opacity: 0
@@ -82,7 +102,8 @@ Builder.load_string(
 )
 
 
-class NavDrawer(FloatLayout, CustomBehavior):
+class NavDrawer(FloatLayout, CustomBehavior, DebugLayout):
+    selected_nav_link_id = StringProperty(None, allownone=True)
     size_hint_x_closed = NumericProperty(0)
     size_hint_x_open = NumericProperty(0)
     size_hint_x = NumericProperty(0, allownone=False)
@@ -106,6 +127,10 @@ class NavDrawer(FloatLayout, CustomBehavior):
     drawer_close_animation: Animation
     fade_in_animation: Animation
     fade_out_animation: Animation
+
+    nav_link_spacing = VariableListProperty([0, 0], length=2)
+    nav_link_padding = VariableListProperty([0, 0, 0, 0], length=4)
+    nav_items: list[dict] = ListProperty([])
 
     _menu_button_pos_hint_closed = DictProperty({"center_x": 0.5, "center_y": 0.5})
     _menu_button_pos_hint_open = DictProperty({"left": 0, "center_y": 0.5})
@@ -253,6 +278,7 @@ class NavDrawer(FloatLayout, CustomBehavior):
 
     def on_open(self, _instance, _value):
         self.open_state = OpenState.open
+        self.fade_in_animation.start(self.search_button)
 
     def on_opening(self, _instance, _value):
         self.drawer_close_animation.cancel(self)
@@ -267,7 +293,6 @@ class NavDrawer(FloatLayout, CustomBehavior):
             self.search_button.on_release = lambda: print("Search button pressed")
             self.ids.side_button_box.add_widget(self.search_button)
         self.fade_out_animation.cancel(self.search_button)
-        self.fade_in_animation.start(self.search_button)
         self.fade_in_animation.start(self.ids.nav_items)
         self.drawer_open_animation.start(self)
 
@@ -297,7 +322,46 @@ class NavDrawer(FloatLayout, CustomBehavior):
             case OpenState.closing:
                 self.on_open_state(self, OpenState.opening)
 
-    def add_widget_to_drawer(self, widget):
+    def bind_to_selection_source(self, instance, property_name):
+        """
+        Creates bidirectional binding between nav drawer selection and external property
+
+        Args:
+            instance: Object with property to bind to (e.g. MainScreen)
+            property_name: Name of property to bind to (e.g. 'selected_note')
+        """
+        # When nav_drawer selection changes, update the external property
+        self.bind(
+            selected_nav_link_id=lambda _, val: setattr(instance, property_name, val)
+        )
+
+        # When external property changes, update nav_drawer selection
+        instance.bind(
+            **{property_name: lambda _, val: setattr(self, "selected_nav_link_id", val)}
+        )
+
+    def handle_nav_link_selected(self, instance: "NavItem"):
+        """Handle a navigation item being clicked"""
+        if instance.nav_id == self.selected_nav_link_id:
+            self.selected_nav_link_id = None
+            instance.selected = False
+        else:
+            # Find previous selection and unselect it
+            old_selection = None
+            for child in self.ids.nav_items.ids.grid_layout.children:
+                if hasattr(child, "selected") and child.selected:
+                    old_selection = child
+                    break
+
+            # Update selection state
+            self.selected_nav_link_id = instance.nav_id
+            instance.selected = True
+
+            # Only update the previous selection if found
+            if old_selection:
+                old_selection.selected = False
+
+    def add_widget_to_drawer(self, widget: "NavItem"):
         self.ids.nav_items.add_widget_to_grid(widget)
 
     def clear_widgets_from_drawer(self):
