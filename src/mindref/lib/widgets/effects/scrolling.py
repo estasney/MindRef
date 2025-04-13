@@ -60,6 +60,9 @@ class RefreshSymbol(FloatLayout):
         rot = (sin(self.event_dt) * 4) + 5
         self.rotation = self.rotation + rot
 
+    def collide_point(self, x, y):
+        return False
+
 
 class RefreshOverscrollEffect(OpacityScrollEffect):
     """
