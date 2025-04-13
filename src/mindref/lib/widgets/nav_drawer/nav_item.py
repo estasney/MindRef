@@ -2,7 +2,8 @@ from kivy.animation import Animation
 from kivy.clock import Clock
 from kivy.graphics import Color, RoundedRectangle
 from kivy.lang import Builder
-from kivy.properties import BooleanProperty, ColorProperty, Logger, StringProperty
+from kivy.metrics import dp
+from kivy.properties import BooleanProperty, ColorProperty, StringProperty
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.widget import Widget
@@ -42,7 +43,7 @@ class SelectableAnimation(Widget):
         with self.canvas:
             self.canvas_rect_color = Color(rgba=(0, 0, 0, 0))
             self.canvas_rect = RoundedRectangle(
-                pos=self.center, size=self.size, radius=[(0, 0, 0, 0)]
+                pos=self.center, size=self.size, radius=[(0, 0, 0, 0)], segments=50
             )
         Clock.schedule_once(self._bind_canvas, 0)
 
@@ -56,9 +57,12 @@ class SelectableAnimation(Widget):
         if is_selected:
             if self._select_anim:
                 self._select_anim.stop(self.canvas_rect)
-            self.canvas_rect.radius = [self.height / 2, self.height / 2]
+            self.canvas_rect.radius = [self.height / 2]
             self._select_anim = Animation(
-                pos=self.pos, size=(self.width, self.height), duration=0.1, t="in_quad"
+                pos=(self.x + dp(12), self.y),
+                size=(self.width - dp(24), self.height),
+                duration=0.1,
+                t="in_quad",
             )
             self._select_anim.start(self.canvas_rect)
 
