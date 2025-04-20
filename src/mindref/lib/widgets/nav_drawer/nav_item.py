@@ -1,9 +1,10 @@
+from kivy import Logger
 from kivy.animation import Animation
 from kivy.clock import Clock
 from kivy.graphics import Color, RoundedRectangle
 from kivy.lang import Builder
 from kivy.metrics import dp
-from kivy.properties import BooleanProperty, ColorProperty, StringProperty
+from kivy.properties import BooleanProperty, ColorProperty, StringProperty, partial
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.widget import Widget
@@ -33,31 +34,35 @@ Builder.load_string(
 class SelectableAnimation(Widget):
     selected = BooleanProperty(False)
     bg_color_selected = ColorProperty()
-    canvas_rect: RoundedRectangle
-    canvas_rect_color: Color
-    _select_anim: Animation | None
 
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
         self._select_anim = None
+        self.canvas_rect_color = None
+        self.canvas_rect = None
+        super().__init__(**kwargs)
         with self.canvas:
             self.canvas_rect_color = Color(rgba=(0, 0, 0, 0))
             self.canvas_rect = RoundedRectangle(
-                pos=self.center, size=self.size, radius=[(0, 0, 0, 0)], segments=50
+                pos=self.pos, size=self.size, radius=[0, 0, 0, 0], segments=50
             )
-        Clock.schedule_once(self._bind_canvas, 0)
-
-    def _bind_canvas(self, _dt):
-        self.bind(pos=self._update_canvas)
+        self.bind(pos=self._update_canvas, size=self._update_canvas)
 
     def _update_canvas(self, *_args):
-        self.canvas_rect.pos = self.center
+        if self.canvas_rect:
+            self.canvas_rect.pos = self.pos
+            self.canvas_rect.size = self.size
 
     def on_selected(self, _, is_selected: bool):
+        Logger.info(f"NavItem: on_selected called with {is_selected}")
+        if not self.canvas_rect:  # We have to reschedule this once canvas is ready
+            cb = partial(self.on_selected, is_selected=is_selected)
+            Clock.schedule_once(cb, 0.1)
+            return
+
         if is_selected:
             if self._select_anim:
                 self._select_anim.stop(self.canvas_rect)
-            self.canvas_rect.radius = [self.height / 2]
+            self.canvas_rect.radius = [self.height / 2] * 4
             self._select_anim = Animation(
                 pos=(self.x + dp(12), self.y),
                 size=(self.width - dp(24), self.height),
@@ -65,26 +70,20 @@ class SelectableAnimation(Widget):
                 t="in_quad",
             )
             self._select_anim.start(self.canvas_rect)
-
             self.canvas_rect_color.rgba = self.bg_color_selected
         else:
             if self._select_anim:
                 self._select_anim.stop(self.canvas_rect)
             self._select_anim = Animation(size=(0, 0), duration=0.2, t="in_out_quad")
-            self.canvas_rect_color.rgba = (0, 0, 0, 0)
             self._select_anim.start(self.canvas_rect)
+            self.canvas_rect_color.rgba = (0, 0, 0, 0)
 
 
 class NavItem(ButtonBehavior, BoxLayout, DebugLayout, SelectableAnimation):
-    """ """
-
     text = StringProperty()
     nav_id = StringProperty()
     selected = BooleanProperty(False)
     bg_color_selected = ColorProperty()
-    _select_anim: Animation | None
-    _canvas_rect: RoundedRectangle | None
-    _canvas_rect_color: Color | None
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

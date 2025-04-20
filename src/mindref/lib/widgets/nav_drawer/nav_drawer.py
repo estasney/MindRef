@@ -1,17 +1,18 @@
 from enum import Enum
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Callable, Literal
 
 from kivy import Logger
 from kivy.animation import Animation
+from kivy.clock import Clock
 from kivy.lang import Builder
 from kivy.properties import (
     DictProperty,
+    ListProperty,
     NumericProperty,
     ObjectProperty,
     OptionProperty,
-    VariableListProperty,
     StringProperty,
-    ListProperty,
+    VariableListProperty,
 )
 from kivy.uix.floatlayout import FloatLayout
 
@@ -64,7 +65,6 @@ Builder.load_string(
     pos_hint: {"left": 0}
     nav_link_padding: [dp(0), dp(12), dp(0), dp(12)]
     nav_link_spacing: [dp(0), dp(0)]
-    nav_links: []
     debug_layout: False
     FloatLayout:
         id: top_bar
@@ -103,7 +103,6 @@ Builder.load_string(
 
 
 class NavDrawer(FloatLayout, CustomBehavior, DebugLayout):
-    selected_nav_link_id = StringProperty(None, allownone=True)
     size_hint_x_closed = NumericProperty(0)
     size_hint_x_open = NumericProperty(0)
     size_hint_x = NumericProperty(0, allownone=False)
@@ -131,11 +130,14 @@ class NavDrawer(FloatLayout, CustomBehavior, DebugLayout):
     nav_link_spacing = VariableListProperty([0, 0], length=2)
     nav_link_padding = VariableListProperty([0, 0, 0, 0], length=4)
     nav_items: list[dict] = ListProperty([])
+    nav_id_selected = StringProperty(None, allownone=True)
 
     _menu_button_pos_hint_closed = DictProperty({"center_x": 0.5, "center_y": 0.5})
     _menu_button_pos_hint_open = DictProperty({"left": 0, "center_y": 0.5})
 
-    __custom_events__ = frozenset({"on_open", "on_close", "on_opening", "on_closing"})
+    __custom_events__ = frozenset(
+        {"on_open", "on_close", "on_opening", "on_closing", "on_nav_selected"}
+    )
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -322,47 +324,17 @@ class NavDrawer(FloatLayout, CustomBehavior, DebugLayout):
             case OpenState.closing:
                 self.on_open_state(self, OpenState.opening)
 
-    def bind_to_selection_source(self, instance, property_name):
-        """
-        Creates bidirectional binding between nav drawer selection and external property
+    def on_nav_selected(self, _instance):
+        Logger.info(f"Nav clicked: {_instance}")
+        Clock.schedule_once(self.update_nav_selection, 0)
 
-        Args:
-            instance: Object with property to bind to (e.g. MainScreen)
-            property_name: Name of property to bind to (e.g. 'selected_note')
-        """
-        # When nav_drawer selection changes, update the external property
-        self.bind(
-            selected_nav_link_id=lambda _, val: setattr(instance, property_name, val)
-        )
-
-        # When external property changes, update nav_drawer selection
-        instance.bind(
-            **{property_name: lambda _, val: setattr(self, "selected_nav_link_id", val)}
-        )
-
-    def handle_nav_link_selected(self, instance: "NavItem"):
-        """Handle a navigation item being clicked"""
-        if instance.nav_id == self.selected_nav_link_id:
-            self.selected_nav_link_id = None
-            instance.selected = False
-        else:
-            # Find previous selection and unselect it
-            old_selection = None
-            for child in self.ids.nav_items.ids.grid_layout.children:
-                if hasattr(child, "selected") and child.selected:
-                    old_selection = child
-                    break
-
-            # Update selection state
-            self.selected_nav_link_id = instance.nav_id
-            instance.selected = True
-
-            # Only update the previous selection if found
-            if old_selection:
-                old_selection.selected = False
+    def update_nav_selection(self, _dt):
+        for widget in self.ids.nav_items.main_children():
+            widget.selected = self.nav_id_selected == widget.nav_id
 
     def add_widget_to_drawer(self, widget: "NavItem"):
-        self.ids.nav_items.add_widget_to_grid(widget)
+        widget.bind(on_release=lambda _: self.dispatch("on_nav_selected", widget))
+        self.ids.nav_items.add_widget_to_main(widget)
 
     def clear_widgets_from_drawer(self):
-        self.ids.nav_items.clear_widgets_from_grid()
+        self.ids.nav_items.clear_widgets_from_main()

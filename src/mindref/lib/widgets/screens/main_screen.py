@@ -44,6 +44,7 @@ Builder.load_string(
             size_hint_x_closed: 0.07
             size_hint_x_open: 0.5
             nav_link_padding: [0, dp(16), 0, dp(16)]
+            nav_id_selected: root.selected_note
             canvas.before:
                 Color:
                     rgba: app.colors['Dark']
@@ -77,7 +78,9 @@ class MainScreen(Screen):
         scroller.fbind("on_refresh", self.on_refresh)
 
     def _bind_nav_drawer(self, _dt):
-        self.ids.nav_drawer.bind_to_selection_source(self, "selected_note")
+        nav_drawer = self.ids.nav_drawer
+        Logger.info(f"{type(self).__name__} : {nav_drawer=}")
+        nav_drawer.fbind("on_nav_selected", self.handle_nav_click)
 
     def on_refresh(self, *args):
         Logger.info(f"{type(self).__name__} : on_refresh called")
@@ -88,15 +91,26 @@ class MainScreen(Screen):
 
         self.app.registry.push_event(RefreshNotesEvent(on_complete))
 
-    def on_nav_click(self, nav_id: str | None):
-        self.selected_note = nav_id
+    def handle_nav_click(self, _dt, instance: "NavItem"):
+        Logger.info(f"{type(self).__name__} : handle_nav_click called with {instance=}")
+        nav_id = instance.nav_id
+        if self.selected_note == nav_id:
+            self.selected_note = None
+            Logger.info(f"{type(self).__name__} : Deselecting {nav_id}")
+        else:
+            Logger.info(f"{type(self).__name__} : Selecting {nav_id}")
+            self.selected_note = nav_id
 
     def handle_note_files(self, _, value: list[Path]):
         nav_drawer = self.ids.nav_drawer
         nav_drawer.clear_widgets_from_drawer()
         for note in value:
             button = NavItem(
-                text=str(note.stem), size_hint_y=None, height=40, nav_id=str(note.stem)
+                text=str(note.stem),
+                size_hint_y=None,
+                height=40,
+                nav_id=str(note.stem),
+                selected=self.selected_note == str(note.stem),
             )
-            button.bind(on_release=lambda btn: nav_drawer.handle_nav_link_selected(btn))
+
             nav_drawer.add_widget_to_drawer(button)

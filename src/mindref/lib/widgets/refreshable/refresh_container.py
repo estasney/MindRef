@@ -43,7 +43,7 @@ Builder.load_string(
         do_scroll_x: False
         do_scroll_y: True
         GridLayout:
-            id: grid_layout
+            id: main
             spacing: root.item_spacing
             cols: 1
             size_hint_y: None
@@ -103,25 +103,28 @@ class V2RefreshContainer(FloatLayout, V2RefreshBehavior):
         """
         ...
 
-    def add_widget_to_grid(self, widget: Widget):
+    def add_widget_to_main(self, widget: Widget):
         """
         Add a widget to the grid layout
         :param widget: The widget to add
         """
-        if not self.ids.grid_layout:
+        if not self.ids.main:
             Logger.error(f"{type(self).__name__} : No grid layout found")
             return
         widget.padding = self.item_padding
-        self.ids.grid_layout.add_widget(widget)
+        self.ids.main.add_widget(widget)
 
-    def clear_widgets_from_grid(self):
+    def clear_widgets_from_main(self):
         """
         Clear all widgets from the grid layout
         """
-        if not self.ids.grid_layout:
+        if not self.ids.main:
             Logger.error(f"{type(self).__name__} : No grid layout found")
             return
-        self.ids.grid_layout.clear_widgets()
+        self.ids.main.clear_widgets()
+
+    def main_children(self):
+        return self.ids.main.children
 
     def on_overscroll(self, *args):
         Logger.info(f"{type(self).__name__} : on_overscroll called with args: {args}")
