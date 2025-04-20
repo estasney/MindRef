@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, NamedTuple
 from kivy.clock import Clock
 from kivy.lang import Builder
 from kivy.logger import Logger
+from kivy.metrics import dp
 from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.screenmanager import Screen
 
@@ -92,14 +93,8 @@ class MainScreen(Screen):
         self.app.registry.push_event(RefreshNotesEvent(on_complete))
 
     def handle_nav_click(self, _dt, instance: "NavItem"):
-        Logger.info(f"{type(self).__name__} : handle_nav_click called with {instance=}")
         nav_id = instance.nav_id
-        if self.selected_note == nav_id:
-            self.selected_note = None
-            Logger.info(f"{type(self).__name__} : Deselecting {nav_id}")
-        else:
-            Logger.info(f"{type(self).__name__} : Selecting {nav_id}")
-            self.selected_note = nav_id
+        self.selected_note = nav_id if not instance.selected else None
 
     def handle_note_files(self, _, value: list[Path]):
         nav_drawer = self.ids.nav_drawer
@@ -107,8 +102,6 @@ class MainScreen(Screen):
         for note in value:
             button = NavItem(
                 text=str(note.stem),
-                size_hint_y=None,
-                height=40,
                 nav_id=str(note.stem),
                 selected=self.selected_note == str(note.stem),
             )

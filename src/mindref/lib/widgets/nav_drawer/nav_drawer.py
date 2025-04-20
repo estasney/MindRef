@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import TYPE_CHECKING, Callable, Literal
+from typing import TYPE_CHECKING, Literal, NamedTuple, TypedDict
 
 from kivy import Logger
 from kivy.animation import Animation
@@ -14,11 +14,14 @@ from kivy.properties import (
     StringProperty,
     VariableListProperty,
 )
+from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.gridlayout import GridLayout
 
 from mindref.lib.models import AnimationTiming
 from mindref.lib.widgets.behavior import CustomBehavior, DebugLayout
 from mindref.lib.widgets.buttons.buttons import ThemedIconButton
+from mindref.lib.widgets.refreshable import V2RefreshContainer
 
 if TYPE_CHECKING:
     from mindref.lib.widgets.nav_drawer.nav_item import NavItem
@@ -102,7 +105,16 @@ Builder.load_string(
 )
 
 
+class NavDrawerIds(NamedTuple):
+    top_bar: "FloatLayout"
+    side_button_grid: "GridLayout"
+    side_button_box: "AnchorLayout"
+    menu_button: "ThemedIconButton"
+    nav_items: "V2RefreshContainer"
+
+
 class NavDrawer(FloatLayout, CustomBehavior, DebugLayout):
+    ids: NavDrawerIds = DictProperty({})
     size_hint_x_closed = NumericProperty(0)
     size_hint_x_open = NumericProperty(0)
     size_hint_x = NumericProperty(0, allownone=False)
@@ -313,7 +325,7 @@ class NavDrawer(FloatLayout, CustomBehavior, DebugLayout):
         self.ids.side_button_box.remove_widget(self.search_button)
         self.search_button = None
 
-    def toggle(self, _instance):
+    def toggle(self, _instance: "ThemedIconButton"):
         match self.open_state:
             case OpenState.open:
                 self.on_open_state(self, OpenState.closing)
@@ -324,9 +336,9 @@ class NavDrawer(FloatLayout, CustomBehavior, DebugLayout):
             case OpenState.closing:
                 self.on_open_state(self, OpenState.opening)
 
-    def on_nav_selected(self, _instance):
-        Logger.info(f"Nav clicked: {_instance}")
+    def on_nav_selected(self, _instance: "NavItem"):
         Clock.schedule_once(self.update_nav_selection, 0)
+        return True
 
     def update_nav_selection(self, _dt):
         for widget in self.ids.nav_items.main_children():
