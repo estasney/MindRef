@@ -1,23 +1,18 @@
 from pathlib import Path
-from typing import TYPE_CHECKING, NamedTuple, Optional
+from typing import TYPE_CHECKING, NamedTuple
 
 import mistune  # type: ignore
 from kivy.clock import Clock
 from kivy.lang import Builder
 from kivy.logger import Logger
-from kivy.metrics import dp
 from kivy.properties import ObjectProperty, StringProperty
-
-from kivy.uix.label import Label
 from kivy.uix.screenmanager import Screen
 
 from mindref.lib import get_app
 from mindref.lib.domain.events import RefreshNotesEvent
-
 from mindref.lib.domain.parser.kbd_plugin import plugin_kbd
 from mindref.lib.widgets.markdown.markdown_document_v2 import MarkdownDocumentLayout
 from mindref.lib.widgets.nav_drawer import NavItem
-
 
 if TYPE_CHECKING:
     from mindref.lib.widgets.nav_drawer import NavDrawer

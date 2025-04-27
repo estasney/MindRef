@@ -13,6 +13,7 @@ from kivy.properties import (
     OptionProperty,
     StringProperty,
     VariableListProperty,
+    BooleanProperty,
 )
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.floatlayout import FloatLayout
@@ -143,6 +144,7 @@ class NavDrawer(FloatLayout, CustomBehavior, DebugLayout):
     nav_link_padding = VariableListProperty([0, 0, 0, 0], length=4)
     nav_items: list[dict] = ListProperty([])
     nav_id_selected = StringProperty(None, allownone=True)
+    close_on_nav = BooleanProperty(True)
 
     _menu_button_pos_hint_closed = DictProperty({"center_x": 0.5, "center_y": 0.5})
     _menu_button_pos_hint_open = DictProperty({"left": 0, "center_y": 0.5})
@@ -204,6 +206,7 @@ class NavDrawer(FloatLayout, CustomBehavior, DebugLayout):
             self.handle_animation_change,
             "animation_closed_timing",
         )
+        self.trigger_toggle = Clock.create_trigger(self.toggle, 0)
 
     def handle_animation_change(
         self, property_name: TAnimatedProperty, _instance, value: float
@@ -338,6 +341,8 @@ class NavDrawer(FloatLayout, CustomBehavior, DebugLayout):
 
     def on_nav_selected(self, _instance: "NavItem"):
         Clock.schedule_once(self.update_nav_selection, 0)
+        if self.close_on_nav and self.open_state in (OpenState.open, OpenState.opening):
+            self.trigger_toggle()
         return True
 
     def update_nav_selection(self, _dt):
