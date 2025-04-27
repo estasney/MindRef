@@ -1,22 +1,25 @@
 from pathlib import Path
 from typing import TYPE_CHECKING, NamedTuple, Optional
 
-import mistune
+import mistune  # type: ignore
 from kivy.clock import Clock
 from kivy.lang import Builder
 from kivy.logger import Logger
 from kivy.metrics import dp
 from kivy.properties import ObjectProperty, StringProperty
+
+from kivy.uix.label import Label
 from kivy.uix.screenmanager import Screen
 
 from mindref.lib import get_app
 from mindref.lib.domain.events import RefreshNotesEvent
+
 from mindref.lib.domain.parser.kbd_plugin import plugin_kbd
-from mindref.lib.widgets.markdown.markdown_document import MarkdownDocument
+from mindref.lib.widgets.markdown.markdown_document_v2 import MarkdownDocumentLayout
 from mindref.lib.widgets.nav_drawer import NavItem
 
+
 if TYPE_CHECKING:
-    from mindref.lib.domain.markdown_note import MarkdownNoteDict
     from mindref.lib.widgets.nav_drawer import NavDrawer
     from mindref.lib.widgets.refreshable import V2RefreshContainer
 
@@ -29,7 +32,7 @@ Builder.load_string(
 #:import NavDrawer mindref.lib.widgets.nav_drawer
 #:import OpenMenuButton mindref.lib.widgets.buttons
 #:import AnimatedHSeparator mindref.lib.widgets.separator
-
+#:import Note mindref.lib.widgets.note.Note
 
 <MainScreen>:
     app: app
@@ -43,7 +46,8 @@ Builder.load_string(
         V2RefreshContainer:
             id: scroller
             size_hint_y: 1
-            pos_hint: {"x": 0.1, "y": 0}
+            size_hint_x: 0.93
+            pos_hint: {"x": 0.09, "y": 0}
         NavDrawer:
             id: nav_drawer
             size_hint_x_closed: 0.07
@@ -70,7 +74,7 @@ class MainScreen(Screen):
     app = ObjectProperty()
     ids: V2NoteListViewScreenIds
     selected_note = StringProperty(None, allownone=True)
-    _markdown_parser = None
+    _markdown_parser: mistune.Markdown
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -111,49 +115,38 @@ class MainScreen(Screen):
             if note_path:
                 # Read and render the note
                 self.read_and_render_note(note_path)
+            else:
+                Logger.error(
+                    f"{type(self).__name__} : Note file not found for ID {self.selected_note}"
+                )
+                self.ids.scroller.clear_widgets_from_main()
         else:
             # Clear the scroller when no note is selected
             self.ids.scroller.clear_widgets_from_main()
 
-    def _find_note_path(self, note_name: str) -> Optional[Path]:
-        """Find the path to a note file by its name."""
-        for note_path in self.app.note_files:
-            if note_path.stem == note_name:
-                return note_path
-        return None
+    def _find_note_path(self, note_id: str) -> Path | None:
+        return next(
+            (
+                note_path
+                for note_path in self.app.note_files
+                if note_path.stem == note_id
+            ),
+            None,
+        )
 
     def read_and_render_note(self, note_path: Path):
         """Read a markdown file, parse it, and render it in the scroller."""
-        try:
-            # Clear the scroller
-            self.ids.scroller.clear_widgets_from_main()
 
-            # Read the file content
-            text = note_path.read_text(encoding="utf-8")
+        self.ids.scroller.clear_widgets_from_main()
+        text = note_path.read_text(encoding="utf-8")
+        document_md = self._markdown_parser(text)
+        layout = MarkdownDocumentLayout()
 
-            # Parse the markdown
-            document = self._markdown_parser(text)
-
-            # Extract title from the first heading or use the filename
-            title = note_path.stem
-            for node in document:
-                if node["type"] == "heading" and node.get("level", 0) == 1:
-                    if node.get("children") and node["children"][0].get("text"):
-                        title = node["children"][0]["text"]
-                        # Remove the title node from the document
-                        document = [n for n in document if n != node]
-                        break
-
-            # Create a content dictionary
-            content_data = {"document": document, "text": text, "title": title}
-
-            # Create and add the markdown document widget
-            md_widget = MarkdownDocument(content_data=content_data)
-            self.ids.scroller.add_widget_to_main(md_widget)
-
-            Logger.info(f"{type(self).__name__} : Rendered note {note_path.name}")
-        except Exception as e:
-            Logger.error(f"{type(self).__name__} : Error rendering note: {e}")
+        #
+        #
+        # # Parse the markdown
+        self.ids.scroller.add_widget_to_main(layout)
+        layout.document = document_md
 
     def handle_note_files(self, _, value: list[Path]):
         nav_drawer = self.ids.nav_drawer

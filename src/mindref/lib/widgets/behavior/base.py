@@ -1,8 +1,14 @@
 from kivy import Logger
+from kivy.clock import Clock
+from kivy.core.window import Window
 from kivy.graphics import Color, Line
 from kivy.graphics.instructions import InstructionGroup
 from kivy.metrics import sp
+from kivy.modules import inspector
+from kivy.modules.inspector import Inspector
 from kivy.properties import BooleanProperty, ObjectProperty
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.layout import Layout
 from kivy.uix.widget import Widget
@@ -63,3 +69,15 @@ class DebugLayout(Layout):
 
 
 class DebugGridLayout(GridLayout, DebugLayout): ...
+
+
+class DebugFloatLayout(FloatLayout, DebugLayout): ...
+
+
+class DebugBoxLayout(BoxLayout, DebugLayout):
+    """
+    A BoxLayout that supports debugging features.
+    It inherits from DebugLayout to provide debugging capabilities.
+    """
+
+    pass

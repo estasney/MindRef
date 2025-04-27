@@ -38,7 +38,6 @@ Builder.load_string(
     scroll_view: scroll_view
     item_spacing: [0, 0]
     item_padding: [0, 0, 0, 0]
-    
     FloatLayout:
         id: float_layout
         RefreshSymbol:
@@ -49,6 +48,8 @@ Builder.load_string(
             opacity: root.overscroll_progress if not root.refreshing else 1  # fully visible if refreshing
     RelativeLayout:
         pos_hint: {"center_x": 0.5, "y": 0}
+        size_hint_x: None
+        width: root.width
         RefreshScrollView:
             id: scroll_view
             do_scroll_x: False
