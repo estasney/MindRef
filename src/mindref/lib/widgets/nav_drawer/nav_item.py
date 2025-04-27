@@ -53,7 +53,6 @@ class SelectableAnimation(Widget):
             self.canvas_rect.size = self.size
 
     def on_selected(self, _, is_selected: bool):
-        Logger.info(f"NavItem: on_selected called with {is_selected}")
         if not self.canvas_rect:  # We have to reschedule this once canvas is ready
             cb = partial(self.on_selected, is_selected=is_selected)
             Clock.schedule_once(cb, 0.1)
