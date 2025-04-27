@@ -38,16 +38,7 @@ Builder.load_string(
     scroll_view: scroll_view
     item_spacing: [0, 0]
     item_padding: [0, 0, 0, 0]
-    RefreshScrollView:
-        id: scroll_view
-        do_scroll_x: False
-        do_scroll_y: True
-        GridLayout:
-            id: main
-            spacing: root.item_spacing
-            cols: 1
-            size_hint_y: None
-            height: self.minimum_height
+    
     FloatLayout:
         id: float_layout
         RefreshSymbol:
@@ -56,13 +47,25 @@ Builder.load_string(
             id: refresh_symbol
             pos_hint: {"center_x": 0.5, "top": 1 -  (root.overscroll_progress / 4)}  # center vertically based on overscroll
             opacity: root.overscroll_progress if not root.refreshing else 1  # fully visible if refreshing
+    RelativeLayout:
+        pos_hint: {"center_x": 0.5, "y": 0}
+        RefreshScrollView:
+            id: scroll_view
+            do_scroll_x: False
+            do_scroll_y: True
+            GridLayout:
+                id: main
+                spacing: root.item_spacing
+                cols: 1
+                size_hint_y: None
+                height: self.minimum_height
     """
 )
 
 
 class V2RefreshContainer(FloatLayout, V2RefreshBehavior):
     """
-    This widget implements a ScrollView contained in a FloatLayout. This nesting of layouts is necessary so that the Refresh icon
+    This widget implements a ScrollView contained in a RelativeLayout. This nesting of layouts is necessary so that the Refresh icon
     can be positioned in the center of the screen. The ScrollView is used to enable the overscroll effect for refreshing.
     """
 
