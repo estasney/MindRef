@@ -88,7 +88,7 @@ class ThemedButton(ButtonBehavior, BoxLayout, RippleMixin):
 class ThemedLabelButton(ThemedButton):
     """Extends ThemedButton to add a label"""
 
-    text: StringProperty()
+    text = StringProperty()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
