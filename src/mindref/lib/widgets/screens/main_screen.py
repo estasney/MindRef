@@ -43,6 +43,7 @@ Builder.load_string(
             size_hint_y: 1
             size_hint_x: 0.93
             pos_hint: {"x": 0.09, "y": 0}
+            item_padding: [0, 0, dp(16), 0]
         NavDrawer:
             id: nav_drawer
             size_hint_x_closed: 0.07

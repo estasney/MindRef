@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import TYPE_CHECKING, Literal, NamedTuple, TypedDict
+from typing import TYPE_CHECKING, Literal, NamedTuple
 
 from kivy import Logger
 from kivy.animation import Animation
@@ -206,7 +206,6 @@ class NavDrawer(FloatLayout, CustomBehavior, DebugLayout):
             self.handle_animation_change,
             "animation_closed_timing",
         )
-        self.trigger_toggle = Clock.create_trigger(self.toggle, 0)
 
     def handle_animation_change(
         self, property_name: TAnimatedProperty, _instance, value: float
@@ -328,7 +327,7 @@ class NavDrawer(FloatLayout, CustomBehavior, DebugLayout):
         self.ids.side_button_box.remove_widget(self.search_button)
         self.search_button = None
 
-    def toggle(self, _instance: "ThemedIconButton"):
+    def toggle(self, _instance: ThemedIconButton | None):
         match self.open_state:
             case OpenState.open:
                 self.on_open_state(self, OpenState.closing)
@@ -342,7 +341,7 @@ class NavDrawer(FloatLayout, CustomBehavior, DebugLayout):
     def on_nav_selected(self, _instance: "NavItem"):
         Clock.schedule_once(self.update_nav_selection, 0)
         if self.close_on_nav and self.open_state in (OpenState.open, OpenState.opening):
-            self.trigger_toggle()
+            self.toggle(None)
         return True
 
     def update_nav_selection(self, _dt):

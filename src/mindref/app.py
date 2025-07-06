@@ -47,7 +47,6 @@ from mindref.lib.domain.events import (
     TypeAheadQueryEvent,
 )
 from mindref.lib.domain.settings import app_settings
-from mindref.lib.plugins import PluginManager
 from mindref.lib.service import Registry
 from mindref.lib.utils import attrsetter, get_app, sch_cb, schedulable, trigger_factory
 from mindref.lib.widgets.screens.manager import NoteAppScreenManager
@@ -58,7 +57,6 @@ class MindRefApp(App):
     atlas_service = AtlasService(storage_path=Path(__file__).parent / "static")
     note_service = NoteRepositoryFactory.get_repo()(get_app=get_app)
     editor_service = FileSystemEditor(get_app=get_app)
-    plugin_manager = PluginManager()
     platform_android = BooleanProperty(defaultvalue=False)
     registry = Registry()
 
@@ -443,10 +441,6 @@ class MindRefApp(App):
 
         self.base_font_size = self.config.get("Display", "BASE_FONT_SIZE")
         Clock.schedule_interval(self.process_event, 1e-4)
-        self.plugin_manager.init_app(self)
-        sm.fbind(
-            "on_interact", lambda _: self.plugin_manager.plugin_event("on_interact")
-        )
 
         return sm
 

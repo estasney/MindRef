@@ -57,6 +57,7 @@ Builder.load_string(
             GridLayout:
                 id: main
                 spacing: root.item_spacing
+                padding: root.item_padding
                 cols: 1
                 size_hint_y: None
                 height: self.minimum_height
