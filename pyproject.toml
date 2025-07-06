@@ -45,6 +45,7 @@ mindref = "mindref.main:main"
 [dependency-groups]
 dev = [
     "click>=8.1.8",
+    "colour>=0.1.5",
     "cython>3,<=3.0.11",
     "line-profiler>=4.2.0",
     "pre-commit>=4.1.0",
