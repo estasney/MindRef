@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import TYPE_CHECKING, Literal, NamedTuple
-
+from kivy.uix.textinput import TextInput
 from kivy import Logger
 from kivy.animation import Animation
 from kivy.clock import Clock
@@ -57,14 +57,6 @@ Builder.load_string(
     width: self.height
     size_hint: None, None
     icon_code: "\ue5d2"
-    
-<SearchButton@ThemedIconButton>:
-    width: self.height
-    size_hint: None, None
-    icon_code: "\ue8b6"
-    
-
-
 <NavDrawer>:
     pos_hint: {"left": 0}
     nav_link_padding: [dp(0), dp(12), dp(0), dp(12)]
@@ -101,7 +93,6 @@ Builder.load_string(
         size_hint_y: 0.9
         pos_hint: {"top": 0.9}
         opacity: 0
-        
 """
 )
 
@@ -133,7 +124,8 @@ class NavDrawer(FloatLayout, CustomBehavior, DebugLayout):
         OpenState.closed, options=list(OpenState.__members__.values())
     )
 
-    search_button = ObjectProperty(allownone=True)
+    clear_search_button = ObjectProperty(allownone=True)
+    search_box = ObjectProperty(allownone=True)
 
     drawer_open_animation: Animation
     drawer_close_animation: Animation
@@ -294,38 +286,42 @@ class NavDrawer(FloatLayout, CustomBehavior, DebugLayout):
 
     def on_open(self, _instance, _value):
         self.open_state = OpenState.open
-        self.fade_in_animation.start(self.search_button)
+        self.fade_in_animation.start(self.clear_search_button)
 
     def on_opening(self, _instance, _value):
         self.drawer_close_animation.cancel(self)
         self.fade_out_animation.cancel(self.ids.nav_items)
         self.ids.menu_button.pos_hint = self._menu_button_pos_hint_open
-        if self.search_button is None:
+        if self.clear_search_button is None:
             # Create a new search button
-            self.search_button = ThemedIconButton(
-                icon_code="\ue8b6", size_hint=(None, None), opacity=0
+            self.clear_search_button = ThemedIconButton(
+                icon_code="\ue5cd",
+                size_hint=(None, None),
+                opacity=0,
+                background_color=(0, 0, 0, 0),
             )
-            self.search_button.bind(height=self.search_button.setter("width"))
-            self.search_button.on_release = lambda: print("Search button pressed")
-            self.ids.side_button_box.add_widget(self.search_button)
-        self.fade_out_animation.cancel(self.search_button)
+
+            self.search_box = TextInput()
+            self.ids.side_button_grid.add_widget(self.search_box)
+            self.ids.side_button_box.add_widget(self.clear_search_button)
+        self.fade_out_animation.cancel(self.clear_search_button)
         self.fade_in_animation.start(self.ids.nav_items)
         self.drawer_open_animation.start(self)
 
     def on_closing(self, _instance, _value):
         self.fade_in_animation.cancel(self.ids.nav_items)
         self.drawer_open_animation.cancel(self)
-        self.fade_in_animation.cancel(self.search_button)
+        self.fade_in_animation.cancel(self.clear_search_button)
 
-        self.fade_out_animation.start(self.search_button)
+        self.fade_out_animation.start(self.clear_search_button)
         self.fade_out_animation.start(self.ids.nav_items)
         self.drawer_close_animation.start(self)
 
     def on_close(self, _instance, _value):
         self.open_state = OpenState.closed
         self.ids.menu_button.pos_hint = self._menu_button_pos_hint_closed
-        self.ids.side_button_box.remove_widget(self.search_button)
-        self.search_button = None
+        self.ids.side_button_box.remove_widget(self.clear_search_button)
+        self.clear_search_button = None
 
     def toggle(self, _instance: ThemedIconButton | None):
         match self.open_state:
