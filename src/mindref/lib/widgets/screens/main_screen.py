@@ -138,9 +138,6 @@ class MainScreen(Screen):
         document_md = self._markdown_parser(text)
         layout = MarkdownDocumentLayout()
 
-        #
-        #
-        # # Parse the markdown
         self.ids.scroller.add_widget_to_main(layout)
         layout.document = document_md
 
