@@ -1,11 +1,12 @@
 from enum import Enum
 from typing import TYPE_CHECKING, Literal, NamedTuple
-from kivy.uix.textinput import TextInput
+
 from kivy import Logger
 from kivy.animation import Animation
 from kivy.clock import Clock
 from kivy.lang import Builder
 from kivy.properties import (
+    BooleanProperty,
     DictProperty,
     ListProperty,
     NumericProperty,
@@ -13,15 +14,16 @@ from kivy.properties import (
     OptionProperty,
     StringProperty,
     VariableListProperty,
-    BooleanProperty,
 )
-from kivy.uix.anchorlayout import AnchorLayout
+
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.gridlayout import GridLayout
 
 from mindref.lib.models import AnimationTiming
 from mindref.lib.widgets.behavior import CustomBehavior, DebugLayout
 from mindref.lib.widgets.buttons.buttons import ThemedIconButton
+from mindref.lib.widgets.forms.text_field import TextField
+from mindref.lib.widgets.nav_drawer.search_box import SearchBox
 from mindref.lib.widgets.refreshable import V2RefreshContainer
 
 if TYPE_CHECKING:
@@ -58,34 +60,22 @@ Builder.load_string(
     size_hint: None, None
     icon_code: "\ue5d2"
 <NavDrawer>:
+    id: nav_drawer
     pos_hint: {"left": 0}
     nav_link_padding: [dp(0), dp(12), dp(0), dp(12)]
     nav_link_spacing: [dp(0), dp(0)]
     debug_layout: False
-    FloatLayout:
+    handle_refresh: lambda instance, value: print(f"Refresh triggered: {instance}, {value}")
+    BoxLayout:
+        orientation: "horizontal"
         id: top_bar
         pos_hint: {"top": 1}
         size_hint_y: 0.1
+        padding: [dp(5), 0, 0, 0]
         OpenMenuButton:
             id: menu_button
             on_release: root.toggle(self)
             pos_hint: root._menu_button_pos_hint_closed
-        GridLayout:
-            id: side_button_grid
-            opacity: 0
-            cols: 2
-            pos_hint: {"top": 1, "right": 1}
-            width: top_bar.width - menu_button.width
-            size_hint_x: None
-            canvas.before:
-                Color:
-                    rgba: 1, 0, 0, 1  # Red color
-                Line:
-                    rectangle: self.x, self.y, self.width, self.height
-            AnchorLayout:
-                id: side_button_box
-                anchor_x: "right"
-                anchor_y: "center"
     V2RefreshContainer:
         id: nav_items
         item_spacing: root.nav_link_spacing
@@ -93,14 +83,14 @@ Builder.load_string(
         size_hint_y: 0.9
         pos_hint: {"top": 0.9}
         opacity: 0
+        on_refresh: nav_drawer.handle_refresh(self, self.refreshing)
+        
 """
 )
 
 
 class NavDrawerIds(NamedTuple):
-    top_bar: "FloatLayout"
-    side_button_grid: "GridLayout"
-    side_button_box: "AnchorLayout"
+    top_bar: "BoxLayout"
     menu_button: "ThemedIconButton"
     nav_items: "V2RefreshContainer"
 
@@ -142,7 +132,15 @@ class NavDrawer(FloatLayout, CustomBehavior, DebugLayout):
     _menu_button_pos_hint_open = DictProperty({"left": 0, "center_y": 0.5})
 
     __custom_events__ = frozenset(
-        {"on_open", "on_close", "on_opening", "on_closing", "on_nav_selected"}
+        {
+            "on_open",
+            "on_close",
+            "on_opening",
+            "on_closing",
+            "on_nav_selected",
+            "on_search_input",
+            "on_search_clear",
+        }
     )
 
     def __init__(self, **kwargs):
@@ -287,24 +285,34 @@ class NavDrawer(FloatLayout, CustomBehavior, DebugLayout):
     def on_open(self, _instance, _value):
         self.open_state = OpenState.open
         self.fade_in_animation.start(self.clear_search_button)
+        self.fade_in_animation.start(self.search_box)
 
     def on_opening(self, _instance, _value):
         self.drawer_close_animation.cancel(self)
         self.fade_out_animation.cancel(self.ids.nav_items)
         self.ids.menu_button.pos_hint = self._menu_button_pos_hint_open
+        if self.search_box is None:
+            self.search_box = SearchBox(pos_hint={"center_y": 0.5}, hint_text="Search")
+            self.ids.top_bar.add_widget(self.search_box)
+
         if self.clear_search_button is None:
-            # Create a new search button
             self.clear_search_button = ThemedIconButton(
                 icon_code="\ue5cd",
                 size_hint=(None, None),
                 opacity=0,
                 background_color=(0, 0, 0, 0),
+                pos_hint={"center_y": 0.5},
             )
+            self.clear_search_button.bind(
+                height=self.clear_search_button.setter("width"),
+                on_release=lambda _: self.dispatch(
+                    "on_search_clear", self.clear_search_button
+                ),
+            )
+            self.ids.top_bar.add_widget(self.clear_search_button)
 
-            self.search_box = TextInput()
-            self.ids.side_button_grid.add_widget(self.search_box)
-            self.ids.side_button_box.add_widget(self.clear_search_button)
         self.fade_out_animation.cancel(self.clear_search_button)
+        self.fade_out_animation.start(self.search_box)
         self.fade_in_animation.start(self.ids.nav_items)
         self.drawer_open_animation.start(self)
 
@@ -312,16 +320,19 @@ class NavDrawer(FloatLayout, CustomBehavior, DebugLayout):
         self.fade_in_animation.cancel(self.ids.nav_items)
         self.drawer_open_animation.cancel(self)
         self.fade_in_animation.cancel(self.clear_search_button)
-
+        self.fade_in_animation.cancel(self.search_box)
         self.fade_out_animation.start(self.clear_search_button)
+        self.fade_out_animation.start(self.search_box)
         self.fade_out_animation.start(self.ids.nav_items)
         self.drawer_close_animation.start(self)
 
     def on_close(self, _instance, _value):
         self.open_state = OpenState.closed
         self.ids.menu_button.pos_hint = self._menu_button_pos_hint_closed
-        self.ids.side_button_box.remove_widget(self.clear_search_button)
+        self.ids.top_bar.remove_widget(self.clear_search_button)
+        self.ids.top_bar.remove_widget(self.search_box)
         self.clear_search_button = None
+        self.search_box = None
 
     def toggle(self, _instance: ThemedIconButton | None):
         match self.open_state:
@@ -339,6 +350,16 @@ class NavDrawer(FloatLayout, CustomBehavior, DebugLayout):
         if self.close_on_nav and self.open_state in (OpenState.open, OpenState.opening):
             self.toggle(None)
         return True
+
+    def on_search_clear(self, _instance: ThemedIconButton | None):
+        if self.search_box is not None:
+            self.search_box.text = ""
+            self.search_box.focus = False
+        return True
+
+    def on_search_input(self, _instance: TextField):
+        Logger.info("on_search_input")
+        # TODO
 
     def update_nav_selection(self, _dt):
         for widget in self.ids.nav_items.main_children():
