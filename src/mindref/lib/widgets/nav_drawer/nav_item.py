@@ -1,4 +1,3 @@
-from kivy import Logger
 from kivy.animation import Animation
 from kivy.clock import Clock
 from kivy.graphics import Color, RoundedRectangle
