@@ -5,12 +5,10 @@ from kivy.lang import Builder
 from kivy.properties import (
     BooleanProperty,
     Clock,
-    Logger,
     NumericProperty,
     VariableListProperty,
 )
 from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.widget import Widget
 
