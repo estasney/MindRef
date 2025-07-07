@@ -1,13 +1,10 @@
+from kivy import Logger
 from kivy.animation import Animation
 from kivy.core.window import Window
 from kivy.effects.opacityscroll import OpacityScrollEffect
 from kivy.lang import Builder
-from kivy.properties import (
-    BooleanProperty,
-    Clock,
-    NumericProperty,
-    VariableListProperty,
-)
+from kivy.clock import Clock
+from kivy.properties import BooleanProperty, NumericProperty, VariableListProperty  # type: ignore
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.widget import Widget
