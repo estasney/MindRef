@@ -7,6 +7,7 @@ from kivy.lang import Builder
 from kivy.logger import Logger
 from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.screenmanager import Screen
+from kivy.uix.scrollview import ScrollView
 
 from mindref.lib import get_app
 from mindref.lib.domain.events import RefreshNotesEvent
@@ -37,8 +38,8 @@ Builder.load_string(
             size: self.size
             pos: self.pos
     RelativeLayout:
-        V2RefreshContainer:
-            id: scroller
+        ScrollView:
+            id: content
             size_hint_y: 1
             size_hint_x: 0.93
             pos_hint: {"x": 0.09, "y": 0}
@@ -61,7 +62,7 @@ Builder.load_string(
 
 
 class V2NoteListViewScreenIds(NamedTuple):
-    scroller: "V2RefreshContainer"
+    content: "ScrollView"
     nav_drawer: "NavDrawer"
 
 
@@ -73,7 +74,6 @@ class MainScreen(Screen):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        Clock.schedule_once(self._bind_scroller, 0)
         Clock.schedule_once(self._bind_nav_drawer, 0)
         self.app = get_app()
         self.app.bind(note_files=self.handle_note_files)
@@ -81,10 +81,6 @@ class MainScreen(Screen):
         self._markdown_parser = mistune.create_markdown(
             escape=False, renderer=mistune.AstRenderer(), plugins=["table", plugin_kbd]
         )
-
-    def _bind_scroller(self, _dt):
-        scroller = self.ids.scroller
-        scroller.fbind("on_refresh", self.on_refresh)
 
     def _bind_nav_drawer(self, _dt):
         nav_drawer = self.ids.nav_drawer
@@ -96,7 +92,7 @@ class MainScreen(Screen):
 
         def on_complete(_dt: float):
             Logger.info(f"{type(self).__name__} : Refresh completed {_dt=}")
-            self.ids.scroller.refreshing = False
+            self.ids.nav_drawer.refreshing = False
 
         self.app.registry.push_event(RefreshNotesEvent(on_complete))
 
@@ -114,10 +110,10 @@ class MainScreen(Screen):
                 Logger.error(
                     f"{type(self).__name__} : Note file not found for ID {self.selected_note}"
                 )
-                self.ids.scroller.clear_widgets_from_main()
+                self.ids.content.clear_widgets()
         else:
             # Clear the scroller when no note is selected
-            self.ids.scroller.clear_widgets_from_main()
+            self.ids.content.clear_widgets()
 
     def _find_note_path(self, note_id: str) -> Path | None:
         return next(
@@ -132,12 +128,12 @@ class MainScreen(Screen):
     def read_and_render_note(self, note_path: Path):
         """Read a markdown file, parse it, and render it in the scroller."""
 
-        self.ids.scroller.clear_widgets_from_main()
+        self.ids.content.clear_widgets()
         text = note_path.read_text(encoding="utf-8")
         document_md = self._markdown_parser(text)
         layout = MarkdownDocumentLayout()
 
-        self.ids.scroller.add_widget_to_main(layout)
+        self.ids.content.add_widget(layout)
         layout.document = document_md
 
     def handle_note_files(self, _, value: list[Path]):
