@@ -8,9 +8,9 @@ from kivy.logger import Logger
 from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.screenmanager import Screen
 from kivy.uix.scrollview import ScrollView
+from kivy.uix.widget import Widget
 
 from mindref.lib import get_app
-from mindref.lib.domain.events import RefreshNotesEvent
 from mindref.lib.domain.parser.kbd_plugin import plugin_kbd
 from mindref.lib.widgets.markdown.markdown_document_v2 import MarkdownDocumentLayout
 from mindref.lib.widgets.nav_drawer import NavItem
@@ -18,7 +18,6 @@ from mindref.lib.widgets.refreshable import V2RefreshBehavior
 
 if TYPE_CHECKING:
     from mindref.lib.widgets.nav_drawer import NavDrawer
-    from mindref.lib.widgets.refreshable import V2RefreshContainer
 
 Builder.load_string(
     """
@@ -77,7 +76,6 @@ class MainScreen(Screen, V2RefreshBehavior):
         Clock.schedule_once(self._bind_nav_drawer, 0)
         self.app = get_app()
         self.app.bind(note_files=self.handle_note_files)
-        # Initialize the markdown parser
         self._markdown_parser = mistune.create_markdown(
             escape=False, renderer=mistune.AstRenderer(), plugins=["table", plugin_kbd]
         )
@@ -86,7 +84,7 @@ class MainScreen(Screen, V2RefreshBehavior):
         nav_drawer = self.ids.nav_drawer
         nav_drawer.fbind("on_nav_selected", self.handle_nav_click)
 
-    def on_refresh(self, widget, state, to_children):
+    def on_refresh(self, widget: "Widget", state: bool, to_children: bool) -> bool:
         if not to_children:
             self.app.registry.query_all_v2()
             return True
@@ -133,13 +131,14 @@ class MainScreen(Screen, V2RefreshBehavior):
         layout.document = document_md
 
     def handle_note_files(self, _, value: list[Path]):
-        nav_drawer = self.ids.nav_drawer
-        nav_drawer.clear_widgets_from_drawer()
-        for note in value:
-            button = NavItem(
+        from mindref.lib.widgets.nav_drawer.nav_item import NavItemData
+
+        nav_data_items = [
+            NavItemData(
                 text=str(note.stem),
                 nav_id=str(note.stem),
                 selected=self.selected_note == str(note.stem),
             )
-
-            nav_drawer.add_widget_to_drawer(button)
+            for note in value
+        ]
+        self.ids.nav_drawer.nav_data_items = nav_data_items

@@ -1,5 +1,6 @@
 from enum import Enum
-from typing import TYPE_CHECKING, Literal, NamedTuple, Any
+from functools import partial
+from typing import TYPE_CHECKING, Any, Literal, NamedTuple
 
 from kivy import Logger
 from kivy.animation import Animation
@@ -15,19 +16,17 @@ from kivy.properties import (
     StringProperty,
     VariableListProperty,
 )
-
-from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 
 from mindref.lib.models import AnimationTiming
 from mindref.lib.widgets.behavior import DebugLayout
 from mindref.lib.widgets.buttons.buttons import ThemedIconButton
-from mindref.lib.widgets.forms.text_field import TextField
+from mindref.lib.widgets.nav_drawer.nav_item import NavItem, NavItemData
 from mindref.lib.widgets.nav_drawer.search_box import SearchBox
-from mindref.lib.widgets.refreshable import V2RefreshContainer, V2RefreshBehavior
+from mindref.lib.widgets.refreshable import V2RefreshBehavior, V2RefreshContainer
 
 if TYPE_CHECKING:
-    from mindref.lib.widgets.nav_drawer.nav_item import NavItem
+    from kivy.uix.boxlayout import BoxLayout
 
 
 class OpenState(str, Enum):
@@ -111,7 +110,8 @@ class NavDrawer(FloatLayout, DebugLayout, V2RefreshBehavior):
     )
 
     clear_search_button = ObjectProperty(allownone=True)
-    search_box = ObjectProperty(allownone=True)
+    search_box: SearchBox | None = ObjectProperty(allownone=True)
+    search_filter: str = StringProperty("")
 
     drawer_open_animation: Animation
     drawer_close_animation: Animation
@@ -120,24 +120,22 @@ class NavDrawer(FloatLayout, DebugLayout, V2RefreshBehavior):
 
     nav_link_spacing = VariableListProperty([0, 0], length=2)
     nav_link_padding = VariableListProperty([0, 0, 0, 0], length=4)
-    nav_items: list[dict] = ListProperty([])
+    nav_data_items: list[NavItemData] = ListProperty([])
     nav_id_selected = StringProperty(None, allownone=True)
     close_on_nav = BooleanProperty(True)
 
     _menu_button_pos_hint_closed = DictProperty({"center_x": 0.5, "center_y": 0.5})
     _menu_button_pos_hint_open = DictProperty({"left": 0, "center_y": 0.5})
+    _search_filter_sch_event: None
 
-    __events__ = frozenset(
-        {
-            "on_open",
-            "on_close",
-            "on_opening",
-            "on_closing",
-            "on_nav_selected",
-            "on_search_input",
-            "on_search_clear",
-            "on_refresh",
-        }
+    __events__ = (
+        "on_open",
+        "on_close",
+        "on_opening",
+        "on_closing",
+        "on_nav_selected",
+        "on_search_clear",
+        "on_refresh",
     )
 
     def __init__(self, **kwargs):
@@ -189,20 +187,53 @@ class NavDrawer(FloatLayout, DebugLayout, V2RefreshBehavior):
             self.handle_animation_change,
             "animation_closed_timing",
         )
+        self._search_filter_sch_event = None
+        self.trigger_search_filter = Clock.create_trigger(self._dispatch_search_filter)
 
     def open_state_open_cb(self, *args, **kwargs):
         Logger.debug(
             f"{type(self).__name__} : open_state_open_cb called with args: {args}, kwargs: {kwargs}"
         )
         self.open_state = OpenState.open
-        self.nav_items.refresh_enabled = True
+        self.ids.nav_items.refresh_enabled = True
 
     def open_state_closed_cb(self, *args, **kwargs):
         Logger.debug(
             f"{type(self).__name__} : open_state_closed_cb called with args: {args}, kwargs: {kwargs}"
         )
         self.open_state = OpenState.closed
-        self.nav_items.refresh_enabled = False
+        self.ids.nav_items.refresh_enabled = False
+
+    def attach_search_box(self):
+        if self.search_box is None:
+            self.search_box = SearchBox(pos_hint={"center_y": 0.5}, hint_text="Search")
+            self.search_box.bind(text=self.setter("search_filter"))
+            self.ids.top_bar.add_widget(self.search_box)
+        if self.clear_search_button is None:
+            self.clear_search_button = ThemedIconButton(
+                icon_code="\ue5cd",
+                size_hint=(None, None),
+                opacity=0,
+                background_color=(0, 0, 0, 0),
+                color=(1.0, 1.0, 1.0, 0.5),
+                pos_hint={"center_y": 0.5},
+            )
+            self.clear_search_button.bind(
+                height=self.clear_search_button.setter("width"),
+                on_release=lambda _: self.dispatch(
+                    "on_search_clear", self.clear_search_button
+                ),
+            )
+            self.ids.top_bar.add_widget(self.clear_search_button)
+
+    def detach_search_box(self):
+        if self.clear_search_button is not None:
+            self.ids.top_bar.remove_widget(self.clear_search_button)
+            self.clear_search_button = None
+        if self.search_box is not None:
+            self.ids.top_bar.remove_widget(self.search_box)
+            self.search_box = None
+        self.search_filter = ""
 
     def handle_animation_change(
         self, property_name: TAnimatedProperty, _instance, value: float
@@ -298,25 +329,7 @@ class NavDrawer(FloatLayout, DebugLayout, V2RefreshBehavior):
         self.drawer_close_animation.cancel(self)
         self.fade_out_animation.cancel(self.ids.nav_items)
         self.ids.menu_button.pos_hint = self._menu_button_pos_hint_open
-        if self.search_box is None:
-            self.search_box = SearchBox(pos_hint={"center_y": 0.5}, hint_text="Search")
-            self.ids.top_bar.add_widget(self.search_box)
-
-        if self.clear_search_button is None:
-            self.clear_search_button = ThemedIconButton(
-                icon_code="\ue5cd",
-                size_hint=(None, None),
-                opacity=0,
-                background_color=(0, 0, 0, 0),
-                pos_hint={"center_y": 0.5},
-            )
-            self.clear_search_button.bind(
-                height=self.clear_search_button.setter("width"),
-                on_release=lambda _: self.dispatch(
-                    "on_search_clear", self.clear_search_button
-                ),
-            )
-            self.ids.top_bar.add_widget(self.clear_search_button)
+        self.attach_search_box()
 
         self.fade_out_animation.cancel(self.clear_search_button)
         self.fade_out_animation.start(self.search_box)
@@ -336,10 +349,7 @@ class NavDrawer(FloatLayout, DebugLayout, V2RefreshBehavior):
     def on_close(self, _instance, _value):
         self.open_state = OpenState.closed
         self.ids.menu_button.pos_hint = self._menu_button_pos_hint_closed
-        self.ids.top_bar.remove_widget(self.clear_search_button)
-        self.ids.top_bar.remove_widget(self.search_box)
-        self.clear_search_button = None
-        self.search_box = None
+        self.detach_search_box()
 
     def toggle(self, _instance: ThemedIconButton | None):
         match self.open_state:
@@ -360,13 +370,26 @@ class NavDrawer(FloatLayout, DebugLayout, V2RefreshBehavior):
 
     def on_search_clear(self, _instance: ThemedIconButton | None):
         if self.search_box is not None:
+            self.search_filter = ""
             self.search_box.text = ""
             self.search_box.focus = False
+
         return True
 
-    def on_search_input(self, _instance: TextField):
-        Logger.info("on_search_input")
-        # TODO
+    def on_search_filter(self, _instance, value: str):
+        """We maintain the state of search filter but debounce our dispatches - unless its cleared"""
+
+        if self._search_filter_sch_event is not None:
+            Clock.unschedule(self._search_filter_sch_event)
+            self._search_filter_sch_event = None
+        self._search_filter_sch_event = Clock.schedule_once(
+            partial(self._dispatch_search_filter, value=value.lower()),
+            timeout=0.1 if value else 0,
+        )
+
+    def _dispatch_search_filter(self, _dt, value: str):
+        self._search_filter_sch_event = None
+        self.render_nav_items()
 
     def update_nav_selection(self, _dt):
         for widget in self.ids.nav_items.main_children():
@@ -378,3 +401,20 @@ class NavDrawer(FloatLayout, DebugLayout, V2RefreshBehavior):
 
     def clear_widgets_from_drawer(self):
         self.ids.nav_items.clear_widgets_from_main()
+
+    def render_nav_items(self, *_args):
+        """On a change, re-render all the nav items"""
+        self.ids.nav_items.clear_widgets_from_main()
+        items: list[NavItemData] = self.nav_data_items[:]
+        needle: str = self.search_filter.lower()
+        displayed_items = (
+            items
+            if not needle
+            else list(filter(lambda i: needle in i.text.lower(), items))
+        )
+        for item in displayed_items:
+            widget = NavItem(text=item.text, nav_id=item.nav_id, selected=item.selected)
+            self.add_widget_to_drawer(widget)
+
+    def on_nav_data_items(self, _widget, value):
+        self.render_nav_items()

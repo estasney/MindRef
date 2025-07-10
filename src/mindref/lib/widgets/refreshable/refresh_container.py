@@ -1,16 +1,27 @@
+from typing import TYPE_CHECKING
+
 from kivy import Logger
 from kivy.animation import Animation
+from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.effects.opacityscroll import OpacityScrollEffect
 from kivy.lang import Builder
-from kivy.clock import Clock
-from kivy.properties import BooleanProperty, NumericProperty, VariableListProperty  # type: ignore
+from kivy.properties import (
+    BooleanProperty,
+    NumericProperty,
+    StringProperty,
+    VariableListProperty,
+)  # type: ignore
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.widget import Widget
 
+from ..behavior import DebugLayout
 from ...ext import compute_overscroll
 from . import V2RefreshBehavior
+
+if TYPE_CHECKING:
+    from mindref.lib.widgets.nav_drawer import NavItem
 
 
 class RefreshScrollView(V2RefreshBehavior, ScrollView):
@@ -30,6 +41,7 @@ Builder.load_string(
 #:import RefreshOverscrollEffect mindref.lib.widgets.effects.scrolling.RefreshOverscrollEffect
 #:import OpacityScrollEffect kivy.effects.opacityscroll.OpacityScrollEffect
 <V2RefreshContainer>:
+    debug_layout: False
     scroll_view: scroll_view
     item_spacing: [0, 0]
     item_padding: [0, 0, 0, 0]
@@ -60,7 +72,7 @@ Builder.load_string(
 )
 
 
-class V2RefreshContainer(FloatLayout, V2RefreshBehavior):
+class V2RefreshContainer(FloatLayout, V2RefreshBehavior, DebugLayout):
     """
     This widget implements a ScrollView contained in a RelativeLayout. This nesting of layouts is necessary so that the Refresh icon
     can be positioned in the center of the screen. The ScrollView is used to enable the overscroll effect for refreshing.
@@ -128,7 +140,7 @@ class V2RefreshContainer(FloatLayout, V2RefreshBehavior):
             return
         self.ids.main.clear_widgets()
 
-    def main_children(self):
+    def main_children(self) -> list["NavItem"]:
         return self.ids.main.children
 
     def on_overscroll(self, *args):

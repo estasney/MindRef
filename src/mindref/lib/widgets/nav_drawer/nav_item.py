@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from kivy.animation import Animation
 from kivy.clock import Clock
 from kivy.graphics import Color, RoundedRectangle
@@ -77,11 +79,21 @@ class SelectableAnimation(Widget):
             self.canvas_rect_color.rgba = (0, 0, 0, 0)
 
 
+@dataclass()
+class NavItemData:
+    text: str
+    nav_id: str
+    selected: bool
+
+
 class NavItem(ButtonBehavior, BoxLayout, DebugLayout, SelectableAnimation):
     text = StringProperty()
     nav_id = StringProperty()
     selected = BooleanProperty(False)
     bg_color_selected = ColorProperty()
 
-    def __init__(self, **kwargs):
+    def __init__(self, text: str, nav_id: str, selected: bool, **kwargs):
         super().__init__(**kwargs)
+        self.text = text
+        self.nav_id = nav_id
+        self.selected = selected

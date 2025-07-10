@@ -28,6 +28,7 @@ class ThemedButton(ButtonBehavior, BoxLayout, RippleMixin):
     background_color = ColorProperty()
     border = VariableListProperty()
     enable_ripple_effect = BooleanProperty(True)
+    color = ColorProperty()
 
     def __init__(self, **kwargs):
         self._on_touch_down_plain = super().on_touch_down
