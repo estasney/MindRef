@@ -23,7 +23,6 @@ Builder.load_string(
     """
 #:import V2RefreshContainer mindref.lib.widgets.refreshable.refresh_container
 #:import ScrollingListView mindref.lib.widgets.list_view.list_view
-#:import OpenMenuButton mindref.lib.widgets.buttons
 #:import NavDrawer mindref.lib.widgets.nav_drawer
 #:import OpenMenuButton mindref.lib.widgets.buttons
 #:import AnimatedHSeparator mindref.lib.widgets.separator

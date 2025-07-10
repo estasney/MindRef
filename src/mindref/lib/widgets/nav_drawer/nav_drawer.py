@@ -55,10 +55,6 @@ Builder.load_string(
 #:import ThemedMenuButton mindref.lib.widgets.buttons
 #:import V2RefreshContainer mindref.lib.widgets.refreshable.refresh_container
 #:import DebugGridLayout mindref.lib.widgets.behavior.DebugGridLayout
-<OpenMenuButton@ThemedIconButton>:
-    width: self.height
-    size_hint: None, None
-    icon_code: "\ue5d2"
 <NavDrawer>:
     id: nav_drawer
     pos_hint: {"left": 0}
@@ -76,6 +72,8 @@ Builder.load_string(
             id: menu_button
             on_release: root.toggle(self)
             pos_hint: root._menu_button_pos_hint_closed
+            width: self.height
+            size_hint: None, None
     V2RefreshContainer:
         id: nav_items
         item_spacing: root.nav_link_spacing
