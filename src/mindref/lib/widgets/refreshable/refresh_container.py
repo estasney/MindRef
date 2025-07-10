@@ -71,6 +71,7 @@ class V2RefreshContainer(FloatLayout, V2RefreshBehavior):
     overscroll_progress = NumericProperty(0.0)
     refresh_threshold = NumericProperty(0.25)
     refreshing = BooleanProperty(False)
+    refresh_enabled = BooleanProperty(True)
     animate_icon_hide: Animation
 
     def __init__(self, **kwargs):
@@ -83,18 +84,22 @@ class V2RefreshContainer(FloatLayout, V2RefreshBehavior):
         effect = self.ids.scroll_view.effect_y
         effect.bind(overscroll=self._on_overscroll_value)
 
-    def _on_overscroll_value(self, effect, value):
+    def _on_overscroll_value(self, effect, value) -> bool:
+        if not self.refresh_enabled:
+            self.overscroll_progress = 0
+            return True
         if effect.is_manual:
             self.overscroll_progress = compute_overscroll(
                 value, Window.height, self.refresh_threshold
             )
-            return
+            return True
         if self.overscroll_progress == 1:
             self.refreshing = True
-            self.dispatch("on_refresh", self, True)
+            super().on_refresh(self, True, to_children=False)
             self.overscroll_progress = 0
         else:
             Animation(overscroll_progress=0, d=0.2).start(self)
+        return True
 
     def on_overscroll_progress(self, _widget, value):
         """
@@ -128,6 +133,16 @@ class V2RefreshContainer(FloatLayout, V2RefreshBehavior):
 
     def on_overscroll(self, *args):
         Logger.info(f"{type(self).__name__} : on_overscroll called with args: {args}")
+
+    def on_refresh(self, widget: "Widget", state: bool, to_children: bool):
+        if to_children:
+            # We've been told to set our state to refreshing from a parent
+            self.refreshing = state
+            return True  # Handled
+        # Ourselves our a child wants to refresh - bubble it up
+        if self.refresh_enabled:
+            return super().on_refresh(widget, state, to_children=False)
+        return True
 
 
 __all__ = [

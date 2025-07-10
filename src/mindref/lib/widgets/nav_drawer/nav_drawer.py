@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import TYPE_CHECKING, Literal, NamedTuple
+from typing import TYPE_CHECKING, Literal, NamedTuple, Any
 
 from kivy import Logger
 from kivy.animation import Animation
@@ -20,11 +20,11 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 
 from mindref.lib.models import AnimationTiming
-from mindref.lib.widgets.behavior import CustomBehavior, DebugLayout
+from mindref.lib.widgets.behavior import DebugLayout
 from mindref.lib.widgets.buttons.buttons import ThemedIconButton
 from mindref.lib.widgets.forms.text_field import TextField
 from mindref.lib.widgets.nav_drawer.search_box import SearchBox
-from mindref.lib.widgets.refreshable import V2RefreshContainer
+from mindref.lib.widgets.refreshable import V2RefreshContainer, V2RefreshBehavior
 
 if TYPE_CHECKING:
     from mindref.lib.widgets.nav_drawer.nav_item import NavItem
@@ -61,7 +61,6 @@ Builder.load_string(
     nav_link_padding: [dp(0), dp(12), dp(0), dp(12)]
     nav_link_spacing: [dp(0), dp(0)]
     debug_layout: False
-    handle_refresh: lambda instance, value: print(f"Refresh triggered: {instance}, {value}")
     BoxLayout:
         orientation: "horizontal"
         id: top_bar
@@ -81,7 +80,6 @@ Builder.load_string(
         size_hint_y: 0.9
         pos_hint: {"top": 0.9}
         opacity: 0
-        on_refresh: nav_drawer.handle_refresh(self, self.refreshing)
         
 """
 )
@@ -93,7 +91,7 @@ class NavDrawerIds(NamedTuple):
     nav_items: "V2RefreshContainer"
 
 
-class NavDrawer(FloatLayout, CustomBehavior, DebugLayout):
+class NavDrawer(FloatLayout, DebugLayout, V2RefreshBehavior):
     ids: NavDrawerIds = DictProperty({})
     size_hint_x_closed = NumericProperty(0)
     size_hint_x_open = NumericProperty(0)
@@ -129,7 +127,7 @@ class NavDrawer(FloatLayout, CustomBehavior, DebugLayout):
     _menu_button_pos_hint_closed = DictProperty({"center_x": 0.5, "center_y": 0.5})
     _menu_button_pos_hint_open = DictProperty({"left": 0, "center_y": 0.5})
 
-    __custom_events__ = frozenset(
+    __events__ = frozenset(
         {
             "on_open",
             "on_close",
@@ -138,6 +136,7 @@ class NavDrawer(FloatLayout, CustomBehavior, DebugLayout):
             "on_nav_selected",
             "on_search_input",
             "on_search_clear",
+            "on_refresh",
         }
     )
 
@@ -148,17 +147,13 @@ class NavDrawer(FloatLayout, CustomBehavior, DebugLayout):
             duration=self.animation_open_duration,
             t=self.animation_open_timing,
         )
-        self.drawer_open_animation.bind(
-            on_complete=lambda _: setattr(self, "open_state", OpenState.open)
-        )
+        self.drawer_open_animation.bind(on_complete=self.open_state_open_cb)
         self.drawer_close_animation = Animation(
             size_hint_x=self.size_hint_x_closed,
             duration=self.animation_closed_duration,
             t=self.animation_closed_timing,
         )
-        self.drawer_close_animation.bind(
-            on_complete=lambda _: setattr(self, "open_state", OpenState.closed)
-        )
+        self.drawer_close_animation.bind(on_complete=self.open_state_closed_cb)
         self.fade_in_animation = Animation(
             opacity=1,
             duration=self.animation_open_duration,
@@ -194,6 +189,20 @@ class NavDrawer(FloatLayout, CustomBehavior, DebugLayout):
             self.handle_animation_change,
             "animation_closed_timing",
         )
+
+    def open_state_open_cb(self, *args, **kwargs):
+        Logger.debug(
+            f"{type(self).__name__} : open_state_open_cb called with args: {args}, kwargs: {kwargs}"
+        )
+        self.open_state = OpenState.open
+        self.nav_items.refresh_enabled = True
+
+    def open_state_closed_cb(self, *args, **kwargs):
+        Logger.debug(
+            f"{type(self).__name__} : open_state_closed_cb called with args: {args}, kwargs: {kwargs}"
+        )
+        self.open_state = OpenState.closed
+        self.nav_items.refresh_enabled = False
 
     def handle_animation_change(
         self, property_name: TAnimatedProperty, _instance, value: float

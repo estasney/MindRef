@@ -196,10 +196,12 @@ class Registry:
             return
 
         def set_notes(notes: list["Path"]):
+            Logger.info("Query all complete")
             self.app.note_files = notes
-            self.app.screen_manager.dispatch("on_refresh", False)
+            self.app.screen_manager.dispatch(
+                "on_refresh", self.app, False, to_children=True
+            )
 
-        self.app.screen_manager.dispatch("on_refresh", True)
         note_repo.discover_notes(on_complete=set_notes)
 
     def query_all(self, on_complete: Callable | None = None):

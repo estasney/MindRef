@@ -4,7 +4,7 @@ from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import ScreenManager
 
 from mindref.lib.widgets.behavior.interact_behavior import InteractBehavior
-from mindref.lib.widgets.behavior.refresh_behavior import RefreshBehavior
+from mindref.lib.widgets.refreshable import V2RefreshBehavior
 
 Builder.load_string(
     """
@@ -22,14 +22,21 @@ Builder.load_string(
 )
 
 
-class NoteAppScreenManager(InteractBehavior, RefreshBehavior, ScreenManager):
+class NoteAppScreenManager(InteractBehavior, V2RefreshBehavior, ScreenManager):
     app = ObjectProperty()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.current = "main_screen"
 
-    def on_refresh(self, state: bool):
-        Logger.info(f"{type(self).__name__} : on_refresh called with state={state}")
-        self.dispatch_children(self, "on_refresh", state)
-        return True
+    def on_refresh(self, widget, state: bool, to_children: bool):
+        Logger.debug(
+            f"{type(self).__name__} : on_refresh called with src={widget}, {state=}, {to_children=}"
+        )
+
+        if to_children:
+            return self.current_screen.dispatch(
+                "on_refresh", widget, state, to_children
+            )
+
+        return False

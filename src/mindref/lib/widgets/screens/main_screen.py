@@ -14,11 +14,11 @@ from mindref.lib.domain.events import RefreshNotesEvent
 from mindref.lib.domain.parser.kbd_plugin import plugin_kbd
 from mindref.lib.widgets.markdown.markdown_document_v2 import MarkdownDocumentLayout
 from mindref.lib.widgets.nav_drawer import NavItem
+from mindref.lib.widgets.refreshable import V2RefreshBehavior
 
 if TYPE_CHECKING:
     from mindref.lib.widgets.nav_drawer import NavDrawer
     from mindref.lib.widgets.refreshable import V2RefreshContainer
-
 
 Builder.load_string(
     """
@@ -66,7 +66,7 @@ class V2NoteListViewScreenIds(NamedTuple):
     nav_drawer: "NavDrawer"
 
 
-class MainScreen(Screen):
+class MainScreen(Screen, V2RefreshBehavior):
     app = ObjectProperty()
     ids: V2NoteListViewScreenIds
     selected_note = StringProperty(None, allownone=True)
@@ -84,17 +84,13 @@ class MainScreen(Screen):
 
     def _bind_nav_drawer(self, _dt):
         nav_drawer = self.ids.nav_drawer
-        Logger.info(f"{type(self).__name__} : {nav_drawer=}")
         nav_drawer.fbind("on_nav_selected", self.handle_nav_click)
 
-    def on_refresh(self, *args):
-        Logger.info(f"{type(self).__name__} : on_refresh called")
-
-        def on_complete(_dt: float):
-            Logger.info(f"{type(self).__name__} : Refresh completed {_dt=}")
-            self.ids.nav_drawer.refreshing = False
-
-        self.app.registry.push_event(RefreshNotesEvent(on_complete))
+    def on_refresh(self, widget, state, to_children):
+        if not to_children:
+            self.app.registry.query_all_v2()
+            return True
+        return super().on_refresh(widget, state, to_children)
 
     def handle_nav_click(self, _dt, instance: "NavItem"):
         nav_id = instance.nav_id
