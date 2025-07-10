@@ -41,8 +41,8 @@ class V2RefreshBehavior(CustomBehavior):
             True, then propagate the event to children widgets
             False, propagate the event to parent widget
         """
-        Logger.info(
-            f"{type(self).__name__} : on_refresh src={widget}, {state=}=, {to_children=}"
+        Logger.debug(
+            f"{type(self).__name__} : on_refresh src='{widget.__class__.__name__}', {state=}, {to_children=}"
         )
         if to_children:
             result = self.dispatch_children("on_refresh", widget, state, to_children)
