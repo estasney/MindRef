@@ -49,7 +49,7 @@ from mindref.lib.domain.events import (
 from mindref.lib.domain.settings import app_settings
 from mindref.lib.service import Registry
 from mindref.lib.utils import attrsetter, get_app, sch_cb, schedulable, trigger_factory
-from mindref.lib.widgets.screens.manager import NoteAppScreenManager
+from mindref.screens import NoteAppScreenManager
 
 
 class MindRefApp(App):
@@ -61,7 +61,7 @@ class MindRefApp(App):
     registry = Registry()
 
     note_files = ListProperty()
-    note_categories = ListProperty()
+
     note_category = StringProperty(allownone=True)
     note_category_meta = ListProperty()
 

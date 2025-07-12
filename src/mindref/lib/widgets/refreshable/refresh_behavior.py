@@ -45,12 +45,11 @@ class V2RefreshBehavior(CustomBehavior):
             f"{type(self).__name__} : on_refresh src='{widget.__class__.__name__}', {state=}, {to_children=}"
         )
         if to_children:
-            result = self.dispatch_children("on_refresh", widget, state, to_children)
-            return result
+            return self.dispatch_children("on_refresh", widget, state, to_children)
 
         matched_parent = self._find_closest_parent_handler()
         if not matched_parent:
-            Logger.info(
+            Logger.debug(
                 f"{self.__class__.__name__}: No parent with on_refresh handler found"
             )
             return False
