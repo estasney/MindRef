@@ -61,10 +61,6 @@ class MindRefApp(App):
     registry = Registry()
 
     note_files = ListProperty()
-
-    note_category = StringProperty(allownone=True)
-    note_category_meta = ListProperty()
-
     editor_note = ObjectProperty(allownone=True)
 
     menu_open = BooleanProperty(False)
