@@ -4,7 +4,6 @@ from enum import Flag, auto
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
-from mindref.lib import DisplayState
 
 if TYPE_CHECKING:
     from mindref.lib.domain.markdown_note import MarkdownNote
@@ -198,16 +197,6 @@ class RefreshNotesEvent(Event):
 
     def __repr__(self):
         attrs = ("event_type", "on_complete")
-        return f"{type(self).__name__}({','.join(f'{p}={getattr(self, p)}' for p in attrs)})"
-
-
-@dataclass(slots=True)
-class BackButtonEvent(Event):
-    event_type = "back_button"
-    display_state: DisplayState
-
-    def __repr__(self):
-        attrs = ("event_type", "display_state")
         return f"{type(self).__name__}({','.join(f'{p}={getattr(self, p)}' for p in attrs)})"
 
 

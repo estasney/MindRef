@@ -1,2 +1,2 @@
-from .enums import DisplayState, AnimationTiming, TAnimationTiming
+from .enums import AnimationTiming, TAnimationTiming
 from .base import Model

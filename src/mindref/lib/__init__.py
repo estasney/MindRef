@@ -1,4 +1,3 @@
-from .models import DisplayState
 from .utils import (
     attrsetter,
     def_cb,

@@ -12,7 +12,6 @@ from kivy.uix.boxlayout import BoxLayout
 
 from mindref.lib.domain.events import (
     AddNoteEvent,
-    BackButtonEvent,
     EditNoteEvent,
     ListViewButtonEvent,
     PaginationEvent,
@@ -108,12 +107,8 @@ class NoteTitleBar(BoxLayout):
                 )
                 return True
             case "back":
-                event = BackButtonEvent(display_state=app.display_state)
-                app.registry.push_event(
-                    BackButtonEvent(display_state=app.display_state)
-                )
-                Logger.info(
-                    f"{type(self).__name__}: handle_select : 'back', pushed: {event!r}"
+                Logger.warning(
+                    f"{type(self).__name__}: handle_select : 'back', pushing TODO"
                 )
                 return True
             case _:

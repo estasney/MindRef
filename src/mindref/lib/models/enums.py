@@ -2,19 +2,6 @@ from enum import Enum
 from typing import Literal
 
 
-class DisplayState(str, Enum):
-    CHOOSE = "choose"
-    DISPLAY = "display"
-    LIST = "list"
-    EDIT = "edit"
-    ADD = "add"
-    ERROR = "error"
-    CATEGORY_EDITOR = "category_editor"
-
-    def __str__(self) -> str:
-        return str.__str__(self)
-
-
 class AnimationTiming(str, Enum):
     in_back = "in_back"
     in_bounce = "in_bounce"

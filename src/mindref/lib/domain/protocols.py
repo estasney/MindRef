@@ -9,7 +9,6 @@ if TYPE_CHECKING:
     from kivy._clock import ClockEvent
     from kivy.uix.screenmanager import ScreenManager
 
-    from mindref.lib import DisplayState
     from mindref.lib.adapters.atlas.fs.fs_atlas_repository import AtlasService
     from mindref.lib.adapters.editor.fs.fs_editor_repository import FileSystemEditor
     from mindref.lib.adapters.notes.android.android_note_repository import (
@@ -34,9 +33,6 @@ class AppRegistryProtocol(Protocol):
     note_categories: list[str]
     note_category: str
     menu_open: bool
-    display_state_last: DisplayState
-    display_state_current: DisplayState
-    display_state: DisplayState
 
     error_message: str
     paginate_interval: int
@@ -50,8 +46,6 @@ class AppRegistryProtocol(Protocol):
     note_files: list[Path]
 
     def dispatch(self, *args, **kwargs) -> None: ...
-
-    def display_state_trigger(self, state: DisplayState) -> None: ...
 
     def select_index(self, value: int) -> None: ...
 
