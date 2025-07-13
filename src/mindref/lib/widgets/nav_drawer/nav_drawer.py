@@ -1,6 +1,6 @@
 from enum import Enum
 from functools import partial
-from typing import TYPE_CHECKING, Any, Literal, NamedTuple
+from typing import TYPE_CHECKING, Literal, NamedTuple
 
 from kivy import Logger
 from kivy.animation import Animation
@@ -362,10 +362,19 @@ class NavDrawer(FloatLayout, DebugLayout, V2RefreshBehavior):
             case OpenState.closing:
                 self.on_open_state(self, OpenState.opening)
 
-    def on_nav_selected(self, _instance: "NavItem"):
+    def handle_nav_selected(self, instance: "NavItem") -> bool:
+        """Before bubbling up, check that the drawer is open"""
+        if self.open_state == OpenState.closed:
+            return True
+        if self.nav_id_selected == instance.nav_id:
+            return True
         Clock.schedule_once(self.update_nav_selection, 0)
         if self.close_on_nav and self.open_state in (OpenState.open, OpenState.opening):
             self.toggle(None)
+
+        return self.dispatch("on_nav_selected", instance)
+
+    def on_nav_selected(self, _instance: "NavItem"):
         return True
 
     def on_search_clear(self, _instance: ThemedIconButton | None):
@@ -396,7 +405,7 @@ class NavDrawer(FloatLayout, DebugLayout, V2RefreshBehavior):
             widget.selected = self.nav_id_selected == widget.nav_id
 
     def add_widget_to_drawer(self, widget: "NavItem"):
-        widget.bind(on_release=lambda _: self.dispatch("on_nav_selected", widget))
+        widget.bind(on_release=lambda _: self.handle_nav_selected(widget))
         self.ids.nav_items.add_widget_to_main(widget)
 
     def clear_widgets_from_drawer(self):
