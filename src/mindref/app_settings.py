@@ -5,7 +5,7 @@ from typing import Any
 from kivy import Logger  # type:ignore
 from kivy.app import App
 from kivy.config import ConfigParser
-from kivy.properties import StringProperty
+from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.settings import Settings
 
 from mindref.lib.domain.settings import app_settings
@@ -13,6 +13,7 @@ from mindref.lib.domain.settings import app_settings
 
 class SettingsMixin(App):
     storage_path = StringProperty()
+    screen_manager: ObjectProperty
 
     def build_settings(self, settings: Settings):
         settings.add_json_panel(self.title, self.config, data=json.dumps(app_settings))
@@ -44,33 +45,23 @@ class SettingsMixin(App):
         match section, key:
             case "Storage", "NOTES_PATH" if not self.platform_android:
                 self.note_service.storage_path = value
-
-                self.registry.push_event(RefreshNotesEvent(on_complete=None))
-            case "Storage", "NOTES_PATH" if self.platform_android:
                 self.registry.set_note_storage_path(value)
+                self.registry.query_all_v2()
 
-                self.registry.push_event(RefreshNotesEvent(on_complete=None))
-            case "Behavior", "NOTE_SORTING":
-                self.note_service.note_sorting = value
+            case "Storage", "NOTES_PATH" if self.platform_android:
+                self.note_service.storage_path = value
+                self.registry.set_note_storage_path(value)
+                self.registry.query_all_v2()
 
-                self.registry.push_event(RefreshNotesEvent(on_complete=None))
-            case "Behavior", "NOTE_SORTING_ASCENDING":
-                self.note_service.note_sorting_ascending = (
-                    value if value in truthy else False
-                )
-
-                self.registry.push_event(RefreshNotesEvent(on_complete=None))
-            case "Behavior", "CATEGORY_SORTING":
-                self.note_service.category_sorting = value
-
-                self.registry.push_event(RefreshNotesEvent(on_complete=None))
-            case "Behavior", "CATEGORY_SORTING_ASCENDING":
-                self.note_service.category_sorting_ascending = (
-                    value if value in truthy else False
-                )
-
-                self.registry.push_event(RefreshNotesEvent(on_complete=None))
             case "Display", "BASE_FONT_SIZE":
                 self.base_font_size = int(value)
             case "Plugins", _:
                 ...
+
+    def open_settings(self, *largs):
+        self.screen_manager.current = "settings_screen"
+        super().open_settings(*largs)
+
+    def close_settings(self, *largs):
+        self.screen_manager.current = "main_screen"
+        super().close_settings(*largs)

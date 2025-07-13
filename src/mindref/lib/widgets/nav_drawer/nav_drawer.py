@@ -52,6 +52,8 @@ TAnimatedProperty = Literal[
 Builder.load_string(
     """
 #:import ThemedMenuButton mindref.lib.widgets.buttons
+#:import OpenMenuButton mindref.lib.widgets.buttons
+#:import OpenSettingsButton mindref.lib.widgets.buttons
 #:import V2RefreshContainer mindref.lib.widgets.refreshable.refresh_container
 #:import DebugGridLayout mindref.lib.widgets.behavior.DebugGridLayout
 <NavDrawer>:
@@ -76,9 +78,21 @@ Builder.load_string(
         id: nav_items
         item_spacing: root.nav_link_spacing
         item_padding: root.nav_link_padding
-        size_hint_y: 0.9
+        size_hint_y: 0.8
         pos_hint: {"top": 0.9}
         opacity: 0
+    BoxLayout:
+        orientation: "horizontal"
+        id: bottom_bar
+        pos_hint: {"bottom": 1}
+        size_hint_y: 0.1
+        padding: [dp(5), 0, 0, 0]
+        OpenSettingsButton:
+            id: settings_button
+            on_release: app.open_settings()
+            pos_hint: root._menu_button_pos_hint_closed
+            width: self.height
+            size_hint: None, None
         
 """
 )

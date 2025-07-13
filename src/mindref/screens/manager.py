@@ -11,6 +11,7 @@ Builder.load_string(
     """
 #:import SlideTransition kivy.uix.screenmanager.SlideTransition
 #:import MainScreen mindref.screens.main_screen
+#:import SettingsScreen mindref.screens.settings_screen
 
 <NoteAppScreenManager>:
     id: screen_manager
@@ -19,6 +20,9 @@ Builder.load_string(
     MainScreen:
         id: main_screen
         name: 'main_screen'
+    SettingsScreen:
+        id: settings_screen
+        name: 'settings_screen'
 """
 )
 
@@ -36,8 +40,9 @@ class NoteAppScreenManager(V2RefreshBehavior, ScreenManager):
         )
 
         if to_children:
-            return self.current_screen.dispatch(
-                "on_refresh", widget, state, to_children
-            )
+            for screen in self.screens:
+                if screen.is_event_type("on_refresh"):
+                    screen.dispatch("on_refresh", widget, state, to_children)
+            return True
 
         return False
