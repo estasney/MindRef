@@ -24,7 +24,6 @@ if TYPE_CHECKING:
     from mindref.lib.domain.events import Event
     from mindref.lib.domain.markdown_note import MarkdownNote, MarkdownNoteDict
     from mindref.lib.domain.protocols import AppRegistryProtocol
-    from mindref.lib.widgets.typeahead.typeahead_dropdown import Suggestion
 
 
 class Registry:
@@ -54,48 +53,6 @@ class Registry:
 
     def push_event(self, event: "Event"):
         self.events.append(event)
-
-    def paginate_note(self, direction: int):
-        """
-        Increment our index, show a note transition and update app.note_data
-
-        Then we emit an on_paginate event
-
-        Parameters
-        ----------
-        direction
-
-        Returns
-        -------
-        """
-
-        def after_note_fetched(note: "MarkdownNote"):
-            """Callback from note_service"""
-            note_data = note.to_dict()
-            Logger.info(
-                f"{type(self).__name__}: after_note_fetched - Set App Note Data to {note!r}"
-            )
-
-        match direction:
-            case 0:
-                return self.set_note_index(self.app.note_service.index.current)
-            case 1:
-                fetch_note = schedulable(
-                    self.app.note_service.get_next_note, on_complete=after_note_fetched
-                )
-                sch_cb(fetch_note)
-                Logger.info(f"{type(self).__name__}: paginate_note - forwards")
-                return None
-            case -1:
-                fetch_note = schedulable(
-                    self.app.note_service.get_previous_note,
-                    on_complete=after_note_fetched,
-                )
-                sch_cb(fetch_note)
-                Logger.info(f"{type(self).__name__}: paginate_note - backwards")
-                return None
-            case _:
-                raise NotImplementedError(f"Pagination of {direction} not supported")
 
     def set_note_index(self, value: int):
         """

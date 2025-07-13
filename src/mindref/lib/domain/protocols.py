@@ -30,13 +30,7 @@ class AppRegistryProtocol(Protocol):
     registry: Registry
 
     platform_android: bool
-    note_categories: list[str]
-    note_category: str
-    menu_open: bool
-
     error_message: str
-    paginate_interval: int
-    paginate_timer: ClockEvent
     screen_manager: ScreenManager
     fonts: dict[str, str]
     base_font_size: int
