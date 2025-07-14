@@ -9,37 +9,6 @@ SETTINGS_BEHAVIOR_PATH = Path(__file__).parent / "settings" / "app_settings.json
 SortOptions = Literal["Creation Date", "Title", "Last Modified Date"]
 
 _common_settings = [
-    {"type": "title", "title": "Behavior"},
-    {
-        "type": "options",
-        "title": "Note Sorting",
-        "desc": "How to sort notes",
-        "section": "Behavior",
-        "key": "NOTE_SORTING",
-        "options": ["Creation Date", "Title", "Last Modified Date"],
-    },
-    {
-        "type": "bool",
-        "title": "Ascending Note Sorting",
-        "desc": "Flips the sorting order of notes",
-        "section": "Behavior",
-        "key": "NOTE_SORTING_ASCENDING",
-    },
-    {
-        "type": "options",
-        "title": "Category Sorting",
-        "desc": "How to sort categories",
-        "section": "Behavior",
-        "key": "CATEGORY_SORTING",
-        "options": ["Creation Date", "Title", "Last Modified Date"],
-    },
-    {
-        "type": "bool",
-        "title": "Ascending Category Sorting",
-        "desc": "Flips the sorting order of categories",
-        "section": "Behavior",
-        "key": "CATEGORY_SORTING_ASCENDING",
-    },
     {"type": "title", "title": "Display"},
     {
         "type": "numeric",

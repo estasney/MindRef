@@ -23,9 +23,6 @@ class SettingsMixin(App):
             case "android":
                 config.setdefaults("Storage", {"NOTES_PATH": None})
                 config.setdefaults("Display", {"BASE_FONT_SIZE": 18})
-                config.setdefaults(
-                    "Plugins", {"SCREEN_SAVER_ENABLE": False, "SCREEN_SAVER_DELAY": 60}
-                )
 
             case _:
                 config.setdefaults(
@@ -33,9 +30,6 @@ class SettingsMixin(App):
                     {"NOTES_PATH": self.user_data_dir},
                 )
                 config.setdefaults("Display", {"BASE_FONT_SIZE": 16})
-                config.setdefaults(
-                    "Plugins", {"SCREEN_SAVER_ENABLE": False, "SCREEN_SAVER_DELAY": 60}
-                )
 
     def on_config_change(
         self, config: ConfigParser, section: str, key: str, value: Any
@@ -55,8 +49,6 @@ class SettingsMixin(App):
 
             case "Display", "BASE_FONT_SIZE":
                 self.base_font_size = int(value)
-            case "Plugins", _:
-                ...
 
     def open_settings(self, *largs):
         self.screen_manager.current = "settings_screen"
