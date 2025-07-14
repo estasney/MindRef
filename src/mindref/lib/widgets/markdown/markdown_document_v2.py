@@ -10,7 +10,6 @@ Builder.load_string(
     orientation: "vertical"
     height: self.minimum_height
     size_hint_y: None
-    size_hint_x: 1
     pos_hint: {"center_x": 0, "y": 0}
     
     

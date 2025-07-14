@@ -5,6 +5,7 @@ import mistune  # type: ignore
 from kivy.clock import Clock
 from kivy.lang import Builder
 from kivy.logger import Logger
+from kivy.metrics import dp
 from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.screenmanager import Screen
 from kivy.uix.scrollview import ScrollView
@@ -42,7 +43,6 @@ Builder.load_string(
             size_hint_y: 1
             size_hint_x: 0.93
             pos_hint: {"x": 0.09, "y": 0}
-            item_padding: [0, 0, dp(16), 0]
         NavDrawer:
             id: nav_drawer
             size_hint_x_closed: 0.07
@@ -126,6 +126,7 @@ class MainScreen(Screen, V2RefreshBehavior):
         text = note_path.read_text(encoding="utf-8")
         document_md = self._markdown_parser(text)
         layout = MarkdownDocumentLayout()
+        layout.padding = [0, 0, dp(32), 0]
 
         self.ids.content.add_widget(layout)
         layout.document = document_md

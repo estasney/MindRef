@@ -38,12 +38,8 @@ _storage_settings_android = [
     },
 ]
 
-match (platform, _SETTINGS_PLUGIN_DATA):
+match platform:
     case ("android", _):
         app_settings = [*_storage_settings_android, *_common_settings]
-    case (_, None):
-        app_settings = [*_storage_settings, *_common_settings]
-    case (_, list()):
-        app_settings = [*_storage_settings, *_common_settings, *_SETTINGS_PLUGIN_DATA]
     case _:
-        raise AssertionError(f"Unhandled settings {platform} {_SETTINGS_PLUGIN_DATA}")
+        app_settings = [*_storage_settings, *_common_settings]

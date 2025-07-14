@@ -5,7 +5,12 @@ from typing import Any
 from kivy import Logger  # type:ignore
 from kivy.app import App
 from kivy.config import ConfigParser
-from kivy.properties import ObjectProperty, StringProperty
+from kivy.properties import (
+    BooleanProperty,
+    ObjectProperty,
+    StringProperty,
+    NumericProperty,
+)
 from kivy.uix.settings import Settings
 
 from mindref.lib.domain.settings import app_settings
@@ -14,6 +19,8 @@ from mindref.lib.domain.settings import app_settings
 class SettingsMixin(App):
     storage_path = StringProperty()
     screen_manager: ObjectProperty
+    platform_android: BooleanProperty
+    base_font_size = NumericProperty()
 
     def build_settings(self, settings: Settings):
         settings.add_json_panel(self.title, self.config, data=json.dumps(app_settings))
