@@ -20,6 +20,7 @@ from kivy.clock import Clock
 from kivy.lang import Builder
 
 from .triggers import trigger_factory
+from .shortcut_lexer import ShortcutLexer
 
 if TYPE_CHECKING:
     from line_profiler import LineProfiler
