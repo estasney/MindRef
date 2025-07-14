@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Literal, NamedTuple
 
 from kivy import Logger
 from kivy.animation import Animation
+from kivy.app import App
 from kivy.clock import Clock
 from kivy.lang import Builder
 from kivy.properties import (
@@ -87,13 +88,7 @@ Builder.load_string(
         pos_hint: {"bottom": 1}
         size_hint_y: 0.1
         padding: [dp(5), 0, 0, 0]
-        OpenSettingsButton:
-            id: settings_button
-            on_release: app.open_settings()
-            pos_hint: root._menu_button_pos_hint_closed
-            width: self.height
-            size_hint: None, None
-        
+
 """
 )
 
@@ -124,6 +119,7 @@ class NavDrawer(FloatLayout, DebugLayout, V2RefreshBehavior):
     )
 
     clear_search_button = ObjectProperty(allownone=True)
+    settings_button = ObjectProperty(allownone=True)
     search_box: SearchBox | None = ObjectProperty(allownone=True)
     search_filter: str = StringProperty("")
 
@@ -239,6 +235,20 @@ class NavDrawer(FloatLayout, DebugLayout, V2RefreshBehavior):
                 ),
             )
             self.ids.top_bar.add_widget(self.clear_search_button)
+        if self.settings_button is None:
+            self.settings_button = ThemedIconButton(
+                icon_code="\ue8b9",
+                size_hint=(None, None),
+                opacity=0,
+                background_color=(0, 0, 0, 0),
+                color=(1.0, 1.0, 1.0, 0.5),
+                pos_hint=self._menu_button_pos_hint_closed,
+            )
+            self.settings_button.bind(
+                height=self.settings_button.setter("width"),
+                on_release=lambda _: App.get_running_app().open_settings(),
+            )
+            self.ids.bottom_bar.add_widget(self.settings_button)
 
     def detach_search_box(self):
         if self.clear_search_button is not None:
@@ -247,6 +257,9 @@ class NavDrawer(FloatLayout, DebugLayout, V2RefreshBehavior):
         if self.search_box is not None:
             self.ids.top_bar.remove_widget(self.search_box)
             self.search_box = None
+        if self.settings_button is not None:
+            self.ids.bottom_bar.remove_widget(self.settings_button)
+            self.settings_button = None
         self.search_filter = ""
 
     def handle_animation_change(
@@ -338,6 +351,7 @@ class NavDrawer(FloatLayout, DebugLayout, V2RefreshBehavior):
         self.open_state = OpenState.open
         self.fade_in_animation.start(self.clear_search_button)
         self.fade_in_animation.start(self.search_box)
+        self.fade_in_animation.start(self.settings_button)
 
     def on_opening(self, _instance, _value):
         self.drawer_close_animation.cancel(self)
@@ -346,6 +360,7 @@ class NavDrawer(FloatLayout, DebugLayout, V2RefreshBehavior):
         self.attach_search_box()
 
         self.fade_out_animation.cancel(self.clear_search_button)
+        self.fade_out_animation.cancel(self.settings_button)
         self.fade_out_animation.start(self.search_box)
         self.fade_in_animation.start(self.ids.nav_items)
         self.drawer_open_animation.start(self)
@@ -355,8 +370,10 @@ class NavDrawer(FloatLayout, DebugLayout, V2RefreshBehavior):
         self.drawer_open_animation.cancel(self)
         self.fade_in_animation.cancel(self.clear_search_button)
         self.fade_in_animation.cancel(self.search_box)
+        self.fade_in_animation.cancel(self.settings_button)
         self.fade_out_animation.start(self.clear_search_button)
         self.fade_out_animation.start(self.search_box)
+        self.fade_out_animation.start(self.settings_button)
         self.fade_out_animation.start(self.ids.nav_items)
         self.drawer_close_animation.start(self)
 
