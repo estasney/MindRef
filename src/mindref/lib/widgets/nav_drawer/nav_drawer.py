@@ -17,6 +17,8 @@ from kivy.properties import (
     StringProperty,
     VariableListProperty,
 )
+from kivy.uix.anchorlayout import AnchorLayout
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 
 from mindref.lib.models import AnimationTiming
@@ -25,9 +27,6 @@ from mindref.lib.widgets.buttons.buttons import ThemedIconButton
 from mindref.lib.widgets.nav_drawer.nav_item import NavItem, NavItemData
 from mindref.lib.widgets.nav_drawer.search_box import SearchBox
 from mindref.lib.widgets.refreshable import V2RefreshBehavior, V2RefreshContainer
-
-if TYPE_CHECKING:
-    from kivy.uix.boxlayout import BoxLayout
 
 
 class OpenState(str, Enum):
@@ -56,7 +55,7 @@ Builder.load_string(
 #:import OpenMenuButton mindref.lib.widgets.buttons
 #:import OpenSettingsButton mindref.lib.widgets.buttons
 #:import V2RefreshContainer mindref.lib.widgets.refreshable.refresh_container
-#:import DebugGridLayout mindref.lib.widgets.behavior.DebugGridLayout
+#:import DebugFloatLayout mindref.lib.widgets.behavior.DebugFloatLayout
 <NavDrawer>:
     id: nav_drawer
     pos_hint: {"left": 0}
@@ -82,9 +81,9 @@ Builder.load_string(
         size_hint_y: 0.8
         pos_hint: {"top": 0.9}
         opacity: 0
-    BoxLayout:
-        orientation: "horizontal"
+    DebugFloatLayout:
         id: bottom_bar
+        debug_layout: False
         pos_hint: {"bottom": 1}
         size_hint_y: 0.1
         padding: [dp(5), 0, 0, 0]
@@ -93,8 +92,135 @@ Builder.load_string(
 )
 
 
+Builder.load_string(
+    """
+<ClearSearchButton@ThemedIconButton>:
+    icon_code: "\ue5cd"
+    size_hint: (None, None)
+    
+    background_color: (0, 0, 0, 0)
+    color: (1.0, 1.0, 1.0, 0.5)
+    pos_hint: {"center_y": 0.5}
+    
+<SettingsButton@ThemedIconButton>:
+    icon_code: "\ue8b8"
+    size_hint: (None, None)
+    background_color: (0,0,0,0)
+    color: (1.0, 1.0, 1.0, 0.5)
+    pos_hint: {"center_y": 0.5}
+
+<NewNoteButton@ThemedIconButton>:
+    icon_code: "\ue89c"
+    size_hint: (None, None)
+    background_color: (0, 0, 0, 0)
+    color: (1.0, 1.0, 1.0)
+    pos_hint: {"center_y": 0.5}
+    opacity: 0
+    
+
+<EditNoteButton@ThemedIconButton>:
+    icon_code: "\uf88c"
+    size_hint: (None, None)
+    background_color: (0, 0, 0, 0)
+    color: (1.0, 1.0, 1.0)
+    pos_hint: {"center_y": 0.5}
+    opacity: 0
+    
+<NoteActionsContainer@BoxLayout>:
+    orientation: "horizontal"
+    pos_hint: {"center_y": 0.5, "right": 1.0}
+    width: self.minimum_width
+    size_hint_x: None
+    opacity: 0
+"""
+)
+
+
+class ClearSearchButton(ThemedIconButton): ...
+
+
+class SettingsButton(ThemedIconButton): ...
+
+
+class NewNoteButton(ThemedIconButton): ...
+
+
+class EditNoteButton(ThemedIconButton): ...
+
+
+class NoteActionsContainer(BoxLayout):
+    new_note_button: NewNoteButton | None
+    edit_note_button: EditNoteButton | None
+    new_note_button = ObjectProperty(allownone=True)
+    edit_note_button = ObjectProperty(allownone=True)
+    nav_id_selected = StringProperty(None, allownone=True)
+    button_opacity = NumericProperty(0)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        Clock.schedule_once(self.attach, 0)
+
+    def on_nav_id_selected(self, _instance, value: str):
+        if value:
+            Clock.schedule_once(self.attach_edit_note_button, 0)
+        else:
+            Clock.schedule_once(self.detach_edit_note_button, 0)
+        return True
+
+    def handle_edit_note(self):
+        if not self.nav_id_selected:
+            Logger.warning("EditNoteButton: No note selected to edit.")
+            return True
+        App.get_running_app().edit_note(self.nav_id_selected)
+        return True
+
+    def attach_new_note_button(self, _dt):
+        if self.new_note_button is None:
+            self.new_note_button = NewNoteButton()
+            self.new_note_button.bind(
+                height=self.new_note_button.setter("width"),
+                on_release=lambda _: App.get_running_app().create_new_note(),
+            )
+            self.bind(button_opacity=self.new_note_button.setter("opacity"))
+            self.add_widget(self.new_note_button)
+
+    def detach_new_note_button(self, _dt):
+        if self.new_note_button is not None:
+            self.remove_widget(self.new_note_button)
+            self.new_note_button = None
+
+    def attach_edit_note_button(self, _dt):
+        if self.edit_note_button is None:
+            self.edit_note_button = EditNoteButton()
+            self.edit_note_button.bind(
+                height=self.edit_note_button.setter("width"),
+                on_release=lambda _: self.handle_edit_note(),
+            )
+            self.bind(button_opacity=self.edit_note_button.setter("opacity"))
+            self.add_widget(self.edit_note_button, index=0)
+
+    def detach_edit_note_button(self, _dt):
+        if self.edit_note_button is not None:
+            self.remove_widget(self.edit_note_button)
+            self.edit_note_button = None
+
+    def attach(self, _dt):
+        Clock.schedule_once(self.attach_new_note_button, 0)
+        if self.nav_id_selected:
+            Clock.schedule_once(self.attach_edit_note_button, 0)
+
+    def detach(self):
+        Clock.schedule_once(self.detach_new_note_button, 0)
+        Clock.schedule_once(self.detach_edit_note_button, 0)
+
+    def on_opacity(self, _instance, value: float):
+        """Update the opacity of the buttons based on the button_opacity property"""
+        self.button_opacity = value / 2
+
+
 class NavDrawerIds(NamedTuple):
     top_bar: "BoxLayout"
+    bottom_bar: "BoxLayout"
     menu_button: "ThemedIconButton"
     nav_items: "V2RefreshContainer"
 
@@ -112,16 +238,17 @@ class NavDrawer(FloatLayout, DebugLayout, V2RefreshBehavior):
     animation_closed_timing = OptionProperty(
         AnimationTiming.in_out_quad, options=[AnimationTiming.__members__.values()]
     )
-
-    animation_close_duration = NumericProperty(0.2)
     open_state = OptionProperty(
         OpenState.closed, options=list(OpenState.__members__.values())
     )
 
-    clear_search_button = ObjectProperty(allownone=True)
-    settings_button = ObjectProperty(allownone=True)
-    search_box: SearchBox | None = ObjectProperty(allownone=True)
-    search_filter: str = StringProperty("")
+    clear_search_button: ClearSearchButton | None
+    settings_button: ThemedIconButton | None
+    search_box: SearchBox | None
+    note_actions_container: NoteActionsContainer | None
+    edit_note_button: ThemedIconButton | None
+    new_note_button: ThemedIconButton | None
+    search_filter: str = StringProperty()
 
     drawer_open_animation: Animation
     drawer_close_animation: Animation
@@ -199,6 +326,12 @@ class NavDrawer(FloatLayout, DebugLayout, V2RefreshBehavior):
         )
         self._search_filter_sch_event = None
         self.trigger_search_filter = Clock.create_trigger(self._dispatch_search_filter)
+        self.clear_search_button = None
+        self.settings_button = None
+        self.search_box = None
+        self.note_actions_container = None
+        self.edit_note_button = None
+        self.new_note_button = None
 
     def open_state_open_cb(self, *args, **kwargs):
         Logger.debug(
@@ -220,14 +353,7 @@ class NavDrawer(FloatLayout, DebugLayout, V2RefreshBehavior):
             self.search_box.bind(text=self.setter("search_filter"))
             self.ids.top_bar.add_widget(self.search_box)
         if self.clear_search_button is None:
-            self.clear_search_button = ThemedIconButton(
-                icon_code="\ue5cd",
-                size_hint=(None, None),
-                opacity=0,
-                background_color=(0, 0, 0, 0),
-                color=(1.0, 1.0, 1.0, 0.5),
-                pos_hint={"center_y": 0.5},
-            )
+            self.clear_search_button = ClearSearchButton()
             self.clear_search_button.bind(
                 height=self.clear_search_button.setter("width"),
                 on_release=lambda _: self.dispatch(
@@ -235,20 +361,25 @@ class NavDrawer(FloatLayout, DebugLayout, V2RefreshBehavior):
                 ),
             )
             self.ids.top_bar.add_widget(self.clear_search_button)
+
+    def attach_settings_button(self):
         if self.settings_button is None:
-            self.settings_button = ThemedIconButton(
-                icon_code="\ue8b9",
-                size_hint=(None, None),
-                opacity=0,
-                background_color=(0, 0, 0, 0),
-                color=(1.0, 1.0, 1.0, 0.5),
-                pos_hint=self._menu_button_pos_hint_closed,
-            )
+            self.settings_button = SettingsButton()
             self.settings_button.bind(
                 height=self.settings_button.setter("width"),
                 on_release=lambda _: App.get_running_app().open_settings(),
             )
             self.ids.bottom_bar.add_widget(self.settings_button)
+
+    def attach_note_actions(self):
+        if self.note_actions_container is None:
+            self.note_actions_container = NoteActionsContainer(
+                nav_id_selected=self.nav_id_selected
+            )
+            self.bind(
+                nav_id_selected=self.note_actions_container.setter("nav_id_selected")
+            )
+            self.ids.bottom_bar.add_widget(self.note_actions_container)
 
     def detach_search_box(self):
         if self.clear_search_button is not None:
@@ -257,10 +388,23 @@ class NavDrawer(FloatLayout, DebugLayout, V2RefreshBehavior):
         if self.search_box is not None:
             self.ids.top_bar.remove_widget(self.search_box)
             self.search_box = None
+        self.search_filter = ""
+
+    def detach_settings_button(self):
         if self.settings_button is not None:
             self.ids.bottom_bar.remove_widget(self.settings_button)
             self.settings_button = None
-        self.search_filter = ""
+
+    def detach_note_actions(self):
+        if self.note_actions_container is not None:
+            self.note_actions_container.detach()
+            self.ids.bottom_bar.remove_widget(self.note_actions_container)
+            self.unbind(
+                nav_id_selected=self.note_actions_container.setter("nav_id_selected")
+            )
+            self.note_actions_container = None
+            self.edit_note_button = None
+            self.new_note_button = None
 
     def handle_animation_change(
         self, property_name: TAnimatedProperty, _instance, value: float
@@ -352,35 +496,46 @@ class NavDrawer(FloatLayout, DebugLayout, V2RefreshBehavior):
         self.fade_in_animation.start(self.clear_search_button)
         self.fade_in_animation.start(self.search_box)
         self.fade_in_animation.start(self.settings_button)
+        self.fade_in_animation.start(self.note_actions_container)
 
     def on_opening(self, _instance, _value):
         self.drawer_close_animation.cancel(self)
-        self.fade_out_animation.cancel(self.ids.nav_items)
+
         self.ids.menu_button.pos_hint = self._menu_button_pos_hint_open
         self.attach_search_box()
+        self.attach_settings_button()
+        self.attach_note_actions()
 
         self.fade_out_animation.cancel(self.clear_search_button)
+        self.fade_out_animation.cancel(self.search_box)
         self.fade_out_animation.cancel(self.settings_button)
-        self.fade_out_animation.start(self.search_box)
+        self.fade_out_animation.cancel(self.note_actions_container)
+        self.fade_out_animation.cancel(self.ids.nav_items)
         self.fade_in_animation.start(self.ids.nav_items)
+
         self.drawer_open_animation.start(self)
 
     def on_closing(self, _instance, _value):
-        self.fade_in_animation.cancel(self.ids.nav_items)
         self.drawer_open_animation.cancel(self)
+
+        self.fade_in_animation.cancel(self.ids.nav_items)
         self.fade_in_animation.cancel(self.clear_search_button)
         self.fade_in_animation.cancel(self.search_box)
         self.fade_in_animation.cancel(self.settings_button)
+        self.fade_in_animation.cancel(self.note_actions_container)
         self.fade_out_animation.start(self.clear_search_button)
         self.fade_out_animation.start(self.search_box)
         self.fade_out_animation.start(self.settings_button)
         self.fade_out_animation.start(self.ids.nav_items)
+        self.fade_out_animation.start(self.note_actions_container)
         self.drawer_close_animation.start(self)
 
     def on_close(self, _instance, _value):
         self.open_state = OpenState.closed
         self.ids.menu_button.pos_hint = self._menu_button_pos_hint_closed
         self.detach_search_box()
+        self.detach_note_actions()
+        self.detach_settings_button()
 
     def toggle(self, _instance: ThemedIconButton | None):
         match self.open_state:
