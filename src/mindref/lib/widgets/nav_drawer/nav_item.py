@@ -10,6 +10,7 @@ from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.widget import Widget
 
+from mindref.app_notes import NoteFile
 from mindref.lib.widgets.behavior import DebugLayout
 
 Builder.load_string(
@@ -81,9 +82,13 @@ class SelectableAnimation(Widget):
 
 @dataclass()
 class NavItemData:
-    text: str
+    display_name: str
     nav_id: str
     selected: bool
+
+    @classmethod
+    def from_note_file(cls, data: "NoteFile", selected: bool) -> "NavItemData":
+        return cls(display_name=data.label, nav_id=data.id, selected=selected)
 
 
 class NavItem(ButtonBehavior, BoxLayout, DebugLayout, SelectableAnimation):

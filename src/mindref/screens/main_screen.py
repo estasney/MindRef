@@ -11,6 +11,7 @@ from kivy.uix.screenmanager import Screen
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.widget import Widget
 
+from mindref.app_notes import NoteFile
 from mindref.lib import get_app
 from mindref.lib.domain.parser.kbd_plugin import plugin_kbd
 from mindref.lib.widgets.markdown.markdown_document_v2 import MarkdownDocumentLayout
@@ -96,7 +97,7 @@ class MainScreen(Screen, V2RefreshBehavior):
 
         if self.selected_note:
             # Find the note file path
-            note_path = self._find_note_path(self.selected_note)
+            note_path = self._find_note_file(self.selected_note)
             if note_path:
                 # Read and render the note
                 self.read_and_render_note(note_path)
@@ -109,37 +110,28 @@ class MainScreen(Screen, V2RefreshBehavior):
             # Clear the scroller when no note is selected
             self.ids.content.clear_widgets()
 
-    def _find_note_path(self, note_id: str) -> Path | None:
+    def _find_note_file(self, note_id: str) -> NoteFile | None:
         return next(
-            (
-                note_path
-                for note_path in self.app.note_files
-                if note_path.stem == note_id
-            ),
+            (note_path for note_path in self.app.note_files if note_path.id == note_id),
             None,
         )
 
-    def read_and_render_note(self, note_path: Path):
+    def read_and_render_note(self, note_file: NoteFile):
         """Read a markdown file, parse it, and render it in the scroller."""
 
         self.ids.content.clear_widgets()
-        text = note_path.read_text(encoding="utf-8")
+        text = note_file.read_text()
         document_md = self._markdown_parser(text)
         layout = MarkdownDocumentLayout()
         layout.padding = [0, 0, dp(32), 0]
-
         self.ids.content.add_widget(layout)
         layout.document = document_md
 
-    def handle_note_files(self, _, value: list[Path]):
+    def handle_note_files(self, _, value: list[NoteFile]):
         from mindref.lib.widgets.nav_drawer.nav_item import NavItemData
 
         nav_data_items = [
-            NavItemData(
-                text=str(note.stem),
-                nav_id=str(note.stem),
-                selected=self.selected_note == str(note.stem),
-            )
+            NavItemData.from_note_file(note, selected=self.selected_note == note.id)
             for note in value
         ]
         self.ids.nav_drawer.nav_data_items = nav_data_items

@@ -142,7 +142,9 @@ class Registry:
 
         def set_notes(notes: list["Path"]):
             Logger.info("Query all complete")
-            self.app.note_files = notes
+            from mindref.app_notes import NoteFile
+
+            self.app.note_files = [NoteFile.from_path(n) for n in notes]
             self.app.screen_manager.dispatch(
                 "on_refresh", self.app, False, to_children=True
             )

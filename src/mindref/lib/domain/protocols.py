@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, NoReturn, Protocol, TypeVar, Literal
+from typing import TYPE_CHECKING, Literal, NoReturn, Protocol, TypeVar
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from kivy._clock import ClockEvent
     from kivy.uix.screenmanager import ScreenManager
 
+    from mindref.app_notes import NoteFile
     from mindref.lib.adapters.atlas.fs.fs_atlas_repository import AtlasService
     from mindref.lib.adapters.editor.fs.fs_editor_repository import FileSystemEditor
     from mindref.lib.adapters.notes.android.android_note_repository import (
@@ -17,7 +17,6 @@ if TYPE_CHECKING:
     from mindref.lib.adapters.notes.fs.fs_note_repository import (
         FileSystemNoteRepository,
     )
-    from mindref.lib.plugins import PluginManager
     from mindref.lib.service.registry import Registry
     from mindref.lib.widgets import MindRefSettingsAndroid, MindRefSettingsNative
 
@@ -26,7 +25,6 @@ class AppRegistryProtocol(Protocol):
     atlas_service: AtlasService
     note_service: FileSystemNoteRepository | AndroidNoteRepository
     editor_service: FileSystemEditor
-    plugin_manager: PluginManager
     registry: Registry
 
     platform_android: bool
@@ -37,7 +35,7 @@ class AppRegistryProtocol(Protocol):
     colors: dict[str, tuple[float, float, float] | tuple[float, float, float, float]]
     settings_cls: str | MindRefSettingsAndroid | MindRefSettingsNative
     user_data_dir: str
-    note_files: list[Path]
+    note_files: list[NoteFile]
 
     def dispatch(self, *args, **kwargs) -> None: ...
 

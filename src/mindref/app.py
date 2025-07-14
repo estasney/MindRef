@@ -32,9 +32,10 @@ from mindref.lib.service import Registry
 from mindref.lib.utils import get_app
 from mindref.screens import NoteAppScreenManager
 from mindref.app_theme import ThemedMixin
+from mindref.app_notes import AppNotesMixin
 
 
-class MindRefApp(ThemedMixin, SettingsMixin, App):
+class MindRefApp(ThemedMixin, SettingsMixin, AppNotesMixin, App):
     title = "MindRef"
     atlas_service = AtlasService(storage_path=Path(__file__).parent / "static")
     note_service = NoteRepositoryFactory.get_repo()(get_app=get_app)
@@ -42,7 +43,6 @@ class MindRefApp(ThemedMixin, SettingsMixin, App):
     platform_android = BooleanProperty(defaultvalue=False)
     registry = Registry()
 
-    note_files = ListProperty()
     editor_note = ObjectProperty(allownone=True)
 
     error_message = StringProperty()

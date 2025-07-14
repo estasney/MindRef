@@ -608,7 +608,9 @@ class NavDrawer(FloatLayout, DebugLayout, V2RefreshBehavior):
             else list(filter(lambda i: needle in i.text.lower(), items))
         )
         for item in displayed_items:
-            widget = NavItem(text=item.text, nav_id=item.nav_id, selected=item.selected)
+            widget = NavItem(
+                text=item.display_name, nav_id=item.nav_id, selected=item.selected
+            )
             self.add_widget_to_drawer(widget)
 
     def on_nav_data_items(self, _widget, value):
