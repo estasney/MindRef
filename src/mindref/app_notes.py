@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 from pathlib import Path
 
+from kivy import Logger
 from kivy.app import App
 from kivy.properties import ListProperty
+from kivy.uix.screenmanager import ScreenManager
 
 
 @dataclass
@@ -28,5 +30,17 @@ class NoteFile:
 
 class AppNotesMixin(App):
     note_files: list[NoteFile] = ListProperty()
+    screen_manager: ScreenManager
 
-    def edit_note(self): ...
+    def edit_note(self, note_id: str):
+        matched_note = next(
+            (note for note in self.note_files if note.id == note_id), None
+        )
+        if not matched_note:
+            Logger.error(
+                f"[{self.__class__.__name__}] Note with ID {note_id} not found."
+            )
+            return
+        Logger.info(
+            f"[{self.__class__.__name__}] Editing note: {matched_note.file_path}"
+        )
