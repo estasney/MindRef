@@ -95,6 +95,20 @@ class ThemedLabelButton(ThemedButton):
         super().__init__(**kwargs)
 
 
+class ContainedLabelButton(ThemedLabelButton):
+    """Renders a button without a background, but draws a rectangle border"""
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
+class LabelButton(ThemedLabelButton):
+    """Renders the most basic"""
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
 class ThemedIconButton(ThemedLabelButton):
     """Extends ThemedLabelButton by replacing BaseLabel with IconLabel"""
 

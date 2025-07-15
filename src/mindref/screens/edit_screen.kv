@@ -1,6 +1,9 @@
 #:import DebugBoxLayout mindref.lib.widgets.behavior.DebugBoxLayout
 #:import DebugFloatLayout mindref.lib.widgets.behavior.DebugFloatLayout
 #:import ThemedLabelButton mindref.lib.widgets.buttons.buttons.ThemedLabelButton
+#:import ContainedLabelButton mindref.lib.widgets.buttons.buttons.ContainedLabelButton
+#:import LabelButton mindref.lib.widgets.buttons.buttons.LabelButton
+
  
 <EditScreen>:
     app: app
@@ -69,25 +72,15 @@
                 pos_hint: {"right": 1, "y": 0}
                 padding: [dp(8), dp(8), dp(8), dp(8)]
                 spacing: dp(8)
-                ThemedLabelButton:
-                    enable_ripple_effect: False
+                LabelButton:
                     size_hint: (None, None)
-                    background_color: (0,0,0,0)
                     pos_hint: {"center_y": 0.5}
                     color: app.colors['Warn']
-                    
-                    
                     text: "Cancel"
                     on_release: root.app.cancel_editing_note()
-                    
-                ThemedLabelButton:
-                    enable_ripple_effect: False
+                LabelButton:
                     size_hint: (None, None)
-                    background_color: (0,0,0,0)
-                    color: app.colors['Accent-One']
                     pos_hint: {"center_y": 0.5}
-                    
-                    
                     text: "Save"
                     on_release: root.app.save_editing_note()
             

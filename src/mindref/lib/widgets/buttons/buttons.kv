@@ -19,12 +19,7 @@
             size: self.size
             source: self.state_image if not self.disabled else self.disabled_image
 
-<ThemedSecondaryButton@ThemedButton>:
-    background_normal: app.atlas_service.uri_for("bg_border", atlas_name="textures")
-    background_down: app.atlas_service.uri_for("bg_border", atlas_name="textures")
-    background_disabled: app.atlas_service.uri_for("bg_border", atlas_name="textures")
-
-<ThemedLabelButton>:
+<ThemedLabelButton@ThemedButton>:
     text: ''
     size_hint_y: None
     height: self.minimum_height
@@ -41,11 +36,26 @@
         size_hint_y: None
         height: self.texture_size[1] * 2
         color: root.color
+        
+<ContainedLabelButton@ThemedLabelButton>:
+    disable_ripple_effect: True
+    background_color: (0,0,0,0)
+    canvas:
+        Color:
+            rgba: self.color       
+        Line:
+            rounded_rectangle: self.x, self.y, self.width, self.height, dp(8)
+            width: dp(1)
+            
+<LabelButton@ThemedLabelButton>:
+    disable_ripple_effect: True
+    background_color: (0,0,0,0)            
+        
 
 
-<ThemedIconButton>:
+<ThemedIconButton@ThemedLabelButton>:
     icon_code: ''
-    icon_size: app.base_font_size + sp(10)
+    icon_size: app.base_font_size + dp(10)
     orientation: 'vertical'
     size_hint_y: None
     height: self.minimum_height
@@ -68,16 +78,6 @@
         size_hint: None, None
         pos_hint: {"center_x": .5, "center_y": .5}
         color: root.color
-
-<XButton@ThemedIconButton>:
-    icon_code: '\ue5cd'
-    border: sp(2)
-    pos_hint: {"x": 1}
-    size_hint_x: None
-    size: self.minimum_size
-    spacing: dp(1)
-    padding: [sp(6), sp(2), sp(6), sp(2)]
-    on_release: app.menu_open = not app.menu_open
 
 <-ImageButton>:
     state_image: self.background_normal if self.state == 'normal' else self.background_down
