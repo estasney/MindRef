@@ -6,7 +6,7 @@ from kivy.clock import Clock
 from kivy.lang import Builder
 from kivy.logger import Logger
 from kivy.metrics import dp
-from kivy.properties import ObjectProperty, StringProperty
+from kivy.properties import ListProperty, ObjectProperty, StringProperty
 from kivy.uix.screenmanager import Screen
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.widget import Widget
@@ -32,6 +32,7 @@ Builder.load_string(
 
 <MainScreen>:
     app: app
+    note_files: app.note_files
     canvas:
         Color:
             rgba: app.colors['Gray-900']
@@ -87,28 +88,28 @@ class MainScreen(Screen, V2RefreshBehavior):
 
     def on_refresh(self, widget: "Widget", state: bool, to_children: bool) -> bool:
         if not to_children:
+            self.selected_note = None
             self.app.registry.query_all_v2()
             return True
         return super().on_refresh(widget, state, to_children)
+
+    def on_selected_note(self, _instance, value: str | None) -> bool:
+        if not value:
+            self.ids.content.clear_widgets()
+            return True
+        note_path = self._find_note_file(value)
+        if note_path:
+            self.read_and_render_note(note_path)
+            return True
+        Logger.error(f"{type(self).__name__} : Note file not found for ID {value}")
+        self.ids.content.clear_widgets()
+        return True
 
     def handle_nav_click(self, _dt, instance: "NavItem"):
         nav_id = instance.nav_id
         self.selected_note = nav_id if not instance.selected else None
 
-        if self.selected_note:
-            # Find the note file path
-            note_path = self._find_note_file(self.selected_note)
-            if note_path:
-                # Read and render the note
-                self.read_and_render_note(note_path)
-            else:
-                Logger.error(
-                    f"{type(self).__name__} : Note file not found for ID {self.selected_note}"
-                )
-                self.ids.content.clear_widgets()
-        else:
-            # Clear the scroller when no note is selected
-            self.ids.content.clear_widgets()
+        return True
 
     def _find_note_file(self, note_id: str) -> NoteFile | None:
         return next(
@@ -128,6 +129,10 @@ class MainScreen(Screen, V2RefreshBehavior):
         layout.document = document_md
 
     def handle_note_files(self, _, value: list[NoteFile]):
+        Logger.info(
+            f"{type(self).__name__} : handle_note_files - {len(value)} note files found."
+        )
+        self.selected_note = None
         from mindref.lib.widgets.nav_drawer.nav_item import NavItemData
 
         nav_data_items = [

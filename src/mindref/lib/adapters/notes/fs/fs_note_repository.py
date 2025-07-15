@@ -52,7 +52,13 @@ class FileSystemNoteRepository(AbstractNoteRepository):
         """
         Recursively scan our storage_path for valid note file paths
         """
-        self.note_files = [f for f in self.storage_path.rglob("*.md") if f.is_file()]
+        note_files = (f for f in self.storage_path.rglob("**/*.md") if f.is_file())
+
+        # Newest first
+        self.note_files = sorted(
+            note_files, key=lambda f: f.stat().st_mtime, reverse=True
+        )
+
         if on_complete:
             on_complete(self.note_files)
 

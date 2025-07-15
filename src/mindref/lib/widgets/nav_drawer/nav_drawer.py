@@ -257,7 +257,7 @@ class NavDrawer(FloatLayout, DebugLayout, V2RefreshBehavior):
 
     nav_link_spacing = VariableListProperty([0, 0], length=2)
     nav_link_padding = VariableListProperty([0, 0, 0, 0], length=4)
-    nav_data_items: list[NavItemData] = ListProperty([])
+    nav_data_items: list[NavItemData] = ListProperty([], force_dispatch=True)
     nav_id_selected = StringProperty(None, allownone=True)
     close_on_nav = BooleanProperty(True)
 
@@ -350,6 +350,7 @@ class NavDrawer(FloatLayout, DebugLayout, V2RefreshBehavior):
     def attach_search_box(self):
         if self.search_box is None:
             self.search_box = SearchBox(pos_hint={"center_y": 0.5}, hint_text="Search")
+            self.search_box.text = self.search_filter
             self.search_box.bind(text=self.setter("search_filter"))
             self.ids.top_bar.add_widget(self.search_box)
         if self.clear_search_button is None:
@@ -388,7 +389,6 @@ class NavDrawer(FloatLayout, DebugLayout, V2RefreshBehavior):
         if self.search_box is not None:
             self.ids.top_bar.remove_widget(self.search_box)
             self.search_box = None
-        self.search_filter = ""
 
     def detach_settings_button(self):
         if self.settings_button is not None:
@@ -594,9 +594,6 @@ class NavDrawer(FloatLayout, DebugLayout, V2RefreshBehavior):
         widget.bind(on_release=lambda _: self.handle_nav_selected(widget))
         self.ids.nav_items.add_widget_to_main(widget)
 
-    def clear_widgets_from_drawer(self):
-        self.ids.nav_items.clear_widgets_from_main()
-
     def render_nav_items(self, *_args):
         """On a change, re-render all the nav items"""
         self.ids.nav_items.clear_widgets_from_main()
@@ -614,4 +611,5 @@ class NavDrawer(FloatLayout, DebugLayout, V2RefreshBehavior):
             self.add_widget_to_drawer(widget)
 
     def on_nav_data_items(self, _widget, value):
+        self.nav_id_selected = None
         self.render_nav_items()

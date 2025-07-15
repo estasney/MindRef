@@ -86,5 +86,5 @@
                     size_hint: (None, None)
                     pos_hint: {"center_y": 0.5}
                     text: "Save"
-                    on_release: root.app.save_editing_note()
+                    on_release: app.save_edit_note(code_input.text)
             

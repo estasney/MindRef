@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from kivy import Logger
 from kivy.app import App
-from kivy.properties import ListProperty, ObjectProperty
+from kivy.properties import ListProperty, ObjectProperty, Property
 
 if TYPE_CHECKING:
     from mindref.screens.manager import NoteAppScreenManager
@@ -32,7 +32,8 @@ class NoteFile:
 
 
 class AppNotesMixin(App):
-    note_files: list[NoteFile] = ListProperty()
+    note_files: list[NoteFile] = ListProperty(force_dispatch=True)
+
     editing_note: NoteFile | None = ObjectProperty(allownone=True)
     screen_manager: "NoteAppScreenManager"
 
@@ -52,8 +53,23 @@ class AppNotesMixin(App):
         self.screen_manager.current = "edit_screen"
 
     def cancel_edit_note(self):
-        Logger.info(
-            f"[{self.__class__.__name__}] Canceling edit for note: {self.editing_note}"
-        )
         self.screen_manager.current = "main_screen"
         self.editing_note = None
+
+    def on_note_files(self, _instance, value: list[NoteFile]):
+        Logger.info(
+            f"[{self.__class__.__name__}] Note files updated: {len(self.note_files)} notes found."
+        )
+
+    def save_edit_note(self, text: str):
+        if not self.editing_note:
+            Logger.error(
+                f"[{self.__class__.__name__}] No note is currently being edited."
+            )
+            return
+        Logger.info(
+            f"[{self.__class__.__name__}] Saving changes to note: {self.editing_note.file_path}"
+        )
+        self.editing_note.file_path.write_text(text)
+        self.registry.query_all_v2()
+        self.cancel_edit_note()

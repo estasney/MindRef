@@ -1,7 +1,6 @@
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
-from time import sleep
 from typing import TYPE_CHECKING, Literal, Optional
 
 from kivy import Logger
@@ -144,7 +143,9 @@ class Registry:
             Logger.info("Query all complete")
             from mindref.app_notes import NoteFile
 
-            self.app.note_files = [NoteFile.from_path(n) for n in notes]
+            note_files = [NoteFile.from_path(n) for n in notes]
+
+            self.app.note_files = note_files
             self.app.screen_manager.dispatch(
                 "on_refresh", self.app, False, to_children=True
             )
