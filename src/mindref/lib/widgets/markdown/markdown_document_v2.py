@@ -2,6 +2,7 @@ from kivy.lang import Builder
 from kivy.properties import BooleanProperty, ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
 
+from mindref.lib.widgets.behavior import DebugBoxLayout
 from mindref.lib.widgets.markdown.markdown_widget_parser import MarkdownWidgetParser
 
 Builder.load_string(
@@ -17,7 +18,7 @@ Builder.load_string(
 )
 
 
-class MarkdownDocumentLayout(BoxLayout):
+class MarkdownDocumentLayout(DebugBoxLayout):
     """
     A layout for displaying markdown content.
 
@@ -25,7 +26,6 @@ class MarkdownDocumentLayout(BoxLayout):
     It uses a GridLayout to arrange the content vertically.
     """
 
-    debug_layout = BooleanProperty()
     document = ObjectProperty()
     """
     The GridLayout that holds the markdown content.
