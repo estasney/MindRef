@@ -1,15 +1,6 @@
 #:import seps mindref.lib.widgets.separator
 #:import style mindref.lib.widgets.style
-
-<PrimaryVSep@VSeparator>:
-    color: app.colors['Primary']
-    width: dp(2)
-
-<PrimaryHSep@HSeparator>:
-    color: app.colors['Primary']
-    height: dp(2)
-
-<-ThemedButton>:
+<ThemedButton>:
     background_normal: app.atlas_service.uri_for("bg_normal", atlas_name="textures") if max(self.border) > 0 else app.atlas_service.uri_for("bg_normal_nb", atlas_name="textures")
     background_down: app.atlas_service.uri_for("bg_down", atlas_name="textures") if max(self.border) > 0 else app.atlas_service.uri_for("bg_down_nb", atlas_name="textures")
     background_disabled: app.atlas_service.uri_for("bg_disabled", atlas_name="textures") if max(self.border) > 0 else app.atlas_service.uri_for("bg_disabled_nb", atlas_name="textures")
@@ -49,23 +40,8 @@
         text: root.text
         size_hint_y: None
         height: self.texture_size[1] * 2
+        color: root.color
 
-<ThemedSecondaryLabelButton@ThemedSecondaryButton>:
-    text: ''
-    size_hint_y: None
-    height: self.minimum_height
-    canvas:
-        Color:
-            rgba: self.background_color
-        BorderImage:
-            border:  self.border
-            pos: self.pos
-            size: self.size
-            source: self.state_image if not root.disabled else self.disabled_image
-    BaseLabel:
-        text: root.text
-        size_hint_y: None
-        height: self.texture_size[1] * 2
 
 <ThemedIconButton>:
     icon_code: ''

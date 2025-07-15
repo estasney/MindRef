@@ -36,5 +36,4 @@ try:
 except Exception:  # pragma: no cover
     pass
 
-
 __all__ = ["ShortcutLexer"]

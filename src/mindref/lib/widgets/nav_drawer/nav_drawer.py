@@ -605,7 +605,7 @@ class NavDrawer(FloatLayout, DebugLayout, V2RefreshBehavior):
         displayed_items = (
             items
             if not needle
-            else list(filter(lambda i: needle in i.text.lower(), items))
+            else list(filter(lambda i: needle in i.display_name.lower(), items))
         )
         for item in displayed_items:
             widget = NavItem(

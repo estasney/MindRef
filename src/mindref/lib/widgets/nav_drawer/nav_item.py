@@ -13,8 +13,8 @@ from kivy.uix.widget import Widget
 from mindref.app_notes import NoteFile
 from mindref.lib.widgets.behavior import DebugLayout
 
-Builder.load_string(
-    """
+Builder.load_string("""
+
 #:import Label kivy.uix.label.Label
 <NavItem>:
     debug_layout: False
@@ -29,8 +29,8 @@ Builder.load_string(
         font_size: app.base_font_size
         halign: 'center'
         valign: 'middle'
-"""
-)
+
+""")
 
 
 class SelectableAnimation(Widget):

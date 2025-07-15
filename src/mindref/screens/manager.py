@@ -1,3 +1,5 @@
+from typing import Literal
+
 from kivy import Logger
 from kivy.lang import Builder
 from kivy.properties import ObjectProperty
@@ -12,6 +14,7 @@ Builder.load_string(
 #:import SlideTransition kivy.uix.screenmanager.SlideTransition
 #:import MainScreen mindref.screens.main_screen
 #:import SettingsScreen mindref.screens.settings_screen
+#:import EditScreen mindref.screens.edit_screen
 
 <NoteAppScreenManager>:
     id: screen_manager
@@ -20,15 +23,21 @@ Builder.load_string(
     MainScreen:
         id: main_screen
         name: 'main_screen'
+    EditScreen:
+        id: edit_screen
+        name: 'edit_screen'
     SettingsScreen:
         id: settings_screen
         name: 'settings_screen'
 """
 )
 
+TScreenNames = Literal["main_screen", "edit_screen", "settings_screen"]
+
 
 class NoteAppScreenManager(V2RefreshBehavior, ScreenManager):
     app = ObjectProperty()
+    current: TScreenNames
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

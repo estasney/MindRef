@@ -1,10 +1,13 @@
 from dataclasses import dataclass
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from kivy import Logger
 from kivy.app import App
-from kivy.properties import ListProperty
-from kivy.uix.screenmanager import ScreenManager
+from kivy.properties import ListProperty, ObjectProperty
+
+if TYPE_CHECKING:
+    from mindref.screens.manager import NoteAppScreenManager
 
 
 @dataclass
@@ -30,7 +33,8 @@ class NoteFile:
 
 class AppNotesMixin(App):
     note_files: list[NoteFile] = ListProperty()
-    screen_manager: ScreenManager
+    editing_note: NoteFile | None = ObjectProperty(allownone=True)
+    screen_manager: "NoteAppScreenManager"
 
     def edit_note(self, note_id: str):
         matched_note = next(
@@ -44,3 +48,5 @@ class AppNotesMixin(App):
         Logger.info(
             f"[{self.__class__.__name__}] Editing note: {matched_note.file_path}"
         )
+        self.editing_note = matched_note
+        self.screen_manager.current = "edit_screen"
