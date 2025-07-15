@@ -1,11 +1,10 @@
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING, NamedTuple, Optional
 
 from mindref.lib import import_kv
 
 import_kv(__file__)
 
 from kivy.clock import Clock
-from kivy.lang import Builder
 from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import Screen
 from pygments.lexers import get_lexer_by_name
@@ -39,7 +38,11 @@ class EditScreen(Screen):
     def _bind_editing_note(self, _dt):
         self.app.bind(editing_note=self.setter("editing_note"))
 
-    def on_editing_note(self, _instance, value: "NoteFile"):
-        text = value.read_text()
+    def on_editing_note(self, _instance, value: Optional["NoteFile"]):
         editor = self.ids.code_input
+        if not value:
+            editor.text = ""
+            return True
+        text = value.read_text()
         editor.text = text
+        return True

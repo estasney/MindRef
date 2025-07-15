@@ -50,3 +50,10 @@ class AppNotesMixin(App):
         )
         self.editing_note = matched_note
         self.screen_manager.current = "edit_screen"
+
+    def cancel_edit_note(self):
+        Logger.info(
+            f"[{self.__class__.__name__}] Canceling edit for note: {self.editing_note}"
+        )
+        self.screen_manager.current = "main_screen"
+        self.editing_note = None
