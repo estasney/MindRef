@@ -12,8 +12,6 @@ Builder.load_string(
     height: self.minimum_height
     size_hint_y: None
     pos_hint: {"center_x": 0, "y": 0}
-    
-    
 """
 )
 
@@ -27,9 +25,6 @@ class MarkdownDocumentLayout(DebugBoxLayout):
     """
 
     document = ObjectProperty()
-    """
-    The GridLayout that holds the markdown content.
-    """
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -38,6 +33,7 @@ class MarkdownDocumentLayout(DebugBoxLayout):
         _instance.bind(width=self.setter("width"))
 
     def on_document(self, _instance, value):
+        self.clear_widgets()
         for child in value:
             parser = MarkdownWidgetParser()
             child_result = parser.parse(child)

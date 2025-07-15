@@ -4,6 +4,7 @@
 #:import ContainedLabelButton mindref.lib.widgets.buttons.buttons.ContainedLabelButton
 #:import LabelButton mindref.lib.widgets.buttons.buttons.LabelButton
 #:import HSeparator mindref.lib.widgets.separator.HSeparator
+#:import CancelEditButton mindref.screens.edit_screen.CancelEditButton
 
  
 <EditScreen>:
@@ -76,12 +77,12 @@
                 pos_hint: {"right": 1, "y": 0}
                 padding: [dp(8), dp(8), dp(8), dp(8)]
                 spacing: dp(8)
-                LabelButton:
+                CancelEditButton:
                     size_hint: (None, None)
                     pos_hint: {"center_y": 0.5}
                     color: app.colors['Warn']
                     text: "Cancel"
-                    on_release: app.cancel_edit_note()
+                    on_release: self.mutation()
                 LabelButton:
                     size_hint: (None, None)
                     pos_hint: {"center_y": 0.5}
