@@ -1,11 +1,19 @@
 import threading
 from collections.abc import Callable
-from typing import Generic
+from typing import Generic, Literal
 
 from kivy import Logger
 from kivy.clock import Clock, mainthread
 from kivy.event import EventDispatcher
+from kivy.properties import (
+    AliasProperty,
+    BooleanProperty,
+    OptionProperty,
+    StringProperty,
+)
 from typing_extensions import ParamSpec, TypeVar
+
+from mindref.lib.models import MutationStatus
 
 P = ParamSpec("P")
 R = TypeVar("R")
@@ -13,6 +21,11 @@ TFn = Callable[P, R]
 
 
 class Mutation(EventDispatcher, Generic[R]):
+    status: MutationStatus = OptionProperty(
+        MutationStatus.idle, options=MutationStatus.__members__.values()
+    )
+    error: str = StringProperty()
+
     __events__ = ("on_mutate", "on_resolved", "on_error", "on_success")
     _fn: TFn
 
@@ -21,41 +34,44 @@ class Mutation(EventDispatcher, Generic[R]):
         self._fn = fn
 
     def __call__(self, *args: P.args, **kwargs: P.kwargs) -> None:
-        """Start the mutation."""
-        Logger.info(
-            f"{type(self).__name__}: __call__ - starting mutation with args: {args}, kwargs: {kwargs}"
-        )
-        # 1. tell the UI were starting
+        self.reset()
         Clock.schedule_once(lambda *_: self.dispatch("on_mutate"))
+        Clock.schedule_once(lambda *_: self._run(*args, **kwargs))
 
-        # 2. do the heavy work off the main thread
-        threading.Thread(
-            target=self._run, args=args, kwargs=kwargs, daemon=True
-        ).start()
+    def reset(self, *_):
+        """Reset the mutation to its initial state."""
+        self.status = MutationStatus.idle
+        self.error = ""
+
+    def _get_is_mutating(self):
+        return self.status == MutationStatus.pending
+
+    is_mutating: bool = AliasProperty(_get_is_mutating, rebind=True)
 
     def on_mutate(self, *_args) -> bool:
-        """Fired on the main thread *before* work starts."""
-        return False
+        self.status = MutationStatus.pending
+        return True
 
     def on_success(self, *, result: R) -> bool:
         """Fired on the main thread when work finishes successfully."""
-        return False
+        self.error = ""
+        self.status = MutationStatus.success
+        return True
 
     def on_resolved(self, *_args) -> bool:
-        """'Final' event fired on the main thread after work is done."""
-        return False
+        """Dispatched regardless of error or success"""
+        return True
 
     def on_error(self, *, err: Exception) -> bool:
-        """Fired on the main thread if the work raises."""
-        return False
+        self.status = MutationStatus.error
+        self.error = str(err)
+        Logger.error(f"{type(self).__name__}: on_error - {self.error}")
+        return True
 
-    @mainthread
     def _run(self, *args: P.args, **kwargs: P.kwargs) -> None:
-        """Workhorse running in a background thread."""
-        Logger.info(f"{type(self).__name__}: _run - running from thread")
         try:
             result: R = self._fn(*args, **kwargs)
-            Logger.info(
+            Logger.debug(
                 f"{type(self).__name__}: _run - mutation completed successfully with result: {result}"
             )
         except Exception as e:
@@ -70,4 +86,5 @@ class Mutation(EventDispatcher, Generic[R]):
             Clock.schedule_once(
                 lambda _dt, res=result: self.dispatch("on_success", result=res)
             )
+        finally:
             Clock.schedule_once(lambda _dt: self.dispatch("on_resolved"))

@@ -2,6 +2,11 @@ from enum import Enum
 from typing import Literal
 
 
+class StrEnum(str, Enum):
+    def __str__(self) -> str:
+        return str.__str__(self)
+
+
 class AnimationTiming(str, Enum):
     in_back = "in_back"
     in_bounce = "in_bounce"
@@ -71,3 +76,15 @@ AnimationTimingLit = Literal[
 ]
 
 TAnimationTiming = AnimationTiming | AnimationTimingLit
+
+
+class MutationStatus(StrEnum):
+    idle = "idle"
+    pending = "pending"
+    error = "error"
+    success = "success"
+
+
+TMutationStatusLit = Literal["idle", "pending", "error", "success"]
+
+TMutationStatus = MutationStatus | TMutationStatusLit

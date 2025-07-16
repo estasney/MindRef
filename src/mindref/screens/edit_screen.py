@@ -1,15 +1,13 @@
 from typing import TYPE_CHECKING, NamedTuple, Optional
 
-from kivy import Logger
 from kivy.clock import Clock
 from kivy.lang import Builder
-from kivy.properties import ObjectProperty
+from kivy.properties import BooleanProperty, ObjectProperty
 from kivy.uix.screenmanager import Screen
 from pygments.lexers import get_lexer_by_name
 
-from mindref.lib import get_app
 from mindref.lib.mutation import Mutation
-from mindref.lib.widgets.buttons.buttons import LabelButton
+from mindref.lib.widgets.buttons.buttons import LabelButton, LoadingButtonMixin
 
 if TYPE_CHECKING:
     from kivy.uix.boxlayout import BoxLayout
@@ -26,9 +24,8 @@ Builder.load_string("""
 #:import ContainedLabelButton mindref.lib.widgets.buttons.buttons.ContainedLabelButton
 #:import LabelButton mindref.lib.widgets.buttons.buttons.LabelButton
 #:import HSeparator mindref.lib.widgets.separator.HSeparator
+#:import LinearProgress mindref.lib.widgets.progress.LinearProgress
 
-
- 
 <EditScreen>:
     app: app
     canvas.before:
@@ -77,6 +74,11 @@ Builder.load_string("""
             style_name: 'github-dark'
             font_family: app.fonts['mono']
             font_size: app.base_font_size
+        LinearProgress:
+            id: progress_bar
+            size_hint_y: None
+            height: dp(4)
+            animated: root.is_loading
         DebugFloatLayout:
             debug_layout: False
             id: bottom_bar
@@ -100,22 +102,29 @@ Builder.load_string("""
                 padding: [dp(8), dp(8), dp(8), dp(8)]
                 spacing: dp(8)
                 CancelEditButton:
+                    id: cancel_button
+                    root: root 
+                    app: app
                     size_hint: (None, None)
                     pos_hint: {"center_y": 0.5}
                     color: app.colors['Warn']
                     text: "Cancel"
                     on_release: self.mutation()
                 SaveEditButton:
+                    id: save_button
+                    root: root
+                    app: app
                     size_hint: (None, None)
                     pos_hint: {"center_y": 0.5}
                     text: "Save"
                     on_release: self.mutation(code_input.text)
-            
-            
-            """)
+""")
 
 
-class CancelEditButton(LabelButton):
+class CancelEditButton(LabelButton, LoadingButtonMixin):
+    app = ObjectProperty()
+    root = ObjectProperty()
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.mutation = Mutation(self.cancel_edit_on_app)
@@ -129,13 +138,17 @@ class CancelEditButton(LabelButton):
 
     def handle_on_resolved(self, _dt):
         self.disabled = False
+        self.root.is_loading = False
 
     def cancel_edit_on_app(self):
-        app = get_app()
-        app.cancel_edit_note()
+        self.root.is_loading = True
+        self.app.cancel_edit_note()
 
 
-class SaveEditButton(LabelButton):
+class SaveEditButton(LabelButton, LoadingButtonMixin):
+    app = ObjectProperty()
+    root = ObjectProperty()
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.mutation = Mutation(self.save_edit_on_app)
@@ -149,10 +162,11 @@ class SaveEditButton(LabelButton):
 
     def handle_on_resolved(self, _dt):
         self.disabled = False
+        self.root.is_loading = False
 
     def save_edit_on_app(self, text: str):
-        app = get_app()
-        app.save_edit_note(text)
+        self.root.is_loading = True
+        self.app.save_edit_note(text)
 
 
 class EditScreenIds(NamedTuple):
@@ -162,7 +176,7 @@ class EditScreenIds(NamedTuple):
 
 class EditScreen(Screen):
     ids: EditScreenIds
-
+    is_loading = BooleanProperty(False)
     app: "AppRegistryProtocol" = ObjectProperty()
     lexer: "Lexer" = ObjectProperty()
     editing_note: "NoteFile" = ObjectProperty(allownone=True)

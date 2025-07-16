@@ -4,11 +4,13 @@ from kivy.properties import (
     NumericProperty,
     StringProperty,
     VariableListProperty,
+    AliasProperty,
 )
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout
 
 from mindref.lib.ext import normalize_coordinates
+from mindref.lib.mutation import Mutation
 from mindref.lib.utils import import_kv, mindref_path
 from mindref.lib.widgets.effects.ripple import RippleMixin
 
@@ -107,6 +109,21 @@ class LabelButton(ThemedLabelButton):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+
+class LoadingButtonMixin:
+    mutation: Mutation
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def get_is_loading(self):
+        """
+        Check if the mutation is pending.
+        """
+        return self.mutation.is_mutating
+
+    is_loading = AliasProperty(get_is_loading, rebind=True)
 
 
 class ThemedIconButton(ThemedLabelButton):

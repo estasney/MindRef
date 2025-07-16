@@ -38,7 +38,7 @@ class RippleMixin:
     intensity = BoundedNumericProperty(0.4, min=0, max=1)
     growth_rate = NumericProperty(1)
     fs = StringProperty()
-    size: list[int, int]
+    size: tuple[int, int]
 
     def __init__(self, **kwargs):
         EventLoop.ensure_window()
