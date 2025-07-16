@@ -1,7 +1,6 @@
 from kivy.lang import Builder
 from kivy.uix.textinput import TextInput
 
-
 Builder.load_string(
     """
 <SearchBox@TextInput>

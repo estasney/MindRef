@@ -53,6 +53,10 @@ class AppRegistryProtocol(Protocol):
 
     def save_edit_note(self, text: str) -> None: ...
 
+    def cancel_draft_note(self) -> None: ...
+
+    def save_draft_note(self, file_name: str, text: str) -> None: ...
+
 
 T = TypeVar("T", bound=AppRegistryProtocol)
 GetApp = Callable[[], T]

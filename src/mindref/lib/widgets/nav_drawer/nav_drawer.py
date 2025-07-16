@@ -149,10 +149,8 @@ class EditNoteButton(ThemedIconButton): ...
 
 
 class NoteActionsContainer(BoxLayout):
-    new_note_button: NewNoteButton | None
-    edit_note_button: EditNoteButton | None
-    new_note_button = ObjectProperty(allownone=True)
-    edit_note_button = ObjectProperty(allownone=True)
+    new_note_button: NewNoteButton | None = ObjectProperty(allownone=True)
+    edit_note_button: EditNoteButton | None = ObjectProperty(allownone=True)
     nav_id_selected = StringProperty(None, allownone=True)
     button_opacity = NumericProperty(0)
 
@@ -174,12 +172,16 @@ class NoteActionsContainer(BoxLayout):
         App.get_running_app().edit_note(self.nav_id_selected)
         return True
 
+    def handle_draft_note(self):
+        App.get_running_app().draft_note()
+        return True
+
     def attach_new_note_button(self, _dt):
         if self.new_note_button is None:
             self.new_note_button = NewNoteButton()
             self.new_note_button.bind(
                 height=self.new_note_button.setter("width"),
-                on_release=lambda _: App.get_running_app().create_new_note(),
+                on_release=lambda _: self.handle_draft_note(),
             )
             self.bind(button_opacity=self.new_note_button.setter("opacity"))
             self.add_widget(self.new_note_button)

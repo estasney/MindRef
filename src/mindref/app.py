@@ -1,38 +1,28 @@
-import json  # noqa: I001
 from pathlib import Path
-from typing import Any
 
 from kivy import platform
 from kivy._clock import ClockEvent  # noqa
 from kivy.app import App
-from kivy.clock import Clock
-from kivy.config import Config
 from kivy.core.window import Window
 from kivy.logger import Logger
-from kivy.parser import parse_color
 from kivy.properties import (
     BooleanProperty,
-    DictProperty,
-    ListProperty,
-    NumericProperty,
     ObjectProperty,
     StringProperty,
 )
 
-
+from mindref.app_notes import AppNotesMixin
 from mindref.app_settings import SettingsMixin
+from mindref.app_theme import ThemedMixin
 from mindref.lib.adapters.atlas import AtlasService
 from mindref.lib.adapters.editor import FileSystemEditor
 from mindref.lib.adapters.notes import NoteRepositoryFactory
 from mindref.lib.domain.events import (
     FilePickerEvent,
-    RefreshNotesEvent,
 )
 from mindref.lib.service import Registry
 from mindref.lib.utils import get_app
 from mindref.screens import NoteAppScreenManager
-from mindref.app_theme import ThemedMixin
-from mindref.app_notes import AppNotesMixin
 
 
 class MindRefApp(ThemedMixin, SettingsMixin, AppNotesMixin, App):
@@ -81,17 +71,11 @@ class MindRefApp(ThemedMixin, SettingsMixin, AppNotesMixin, App):
         storage_path = (
             np if (np := self.config.get("Storage", "NOTES_PATH")) != "None" else None
         )
-
-        if storage_path:
-            self.registry.set_note_storage_path(storage_path)
+        self.storage_path = storage_path or ""
+        self.base_font_size = self.config.get("Display", "BASE_FONT_SIZE")
         sm = NoteAppScreenManager()
         self.screen_manager = sm
-
-        # Invokes note_service.discover_notes
-        self.registry.query_all_v2()
-
-        self.base_font_size = self.config.get("Display", "BASE_FONT_SIZE")
-        Clock.schedule_interval(self.process_event, 1e-4)
+        self.query_note_files()
 
         return sm
 
