@@ -41,7 +41,7 @@ class NoteFile:
 class AppNotesMixin(App):
     registry: "Registry"
     storage_path: str
-    note_service: "Union[FileSystemNoteRepository, AndroidNoteRepository]"
+    note_service: "FileSystemNoteRepository | AndroidNoteRepository"
     note_files: list[NoteFile] = ListProperty(force_dispatch=True)
 
     editing_note: NoteFile | None = ObjectProperty(allownone=True)
@@ -111,7 +111,7 @@ class AppNotesMixin(App):
 
     def save_draft_note(self, file_name: str, text: str):
         # TODO - Handle Android
-        ...
+        draft_path = (Path(self.storage_path) / file_name).with_suffix(".md")
 
         # draft_path = Path(self.user_data_dir) / "drafts" / f"{file_name}.txt"
         # draft_path.parent.mkdir(parents=True, exist_ok=True)

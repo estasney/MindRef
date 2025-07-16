@@ -13,7 +13,7 @@ _common_settings = [
         "title": "Base Font Size",
         "desc": "Set the base font size",
         "section": "Display",
-        "key": "BASE_FONT_SIZE",
+        "key": "base_font_size",
     },
 ]
 
@@ -22,9 +22,9 @@ _storage_settings = [
     {
         "type": "path",
         "title": "Note Storage",
-        "desc": "Directory containing note categories",
+        "desc": "Root directory to read and store note files",
         "section": "Storage",
-        "key": "NOTES_PATH",
+        "key": "storage_path",
     },
 ]
 _storage_settings_android = [
@@ -32,9 +32,9 @@ _storage_settings_android = [
     {
         "type": "android_path",
         "title": "Note Storage",
-        "desc": "Directory containing note categories",
+        "desc": "Root directory to read and store note files",
         "section": "Storage",
-        "key": "NOTES_PATH",
+        "key": "storage_path",
     },
 ]
 

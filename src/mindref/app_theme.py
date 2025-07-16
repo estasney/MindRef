@@ -1,6 +1,6 @@
 from kivy.app import App
 from kivy.parser import parse_color
-from kivy.properties import DictProperty, NumericProperty
+from kivy.properties import DictProperty
 
 THEME_COLORS = {
     "White": (1, 1, 1),
@@ -27,6 +27,5 @@ THEME_COLORS = {
 
 
 class ThemedMixin(App):
-    base_font_size = NumericProperty()
     fonts = DictProperty({"mono": "RobotoMono", "default": "Roboto", "icons": "Icon"})
     colors = DictProperty(THEME_COLORS)

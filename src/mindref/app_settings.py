@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 from platform import platform
 from typing import Any
 
@@ -7,20 +8,46 @@ from kivy.app import App
 from kivy.config import ConfigParser
 from kivy.properties import (
     BooleanProperty,
-    ObjectProperty,
-    StringProperty,
+    ConfigParserProperty,
     NumericProperty,
+    ObjectProperty,
 )
 from kivy.uix.settings import Settings
 
 from mindref.lib.domain.settings import app_settings
 
 
+def _to_path(value: str | Path | None) -> Path | None:
+    if value in {"None", "null", "", None}:
+        return None
+    return Path(value)
+
+
+class PathConfigParserProperty(ConfigParserProperty):
+    # noinspection PyArgumentList
+    def __init__(
+        self, default: Path | None, section: str, key: str, config_name: str = "app"
+    ):
+        super().__init__(
+            default, section, key, config_name, val_type=_to_path, errorvalue=None
+        )
+
+    def set(self, EventDispatcher_obj, value):
+        val = "" if value is None else str(value)
+        super().set(EventDispatcher_obj, val)
+
+
 class SettingsMixin(App):
-    storage_path = StringProperty()
+    storage_path: Path | None = PathConfigParserProperty(
+        default=None, section="Storage", key="storage_path", config_name="app"
+    )
+    # noinspection PyArgumentList
+    base_font_size: int = ConfigParserProperty(
+        16, "Display", "base_font_size", "app", val_type=int, errorvalue=16
+    )
+
     screen_manager: ObjectProperty
     platform_android: BooleanProperty
-    base_font_size = NumericProperty()
 
     def build_settings(self, settings: Settings):
         settings.add_json_panel(self.title, self.config, data=json.dumps(app_settings))
@@ -28,34 +55,12 @@ class SettingsMixin(App):
     def build_config(self, config: ConfigParser):
         match platform:  # We can't use self.platform_android yet
             case "android":
-                config.setdefaults("Storage", {"NOTES_PATH": None})
-                config.setdefaults("Display", {"BASE_FONT_SIZE": 18})
+                config.setdefaults("Storage", {"storage_path": None})
+                config.setdefaults("Display", {"base_font_size": 18})
 
             case _:
-                config.setdefaults(
-                    "Storage",
-                    {"NOTES_PATH": self.user_data_dir},
-                )
-                config.setdefaults("Display", {"BASE_FONT_SIZE": 16})
-
-    def on_config_change(
-        self, config: ConfigParser, section: str, key: str, value: Any
-    ):
-        truthy = {True, "1", "True"}
-        Logger.info(f"{type(self).__name__}: on_config_change - {section},{key}")
-        match section, key:
-            case "Storage", "NOTES_PATH" if not self.platform_android:
-                self.note_service.storage_path = value
-                self.registry.set_note_storage_path(value)
-                self.registry.query_all_v2()
-
-            case "Storage", "NOTES_PATH" if self.platform_android:
-                self.note_service.storage_path = value
-                self.registry.set_note_storage_path(value)
-                self.registry.query_all_v2()
-
-            case "Display", "BASE_FONT_SIZE":
-                self.base_font_size = int(value)
+                config.setdefaults("Storage", {"storage_path": None})
+                config.setdefaults("Display", {"base_font_size": 16})
 
     def open_settings(self, *largs):
         self.screen_manager.current = "settings_screen"
