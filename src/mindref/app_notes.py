@@ -7,6 +7,8 @@ from kivy.app import App
 from kivy.clock import Clock
 from kivy.properties import ListProperty, ObjectProperty
 
+from mindref.lib.adapters_v2.direct_file_system import DirectFileSystemAdapter
+from mindref.lib.adapters_v2.file_system import FileSystemBase
 from mindref.lib.mutation import Mutation
 
 if TYPE_CHECKING:
@@ -40,6 +42,7 @@ class AppNotesMixin(App):
     editing_note: NoteFile | None = ObjectProperty(allownone=True)
     screen_manager: "NoteAppScreenManager"
     notes_files_mutation: Mutation
+    fs: FileSystemBase
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -49,6 +52,7 @@ class AppNotesMixin(App):
             on_resolved=self.handle_note_file_resolved,
             on_success=self.handle_note_file_success,
         )
+        self.fs = DirectFileSystemAdapter()
 
     def handle_note_file_mutation(self, _dt):
         self.screen_manager.dispatch("on_refresh", self, True, to_children=True)
@@ -77,17 +81,20 @@ class AppNotesMixin(App):
             Logger.error(f"[{self.__class__.__name__}] Storage path is not set.")
             return self.note_files
 
-        if not storage_path.exists() or not storage_path.is_dir():
-            Logger.error(
-                f"[{self.__class__.__name__}] Storage path does not exist or is not a directory: {self.storage_path}"
-            )
-            return self.note_files
-        note_files = sorted(
-            (f for f in storage_path.rglob("**/*.md") if f.is_file()),
-            key=lambda f: f.stat().st_mtime,
-            reverse=True,
+        return self.fs.query_note_files(self.storage_path)
+
+    def read_note(self, note_id: str) -> str:
+        """Read the contents of the note"""
+        # TODO Use FileSystem
+        matched_note = next(
+            (note for note in self.note_files if note.id == note_id), None
         )
-        return [NoteFile.from_path(f) for f in note_files]
+        if not matched_note:
+            Logger.error(
+                f"[{self.__class__.__name__}] Note with ID {note_id} not found."
+            )
+            return ""
+        return matched_note.read_text(encoding="utf-8")
 
     def edit_note(self, note_id: str):
         matched_note = next(

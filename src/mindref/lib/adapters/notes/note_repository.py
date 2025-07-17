@@ -41,15 +41,3 @@ class AbstractNoteRepository(ABC, NoteRepositoryInitProtocol):
     @storage_path.setter
     def storage_path(self, path: PathLike | None):
         raise NotImplementedError
-
-    @abc.abstractmethod
-    def discover_notes(self, on_complete: Callable) -> None:
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def save_note(
-        self,
-        note: EditableNote,
-        on_complete: Callable,
-    ):
-        raise NotImplementedError

@@ -94,16 +94,12 @@ class MainScreen(Screen, V2RefreshBehavior):
             return True
         return super().on_refresh(widget, state, to_children)
 
-    def on_selected_note(self, _instance, value: str | None) -> bool:
-        if not value:
+    def on_selected_note(self, _instance, note_id: str | None) -> bool:
+        if not note_id:
             self.ids.content.clear_widgets()
             return True
-        note_path = self._find_note_file(value)
-        if note_path:
-            self.read_and_render_note(note_path)
-            return True
-        Logger.error(f"{type(self).__name__} : Note file not found for ID {value}")
-        self.ids.content.clear_widgets()
+        note_content = self.app.read_note(note_id)
+        Clock.schedule_once(lambda _: self.render_note(note_content), 0)
         return True
 
     def handle_nav_click(self, _dt, instance: "NavItem"):
@@ -118,12 +114,11 @@ class MainScreen(Screen, V2RefreshBehavior):
             None,
         )
 
-    def read_and_render_note(self, note_file: NoteFile):
+    def render_note(self, note_text: str):
         """Read a markdown file, parse it, and render it in the scroller."""
 
         self.ids.content.clear_widgets()
-        text = note_file.read_text()
-        document_md = self._markdown_parser(text)
+        document_md = self._markdown_parser(note_text)
         layout = MarkdownDocumentLayout()
         layout.padding = [0, 0, dp(32), 0]
         self.ids.content.add_widget(layout)
