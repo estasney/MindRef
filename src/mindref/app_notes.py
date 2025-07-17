@@ -39,12 +39,12 @@ class AppNotesMixin(App):
     note_files: list[NoteFile] = ListProperty(force_dispatch=True)
     editing_note: NoteFile | None = ObjectProperty(allownone=True)
     screen_manager: "NoteAppScreenManager"
-    note_file_mutation: Mutation
+    notes_files_mutation: Mutation
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.note_file_mutation = Mutation(self._query_note_files)
-        self.note_file_mutation.bind(
+        self.notes_files_mutation = Mutation(self._query_note_files)
+        self.notes_files_mutation.bind(
             on_mutate=self.handle_note_file_mutation,
             on_resolved=self.handle_note_file_resolved,
             on_success=self.handle_note_file_success,
@@ -68,7 +68,7 @@ class AppNotesMixin(App):
             f"[{self.__class__.__name__}] Loading note files from storage path."
         )
         Clock.schedule_once(
-            lambda _: self.note_file_mutation(),
+            lambda _: self.notes_files_mutation(),
         )
 
     def _query_note_files(self) -> list[NoteFile]:
