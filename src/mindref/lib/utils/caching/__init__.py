@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import TYPE_CHECKING, Optional, TypeVar
+from typing import TYPE_CHECKING, TypeVar
 
 from kivy.cache import Cache
 
@@ -55,14 +55,6 @@ def kivy_cache(
     return dec_kivy_cache
 
 
-def cache_key_text_extents(**kwargs) -> str:
-    """Generate key for 'text_extents' cache"""
-    label = kwargs.get("label")
-    text = kwargs.get("text")
-    opts = label.options
-    return f"{text}-{opts['font_size']}-{opts['font_family']}"
-
-
 def cache_key_text_contrast(*_args, **kwargs) -> tuple[tuple, int, tuple | None]:
     """Generate key for 'text_contrast'"""
     background_color = kwargs.get("background_color")
@@ -77,9 +69,3 @@ def cache_key_text_contrast(*_args, **kwargs) -> tuple[tuple, int, tuple | None]
 
 def cache_key_color_norm(*_args, **kwargs) -> tuple:
     return tuple(kwargs.get("color"))
-
-
-def cache_key_note(*_args, **kwargs) -> str:
-    content_data = kwargs.get("content_data")
-    parent = kwargs.pop("parent")
-    return f"{content_data['filepath']}-{content_data['text']}-{hash(parent)}"
