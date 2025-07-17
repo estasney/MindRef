@@ -3,7 +3,7 @@ from kivy.factory import Factory
 from kivy.properties import StringProperty
 from kivy.uix.settings import SettingPath, SettingsWithSpinner
 
-from mindref.lib.domain.events import FilePickerEvent
+
 from mindref.lib.utils import get_app
 from mindref.lib.widgets.behavior.interact_behavior import InteractBehavior
 
@@ -34,13 +34,8 @@ class AndroidSettingPath(SettingPath):
         self.value = uri
 
     def _create_popup(self, *args):
-        app = self.get_app()
-        app.registry.push_event(
-            FilePickerEvent(
-                on_complete=self.select_folder_callback,
-                action=FilePickerEvent.Action.OPEN_FOLDER,
-            )
-        )
+        # TODO - "Popup Android File Picker"
+        ...
 
 
 class MindRefSettingsAndroid(InteractBehavior, SettingsWithSpinner):
@@ -53,12 +48,9 @@ class MindRefSettingsAndroid(InteractBehavior, SettingsWithSpinner):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-
     def create_json_panel(self, title, config, filename=None, data=None):
         self.register_type("android_path", AndroidSettingPath)
-        return super().create_json_panel(
-            title, config, filename, data
-        )
+        return super().create_json_panel(title, config, filename, data)
 
 
 match platform:

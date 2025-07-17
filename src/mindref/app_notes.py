@@ -1,19 +1,12 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Union, Self
+from typing import TYPE_CHECKING, Self
 
 from kivy import Logger
 from kivy.app import App
 from kivy.properties import ListProperty, ObjectProperty
 
 if TYPE_CHECKING:
-    from mindref.lib.adapters.notes.android.android_note_repository import (
-        AndroidNoteRepository,
-    )
-    from mindref.lib.adapters.notes.fs.fs_note_repository import (
-        FileSystemNoteRepository,
-    )
-    from mindref.lib.service import Registry
     from mindref.screens.manager import NoteAppScreenManager
 
 
@@ -39,9 +32,7 @@ class NoteFile:
 
 
 class AppNotesMixin(App):
-    registry: "Registry"
     storage_path: str
-    note_service: "FileSystemNoteRepository | AndroidNoteRepository"
     note_files: list[NoteFile] = ListProperty(force_dispatch=True)
 
     editing_note: NoteFile | None = ObjectProperty(allownone=True)
@@ -103,7 +94,7 @@ class AppNotesMixin(App):
             f"[{self.__class__.__name__}] Saving changes to note: {self.editing_note.file_path}"
         )
         self.editing_note.file_path.write_text(text)
-        self.registry.query_all_v2()
+        self.query_note_files()
         self.cancel_edit_note()
 
     def cancel_draft_note(self):

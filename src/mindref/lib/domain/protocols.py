@@ -16,14 +16,13 @@ if TYPE_CHECKING:
     from mindref.lib.adapters.notes.fs.fs_note_repository import (
         FileSystemNoteRepository,
     )
-    from mindref.lib.service.registry import Registry
+
     from mindref.lib.widgets import MindRefSettingsAndroid, MindRefSettingsNative
 
 
 class AppRegistryProtocol(Protocol):
     atlas_service: AtlasService
     note_service: FileSystemNoteRepository | AndroidNoteRepository
-    registry: Registry
 
     platform_android: bool
     error_message: str

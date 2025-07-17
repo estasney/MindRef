@@ -19,7 +19,6 @@ from mindref.lib.adapters.notes.fs.fs_note_repository import (
     FileSystemNoteRepository,
     TGetCategoriesCallback,
 )
-from mindref.lib.domain.events import DiscoverCategoryEvent
 from mindref.lib.domain.markdown_note import MarkdownNote
 from mindref.lib.domain.settings import SortOptions
 from mindref.lib.utils import fmt_attrs, get_app, sch_cb, schedulable

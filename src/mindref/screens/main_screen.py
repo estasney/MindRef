@@ -28,7 +28,7 @@ Builder.load_string(
 #:import NavDrawer mindref.lib.widgets.nav_drawer
 #:import OpenMenuButton mindref.lib.widgets.buttons
 #:import AnimatedHSeparator mindref.lib.widgets.separator
-#:import Note mindref.lib.widgets.note.Note
+
 
 <MainScreen>:
     app: app

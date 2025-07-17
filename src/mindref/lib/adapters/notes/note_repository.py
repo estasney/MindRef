@@ -15,10 +15,6 @@ if TYPE_CHECKING:
     from mindref.lib.domain.editable import EditableNote
     from mindref.lib.domain.protocols import GetApp
 
-    from ...domain.settings import SortOptions
-    from .android.android_note_repository import AndroidNoteRepository
-    from .fs.fs_note_repository import FileSystemNoteRepository
-
     PLATFORM = Literal["win", "linux", "android", "macosx", "ios", "unknown"]
 
 
@@ -29,34 +25,6 @@ class NoteRepositoryInitProtocol(Protocol):
         get_app: GetApp,
         **kwargs,
     ): ...
-
-
-class NoteRepositoryFactory:
-    @classmethod
-    def _get_repo_android(cls) -> type[AndroidNoteRepository]:
-        from .android.android_note_repository import AndroidNoteRepository
-
-        return AndroidNoteRepository
-
-    @classmethod
-    def _get_repo_default(cls) -> type[FileSystemNoteRepository]:
-        from .fs.fs_note_repository import FileSystemNoteRepository
-
-        return FileSystemNoteRepository
-
-    @classmethod
-    def get_repo(cls) -> type[FileSystemNoteRepository] | type[AndroidNoteRepository]:
-        """
-        Dynamic Class returned based on platform.
-        """
-
-        from kivy import platform
-
-        match platform:
-            case "android":
-                return cls._get_repo_android()
-            case _:
-                return cls._get_repo_default()
 
 
 class AbstractNoteRepository(ABC, NoteRepositoryInitProtocol):
