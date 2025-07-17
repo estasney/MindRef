@@ -1,22 +1,18 @@
-from __future__ import annotations
-
 import json
 import os
 import re
 import shutil
 import tempfile
+from collections.abc import Sequence
 from operator import itemgetter
 from pathlib import Path
-from typing import TYPE_CHECKING, ClassVar, NamedTuple, NewType
+from typing import ClassVar, NamedTuple, NewType
 
 import PIL.Image
 from kivy.atlas import Atlas as KivyAtlas
 
 from mindref.lib.adapters.atlas import AbstractAtlasRepository
 from mindref.lib.utils import EnvironContext, LazyLoaded
-
-if TYPE_CHECKING:
-    from collections.abc import Sequence
 
 
 class AtlasItem(NamedTuple):
@@ -219,7 +215,7 @@ class AtlasService(AbstractAtlasRepository):
 
         self._store_atlas(atlas_name, atlas_data)
 
-    def get_from_atlas(self, name: str, atlas_name: str) -> "PIL.Image.Image":
+    def get_from_atlas(self, name: str, atlas_name: str) -> PIL.Image.Image:
         """
         Retrieve an image by name and atlas name
         Parameters
