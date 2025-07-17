@@ -85,16 +85,7 @@ class AppNotesMixin(App):
 
     def read_note(self, note_id: str) -> str:
         """Read the contents of the note"""
-        # TODO Use FileSystem
-        matched_note = next(
-            (note for note in self.note_files if note.id == note_id), None
-        )
-        if not matched_note:
-            Logger.error(
-                f"[{self.__class__.__name__}] Note with ID {note_id} not found."
-            )
-            return ""
-        return matched_note.read_text(encoding="utf-8")
+        return self.fs.read_note(note_id=note_id, note_files=self.note_files)
 
     def edit_note(self, note_id: str):
         matched_note = next(
@@ -121,11 +112,13 @@ class AppNotesMixin(App):
                 f"[{self.__class__.__name__}] No note is currently being edited."
             )
             return
-        Logger.info(
-            f"[{self.__class__.__name__}] Saving changes to note: {self.editing_note.file_path}"
-        )
-        self.editing_note.file_path.write_text(text)
 
+        edit_file_name = str(
+            Path(self.editing_note.file_path).relative_to(self.storage_path)
+        )
+        self.fs.save_edit_note(
+            storage_path=self.storage_path, file_name=edit_file_name, text=text
+        )
         self.load_note_files()
         Clock.schedule_once(self.cancel_edit_note)
 
@@ -136,11 +129,10 @@ class AppNotesMixin(App):
         self.screen_manager.current = "main_screen"
 
     def save_draft_note(self, file_name: str, text: str):
-        # TODO - Handle Android
-        draft_path = (Path(self.storage_path) / file_name).with_suffix(".md")
-        draft_path.parent.mkdir(parents=True, exist_ok=True)
-        draft_path.write_text(text, encoding="utf-8")
+        draft_note_file = self.fs.save_draft_note(
+            storage_path=self.storage_path, file_name=file_name, text=text
+        )
 
-        note_files = [NoteFile.from_path(draft_path), *self.note_files]
+        note_files = [draft_note_file, *self.note_files]
         self.note_files = note_files
         self.screen_manager.current = "main_screen"
