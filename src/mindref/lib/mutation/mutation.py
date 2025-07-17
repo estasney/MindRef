@@ -10,6 +10,7 @@ from kivy.properties import (
     BooleanProperty,
     OptionProperty,
     StringProperty,
+    ObjectProperty,
 )
 from typing_extensions import ParamSpec, TypeVar
 
@@ -24,9 +25,9 @@ class Mutation(EventDispatcher, Generic[R]):
     status: MutationStatus = OptionProperty(
         MutationStatus.idle, options=MutationStatus.__members__.values()
     )
-    error: str = StringProperty()
+    error: Exception | None = ObjectProperty(allownone=True)
 
-    __events__ = ("on_mutate", "on_resolved", "on_error", "on_success")
+    __events__ = ("on_mutate", "on_resolved", "on_success")
     _fn: TFn
 
     def __init__(self, fn: Callable[P, R]) -> None:
@@ -41,7 +42,7 @@ class Mutation(EventDispatcher, Generic[R]):
     def reset(self, *_):
         """Reset the mutation to its initial state."""
         self.status = MutationStatus.idle
-        self.error = ""
+        self.error = None
 
     def _get_is_mutating(self):
         return self.status == MutationStatus.pending
@@ -54,7 +55,7 @@ class Mutation(EventDispatcher, Generic[R]):
 
     def on_success(self, *, result: R) -> bool:
         """Fired on the main thread when work finishes successfully."""
-        self.error = ""
+        self.error = None
         self.status = MutationStatus.success
         return True
 
@@ -62,9 +63,8 @@ class Mutation(EventDispatcher, Generic[R]):
         """Dispatched regardless of error or success"""
         return True
 
-    def on_error(self, *, err: Exception) -> bool:
+    def on_error(self, _instance, value: Exception) -> bool:
         self.status = MutationStatus.error
-        self.error = str(err)
         Logger.error(f"{type(self).__name__}: on_error - {self.error}")
         return True
 
@@ -78,7 +78,8 @@ class Mutation(EventDispatcher, Generic[R]):
             Logger.error(
                 f"{type(self).__name__}: _run - mutation failed with error: {e}"
             )
-            Clock.schedule_once(lambda _dt, err=e: self.dispatch("on_error", err=err))
+
+            self.error = e
         else:
             Logger.info(
                 f"{type(self).__name__}: _run - mutation succeeded with result: {result}"

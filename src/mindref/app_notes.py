@@ -112,12 +112,9 @@ class AppNotesMixin(App):
     def save_draft_note(self, file_name: str, text: str):
         # TODO - Handle Android
         draft_path = (Path(self.storage_path) / file_name).with_suffix(".md")
+        draft_path.parent.mkdir(parents=True, exist_ok=True)
+        draft_path.write_text(text, encoding="utf-8")
 
-        # draft_path = Path(self.user_data_dir) / "drafts" / f"{file_name}.txt"
-        # draft_path.parent.mkdir(parents=True, exist_ok=True)
-        # draft_path.write_text(text)
-        # Logger.info(
-        #     f"[{self.__class__.__name__}] Draft saved to: {draft_path}"
-        # )
-        # self.registry.query_all_v2()
-        # self.screen_manager.current = "main_screen"
+        note_files = [NoteFile.from_path(draft_path), *self.note_files]
+        self.note_files = note_files
+        self.screen_manager.current = "main_screen"

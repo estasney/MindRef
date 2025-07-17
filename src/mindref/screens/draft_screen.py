@@ -84,8 +84,7 @@ Builder.load_string("""
                 pos_hint: {"center_x": 0.5, "center_y": 0.5}
                 NoteTitleInput:
                     id: title_input
-                    
-                
+                    text: ''                
         HSeparator:
             color: [*app.colors['Gray-800'][:3], .2]
             height: dp(1)        
@@ -141,7 +140,9 @@ Builder.load_string("""
                     size_hint: (None, None)
                     pos_hint: {"center_y": 0.5}
                     text: "Save"
-                    on_release: self.mutation(code_input.text)
+                    on_release: self.mutation(file_name=title_input.text, text=code_input.text)
+                    disabled: not title_input.text
+                    
 """)
 
 
