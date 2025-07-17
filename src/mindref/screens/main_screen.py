@@ -6,20 +6,20 @@ from kivy.clock import Clock
 from kivy.lang import Builder
 from kivy.logger import Logger
 from kivy.metrics import dp
-from kivy.properties import ListProperty, ObjectProperty, StringProperty
+from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.screenmanager import Screen
-from kivy.uix.scrollview import ScrollView
-from kivy.uix.widget import Widget
 
 from mindref.app_notes import NoteFile
 from mindref.lib import get_app
 from mindref.lib.domain.parser.kbd_plugin import plugin_kbd
 from mindref.lib.widgets.markdown.markdown_document_v2 import MarkdownDocumentLayout
-from mindref.lib.widgets.nav_drawer import NavItem
 from mindref.lib.widgets.refreshable import V2RefreshBehavior
 
 if TYPE_CHECKING:
-    from mindref.lib.widgets.nav_drawer import NavDrawer
+    from kivy.uix.scrollview import ScrollView
+    from kivy.uix.widget import Widget
+
+    from mindref.lib.widgets.nav_drawer import NavDrawer, NavItem
 
 Builder.load_string(
     """
@@ -51,6 +51,7 @@ Builder.load_string(
             size_hint_x_open: 0.5
             nav_link_padding: [0, dp(16), 0, dp(16)]
             nav_id_selected: root.selected_note
+            open_state: 'opening'
             canvas.before:
                 Color:
                     rgba: app.colors['Dark']
