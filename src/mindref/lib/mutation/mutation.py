@@ -81,9 +81,6 @@ class Mutation(EventDispatcher, Generic[R]):
 
             self.error = e
         else:
-            Logger.info(
-                f"{type(self).__name__}: _run - mutation succeeded with result: {result}"
-            )
             Clock.schedule_once(
                 lambda _dt, res=result: self.dispatch("on_success", result=res)
             )

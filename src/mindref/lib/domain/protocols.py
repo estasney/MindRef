@@ -54,6 +54,9 @@ class AppRegistryProtocol(Protocol):
 
     def save_draft_note(self, file_name: str, text: str) -> None: ...
 
+    def load_note_files(self):
+        pass
+
 
 T = TypeVar("T", bound=AppRegistryProtocol)
 GetApp = Callable[[], T]

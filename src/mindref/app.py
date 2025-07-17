@@ -38,9 +38,8 @@ class MindRefApp(ThemedMixin, SettingsMixin, AppNotesMixin, App):
         self.platform_android = platform == "android"
         Window.bind(on_keyboard=self.key_input)
         self.screen_manager = NoteAppScreenManager()
-        self.bind(storage_path=lambda *_: self.query_note_files())
-        Clock.schedule_once(lambda _: self.query_note_files(), 0)
-
+        self.bind(storage_path=lambda *_: self.load_note_files())
+        Clock.schedule_once(lambda _: self.load_note_files(), 0.5)
         return self.screen_manager
 
     def on_pause(self):
