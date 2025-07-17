@@ -10,7 +10,6 @@ if TYPE_CHECKING:
 
     from mindref.app_notes import NoteFile
     from mindref.lib.adapters.atlas.fs.fs_atlas_repository import AtlasService
-    from mindref.lib.adapters.editor.fs.fs_editor_repository import FileSystemEditor
     from mindref.lib.adapters.notes.android.android_note_repository import (
         AndroidNoteRepository,
     )
@@ -24,7 +23,6 @@ if TYPE_CHECKING:
 class AppRegistryProtocol(Protocol):
     atlas_service: AtlasService
     note_service: FileSystemNoteRepository | AndroidNoteRepository
-    editor_service: FileSystemEditor
     registry: Registry
 
     platform_android: bool
