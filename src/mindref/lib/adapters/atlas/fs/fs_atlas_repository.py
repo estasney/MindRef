@@ -138,9 +138,11 @@ class AtlasService(AbstractAtlasRepository):
 
         """
 
+        # noinspection PyTypeChecker
         def get_width(x: ImgPos):
             return sum(itemgetter(0, 2)(x)) + padding
 
+        # noinspection PyTypeChecker
         def get_height(x: ImgPos):
             return sum(itemgetter(1, 3)(x)) + padding
 

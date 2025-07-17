@@ -7,7 +7,7 @@ import PIL.Image
 
 class AbstractAtlasRepository(abc.ABC):
     @abc.abstractmethod
-    def get_from_atlas(self, name: str, atlas_name: str) -> PIL.Image:
+    def get_from_atlas(self, name: str, atlas_name: str) -> PIL.Image.Image:
         raise NotImplementedError
 
     @abc.abstractmethod
