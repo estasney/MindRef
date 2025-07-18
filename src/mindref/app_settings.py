@@ -1,20 +1,21 @@
 import json
 from pathlib import Path
-from platform import platform
-from typing import Any
 
-from kivy import Logger  # type:ignore
 from kivy.app import App
 from kivy.config import ConfigParser
 from kivy.properties import (
-    BooleanProperty,
     ConfigParserProperty,
-    NumericProperty,
     ObjectProperty,
 )
 from kivy.uix.settings import Settings
 
-from mindref.lib.domain.settings import app_settings
+from mindref.lib import get_app
+from mindref.lib.adapters_v2 import FileSystemBase
+from mindref.lib.adapters_v2.brokered.android.android_file_system import (
+    AndroidFileSystemAdapter,
+)
+from mindref.lib.adapters_v2.direct_file_system import DirectFileSystemAdapter
+from mindref.lib.domain.settings import get_android_settings, get_native_settings
 
 
 def _to_path(value: str | Path | None) -> Path | None:
@@ -41,26 +42,58 @@ class SettingsMixin(App):
     storage_path: Path | None = PathConfigParserProperty(
         default=None, section="Storage", key="storage_path", config_name="app"
     )
+    android_storage_path: str = ConfigParserProperty(
+        "",
+        "Storage",
+        "android_storage_path",
+        "app",
+    )
+
     # noinspection PyArgumentList
     base_font_size: int = ConfigParserProperty(
         16, "Display", "base_font_size", "app", val_type=int, errorvalue=16
     )
 
     screen_manager: ObjectProperty
-    platform_android: BooleanProperty
+    platform_android: bool
+    fs: DirectFileSystemAdapter | AndroidFileSystemAdapter
+
+    def _create_settings_native(self): ...
+
+    def _create_settings_android(self):
+        fs = self.fs
+        if not isinstance(fs, AndroidFileSystemAdapter):
+            raise TypeError(
+                f"Expected AndroidFileSystemAdapter, got {type(fs).__name__}"
+            )
+        fs.prompt_for_external_storage
+
+    def create_settings(self):
+        settings = (
+            self._create_settings_android()
+            if self.platform_android
+            else self._create_settings_native()
+        )
 
     def build_settings(self, settings: Settings):
-        settings.add_json_panel(self.title, self.config, data=json.dumps(app_settings))
+        settings_data = (
+            get_android_settings() if self.platform_android else get_native_settings()
+        )
+        settings.add_json_panel(self.title, self.config, data=json.dumps(settings_data))
 
     def build_config(self, config: ConfigParser):
-        match platform:  # We can't use self.platform_android yet
-            case "android":
-                config.setdefaults("Storage", {"storage_path": None})
-                config.setdefaults("Display", {"base_font_size": 18})
-
-            case _:
-                config.setdefaults("Storage", {"storage_path": None})
-                config.setdefaults("Display", {"base_font_size": 16})
+        if self.platform_android:
+            config.setdefaults(
+                "Storage",
+                {
+                    "android_storage_path": "",
+                    "storage_path": Path(get_app().user_data_dir) / "notes",
+                },
+            )
+            config.setdefaults("Display", {"base_font_size": 18})
+        else:
+            config.setdefaults("Storage", {"storage_path": None})
+            config.setdefaults("Display", {"base_font_size": 16})
 
     def open_settings(self, *largs):
         self.screen_manager.current = "settings_screen"

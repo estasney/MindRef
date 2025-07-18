@@ -11,10 +11,3 @@ from .separator import (
     Separator,
     VSeparator,
 )
-
-# Requires InteractBehavior
-from .settings_panel import (
-    AndroidSettingPath,
-    MindRefSettingsAndroid,
-    MindRefSettingsNative,
-)

@@ -4,7 +4,7 @@ $(PROJECT_ROOT)/%.c: $(PROJECT_ROOT)/%.pyx
 
 cythonize: $(PYX_C_FILES)
 
-clean-bytecode :
+clean-bytecode:
 	# Remove this projects bytecode
 	find $(PROJECT_ROOT) -name "*.pyc" -delete
 	find $(PROJECT_ROOT) -name "__pycache__" -type d -print0 | xargs -0 rm -rf

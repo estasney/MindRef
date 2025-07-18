@@ -375,7 +375,7 @@ class AndroidNoteRepository(FileSystemNoteRepository):
         # We need to create the category directory in our app storage, and copy the image to that directory
         # We have to ensure that the directory is created before we copy the image
 
-        # We will register our image copy callback with this code
+        # We will register_external_storage_callback our image copy callback with this code
         category_callback_code = cast(int, MindRefCallCodes.WRITE_DIRECTORY.value)
 
         @schedulable

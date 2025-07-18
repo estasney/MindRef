@@ -1,10 +1,4 @@
-from pathlib import Path
-from typing import Literal
-
 from kivy import platform
-
-SETTINGS_BEHAVIOR_PATH = Path(__file__).parent / "settings" / "app_settings.json"
-SortOptions = Literal["Creation Date", "Title", "Last Modified Date"]
 
 _common_settings = [
     {"type": "title", "title": "Display"},
@@ -32,14 +26,18 @@ _storage_settings_android = [
     {
         "type": "android_path",
         "title": "Note Storage",
-        "desc": "Root directory to read and store note files",
+        "desc": "Root directory to read and store note files on your Android Device",
         "section": "Storage",
-        "key": "storage_path",
+        "key": "android_storage_path",
     },
 ]
 
-match platform:
-    case ("android", _):
-        app_settings = [*_storage_settings_android, *_common_settings]
-    case _:
-        app_settings = [*_storage_settings, *_common_settings]
+
+def get_native_settings():
+    """Get the app settings based on the platform."""
+    return [*_storage_settings, *_common_settings]
+
+
+def get_android_settings():
+    """Get the app settings for Android platform."""
+    return [*_storage_settings_android, *_common_settings]
