@@ -8,7 +8,7 @@ from pythonforandroid.build import Context
 from pythonforandroid.logger import info, info_main, shprint
 from pythonforandroid.recipe import CythonRecipe
 from pythonforandroid.util import rmdir
-from typing_extensions import ClassVar
+from typing import ClassVar
 
 
 class MindRefAndroidRecipe(CythonRecipe):
@@ -79,7 +79,6 @@ class MindRefAndroidRecipe(CythonRecipe):
         if pyproject_toml_path.exists():
             info(f"Removing {pyproject_toml_path}")
             shprint(sh.rm, str(pyproject_toml_path))
-
 
     def get_build_dir(self, arch: "Arch") -> Path:
         return super().get_build_dir(arch)

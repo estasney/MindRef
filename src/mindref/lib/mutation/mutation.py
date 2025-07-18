@@ -1,18 +1,14 @@
-import threading
 from collections.abc import Callable
-from typing import Generic, Literal
+from typing import Generic, ParamSpec, TypeVar
 
 from kivy import Logger
-from kivy.clock import Clock, mainthread
+from kivy.clock import Clock
 from kivy.event import EventDispatcher
 from kivy.properties import (
     AliasProperty,
-    BooleanProperty,
-    OptionProperty,
-    StringProperty,
     ObjectProperty,
+    OptionProperty,
 )
-from typing_extensions import ParamSpec, TypeVar
 
 from mindref.lib.models import MutationStatus
 
