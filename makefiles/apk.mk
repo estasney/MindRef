@@ -41,7 +41,11 @@ build-apk :  $(MINDREF_UTILS_DEBUG) clean-bytecode prebuild
   	--depend "org.apache.commons:commons-io:1.3.2" \
   	--add-aar $(ROOT_DIR)/$(MINDREF_UTILS_DEBUG) \
   	--no-byte-compile-python \
-  	--local-recipes $(LOCAL_RECIPES)
+  	--add-compile-option "sourceCompatibility=17" \
+  	--add-compile-option "targetCompatibility=17" \
+  	--local-recipes $(LOCAL_RECIPES) \
+  	--hook $(P4A_HOOKS_FILE)
+  	
 .PHONY : build-apk
 
 copy-apk:

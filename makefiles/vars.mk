@@ -3,6 +3,8 @@
 ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 BUILD_DIR:=$(ROOT_DIR)/build_p4a
 SCRIPT_DIR:=$(ROOT_DIR)/scripts
+P4A_HOOKS_DIR:=$(SCRIPT_DIR)/p4a
+P4A_HOOKS_FILE:=$(P4A_HOOKS_DIR)/hook.py
 
 UTIL_ROOT:=$(HOME)/AndroidStudioProjects/MindRefUtils
 UTIL_OUTPUT:=$(UTIL_ROOT)/mindrefutils/build/outputs/aar

@@ -2,6 +2,8 @@
 include makefiles/vars.mk
 include makefiles/prebuild.mk
 include makefiles/apk.mk
+include makefiles/aar.mk
+
 
 echo-vars:
 	@echo PROJECT_ROOT = \"$(PROJECT_ROOT)\"

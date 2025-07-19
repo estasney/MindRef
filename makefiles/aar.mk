@@ -13,6 +13,5 @@ $(UTIL_OUTPUT)/$(MINDREF_UTILS_DEBUG):
 build-aar : $(MINDREF_UTILS_DEBUG)
 
 clean-aar :
-	rm -f $(MINDREF_UTILS_DEBUG)
-	rm -f $(UTIL_OUTPUT)/$(MINDREF_UTILS_DEBUG)
+	cd $(UTIL_ROOT) && ./gradlew clean mindrefutils:clean
 .PHONY : clean-aar
