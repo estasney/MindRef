@@ -21,7 +21,7 @@ clean-dists:
 
 
 build-apk :  $(MINDREF_UTILS_DEBUG) clean-bytecode prebuild
-	uv run p4a apk --private $(BUILD_DIR) \
+	JAVA_HOME=$(PROJECT_JAVA_HOME) uv run p4a apk --private $(BUILD_DIR) \
   	--package=$(PROJECT_JAVA_PACKAGE) \
   	--name $(PROJECT_NAME_READABLE) \
   	--version $(PROJECT_VERSION) \

@@ -24,10 +24,8 @@ dependencies = [
     "Kivy==2.3.*",
     "mistune==2.0.5",
     "pillow<11.1.0",
-    "pydantic>2",
     "Pygments==2.19.0",
     "python-dotenv==1.0.1",
-    "python-for-android",
     "toolz>=1,<2",
 ]
 
@@ -78,8 +76,6 @@ where = ["src"]
 package = true
 default-groups = ["dev", "lint"]
 
-[tool.uv.sources]
-python-for-android = { git = "https://github.com/estasney/python-for-android.git", branch = "master" }
 
 [tool.ruff]
 target-version = "py310"

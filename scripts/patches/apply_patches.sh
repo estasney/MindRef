@@ -8,7 +8,7 @@
 set -euo pipefail
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-VENV_PATH=$(readlink -f "$SCRIPT_DIR"/../../venv)
+VENV_PATH=$(readlink -f "$SCRIPT_DIR"/../../.venv)
 
 
 

@@ -5,4 +5,3 @@ from .enums import (
     TMutationStatus,
     TMutationStatusLit,
 )
-from .base import Model
