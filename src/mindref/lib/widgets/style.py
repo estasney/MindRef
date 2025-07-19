@@ -30,3 +30,6 @@ class TitleInput(TextInput): ...
 
 class IconLabel(BaseLabel):
     icon_code = StringProperty()
+
+
+class StyledTextInput(TextInput): ...
