@@ -1,4 +1,4 @@
-from kivy import Logger
+from kivy.logger import Logger
 from kivy.lang import Builder
 from kivy.properties import ListProperty, NumericProperty, BooleanProperty
 from kivy.uix.effectwidget import EffectWidget

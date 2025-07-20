@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
-from kivy import Logger
+from kivy.logger import Logger
 from kivy.uix.widget import Widget
 from toolz import get_in
 

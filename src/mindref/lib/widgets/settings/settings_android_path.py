@@ -1,4 +1,4 @@
-from kivy import Logger
+from kivy.logger import Logger
 from kivy.clock import mainthread, Clock
 from kivy.uix.settings import SettingString
 

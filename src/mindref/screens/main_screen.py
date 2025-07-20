@@ -90,7 +90,7 @@ class MainScreen(Screen, V2RefreshBehavior):
     def on_refresh(self, widget: "Widget", state: bool, to_children: bool) -> bool:
         if not to_children:
             self.selected_note = None
-            self.app.load_note_files()
+            self.app.refresh_note_files()
             return True
         return super().on_refresh(widget, state, to_children)
 

@@ -1,20 +1,23 @@
 from pathlib import Path
 
 from dotenv import load_dotenv
-from kivy import Logger, platform
 from kivy.config import Config
 from kivy.core.text import LabelBase
+from kivy.logger import Logger
+from kivy.utils import platform
+
+from mindref.app import MindRefApp
 
 
 def run_android():
     Logger.info("Running Android")
     from mindref.app import MindRefApp
 
-    app = MindRefApp()
+    app = MindRefApp(platform_android=True)
     app.run()
 
 
-def run_desktop():
+def setup_desktop() -> MindRefApp:
     import os
 
     load_dotenv()
@@ -28,8 +31,11 @@ def run_desktop():
 
     from mindref.app import MindRefApp
 
-    app = MindRefApp()
+    return MindRefApp()
 
+
+def run_desktop():
+    app = setup_desktop()
     app.run()
 
 

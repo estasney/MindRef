@@ -1,6 +1,6 @@
 from typing import Literal
 
-from kivy import Logger
+from kivy.logger import Logger
 from kivy.lang import Builder
 from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import ScreenManager

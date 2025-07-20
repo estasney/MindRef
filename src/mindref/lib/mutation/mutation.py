@@ -1,7 +1,7 @@
 from collections.abc import Callable
 from typing import Generic, ParamSpec, TypeVar
 
-from kivy import Logger
+from kivy.logger import Logger
 from kivy.clock import Clock
 from kivy.event import EventDispatcher
 from kivy.properties import (
@@ -71,8 +71,8 @@ class Mutation(EventDispatcher, Generic[R]):
                 f"{type(self).__name__}: _run - mutation completed successfully with result: {result}"
             )
         except Exception as e:
-            Logger.error(
-                f"{type(self).__name__}: _run - mutation failed with error: {e}"
+            Logger.exception(
+                f"{type(self).__name__}: _run - mutation failed with error"
             )
 
             self.error = e

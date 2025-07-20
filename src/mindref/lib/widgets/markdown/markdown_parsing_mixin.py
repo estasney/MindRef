@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol, cast
 
-from kivy import Logger
+from kivy.logger import Logger
 
 from mindref.lib.domain.md_parser_types import (
     MD_INLINE_TYPES,

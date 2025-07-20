@@ -15,13 +15,13 @@ authors = [
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.12",
     "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
 ]
 urls = { "Homepage" = "https://github.com/estasney/MindRef" }
 
 dependencies = [
-    "Kivy==2.3.*",
+    "Kivy==2.3.1",
     "mistune==2.0.5",
     "pillow<11.1.0",
     "Pygments==2.19.0",
@@ -47,7 +47,7 @@ dev = [
     "cython>3,<=3.0.11",
     "line-profiler>=4.2.0",
     "pre-commit>=4.1.0",
-    "pyright>=1.1.394",
+    "pytest>=8.4.1",
 ]
 lint = [
     "ruff>=0.9.6",
@@ -76,14 +76,13 @@ where = ["src"]
 package = true
 default-groups = ["dev", "lint"]
 
-
 [tool.ruff]
-target-version = "py310"
+target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E4", "E7", "E9", "F", "I001", "UP", "ANN", "B", "C", "I", "LOG", "G", "RSE", "RET", "SLOT", "SIM", "TC", "INT", "ARG",
     "PTH", "ERA", "PL", "TRY", "FLY", "RUF", "FA"]
-ignore = ["ANN002", "ANN003", "ANN401", "ANN204", "ANN201", "ANN202", "ARG002", "TRY003", "C901", "PLR0915", "PLR0912", "PLR0911", "PLC0415"]
+ignore = ["ANN002", "ANN003", "ANN401", "ANN204", "ANN201", "ANN202", "ARG002", "TRY003", "C901", "PLR0915", "PLR0912", "PLR0911", "PLC0415","E731"]
 
 [tool.ruff.lint.flake8-annotations]
 ignore-fully-untyped = true
@@ -91,9 +90,14 @@ suppress-dummy-args = true
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401", "I001"]
+"**/*.pyi" = ["ALL"]
 
-[tool.ty.rules]
-unresolved-import="ignore"
+[[tool.ty.overrides]]
+include = ["stubs/**"]
+
+[tool.ty.overrides.rules]
+unresolved-reference = "ignore"
+unresolved-import = "ignore"
 
 [tool.ty.environment]
 extra-paths=["./stubs"]

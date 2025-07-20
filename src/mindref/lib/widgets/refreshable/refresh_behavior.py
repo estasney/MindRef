@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from kivy import Logger
+from kivy.logger import Logger
 
 from . import CustomBehavior
 

@@ -21,9 +21,13 @@ echo-vars:
 .PHONY : echo-vars
 
 
-install :
+install : uninstall
 	adb -d install mindref*.apk
 .PHONY : install
+
+uninstall :
+	adb -d uninstall org.test.mindref || true
+.PHONY : uninstall
 
 install-run : install
 	adb -d shell am start -n org.test.mindref/org.kivy.android.PythonActivity \

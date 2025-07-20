@@ -1,4 +1,4 @@
-from kivy import Logger
+from kivy.logger import Logger
 from kivy.properties import AliasProperty, ObjectProperty, StringProperty
 from kivy.uix.gridlayout import GridLayout
 from pygments import lexers, styles

@@ -15,7 +15,7 @@ from typing import (
     Unpack,
 )
 
-from kivy import Logger
+from kivy.logger import Logger
 from kivy.clock import Clock
 from kivy.lang import Builder
 from .shortcut_lexer import ShortcutLexer

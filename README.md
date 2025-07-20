@@ -8,6 +8,12 @@ MindRef renders Markdown notes with a special emphasis on technical notes, such 
 
 ## Development
 
+### Stub Generation
+
+```bash
+KIVY_NO_ARGS=1 uv run stubgen -p kivy --ignore-errors --inspect-mode --include-docstrings -o stubs
+```
+
 ### ImportError With Pycharm Debugger
 
 - Patch virtualenv with [apply_patches.sh](./scripts/patches/apply_patches.sh)

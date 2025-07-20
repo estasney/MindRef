@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from concurrent.futures.thread import ThreadPoolExecutor
 from typing import TYPE_CHECKING, Literal, NoReturn, Protocol, TypeVar
 
 from mindref.lib.adapters_v2.brokered.android.android_file_system import (
@@ -15,12 +16,6 @@ if TYPE_CHECKING:
 
     from mindref.app_notes import NoteFile
     from mindref.lib.adapters.atlas.fs.fs_atlas_repository import AtlasService
-    from mindref.lib.adapters.notes.android.android_note_repository import (
-        AndroidNoteRepository,
-    )
-    from mindref.lib.adapters.notes.fs.fs_note_repository import (
-        FileSystemNoteRepository,
-    )
 
     from mindref.lib.widgets import MindRefSettingsAndroid, MindRefSettingsNative
 
@@ -37,6 +32,7 @@ class AppRegistryProtocol(Protocol):
     colors: dict[str, tuple[float, float, float] | tuple[float, float, float, float]]
     settings_cls: str | MindRefSettingsAndroid | MindRefSettingsNative
     user_data_dir: str
+    pool: ThreadPoolExecutor
     note_files: list[NoteFile]
 
     def dispatch(self, *args, **kwargs) -> None: ...
@@ -59,7 +55,7 @@ class AppRegistryProtocol(Protocol):
 
     def save_draft_note(self, file_name: str, text: str) -> None: ...
 
-    def load_note_files(self):
+    def refresh_note_files(self):
         pass
 
     def read_note(self, note_id: str) -> str:

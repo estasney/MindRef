@@ -2,7 +2,7 @@ from enum import Enum
 from functools import partial
 from typing import TYPE_CHECKING, Literal, NamedTuple
 
-from kivy import Logger
+from kivy.logger import Logger
 from kivy.animation import Animation
 from kivy.app import App
 from kivy.clock import Clock

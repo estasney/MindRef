@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from operator import attrgetter, ge, gt, le, lt
 from pathlib import Path
 
-from kivy import Logger
+from kivy.logger import Logger
 from toolz import groupby
 
 from mindref.lib.domain.markdown_note import MarkdownNote, MarkdownNoteDict

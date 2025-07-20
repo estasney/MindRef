@@ -1,16 +1,18 @@
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from kivy import Logger
+from kivy.logger import Logger
 
-from . import FileSystemBase
+from .base import FileSystemBase
 
 if TYPE_CHECKING:
     from ...app_notes import NoteFile
 
 
 class DirectFileSystemAdapter(FileSystemBase):
-    def query_note_files(self, storage_path: str | Path) -> list["NoteFile"]:
+    def refresh_note_files(
+        self, storage_path: str | Path, external_storage_path: str
+    ) -> list["NoteFile"]:
         storage_path = Path(storage_path)
         if not storage_path.exists() or not storage_path.is_dir():
             Logger.error(
@@ -36,7 +38,11 @@ class DirectFileSystemAdapter(FileSystemBase):
         return matched_note.read_text(encoding="utf-8")
 
     def save_draft_note(
-        self, storage_path: str | Path, file_name: str, text: str
+        self,
+        storage_path: str | Path,
+        external_storage_path: str,
+        file_name: str,
+        text: str,
     ) -> "NoteFile":
         storage_path = Path(storage_path)
         draft_path = (storage_path / file_name).with_suffix(".md")
@@ -47,7 +53,11 @@ class DirectFileSystemAdapter(FileSystemBase):
         return NoteFile.from_path(draft_path)
 
     def save_edit_note(
-        self, storage_path: str | Path, file_name: str, text: str
+        self,
+        storage_path: str | Path,
+        external_storage_path: str,
+        file_name: str,
+        text: str,
     ) -> "NoteFile":
         storage_path = Path(storage_path)
         edit_path = (storage_path / file_name).with_suffix(".md")

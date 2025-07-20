@@ -4,9 +4,9 @@ from threading import Lock
 from typing import TYPE_CHECKING
 
 from jnius import PythonJavaClass, autoclass, java_method
-from kivy import Logger
+from kivy.logger import Logger
 
-from . import UriProtocol, get_intent_cls, get_kivy_activity
+from . import UriProtocol
 
 if TYPE_CHECKING:
     from mindref.lib.adapters.notes.android.interface import ActivityResultCode

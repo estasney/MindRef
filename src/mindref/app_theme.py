@@ -1,6 +1,9 @@
+from typing import Protocol, ClassVar
+
 from kivy.app import App
 from kivy.parser import parse_color
 from kivy.properties import DictProperty
+from mindref.app_protocol import AppThemeProtocol
 
 THEME_COLORS = {
     "White": (1, 1, 1),
@@ -24,8 +27,3 @@ THEME_COLORS = {
     "Accent-Two": parse_color("#56e39f"),
     "Warn": parse_color("#fa1919"),
 }
-
-
-class ThemedMixin(App):
-    fonts = DictProperty({"mono": "RobotoMono", "default": "Roboto", "icons": "Icon"})
-    colors = DictProperty(THEME_COLORS)

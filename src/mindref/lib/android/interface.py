@@ -1,22 +1,26 @@
 from collections.abc import Callable
 from enum import IntEnum, auto
-from typing import Any, ClassVar, Concatenate, Literal, ParamSpec
+from pathlib import Path
+from typing import Any, Concatenate, Literal, ParamSpec
 
 from jnius import PythonJavaClass, autoclass, java_method
-from kivy import Logger
+from kivy.logger import Logger
 
-from mindref.lib.adapters.notes.android.annotations import (
-    ActivityProtocol,
-    ContentResolverProtocol,
-    IntentProtocol,
-)
 from mindref.lib.adapters_v2.brokered.android import UriProtocol
 from mindref.lib.utils import Singleton
+
+from .annotations import (
+    ActivityProtocol,
+    ContentResolverProtocol,
+    ContextProtocol,
+    IntentProtocol,
+    MindRefUtilsProtocol,
+)
 
 ACTIVITY_CLASS_NAME = "org.kivy.android.PythonActivity"
 ACTIVITY_CLASS_NAMESPACE = "org/kivy/android/PythonActivity"
 
-_kivy_activity: ActivityProtocol = autoclass(ACTIVITY_CLASS_NAME).mActivity
+MINDREF_UTILS_CLASS_NAME = "org.estasney.android.MindRefUtils"
 
 
 TDocumentResultCode = Literal[-1, 0, 1]
@@ -25,6 +29,8 @@ CBArgs = ParamSpec("CBArgs")
 
 class V2MindRefCallCodes(IntEnum):
     PROMPT_EXTERNAL_STORAGE = auto()
+    IMPORT_EXTERNAL_STORAGE = auto()
+    COPY_TO_EXTERNAL_STORAGE = auto()
 
 
 TKeyedCallbackInner = Callable[Concatenate[V2MindRefCallCodes, CBArgs], None]
@@ -40,7 +46,7 @@ class OnDocumentCallback(PythonJavaClass):
     - This class needs to be registered as an ActivityResultListener in the Kivy Android activity.
     """
 
-    __javainterfaces__ = [ACTIVITY_CLASS_NAMESPACE + "$ActivityResultListener"]
+    __javainterfaces__ = [ACTIVITY_CLASS_NAMESPACE + "$ActivityResultListener"]  # noqa: RUF012
     __javacontext__ = "app"
 
     def __init__(self, callback: Callable[[int, str | UriProtocol], None]) -> None:
@@ -59,6 +65,24 @@ class OnDocumentCallback(PythonJavaClass):
         self.py_callback(requestCode, uri.toString())
 
 
+class MindRefUtilsCallback(PythonJavaClass):
+    __javainterfaces__ = ["org/estasney/android/MindRefUtils" + "$MindRefUtilsCallback"]  # noqa: RUF012
+    __javacontext__ = "app"
+
+    def __init__(self, callback: Callable[[int], None]) -> None:
+        super().__init__()
+        self.py_callback = callback
+
+    @java_method("(I)V", name="onComplete")
+    def onCompleteImportExternalStorage(self, result_code: int):
+        Logger.info(f"MindRefUtilsCallback: Import completed with code {result_code}")
+        self.py_callback(result_code)
+
+    @java_method("I(V)")
+    def onFailure(self, key: int):
+        self.py_callback(key * -1)  # Negative key to indicate failure
+
+
 class AndroidManager(metaclass=Singleton):
     """
     This class is responsible for implementing the `TKeyedCallback` interface, registering `PythonJavaClass` callbacks,
@@ -70,6 +94,9 @@ class AndroidManager(metaclass=Singleton):
 
     _py_mediator: TKeyedCallback | None = None
     _java_prompt_picker_callback: OnDocumentCallback | None = None
+    _java_mindref_utils_callback: MindRefUtilsCallback | None = None
+    _java_mindref_utils_class: type[MindRefUtilsProtocol] | None = None
+    _java_mindref_utils: MindRefUtilsProtocol | None = None
 
     @classmethod
     def get_py_mediator(cls) -> TKeyedCallbackInner:
@@ -84,7 +111,44 @@ class AndroidManager(metaclass=Singleton):
         cls._py_mediator = py_mediator
 
     @classmethod
-    def register_java_callbacks(cls):
+    def _get_mindref_utils(
+        cls, externalStorageRoot: str, appStorageRoot: str, context: "ContextProtocol"
+    ) -> MindRefUtilsProtocol:
+        # Check if our cached instance has the same parameters
+
+        def matches_parameters(
+            instance: MindRefUtilsProtocol,
+        ) -> bool:
+            return (
+                instance.externalStorageRoot == externalStorageRoot
+                and instance.appStorageRoot == appStorageRoot
+            )
+
+        if cls._java_mindref_utils_class is None:
+            from mindref.lib.android.jni import MindRefUtils
+
+            cls._java_mindref_utils_class = MindRefUtils
+
+        if cls._java_mindref_utils is not None and matches_parameters(
+            cls._java_mindref_utils
+        ):
+            return cls._java_mindref_utils
+
+        utils = cls._java_mindref_utils_class(
+            externalStorageRoot, appStorageRoot, context
+        )
+        if cls._java_mindref_utils_callback is None:
+            cls._register_mindref_utils_callback()
+        Logger.info(
+            f"{cls.__name__} : Setting MindRefUtilsCallback for {utils.externalStorageRoot=}, {utils.appStorageRoot=}"
+        )
+        utils.setMindRefCallback(cls._java_mindref_utils_callback)
+
+        cls._java_mindref_utils = utils
+        return cls._java_mindref_utils
+
+    @classmethod
+    def _register_kivy_java_callbacks(cls) -> None:
         def wrapped_external_storage_callback(
             request_code: int, uri: str | UriProtocol
         ):
@@ -108,7 +172,42 @@ class AndroidManager(metaclass=Singleton):
         )
         Logger.info("AndroidManager: Created OnDocumentCallback instance")
         # Register the callback with the Kivy activity
-        _kivy_activity.registerActivityResultListener(cls._java_prompt_picker_callback)
+        from mindref.lib.android.jni import KivyActivity
+
+        KivyActivity.registerActivityResultListener(cls._java_prompt_picker_callback)
+
+    @classmethod
+    def _register_mindref_utils_callback(cls) -> None:
+        def wrapped_mindref_utils_callback(operation_code: int):
+            if operation_code < 0:
+                Logger.error(
+                    f"AndroidManager: wrapped_mindref_utils_callback called with error, {operation_code=}"
+                )
+            else:
+                Logger.info(
+                    f"AndroidManager: wrapped_mindref_utils_callback called with {operation_code=}"
+                )
+
+            parseable_code = abs(operation_code)
+            try:
+                _code = V2MindRefCallCodes(parseable_code)
+            except ValueError:
+                Logger.error(
+                    f"AndroidManager: wrapped_mindref_utils_callback - Invalid result_code={operation_code}, cannot parse to V2MindRefCallCodes"
+                )
+                raise
+            cls.get_py_mediator()(operation_code)
+
+        cls._java_mindref_utils_callback = MindRefUtilsCallback(
+            wrapped_mindref_utils_callback
+        )
+        Logger.info("AndroidManager: Created MindRefUtilsCallback instance")
+
+    @classmethod
+    def register_java_callbacks(cls):
+        Logger.info(f"{type(cls).__name__}: Registering Java callbacks")
+        cls._register_kivy_java_callbacks()
+        cls._register_mindref_utils_callback()
 
     @classmethod
     def ensure_is_uri(cls, uri: str | UriProtocol) -> UriProtocol:
@@ -123,14 +222,16 @@ class AndroidManager(metaclass=Singleton):
     def take_persistable_permission(cls, uri: str | UriProtocol) -> str | UriProtocol:
         """After user selects DocumentTree, we want to persist the permission"""
         Intent: IntentProtocol = autoclass("android.content.Intent")
-        resolver: ContentResolverProtocol = _kivy_activity.getContentResolver()
+        from .jni import KivyActivity
+
+        resolver: ContentResolverProtocol = KivyActivity.getContentResolver()
         uri_native: UriProtocol = cls.ensure_is_uri(uri)
         resolver.takePersistableUriPermission(
             uri_native,
             Intent.FLAG_GRANT_READ_URI_PERMISSION
             | Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
         )
-        Logger.info(f"{type(cls).__name__}: take_persistable_permission - {uri}")
+        Logger.info(f"{cls.__name__} : take_persistable_permission - {uri}")
         return uri
 
     @classmethod
@@ -150,6 +251,61 @@ class AndroidManager(metaclass=Singleton):
             .addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
             .addFlags(Intent.FLAG_GRANT_PREFIX_URI_PERMISSION)
         )
-        _kivy_activity.startActivityForResult(
+        from mindref.lib.android.jni import KivyActivity
+
+        KivyActivity.startActivityForResult(
             intent, V2MindRefCallCodes.PROMPT_EXTERNAL_STORAGE.value
+        )
+
+    @classmethod
+    def import_external_storage(
+        cls, externalStorageRoot: str, appStoragePath: str
+    ) -> None:
+        """
+        Import external storage using the MindRefUtils class.
+
+        Parameters
+        ----------
+        externalStorageRoot : str
+            The root path of the external storage.
+        appStoragePath : str
+            The root path of the app's storage.
+        """
+        from mindref.lib.android.jni import KivyActivity
+
+        context: ContextProtocol = KivyActivity.getContext()
+        utils = cls._get_mindref_utils(externalStorageRoot, appStoragePath, context)
+        op_key = V2MindRefCallCodes.IMPORT_EXTERNAL_STORAGE.value
+        utils.copyToAppStorage(op_key)
+
+    @classmethod
+    def copy_to_external_storage(
+        cls, externalStoragePath: str, appStoragePath: str, filePath: str | UriProtocol
+    ) -> None:
+        source = Path(filePath)
+
+        source_ext = source.suffix if source.suffix else ""
+
+        mime_types = {
+            ".md": "text/markdown",
+        }
+
+        source_mime_type = mime_types.get(source_ext, "")
+
+        if cls._java_mindref_utils_class is None:
+            from mindref.lib.android.jni import MindRefUtils
+
+            cls._java_mindref_utils_class = MindRefUtils
+
+        from mindref.lib.android.jni import KivyActivity
+
+        context: ContextProtocol = KivyActivity.getContext()
+        utils = cls._get_mindref_utils(externalStoragePath, appStoragePath, context)
+
+        op_key = V2MindRefCallCodes.COPY_TO_EXTERNAL_STORAGE.value
+        Logger.info(
+            f"{cls.__name__} : Calling MindRefUtils 'copyToExternalStorage' sourcePath={source!s}, directory={source.parent.stem} name={source.stem} mimeType={source_mime_type}"
+        )
+        utils.copyToExternalStorage(
+            op_key, str(source), source.parent.stem, source.stem, source_mime_type
         )
