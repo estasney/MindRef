@@ -49,7 +49,7 @@ def take_persistable_permission(uri: str | UriProtocol):
 class OnDocumentCallback(PythonJavaClass):
     """PythonActivity (Kivy Built-in) calls this after User has selected folder or file with Android Document Picker"""
 
-    __javainterfaces__ = f"{ACTIVITY_CLASS_NAMESPACE}$ActivityResultListener"
+    __javainterfaces__ = "org/kivy/android/PythonActivity$ActivityResultListener"
     __javacontext__ = "app"
 
     def __init__(self, py_callback: Callable[[int, ...], None]):

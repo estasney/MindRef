@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import json
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from kivy import Logger
 from kivy.app import App
@@ -8,16 +11,15 @@ from kivy.properties import (
     ConfigParserProperty,
     ObjectProperty,
 )
-from kivy.uix.settings import Settings
 
 from mindref.lib import get_app
-from mindref.lib.adapters_v2 import FileSystemBase
-from mindref.lib.adapters_v2.brokered.android.android_file_system import (
-    AndroidFileSystemAdapter,
-)
 from mindref.lib.adapters_v2.direct_file_system import DirectFileSystemAdapter
-from mindref.lib.domain.settings import get_android_settings, get_native_settings
 from mindref.lib.widgets.settings.settings_mindref import MindrefSettings
+
+if TYPE_CHECKING:
+    from mindref.lib.adapters_v2.brokered.android.android_file_system import (
+        AndroidFileSystemAdapter,
+    )
 
 
 def _to_path(value: str | Path | None) -> Path | None:
@@ -64,6 +66,10 @@ class SettingsMixin(App):
     def on_platform_android(self, instance, value):
         Logger.info(f"Platform changed: Android={value}")
         if value:
+            from mindref.lib.adapters_v2.brokered.android.android_file_system import (
+                AndroidFileSystemAdapter,
+            )
+
             self.fs = AndroidFileSystemAdapter()
             self.fs.external_storage_path = self.external_storage_path
             self.bind(
