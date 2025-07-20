@@ -2,6 +2,9 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from kivy import Logger
+from kivy.clock import mainthread
+
 from mindref.lib.android.interface import V2MindRefCallCodes
 
 from ...direct_file_system import DirectFileSystemAdapter
@@ -44,7 +47,18 @@ class AndroidFileSystemAdapter(DirectFileSystemAdapter):
     def py_mediator(self) -> Callable[[V2MindRefCallCodes, tuple[Any, ...]], None]:
         return self.py_mediator_impl
 
-    def py_mediator_impl(self, key: V2MindRefCallCodes, *args) -> None: ...
+    @mainthread
+    def py_mediator_impl(self, key: V2MindRefCallCodes, *args) -> None:
+        Logger.info(
+            f"AndroidFileSystemAdapter: py_mediator called with key={key}, args={args}"
+        )
+        callback = self.py_callbacks.pop(key, None)
+        if callback is None:
+            raise ValueError(f"Callback for key {key} not found in py_callbacks.")
+        Logger.info(
+            f"AndroidFileSystemAdapter: Calling callback={callback} for key={key} with args={args}"
+        )
+        callback(*args)
 
     def prompt_for_external_storage(
         self, callback: TPromptExternalStorageCallback

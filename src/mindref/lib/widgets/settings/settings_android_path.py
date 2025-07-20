@@ -1,3 +1,4 @@
+from kivy import Logger
 from kivy.uix.settings import SettingString
 
 
@@ -33,4 +34,5 @@ class SettingsAndroidPath(SettingString):
         app.fs.prompt_for_external_storage(self._external_path_callback)
 
     def _external_path_callback(self, value):
+        Logger.info(f"SettingsAndroidPath: External storage path selected - {value}")
         self.value = value

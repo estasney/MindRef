@@ -96,7 +96,12 @@ class AndroidManager(metaclass=Singleton):
                 f"AndroidManager: wrapped_callback - calling py_mediator with request_code={request_code}, uri={uri}"
             )
             call_code = V2MindRefCallCodes(request_code)
-            cls.get_py_mediator()(call_code, uri)
+            Logger.info(
+                f"AndroidManager: wrapped_callback - call_code={call_code}, uri={uri}"
+            )
+            mediator = cls.get_py_mediator()
+            Logger.info(f"AndroidManager: wrapped_callback - mediator={mediator}")
+            mediator(call_code, uri)
 
         cls._java_prompt_picker_callback = OnDocumentCallback(
             wrapped_external_storage_callback
