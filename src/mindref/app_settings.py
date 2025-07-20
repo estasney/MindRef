@@ -67,7 +67,7 @@ class SettingsMixin(App):
             self.fs = AndroidFileSystemAdapter()
             self.fs.external_storage_path = self.external_storage_path
             self.bind(
-                android_storage_path=lambda *_: setattr(
+                external_storage_path=lambda *_: setattr(
                     self.fs, "external_storage_path", self.external_storage_path
                 )
             )
