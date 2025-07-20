@@ -611,6 +611,10 @@ class NavDrawer(FloatLayout, DebugLayout, V2RefreshBehavior):
                 text=item.display_name, nav_id=item.nav_id, selected=item.selected
             )
             self.add_widget_to_drawer(widget)
+        if self.open_state == OpenState.closed:
+            Clock.schedule_once(
+                lambda _: setattr(self, "open_state", OpenState.opening),
+            )
 
     def on_nav_data_items(self, _widget, value):
         self.nav_id_selected = None

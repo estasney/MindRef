@@ -51,7 +51,7 @@ Builder.load_string(
             size_hint_x_open: 0.5
             nav_link_padding: [0, dp(16), 0, dp(16)]
             nav_id_selected: root.selected_note
-            open_state: 'opening'
+            open_state: 'closed'
             canvas.before:
                 Color:
                     rgba: app.colors['Dark']
