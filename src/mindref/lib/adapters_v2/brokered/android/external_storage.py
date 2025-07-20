@@ -1,8 +1,10 @@
 from collections.abc import Callable
+from enum import IntEnum, auto
 from threading import Lock
 from typing import TYPE_CHECKING
 
 from jnius import PythonJavaClass, autoclass, java_method
+from kivy import Logger
 
 from . import UriProtocol, get_intent_cls, get_kivy_activity
 
@@ -10,6 +12,10 @@ if TYPE_CHECKING:
     from mindref.lib.adapters.notes.android.interface import ActivityResultCode
 
 ACTIVITY_CLASS_NAMESPACE = "org/kivy/android/PythonActivity"
+
+
+class V2MindRefCallCodes(IntEnum):
+    PROMPT_EXTERNAL_STORAGE = auto()
 
 
 def KivyActivity():
@@ -46,7 +52,7 @@ class OnDocumentCallback(PythonJavaClass):
     __javainterfaces__ = f"{ACTIVITY_CLASS_NAMESPACE}$ActivityResultListener"
     __javacontext__ = "app"
 
-    def __init__(self, py_callback: Callable[[str], None]):
+    def __init__(self, py_callback: Callable[[int, ...], None]):
         """
 
         Parameters
@@ -68,33 +74,39 @@ class OnDocumentCallback(PythonJavaClass):
 
 
 class ExternalStorageMixin:
+    callbacks: dict[int, Callable]
+
     def __init__(self):
+        self.jni_lock = Lock()
         self.java_on_document_callback = None
         self.kivy_activity = None
-        self.jni_lock = Lock()
-
-    def register_external_storage_callback(self, on_complete: Callable[[str], None]):
+        self.callbacks = {}
         with self.jni_lock:
-            self.java_on_document_callback = OnDocumentCallback(on_complete)
+            self.register_external_storage_callback()
+
+    def callback_manager(self, key: int, *args):
+        """
+        Any `PythonJavaClass` that we register uses this as a callback - this prevents multiple registrations
+        """
+
+        Logger.info(
+            f"{type(self).__name__}: py_mediator - Got Key : {key}, Args: {args}"
+        )
+        if key not in self.callbacks:
+            Logger.info(
+                f"{type(self).__name__}: py_mediator - No callback for code {key}"
+            )
+            return
+        callback = self.callbacks.pop(key)
+        callback(*args)
+
+    def register_external_storage_callback(self):
+        with self.jni_lock:
+            self.java_on_document_callback = OnDocumentCallback(self.callback_manager)
             self.kivy_activity = get_kivy_activity()
             self.kivy_activity.registerActivityResultListener(
                 self.java_on_document_callback
             )
-
-    def unregister_external_storage_callback(self):
-        with self.jni_lock:
-            if self.java_on_document_callback and self.kivy_activity:
-                self.kivy_activity.unregisterActivityResultListener(
-                    self.java_on_document_callback
-                )
-                self.java_on_document_callback = None
-                self.kivy_activity = None
-
-    def has_registered_callback(self) -> bool:
-        return (
-            self.java_on_document_callback is not None
-            and self.kivy_activity is not None
-        )
 
     def prompt_for_external_storage(self, on_complete: Callable[[str], None]):
         """
@@ -105,11 +117,16 @@ class ExternalStorageMixin:
         on_complete
             Callback function that will be called with the selected URI as a string.
         """
-        self.java_on_document_callback = OnDocumentCallback(on_complete)
 
-        if not self.has_registered_callback():
-            self.register_external_storage_callback(on_complete)
+        key = V2MindRefCallCodes.PROMPT_EXTERNAL_STORAGE.value
+
+        # We actually want to wrap the callback in another, taking the persistable permission
+        def wrapped_on_complete(uri: str):
+            take_persistable_permission(uri)
+            on_complete(uri)
+
+        self.callbacks[key] = wrapped_on_complete
 
         Intent = get_intent_cls()
         intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-        self.kivy_activity.startActivityForResult(intent, 1)
+        self.kivy_activity.startActivityForResult(intent, key)

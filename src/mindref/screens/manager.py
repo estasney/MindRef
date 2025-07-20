@@ -5,13 +5,13 @@ from kivy.lang import Builder
 from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import ScreenManager
 from kivy.uix.widget import Widget
+
 from mindref.lib.widgets.refreshable import V2RefreshBehavior
 
 Builder.load_string(
     """
 #:import SlideTransition kivy.uix.screenmanager.SlideTransition
 #:import MainScreen mindref.screens.main_screen
-#:import SettingsScreen mindref.screens.settings_screen
 #:import EditScreen mindref.screens.edit_screen
 #:import DraftScreen mindref.screens.draft_screen
 
@@ -28,13 +28,10 @@ Builder.load_string(
     DraftScreen:
         id: draft_screen
         name: 'draft_screen'
-    SettingsScreen:
-        id: settings_screen
-        name: 'settings_screen'
 """
 )
 
-TScreenNames = Literal["main_screen", "edit_screen", "draft_screen", "settings_screen"]
+TScreenNames = Literal["main_screen", "edit_screen", "draft_screen"]
 
 
 class NoteAppScreenManager(V2RefreshBehavior, ScreenManager):

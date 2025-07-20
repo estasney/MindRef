@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from kivy import platform
+from kivy import platform, Logger
 from kivy._clock import ClockEvent  # noqa
 from kivy.app import App
 from kivy.clock import Clock
@@ -25,7 +25,6 @@ class MindRefApp(ThemedMixin, SettingsMixin, AppNotesMixin, App):
 
     error_message = StringProperty()
     screen_manager = ObjectProperty()
-    settings_cls = "MindRefSettings"
     storage_path: Path | None
 
     def key_input(self, _window, key, _scancode, _codepoint, _modifier):
@@ -36,6 +35,8 @@ class MindRefApp(ThemedMixin, SettingsMixin, AppNotesMixin, App):
 
     def build(self):
         self.platform_android = platform == "android"
+        Logger.info(f"Platform: {platform}, Android: {self.platform_android}")
+
         Window.bind(on_keyboard=self.key_input)
         self.screen_manager = NoteAppScreenManager()
         self.bind(storage_path=lambda *_: self.load_note_files())

@@ -3,6 +3,11 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Literal, NoReturn, Protocol, TypeVar
 
+from mindref.lib.adapters_v2.brokered.android.android_file_system import (
+    AndroidFileSystemAdapter,
+)
+from mindref.lib.adapters_v2.direct_file_system import DirectFileSystemAdapter
+
 if TYPE_CHECKING:
     from pathlib import Path
 
@@ -23,7 +28,7 @@ if TYPE_CHECKING:
 class AppRegistryProtocol(Protocol):
     atlas_service: AtlasService
     note_service: FileSystemNoteRepository | AndroidNoteRepository
-
+    fs: DirectFileSystemAdapter | AndroidFileSystemAdapter
     platform_android: bool
     error_message: str
     screen_manager: ScreenManager

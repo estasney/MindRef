@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 
+from kivy import Logger
 from kivy.app import App
 from kivy.config import ConfigParser
 from kivy.properties import (
@@ -16,6 +17,7 @@ from mindref.lib.adapters_v2.brokered.android.android_file_system import (
 )
 from mindref.lib.adapters_v2.direct_file_system import DirectFileSystemAdapter
 from mindref.lib.domain.settings import get_android_settings, get_native_settings
+from mindref.lib.widgets.settings.settings_mindref import MindrefSettings
 
 
 def _to_path(value: str | Path | None) -> Path | None:
@@ -39,13 +41,14 @@ class PathConfigParserProperty(ConfigParserProperty):
 
 
 class SettingsMixin(App):
+    settings_cls = ObjectProperty(MindrefSettings)
     storage_path: Path | None = PathConfigParserProperty(
         default=None, section="Storage", key="storage_path", config_name="app"
     )
-    android_storage_path: str = ConfigParserProperty(
+    external_storage_path: str = ConfigParserProperty(
         "",
         "Storage",
-        "android_storage_path",
+        "external_storage_path",
         "app",
     )
 
@@ -58,35 +61,57 @@ class SettingsMixin(App):
     platform_android: bool
     fs: DirectFileSystemAdapter | AndroidFileSystemAdapter
 
-    def _create_settings_native(self): ...
-
-    def _create_settings_android(self):
-        fs = self.fs
-        if not isinstance(fs, AndroidFileSystemAdapter):
-            raise TypeError(
-                f"Expected AndroidFileSystemAdapter, got {type(fs).__name__}"
+    def on_platform_android(self, instance, value):
+        Logger.info(f"Platform changed: Android={value}")
+        if value:
+            self.fs = AndroidFileSystemAdapter()
+            self.fs.external_storage_path = self.external_storage_path
+            self.bind(
+                android_storage_path=lambda *_: setattr(
+                    self.fs, "external_storage_path", self.external_storage_path
+                )
             )
-        fs.prompt_for_external_storage
+        else:
+            self.fs = DirectFileSystemAdapter()
 
-    def create_settings(self):
-        settings = (
-            self._create_settings_android()
-            if self.platform_android
-            else self._create_settings_native()
-        )
-
-    def build_settings(self, settings: Settings):
-        settings_data = (
-            get_android_settings() if self.platform_android else get_native_settings()
-        )
-        settings.add_json_panel(self.title, self.config, data=json.dumps(settings_data))
+    def build_settings(self, settings):
+        settings_data = [
+            {
+                "type": "numeric",
+                "title": "Base Font Size",
+                "desc": "The base font size for the application.",
+                "section": "Display",
+                "key": "base_font_size",
+            },
+        ]
+        if self.platform_android:
+            settings_data.append(
+                {
+                    "type": "android_path",
+                    "title": "External Storage Path",
+                    "desc": "The path to the external storage directory.",
+                    "section": "Storage",
+                    "key": "external_storage_path",
+                }
+            )
+        else:
+            settings_data.append(
+                {
+                    "type": "path",
+                    "title": "Storage Path",
+                    "desc": "The path to the storage directory.",
+                    "section": "Storage",
+                    "key": "storage_path",
+                }
+            )
+        settings.add_json_panel("MindRef", self.config, data=json.dumps(settings_data))
 
     def build_config(self, config: ConfigParser):
         if self.platform_android:
             config.setdefaults(
                 "Storage",
                 {
-                    "android_storage_path": "",
+                    "external_storage_path": "",
                     "storage_path": Path(get_app().user_data_dir) / "notes",
                 },
             )
@@ -96,9 +121,11 @@ class SettingsMixin(App):
             config.setdefaults("Display", {"base_font_size": 16})
 
     def open_settings(self, *largs):
-        self.screen_manager.current = "settings_screen"
+        # self.screen_manager.current = "settings_screen"
+        # super().open_settings(*largs)
         super().open_settings(*largs)
 
     def close_settings(self, *largs):
-        self.screen_manager.current = "main_screen"
+        # self.screen_manager.current = "main_screen"
+        # super().close_settings(*largs)
         super().close_settings(*largs)
