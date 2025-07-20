@@ -1,4 +1,5 @@
 from kivy import Logger
+from kivy.clock import mainthread, Clock
 from kivy.uix.settings import SettingString
 
 
@@ -21,7 +22,7 @@ class SettingsAndroidPath(SettingString):
         Instead, we'll offload the path selection to the Android system.
         """
         from mindref.lib import get_app
-        from mindref.lib.adapters_v2.brokered.android.android_file_system import (  # noqa: PLC0415
+        from mindref.lib.adapters_v2.brokered.android.android_file_system import (
             AndroidFileSystemAdapter,
         )
 

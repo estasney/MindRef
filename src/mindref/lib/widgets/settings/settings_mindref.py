@@ -1,4 +1,4 @@
-from kivy.uix.settings import SettingsWithNoMenu, SettingsWithSpinner
+from kivy.uix.settings import SettingsWithSpinner
 
 from . import SettingsAndroidPath
 

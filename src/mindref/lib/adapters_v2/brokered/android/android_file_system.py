@@ -3,8 +3,9 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from kivy import Logger
-from kivy.clock import mainthread
+from kivy.clock import mainthread, Clock
 
+from mindref.lib import schedulable
 from mindref.lib.android.interface import V2MindRefCallCodes
 
 from ...direct_file_system import DirectFileSystemAdapter
@@ -72,4 +73,9 @@ class AndroidFileSystemAdapter(DirectFileSystemAdapter):
             A callback function that will be called with the result of the user's selection.
         """
         self.py_callbacks[V2MindRefCallCodes.PROMPT_EXTERNAL_STORAGE] = callback
-        self.android_manager.prompt_for_external_storage()
+
+        Clock.schedule_once(
+            schedulable(
+                self.android_manager.prompt_for_external_storage,
+            )
+        )
