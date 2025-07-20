@@ -81,8 +81,6 @@ class ExternalStorageMixin:
         self.java_on_document_callback = None
         self.kivy_activity = None
         self.callbacks = {}
-        with self.jni_lock:
-            self.register_external_storage_callback()
 
     def callback_manager(self, key: int, *args):
         """
@@ -101,7 +99,13 @@ class ExternalStorageMixin:
         callback(*args)
 
     def register_external_storage_callback(self):
+        Logger.info(
+            f"{type(self).__name__}: Registering external storage callback - attempting to get lock"
+        )
         with self.jni_lock:
+            Logger.info(
+                f"{type(self).__name__}: Got lock, registering external storage callback"
+            )
             self.java_on_document_callback = OnDocumentCallback(self.callback_manager)
             self.kivy_activity = get_kivy_activity()
             self.kivy_activity.registerActivityResultListener(
@@ -117,6 +121,9 @@ class ExternalStorageMixin:
         on_complete
             Callback function that will be called with the selected URI as a string.
         """
+
+        if not self.java_on_document_callback:
+            self.register_external_storage_callback()
 
         key = V2MindRefCallCodes.PROMPT_EXTERNAL_STORAGE.value
 
