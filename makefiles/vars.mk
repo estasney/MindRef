@@ -9,6 +9,7 @@ P4A_HOOKS_FILE:=$(P4A_HOOKS_DIR)/hook.py
 UTIL_ROOT:=$(HOME)/AndroidStudioProjects/MindRefUtils
 UTIL_OUTPUT:=$(UTIL_ROOT)/mindrefutils/build/outputs/aar
 MINDREF_UTILS_DEBUG:=mindrefutils-debug.aar
+MINDREF_UTILS_RELEASE:=mindrefutils-release.aar
 
 PROJECT_NAME:=mindref
 PROJECT_NAME_READABLE:=MindRef
@@ -39,9 +40,13 @@ SDK_DIR:=$(HOME)/.android
 NDK_DIR:=$(HOME)/.android/ndk/$(NDK_VERSION)
 NDK_API ?= 29
 SDK_VERSION ?= 34
+BUILD_TOOLS_DIR:=$(SDK_DIR)/build-tools/$(SDK_VERSION).0.0
 
 
-MINDREF_APK := $(PROJECT_NAME)-debug-$(PROJECT_VERSION).apk
+MINDREF_DEBUG_APK := $(PROJECT_NAME)-debug-$(PROJECT_VERSION).apk
+MINDREF_RELEASE_UNSIGNED_APK := $(PROJECT_NAME)-release-unsigned-$(PROJECT_VERSION).apk
+MINDREF_RELEASE_ALIGNED_APK := $(PROJECT_NAME)-release-aligned-$(PROJECT_VERSION).apk
+MINDREF_RELEASE_SIGNED_APK := $(PROJECT_NAME)-release-signed-$(PROJECT_VERSION).apk
 UNPACK_DIR := $(HOME)/Downloads/apk
 
 # ADB

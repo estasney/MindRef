@@ -43,6 +43,7 @@ clean-mindref-p4a-src:
 	uv run p4a clean-recipe-build mindref_android || true
 	uv run p4a clean_dists
 	rm -f $(BUILD_DIR)/$(MINDREF_UTILS_DEBUG)
+	rm -f $(BUILD_DIR)/$(MINDREF_UTILS_RELEASE)
 .PHONY : clean-mindref-p4a-src
 
 prebuild : $(BUILD_DIR) $(PRIVATE_ENTRYPOINT_DEST) clean-mindref-p4a-src asset-image asset-fonts

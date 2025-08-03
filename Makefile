@@ -1,5 +1,6 @@
 #include $(wildcard makefiles/*.mk)
 include makefiles/vars.mk
+include makefiles/secrets.mk
 include makefiles/prebuild.mk
 include makefiles/apk.mk
 include makefiles/aar.mk
@@ -25,6 +26,10 @@ install : uninstall
 	adb -d install mindref*.apk
 .PHONY : install
 
+install-release: uninstall
+	adb -d install $(MINDREF_RELEASE_SIGNED_APK)
+.PHONY : install-release
+
 uninstall :
 	adb -d uninstall org.test.mindref || true
 .PHONY : uninstall
@@ -34,3 +39,9 @@ install-run : install
 	&& adb -d logcat -c \
 	&& adb -d logcat $(LOGCAT_FILTER)
 .PHONY : install-run
+
+
+install-run-release : install-release
+	adb -d shell am start -n org.test.mindref/org.kivy.android.PythonActivity \
+	&& adb -d logcat -c \
+	&& adb -d logcat $(LOGCAT_FILTER)

@@ -48,8 +48,54 @@ build-apk :  $(MINDREF_UTILS_DEBUG) clean-bytecode prebuild
   	
 .PHONY : build-apk
 
+
+
+$(MINDREF_RELEASE_UNSIGNED_APK) : $(MINDREF_UTILS_RELEASE) clean-bytecode prebuild
+	JAVA_HOME=$(PROJECT_JAVA_HOME) \
+ 	uv run p4a apk --private $(BUILD_DIR) \
+  	--package=$(PROJECT_JAVA_PACKAGE) \
+  	--name $(PROJECT_NAME_READABLE) \
+  	--version $(PROJECT_VERSION) \
+  	--bootstrap=sdl2 \
+  	--window \
+  	--dist-name=$(PROJECT_NAME) \
+  	--sdk-dir $(SDK_DIR) \
+  	--ndk-dir $(NDK_DIR) \
+  	--ndk-api $(NDK_API) \
+  	--android-api $(SDK_VERSION) \
+  	--arch arm64-v8a \
+  	--requirements=$(PROJECT_REQUIREMENTS) \
+  	--enable-androidx \
+  	--presplash $(PROJECT_ROOT)/assets/presplash.png \
+  	--icon $(PROJECT_ROOT)/assets/logo.png \
+  	--depend "com.google.guava:guava:31.1-android" \
+  	--depend "org.apache.commons:commons-io:1.3.2" \
+  	--add-aar $(ROOT_DIR)/$(MINDREF_UTILS_RELEASE) \
+  	--no-byte-compile-python \
+  	--add-compile-option "sourceCompatibility=17" \
+  	--add-compile-option "targetCompatibility=17" \
+  	--local-recipes $(LOCAL_RECIPES) \
+  	--hook $(P4A_HOOKS_FILE) \
+  	--keystore $(KEYSTORE_FILE) \
+  	--signkey mindref \
+  	--keystorepw $(KEYSTORE_PASSWORD) \
+  	--release
+  	
+$(MINDREF_RELEASE_ALIGNED_APK): $(MINDREF_RELEASE_UNSIGNED_APK)
+	$(BUILD_TOOLS_DIR)/zipalign -p -f 4 $< $@
+
+$(MINDREF_RELEASE_SIGNED_APK): $(MINDREF_RELEASE_ALIGNED_APK)
+	$(BUILD_TOOLS_DIR)/apksigner sign --ks $(KEYSTORE_FILE) \
+	--ks-key-alias mindref \
+	--ks-pass pass:$(KEYSTORE_PASSWORD) \
+	--out $@ $<
+
+
+build-apk-release: $(MINDREF_RELEASE_SIGNED_APK)
+.PHONY : build-apk-release
+	
 copy-apk:
-	cp $(MINDREF_APK) $(HOME)/ApkProjects/$(basename $(MINDREF_APK))/$(MINDREF_APK)
+	cp $(MINDREF_DEBUG_APK) $(HOME)/ApkProjects/$(basename $(MINDREF_DEBUG_APK))/$(MINDREF_DEBUG_APK)
 .PHONY : copy-apk
 
 $(UNPACK_DIR):
