@@ -1,12 +1,12 @@
 from enum import Enum
 from functools import partial
-from typing import TYPE_CHECKING, Literal, NamedTuple
+from typing import Literal, NamedTuple
 
-from kivy.logger import Logger
 from kivy.animation import Animation
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.lang import Builder
+from kivy.logger import Logger
 from kivy.properties import (
     BooleanProperty,
     DictProperty,
@@ -17,12 +17,10 @@ from kivy.properties import (
     StringProperty,
     VariableListProperty,
 )
-from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.floatlayout import FloatLayout
 
 from mindref.lib.models import AnimationTiming
-from mindref.lib.widgets.behavior import DebugLayout
+from mindref.lib.widgets.behavior import DebugFloatLayout
 from mindref.lib.widgets.buttons.buttons import ThemedIconButton
 from mindref.lib.widgets.nav_drawer.nav_item import NavItem, NavItemData
 from mindref.lib.widgets.nav_drawer.search_box import SearchBox
@@ -227,7 +225,7 @@ class NavDrawerIds(NamedTuple):
     nav_items: "V2RefreshContainer"
 
 
-class NavDrawer(FloatLayout, DebugLayout, V2RefreshBehavior):
+class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
     ids: NavDrawerIds = DictProperty({})
     size_hint_x_closed = NumericProperty(0)
     size_hint_x_open = NumericProperty(0)

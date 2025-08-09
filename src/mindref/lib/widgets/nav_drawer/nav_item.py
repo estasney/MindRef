@@ -7,11 +7,10 @@ from kivy.lang import Builder
 from kivy.metrics import dp
 from kivy.properties import BooleanProperty, ColorProperty, StringProperty, partial
 from kivy.uix.behaviors import ButtonBehavior
-from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.widget import Widget
 
 from mindref.app_notes import NoteFile
-from mindref.lib.widgets.behavior import DebugLayout
+from mindref.lib.widgets.behavior import DebugBoxLayout
 
 Builder.load_string("""
 
@@ -91,7 +90,7 @@ class NavItemData:
         return cls(display_name=data.label, nav_id=data.id, selected=selected)
 
 
-class NavItem(ButtonBehavior, BoxLayout, DebugLayout, SelectableAnimation):
+class NavItem(ButtonBehavior, DebugBoxLayout, SelectableAnimation):
     text = StringProperty()
     nav_id = StringProperty()
     selected = BooleanProperty(False)
