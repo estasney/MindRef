@@ -1,6 +1,9 @@
 import re
 from copy import copy
 from pathlib import Path
+from pathlib import Path
+from xml.etree import ElementTree as ET
+
 
 REPO_PATTERN = re.compile(r"(?<=repositories {)(?:[^}]+)(})")
 
@@ -26,6 +29,9 @@ def patch(doc: str) -> str:
     return doc_copy
 
 
+PROFILEABLE_TAG = {"{http://schemas.android.com/apk/res/android}shell": "true"}
+
+
 def after_apk_build(ctx, **kwargs) -> None:
     """
     p4a hook: runs once the dist is ready but *before* gradle builds.
@@ -43,3 +49,15 @@ def after_apk_build(ctx, **kwargs) -> None:
 
     patched_doc = patch(doc)
     gradle_path.write_text(patched_doc, encoding="utf-8")
+
+    manifest = Path(ctx._dist.dist_dir) / "src/main/AndroidManifest.xml"
+
+    tree = ET.parse(manifest)
+    app = tree.getroot().find("application")
+    if app is None:
+        raise RuntimeError("No <application> tag found in manifest")
+
+    if app.find("profileable") is None:
+        ET.SubElement(app, "profileable", PROFILEABLE_TAG)
+        tree.write(manifest, encoding="utf-8", xml_declaration=True)
+        print("✓ inserted <profileable/> into AndroidManifest.xml")

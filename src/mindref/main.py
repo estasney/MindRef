@@ -29,9 +29,11 @@ def setup_desktop() -> MindRefApp:
 
     Config.set("input", "mouse", "mouse,disable_multitouch")
 
+    enable_profiling = os.environ.get("PROFILE") is not None
+
     from mindref.app import MindRefApp
 
-    return MindRefApp()
+    return MindRefApp(enable_profiling=enable_profiling)
 
 
 def run_desktop():

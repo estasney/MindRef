@@ -23,7 +23,7 @@
       <option name="useCurrentConnection" value="false" />
     </EXTENSION>
     <option name="SCRIPT_NAME" value="$ProjectFileDir$/src/mindref/main.py" />
-    <option name="PARAMETERS" value="--size 2340x1080" />
+    <option name="PARAMETERS" value="--size 1080x2340 -m monitor" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />

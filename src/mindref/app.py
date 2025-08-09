@@ -33,6 +33,7 @@ class MindRefApp(App):
     settings_cls = ObjectProperty(MindrefSettings)
 
     platform_android = BooleanProperty(defaultvalue=False)
+    enable_profiling = BooleanProperty(defaultvalue=False)
     note_files = ListProperty(force_dispatch=True)
     editing_note = ObjectProperty(allownone=True)
     error_message = StringProperty()
@@ -57,15 +58,34 @@ class MindRefApp(App):
 
     def __init__(self, **kwargs):
         platform_android = kwargs.pop("platform_android", False)
+        enable_profiling = kwargs.pop("enable_profiling", False)
         self.pool = get_pool()
+        self.profile = None
         super().__init__(**kwargs)
         self.platform_android = platform_android
+        self.enable_profiling = enable_profiling
         self.fs = FileManager()
         self.bind(
             external_storage_path=lambda *_: setattr(
                 self.fs, "external_storage_path", self.external_storage_path
             )
         )
+
+    def on_start(self):
+        if self.enable_profiling:
+            import cProfile
+
+            self.profile = cProfile.Profile()
+            self.profile.enable()
+            Logger.info(
+                "Profiling enabled. MindRef will generate a profile file on exit."
+            )
+
+    def on_stop(self):
+        if self.profile is not None:
+            self.profile.disable()
+            self.profile.dump_stats("mindref.profile")
+            Logger.info("Saved profiling data to mindref.profile")
 
     def on_platform_android(self, _instance, value):
         Logger.info(f"Platform changed: Android={value}")
@@ -159,7 +179,7 @@ class MindRefApp(App):
         self.platform_android = platform == "android"
         Logger.info(f"Platform: {platform}, Android: {self.platform_android}")
 
-        Window.bind(on_keyboard=self.key_input)
+        # Window.bind(on_keyboard=self.key_input)
         self.screen_manager = NoteAppScreenManager()
         self.bind(storage_path=lambda *_: self.refresh_note_files())
         Clock.schedule_once(lambda _: self.refresh_note_files())
