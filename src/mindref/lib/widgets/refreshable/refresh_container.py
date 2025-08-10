@@ -16,6 +16,7 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.widget import Widget
 
+from ..behavior import DebugFloatLayout
 from ...ext import compute_overscroll
 from . import V2RefreshBehavior
 
@@ -71,7 +72,7 @@ Builder.load_string(
 )
 
 
-class V2RefreshContainer(V2RefreshBehavior):
+class V2RefreshContainer(DebugFloatLayout, V2RefreshBehavior):
     """
     This widget implements a ScrollView contained in a RelativeLayout. This nesting of layouts is necessary so that the Refresh icon
     can be positioned in the center of the screen. The ScrollView is used to enable the overscroll effect for refreshing.
