@@ -1,6 +1,6 @@
 from enum import Enum
 from functools import partial
-from typing import Literal, NamedTuple
+from typing import TYPE_CHECKING, Literal, NamedTuple
 
 from kivy.animation import Animation
 from kivy.app import App
@@ -12,19 +12,25 @@ from kivy.properties import (
     DictProperty,
     ListProperty,
     NumericProperty,
-    ObjectProperty,
     OptionProperty,
     StringProperty,
     VariableListProperty,
 )
-from kivy.uix.boxlayout import BoxLayout
 
 from mindref.lib.models import AnimationTiming
 from mindref.lib.widgets.behavior import DebugFloatLayout
 from mindref.lib.widgets.buttons.buttons import ThemedIconButton
+from mindref.lib.widgets.nav_drawer.nav_buttons import (
+    ClearSearchButton,
+    NoteActionsContainer,
+    SettingsButton,
+)
 from mindref.lib.widgets.nav_drawer.nav_item import NavItem, NavItemData
 from mindref.lib.widgets.nav_drawer.search_box import SearchBox
 from mindref.lib.widgets.refreshable import V2RefreshBehavior, V2RefreshContainer
+
+if TYPE_CHECKING:
+    from kivy.uix.boxlayout import BoxLayout
 
 
 class OpenState(str, Enum):
@@ -47,17 +53,18 @@ TAnimatedProperty = Literal[
     "animation_closed_timing",
 ]
 
+
 Builder.load_string(
     """
 #:import ThemedMenuButton mindref.lib.widgets.buttons
-#:import OpenMenuButton mindref.lib.widgets.buttons
+#:import OpenMenuButton mindref.lib.widgets.nav_drawer.nav_buttons
 #:import OpenSettingsButton mindref.lib.widgets.buttons
 #:import V2RefreshContainer mindref.lib.widgets.refreshable.refresh_container
 #:import DebugFloatLayout mindref.lib.widgets.behavior.DebugFloatLayout
 <NavDrawer>:
     id: nav_drawer
     pos_hint: {"left": 0}
-    nav_link_padding: [dp(0), dp(12), dp(0), dp(12)]
+    nav_link_padding: [dp(0), dp(0), dp(0), dp(0)]
     nav_link_spacing: [dp(0), dp(0)]
     debug_layout: False
     BoxLayout:
@@ -66,12 +73,18 @@ Builder.load_string(
         pos_hint: {"top": 1}
         size_hint_y: 0.1
         padding: [dp(5), 0, 0, 0]
-        OpenMenuButton:
-            id: menu_button
-            on_release: root.toggle(self)
-            pos_hint: root._menu_button_pos_hint_closed
-            width: self.height
-            size_hint: None, None
+        FloatLayout:
+            width: menu_button.width
+            size_hint: (None, None)
+            x: menu_button.x
+            OpenMenuButton:
+                id: menu_button
+                on_release: root.toggle(self)
+                # x: 
+                x: min((nav_drawer.width - self.width)/2, self.smallest_x)
+                y: nav_drawer.top - self.height
+                width: min(self.height, nav_drawer.width)
+                size_hint: None, None
     V2RefreshContainer:
         id: nav_items
         item_spacing: root.nav_link_spacing
@@ -88,134 +101,6 @@ Builder.load_string(
 
 """
 )
-
-
-Builder.load_string(
-    """
-<ClearSearchButton@ThemedIconButton>:
-    icon_code: "\ue5cd"
-    size_hint: (None, None)
-    
-    background_color: (0, 0, 0, 0)
-    color: (1.0, 1.0, 1.0, 0.5)
-    pos_hint: {"center_y": 0.5}
-    
-<SettingsButton@ThemedIconButton>:
-    icon_code: "\ue8b8"
-    size_hint: (None, None)
-    background_color: (0,0,0,0)
-    color: (1.0, 1.0, 1.0, 0.5)
-    pos_hint: {"center_y": 0.5}
-
-<NewNoteButton@ThemedIconButton>:
-    icon_code: "\ue89c"
-    size_hint: (None, None)
-    background_color: (0, 0, 0, 0)
-    color: (1.0, 1.0, 1.0)
-    pos_hint: {"center_y": 0.5}
-    opacity: 0
-    
-
-<EditNoteButton@ThemedIconButton>:
-    icon_code: "\uf88c"
-    size_hint: (None, None)
-    background_color: (0, 0, 0, 0)
-    color: (1.0, 1.0, 1.0)
-    pos_hint: {"center_y": 0.5}
-    opacity: 0
-    
-<NoteActionsContainer@BoxLayout>:
-    orientation: "horizontal"
-    pos_hint: {"center_y": 0.5, "right": 1.0}
-    width: self.minimum_width
-    size_hint_x: None
-    opacity: 0
-"""
-)
-
-
-class ClearSearchButton(ThemedIconButton): ...
-
-
-class SettingsButton(ThemedIconButton): ...
-
-
-class NewNoteButton(ThemedIconButton): ...
-
-
-class EditNoteButton(ThemedIconButton): ...
-
-
-class NoteActionsContainer(BoxLayout):
-    new_note_button: NewNoteButton | None = ObjectProperty(allownone=True)
-    edit_note_button: EditNoteButton | None = ObjectProperty(allownone=True)
-    nav_id_selected = StringProperty(None, allownone=True)
-    button_opacity = NumericProperty(0)
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        Clock.schedule_once(self.attach, 0)
-
-    def on_nav_id_selected(self, _instance, value: str):
-        if value:
-            Clock.schedule_once(self.attach_edit_note_button, 0)
-        else:
-            Clock.schedule_once(self.detach_edit_note_button, 0)
-        return True
-
-    def handle_edit_note(self):
-        if not self.nav_id_selected:
-            Logger.warning("EditNoteButton: No note selected to edit.")
-            return True
-        App.get_running_app().edit_note(self.nav_id_selected)
-        return True
-
-    def handle_draft_note(self):
-        App.get_running_app().draft_note()
-        return True
-
-    def attach_new_note_button(self, _dt):
-        if self.new_note_button is None:
-            self.new_note_button = NewNoteButton()
-            self.new_note_button.bind(
-                height=self.new_note_button.setter("width"),
-                on_release=lambda _: self.handle_draft_note(),
-            )
-            self.bind(button_opacity=self.new_note_button.setter("opacity"))
-            self.add_widget(self.new_note_button)
-
-    def detach_new_note_button(self, _dt):
-        if self.new_note_button is not None:
-            self.remove_widget(self.new_note_button)
-            self.new_note_button = None
-
-    def attach_edit_note_button(self, _dt):
-        if self.edit_note_button is None:
-            self.edit_note_button = EditNoteButton()
-            self.edit_note_button.bind(
-                height=self.edit_note_button.setter("width"),
-                on_release=lambda _: self.handle_edit_note(),
-            )
-            self.bind(button_opacity=self.edit_note_button.setter("opacity"))
-            self.add_widget(self.edit_note_button, index=0)
-
-    def detach_edit_note_button(self, _dt):
-        if self.edit_note_button is not None:
-            self.remove_widget(self.edit_note_button)
-            self.edit_note_button = None
-
-    def attach(self, _dt):
-        Clock.schedule_once(self.attach_new_note_button, 0)
-        if self.nav_id_selected:
-            Clock.schedule_once(self.attach_edit_note_button, 0)
-
-    def detach(self):
-        Clock.schedule_once(self.detach_new_note_button, 0)
-        Clock.schedule_once(self.detach_edit_note_button, 0)
-
-    def on_opacity(self, _instance, value: float):
-        """Update the opacity of the buttons based on the button_opacity property"""
-        self.button_opacity = value / 2
 
 
 class NavDrawerIds(NamedTuple):
@@ -261,8 +146,6 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
     nav_id_selected = StringProperty(None, allownone=True)
     close_on_nav = BooleanProperty(True)
 
-    _menu_button_pos_hint_closed = DictProperty({"center_x": 0.5, "center_y": 0.5})
-    _menu_button_pos_hint_open = DictProperty({"left": 0, "center_y": 0.5})
     _search_filter_sch_event: None
 
     __events__ = (
@@ -501,7 +384,6 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
     def on_opening(self, _instance, _value):
         self.drawer_close_animation.cancel(self)
 
-        self.ids.menu_button.pos_hint = self._menu_button_pos_hint_open
         self.attach_search_box()
         self.attach_settings_button()
         self.attach_note_actions()
@@ -532,7 +414,7 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
 
     def on_close(self, _instance, _value):
         self.open_state = OpenState.closed
-        self.ids.menu_button.pos_hint = self._menu_button_pos_hint_closed
+
         self.detach_search_box()
         self.detach_note_actions()
         self.detach_settings_button()

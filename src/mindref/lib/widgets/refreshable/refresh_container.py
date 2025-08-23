@@ -43,8 +43,6 @@ Builder.load_string(
 <V2RefreshContainer>:
     debug_layout: False
     scroll_view: scroll_view
-    item_spacing: [0, 0]
-    item_padding: [0, 0, 0, 0]
     FloatLayout:
         id: float_layout
         RefreshSymbol:
