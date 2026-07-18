@@ -8,15 +8,7 @@ from kivy.uix.boxlayout import BoxLayout
 from mindref.lib.widgets.buttons.buttons import ThemedIconButton
 
 
-class OpenMenuButton(ThemedIconButton):
-    smallest_x = NumericProperty(10000)
-
-    def on_x(self, instance, value):
-        self.smallest_x = max(min(self.smallest_x, value), 0)
-
-        Logger.info(
-            f"OpenMenuButton: x changed to {value}, smallest_x is now {self.smallest_x}"
-        )
+class OpenMenuButton(ThemedIconButton): ...
 
 
 Builder.load_string(

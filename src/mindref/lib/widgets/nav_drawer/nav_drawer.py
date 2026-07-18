@@ -80,8 +80,7 @@ Builder.load_string(
             OpenMenuButton:
                 id: menu_button
                 on_release: root.toggle(self)
-                # x: 
-                x: min((nav_drawer.width - self.width)/2, self.smallest_x)
+                x: max((nav_drawer.size_hint_x_closed * nav_drawer.parent.width - self.width) / 2, 0) if nav_drawer.parent else 0
                 y: nav_drawer.top - self.height
                 width: min(self.height, nav_drawer.width)
                 size_hint: None, None
