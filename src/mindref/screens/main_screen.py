@@ -6,7 +6,7 @@ from kivy.clock import Clock
 from kivy.lang import Builder
 from kivy.logger import Logger
 from kivy.metrics import dp
-from kivy.properties import ObjectProperty, StringProperty
+from kivy.properties import NumericProperty, ObjectProperty, StringProperty
 from kivy.uix.screenmanager import Screen
 
 from mindref.app_notes import NoteFile
@@ -33,16 +33,23 @@ Builder.load_string(
 <MainScreen>:
     app: app
     note_files: app.note_files
+    top_strip_height: menu_button.height
     canvas:
         Color:
             rgba: app.colors['Gray-900']
         Rectangle:
             size: self.size
             pos: self.pos
+        Color:
+            rgba: app.colors['Dark']
+        Rectangle:
+            size: (self.width, self.top_strip_height)
+            pos: (self.x, self.top - self.top_strip_height)
     RelativeLayout:
         ScrollView:
             id: content
-            size_hint: 1, 1
+            size_hint: 1, None
+            height: root.height - menu_button.height
             pos_hint: {"x": 0, "y": 0}
         NavDrawer:
             id: nav_drawer
@@ -78,6 +85,7 @@ class MainScreen(Screen, V2RefreshBehavior):
     app = ObjectProperty()
     ids: V2NoteListViewScreenIds
     selected_note = StringProperty(None, allownone=True)
+    top_strip_height = NumericProperty(0)
     _markdown_parser: mistune.Markdown
 
     def __init__(self, **kwargs):
@@ -126,7 +134,7 @@ class MainScreen(Screen, V2RefreshBehavior):
         self.ids.content.clear_widgets()
         document_md = self._markdown_parser(note_text)
         layout = MarkdownDocumentLayout()
-        layout.padding = [0, 0, dp(32), 0]
+        layout.padding = [dp(16), 0, dp(16), 0]
         self.ids.content.add_widget(layout)
         layout.document = document_md
 
