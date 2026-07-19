@@ -97,6 +97,10 @@ class ActivityProtocol(Protocol):
     startActivityForResult: Callable[[IntentProtocol, int], None]
 
 
+class MindRefWindowInsetsProtocol(Protocol):
+    applyToContentView: Callable[[ActivityProtocol], None]
+
+
 class MindRefUtilsCallbackProtocol(Protocol):
     onComplete: Callable[[int], None]
     onFailure: Callable[[int], None]

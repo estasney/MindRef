@@ -91,6 +91,11 @@ class MindRefApp(App):
         Logger.info(f"Platform changed: Android={value}")
         if self.platform_android:
             self.storage_path = Path(get_app().user_data_dir) / "notes"
+            from mindref.lib.adapters_v2.brokered.android.window_insets import (
+                apply_window_insets,
+            )
+
+            apply_window_insets()
 
     def refresh_note_files(self, *_args):
         if self.storage_path is None:
