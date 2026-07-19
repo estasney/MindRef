@@ -93,6 +93,12 @@ class MindRefApp(App):
             self.storage_path = Path(get_app().user_data_dir) / "notes"
 
     def refresh_note_files(self, *_args):
+        if self.storage_path is None:
+            Logger.warning(
+                f"{self.__class__.__name__} : storage_path is not set. "
+                "Set it in Settings to load notes."
+            )
+            return
         self.screen_manager.dispatch("on_refresh", self, True, to_children=True)
         fut = self.pool.submit(
             self.fs.refresh_note_files, self.storage_path, self.external_storage_path
