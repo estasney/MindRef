@@ -6,20 +6,24 @@ import sh
 from pythonforandroid.archs import Arch
 from pythonforandroid.build import Context
 from pythonforandroid.logger import info, info_main, shprint
-from pythonforandroid.recipe import CythonRecipe
+from pythonforandroid.recipe import PyProjectRecipe
 from pythonforandroid.util import rmdir
 from typing import ClassVar
 
 
-class MindRefAndroidRecipe(CythonRecipe):
+class MindRefAndroidRecipe(PyProjectRecipe):
+    """Builds MindRef from a clone of the local repository.
+
+    The extension module is compiled from the committed ``ext.c``, so Cython is
+    not needed at build time. Depending on p4a's ``cython`` recipe would pull in
+    a cross-compiled Cython 0.29.36, which cannot build against Python 3.14.
+    """
+
     ctx: ClassVar[Context]
 
-    pre_build_ext = True
     name = "mindref_android"
-    cythonize = True
-    depends = ["setuptools", "Cython"]
+    depends: ClassVar[list[str]] = ["setuptools"]
     site_packages_name = "mindref"
-    install_in_targetpython = True
     repo_path = Path(__file__).parent.parent.parent / ".git"
     branch_name = "dev"
 
@@ -42,7 +46,7 @@ class MindRefAndroidRecipe(CythonRecipe):
             if site_packages_dir:
                 build_dir = join(site_packages_dir[0], name)
                 if exists(build_dir):
-                    info("Deleted {}".format(build_dir))
+                    info(f"Deleted {build_dir}")
                     rmdir(build_dir)
 
     def prepare_build_dir(self, arch):
@@ -79,24 +83,6 @@ class MindRefAndroidRecipe(CythonRecipe):
         if pyproject_toml_path.exists():
             info(f"Removing {pyproject_toml_path}")
             shprint(sh.rm, str(pyproject_toml_path))
-
-    def get_build_dir(self, arch: "Arch") -> Path:
-        return super().get_build_dir(arch)
-
-    def prebuild_arch(self, arch: "Arch"):
-        info_main(f"Prebuilding {self.name} for {arch}")
-        info("Nothing to do here")
-
-    def install_python_package(self, arch, name=None, env=None, is_dir=True):
-        info_main("Installing MindRef into site-packages")
-        info_main(f"Arch: {arch}, name: {name}, env: {env}, is_dir: {is_dir}")
-        target_dir = self.ctx.get_python_install_dir(arch.arch)
-        info_main(f"Root dir: {target_dir}")
-        super().install_python_package(arch, name, env, is_dir)
-
-    def install_hostpython_package(self, arch):
-        info_main("Installing MindRef into hostpython")
-        super().install_hostpython_package(arch)
 
 
 recipe = MindRefAndroidRecipe()

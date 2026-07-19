@@ -132,6 +132,7 @@ suppress-dummy-args = true
 "__init__.py" = ["F401", "I001"]
 "**/android/**/*.py" = ["N"]
 "**/*.pyi" = ["ALL"]
+"p4a-recipes/**/*.py" = ["N"]
 
 [[tool.ty.overrides]]
 include = ["stubs/**"]
