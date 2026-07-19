@@ -1,16 +1,14 @@
 from collections.abc import Callable
-from enum import IntEnum, auto
 from pathlib import Path
 from typing import Any, Concatenate, Literal, ParamSpec
 
 from jnius import PythonJavaClass, autoclass, java_method
 from kivy.logger import Logger
 
-from mindref.lib.adapters_v2.brokered.android import UriProtocol
+from mindref.lib.adapters_v2.brokered.android import UriProtocol, V2MindRefCallCodes
 from mindref.lib.utils import Singleton
 
 from .annotations import (
-    ActivityProtocol,
     ContentResolverProtocol,
     ContextProtocol,
     IntentProtocol,
@@ -25,12 +23,6 @@ MINDREF_UTILS_CLASS_NAME = "org.estasney.android.MindRefUtils"
 
 TDocumentResultCode = Literal[-1, 0, 1]
 CBArgs = ParamSpec("CBArgs")
-
-
-class V2MindRefCallCodes(IntEnum):
-    PROMPT_EXTERNAL_STORAGE = auto()
-    IMPORT_EXTERNAL_STORAGE = auto()
-    COPY_TO_EXTERNAL_STORAGE = auto()
 
 
 TKeyedCallbackInner = Callable[Concatenate[V2MindRefCallCodes, CBArgs], None]

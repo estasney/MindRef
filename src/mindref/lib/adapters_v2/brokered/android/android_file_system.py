@@ -8,7 +8,7 @@ from kivy.logger import Logger
 
 from mindref.lib import get_app, sch_cb, schedulable
 from mindref.lib.adapters_v2.base import FileSystemBase
-from mindref.lib.android.interface import V2MindRefCallCodes
+from mindref.lib.adapters_v2.brokered.android.types import V2MindRefCallCodes
 
 if TYPE_CHECKING:
     from mindref.app_notes import NoteFile
@@ -37,8 +37,8 @@ class AndroidFileSystemAdapter(FileSystemBase):
         fut = Future()
 
         # Sentinel to notify us that import is complete
-        self.py_callbacks[V2MindRefCallCodes.IMPORT_EXTERNAL_STORAGE] = (
-            lambda: fut.set_result(True)
+        self.py_callbacks[V2MindRefCallCodes.IMPORT_EXTERNAL_STORAGE] = lambda: (
+            fut.set_result(True)
         )
 
         # We want to return Future immediately but still need this ro run
