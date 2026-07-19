@@ -13,3 +13,4 @@ bin
 build
 build_p4a
 makefiles/secrets.mk
+uv.lock
