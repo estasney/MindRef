@@ -32,7 +32,7 @@ build-apk :  $(MINDREF_UTILS_DEBUG) clean-bytecode prebuild
   	--ndk-dir $(NDK_DIR) \
   	--ndk-api $(NDK_API) \
   	--android-api $(SDK_VERSION) \
-  	--arch arm64-v8a \
+  	$(DEBUG_ARCHS) \
   	--requirements=$(PROJECT_REQUIREMENTS) \
   	--enable-androidx \
   	--presplash $(PROJECT_ROOT)/assets/presplash.png \
@@ -63,7 +63,7 @@ $(MINDREF_RELEASE_UNSIGNED_APK) : $(MINDREF_UTILS_RELEASE) clean-bytecode prebui
   	--ndk-dir $(NDK_DIR) \
   	--ndk-api $(NDK_API) \
   	--android-api $(SDK_VERSION) \
-  	--arch arm64-v8a \
+  	$(RELEASE_ARCHS) \
   	--requirements=$(PROJECT_REQUIREMENTS) \
   	--enable-androidx \
   	--presplash $(PROJECT_ROOT)/assets/presplash.png \

@@ -43,6 +43,11 @@ SDK_VERSION ?= 35
 BUILD_TOOLS_DIR:=$(SDK_DIR)/build-tools/$(SDK_VERSION).0.0
 
 
+# Debug builds include x86_64 so they run on the emulator; release targets
+# hardware only, which keeps the shipped APK to a single architecture.
+DEBUG_ARCHS ?= --arch arm64-v8a --arch x86_64
+RELEASE_ARCHS ?= --arch arm64-v8a
+
 MINDREF_DEBUG_APK := $(PROJECT_NAME)-debug-$(PROJECT_VERSION).apk
 MINDREF_RELEASE_UNSIGNED_APK := $(PROJECT_NAME)-release-unsigned-$(PROJECT_VERSION).apk
 MINDREF_RELEASE_ALIGNED_APK := $(PROJECT_NAME)-release-aligned-$(PROJECT_VERSION).apk
@@ -50,6 +55,8 @@ MINDREF_RELEASE_SIGNED_APK := $(PROJECT_NAME)-release-signed-$(PROJECT_VERSION).
 UNPACK_DIR := $(HOME)/Downloads/apk
 
 # ADB
+# -d targets a USB device, -e an emulator
+ADB_TARGET ?= -d
 PYTHON_LOG_LEVEL ?= 'I'
 JAVA_LOG_LEVEL ?= 'D'
 OTHER_LOG_LEVEL ?= '*:S'
