@@ -45,6 +45,7 @@ Builder.load_string(
     scroll_view: scroll_view
     FloatLayout:
         id: float_layout
+        pos_hint: {"x": 0, "y": 0}
         RefreshSymbol:
             rotation: root.overscroll_progress * 360  # rotate based on overscroll progress
             animate: root.refreshing  # animate if refreshing

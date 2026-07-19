@@ -44,57 +44,35 @@ class OpenState(str, Enum):
 
 
 TOpenState = Literal["open", "opening", "closed", "closing"]
-TAnimatedProperty = Literal[
-    "size_hint_x_closed",
-    "size_hint_x_open",
-    "animation_open_duration",
-    "animation_open_timing",
-    "animation_closed_duration",
-    "animation_closed_timing",
-]
 
 
 Builder.load_string(
     """
-#:import ThemedMenuButton mindref.lib.widgets.buttons
-#:import OpenMenuButton mindref.lib.widgets.nav_drawer.nav_buttons
-#:import OpenSettingsButton mindref.lib.widgets.buttons
 #:import V2RefreshContainer mindref.lib.widgets.refreshable.refresh_container
 #:import DebugFloatLayout mindref.lib.widgets.behavior.DebugFloatLayout
 <NavDrawer>:
     id: nav_drawer
-    pos_hint: {"left": 0}
+    x: (self.open_progress - 1) * self.width
     nav_link_padding: [dp(0), dp(0), dp(0), dp(0)]
     nav_link_spacing: [dp(0), dp(0)]
     debug_layout: False
     BoxLayout:
         orientation: "horizontal"
         id: top_bar
-        pos_hint: {"top": 1}
+        pos_hint: {"x": 0, "top": 1}
         size_hint_y: 0.1
-        padding: [dp(5), 0, 0, 0]
-        FloatLayout:
-            width: menu_button.width
-            size_hint: (None, None)
-            x: menu_button.x
-            OpenMenuButton:
-                id: menu_button
-                on_release: root.toggle(self)
-                x: max((nav_drawer.size_hint_x_closed * nav_drawer.parent.width - self.width) / 2, 0) if nav_drawer.parent else 0
-                y: nav_drawer.top - self.height
-                width: min(self.height, nav_drawer.width)
-                size_hint: None, None
+        padding: [root.top_bar_left_inset + dp(5), 0, 0, 0]
     V2RefreshContainer:
         id: nav_items
         item_spacing: root.nav_link_spacing
         item_padding: root.nav_link_padding
         size_hint_y: 0.8
-        pos_hint: {"top": 0.9}
+        pos_hint: {"x": 0, "top": 0.9}
         opacity: 0
     DebugFloatLayout:
         id: bottom_bar
         debug_layout: False
-        pos_hint: {"bottom": 1}
+        pos_hint: {"x": 0, "y": 0}
         size_hint_y: 0.1
         padding: [dp(5), 0, 0, 0]
 
@@ -105,15 +83,13 @@ Builder.load_string(
 class NavDrawerIds(NamedTuple):
     top_bar: "BoxLayout"
     bottom_bar: "BoxLayout"
-    menu_button: "ThemedIconButton"
     nav_items: "V2RefreshContainer"
 
 
 class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
     ids: NavDrawerIds = DictProperty({})
-    size_hint_x_closed = NumericProperty(0)
-    size_hint_x_open = NumericProperty(0)
-    size_hint_x = NumericProperty(0, allownone=False)
+    open_progress = NumericProperty(0)
+    top_bar_left_inset = NumericProperty(0)
     animation_open_duration = NumericProperty(0.2)
     animation_open_timing = OptionProperty(
         AnimationTiming.in_out_quad, options=[AnimationTiming.__members__.values()]
@@ -130,6 +106,7 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
     settings_button: ThemedIconButton | None
     search_box: SearchBox | None
     note_actions_container: NoteActionsContainer | None
+    note_actions_bind_uid: int
     edit_note_button: ThemedIconButton | None
     new_note_button: ThemedIconButton | None
     search_filter: str = StringProperty()
@@ -159,59 +136,17 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.drawer_open_animation = Animation(
-            size_hint_x=self.size_hint_x_open,
-            duration=self.animation_open_duration,
-            t=self.animation_open_timing,
-        )
-        self.drawer_open_animation.bind(on_complete=self.open_state_open_cb)
-        self.drawer_close_animation = Animation(
-            size_hint_x=self.size_hint_x_closed,
-            duration=self.animation_closed_duration,
-            t=self.animation_closed_timing,
-        )
-        self.drawer_close_animation.bind(on_complete=self.open_state_closed_cb)
-        self.fade_in_animation = Animation(
-            opacity=1,
-            duration=self.animation_open_duration,
-            t=self.animation_open_timing,
-        )
-        self.fade_out_animation = Animation(
-            opacity=0,
-            duration=self.animation_closed_duration,
-            t=self.animation_closed_timing,
-        )
-
-        self.fbind(
-            "size_hint_x_closed", self.handle_animation_change, "size_hint_x_closed"
-        )
-        self.fbind("size_hint_x_open", self.handle_animation_change, "size_hint_x_open")
-        self.fbind(
-            "animation_open_duration",
-            self.handle_animation_change,
-            "animation_open_duration",
-        )
-        self.fbind(
-            "animation_open_timing",
-            self.handle_animation_change,
-            "animation_open_timing",
-        )
-        self.fbind(
-            "animation_closed_duration",
-            self.handle_animation_change,
-            "animation_closed_duration",
-        )
-        self.fbind(
-            "animation_closed_timing",
-            self.handle_animation_change,
-            "animation_closed_timing",
-        )
+        self.rebuild_animations()
+        self.fbind("animation_open_duration", self.rebuild_animations)
+        self.fbind("animation_open_timing", self.rebuild_animations)
+        self.fbind("animation_closed_duration", self.rebuild_animations)
+        self.fbind("animation_closed_timing", self.rebuild_animations)
         self._search_filter_sch_event = None
-        self.trigger_search_filter = Clock.create_trigger(self._dispatch_search_filter)
         self.clear_search_button = None
         self.settings_button = None
         self.search_box = None
         self.note_actions_container = None
+        self.note_actions_bind_uid = 0
         self.edit_note_button = None
         self.new_note_button = None
 
@@ -259,8 +194,9 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
             self.note_actions_container = NoteActionsContainer(
                 nav_id_selected=self.nav_id_selected
             )
-            self.bind(
-                nav_id_selected=self.note_actions_container.setter("nav_id_selected")
+            self.note_actions_bind_uid = self.fbind(
+                "nav_id_selected",
+                self.note_actions_container.setter("nav_id_selected"),
             )
             self.ids.bottom_bar.add_widget(self.note_actions_container)
 
@@ -281,83 +217,37 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
         if self.note_actions_container is not None:
             self.note_actions_container.detach()
             self.ids.bottom_bar.remove_widget(self.note_actions_container)
-            self.unbind(
-                nav_id_selected=self.note_actions_container.setter("nav_id_selected")
-            )
+            if self.note_actions_bind_uid:
+                self.unbind_uid("nav_id_selected", self.note_actions_bind_uid)
+                self.note_actions_bind_uid = 0
             self.note_actions_container = None
             self.edit_note_button = None
             self.new_note_button = None
 
-    def handle_animation_change(
-        self, property_name: TAnimatedProperty, _instance, value: float
-    ):
-        match property_name:
-            case "size_hint_x_closed":
-                self.size_hint_x = value
-                self.drawer_close_animation = Animation(
-                    size_hint_x=value,
-                    duration=self.animation_open_duration,
-                    t=self.animation_open_timing,
-                )
-                self.drawer_close_animation.bind(
-                    on_complete=lambda *_: setattr(self, "open_state", OpenState.closed)
-                )
-            case "size_hint_x_open":
-                self.drawer_open_animation = Animation(
-                    size_hint_x=value,
-                    duration=self.animation_open_duration,
-                    t=self.animation_open_timing,
-                )
-                self.drawer_open_animation.bind(
-                    on_complete=lambda *_: setattr(self, "open_state", OpenState.open)
-                )
-            case "animation_open_duration":
-                self.drawer_open_animation = Animation(
-                    size_hint_x=self.size_hint_x_open,
-                    duration=value,
-                    t=self.animation_open_timing,
-                )
-                self.fade_in_animation = Animation(
-                    opacity=1,
-                    duration=value,
-                    t=self.animation_open_timing,
-                )
-            case "animation_open_timing":
-                self.drawer_open_animation = Animation(
-                    size_hint_x=self.size_hint_x_open,
-                    duration=self.animation_open_duration,
-                    t=value,
-                )
-                self.fade_in_animation = Animation(
-                    opacity=1,
-                    duration=self.animation_open_duration,
-                    t=value,
-                )
-            case "animation_closed_duration":
-                self.drawer_close_animation = Animation(
-                    size_hint_x=self.size_hint_x_closed,
-                    duration=value,
-                    t=self.animation_closed_timing,
-                )
-                self.fade_out_animation = Animation(
-                    opacity=0,
-                    duration=value,
-                    t=self.animation_closed_timing,
-                )
-            case "animation_closed_timing":
-                self.drawer_close_animation = Animation(
-                    size_hint_x=self.size_hint_x_closed,
-                    duration=self.animation_closed_duration,
-                    t=value,
-                )
-                self.fade_out_animation = Animation(
-                    opacity=0,
-                    duration=self.animation_closed_duration,
-                    t=value,
-                )
-            case _:
-                Logger.warning(f"Unknown property: {property_name}")
-                raise ValueError(f"Unknown property: {property_name}")
+    def rebuild_animations(self, *args):
+        """Construct all four animations from the current duration/timing properties"""
+        self.drawer_open_animation = Animation(
+            open_progress=1,
+            duration=self.animation_open_duration,
+            t=self.animation_open_timing,
+        )
+        self.drawer_open_animation.bind(on_complete=self.open_state_open_cb)
+        self.drawer_close_animation = Animation(
+            open_progress=0,
+            duration=self.animation_closed_duration,
+            t=self.animation_closed_timing,
+        )
+        self.drawer_close_animation.bind(on_complete=self.open_state_closed_cb)
+        self.fade_in_animation = Animation(
+            opacity=1,
+            duration=self.animation_open_duration,
+            t=self.animation_open_timing,
+        )
+        self.fade_out_animation = Animation(
+            opacity=0,
+            duration=self.animation_closed_duration,
+            t=self.animation_closed_timing,
+        )
 
     def on_open_state(self, _instance, _value: TOpenState | OpenState):
         match _value:

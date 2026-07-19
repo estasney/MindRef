@@ -42,13 +42,12 @@ Builder.load_string(
     RelativeLayout:
         ScrollView:
             id: content
-            size_hint_y: 1
-            size_hint_x: 0.93
-            pos_hint: {"x": 0.09, "y": 0}
+            size_hint: 1, 1
+            pos_hint: {"x": 0, "y": 0}
         NavDrawer:
             id: nav_drawer
-            size_hint_x_closed: 0.07
-            size_hint_x_open: 0.5
+            size_hint_x: 0.5
+            top_bar_left_inset: menu_button.width
             nav_link_padding: [0, dp(16), 0, dp(16)]
             nav_id_selected: root.selected_note
             open_state: 'closed'
@@ -57,7 +56,14 @@ Builder.load_string(
                     rgba: app.colors['Dark']
                 Rectangle:
                     size: self.size
-                    pos: self.pos        
+                    pos: self.pos
+        OpenMenuButton:
+            id: menu_button
+            size_hint: None, None
+            width: self.height
+            pos_hint: {"top": 1}
+            x: dp(4)
+            on_release: nav_drawer.toggle(self)
 
 """
 )
