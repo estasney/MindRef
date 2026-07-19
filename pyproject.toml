@@ -48,10 +48,9 @@ dev = [
     "line-profiler>=4.2.0",
     "pre-commit>=4.1.0",
     "pytest>=8.4.1",
+    "ruff>=0.15.22",
 ]
-lint = [
-    "ruff>=0.9.6",
-]
+lint = []
 android = [
     "pyjnius==1.6.1",
     "python-for-android",
@@ -78,11 +77,60 @@ default-groups = ["dev", "lint"]
 
 [tool.ruff]
 target-version = "py312"
-
 [tool.ruff.lint]
-select = ["E4", "E7", "E9", "F", "I001", "UP", "ANN", "B", "C", "I", "LOG", "G", "RSE", "RET", "SLOT", "SIM", "TC", "INT", "ARG",
-    "PTH", "ERA", "PL", "TRY", "FLY", "RUF", "FA"]
-ignore = ["ANN002", "ANN003", "ANN401", "ANN204", "ANN201", "ANN202", "ARG002", "TRY003", "C901", "PLR0915", "PLR0912", "PLR0911", "PLC0415","E731"]
+select = [
+    "A",
+    "ANN",
+    "ASYNC",
+    "B",
+    "BLE",
+    "C4",
+    "DTZ",
+    "ERA",
+    "F",
+    "FA",
+    "FAST",
+    "FBT",
+    "FLY",
+    "FURB",
+    "I",
+    "INP",
+    "N",
+    "NPY",
+    "PD",
+    "PERF",
+    "PIE",
+    "PLC0105",
+    "PLC0131",
+    "PLC0132",
+    "PLC0207",
+    "PLC0208",
+    "PLE",
+    "PLR",
+    "PLW",
+    "PYI",
+    "RET",
+    "RUF",
+    "SIM",
+    "TRY",
+    "UP",
+    "YTT",
+]
+ignore = [
+    "A002",
+    "ANN002",
+    "ANN003",
+    "ANN202",
+    "ANN401",
+    "N818",
+    "PLR0912",
+    "PLR0913",
+    "PLR0915",
+    "PLR2004",
+    "RET504",
+    "RUF001",
+    "TRY003",
+]
 
 [tool.ruff.lint.flake8-annotations]
 ignore-fully-untyped = true
