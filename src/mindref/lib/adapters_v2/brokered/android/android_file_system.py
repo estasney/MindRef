@@ -22,7 +22,9 @@ class AndroidFileSystemAdapter(FileSystemBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.app = get_app()
-        from mindref.lib.android.interface import AndroidManager
+        from mindref.lib.adapters_v2.brokered.android.external_storage import (
+            AndroidManager,
+        )
 
         self.android_manager = AndroidManager()
         self.android_manager.set_py_mediator(self.py_mediator)

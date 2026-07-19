@@ -4,11 +4,6 @@ from collections.abc import Callable
 from concurrent.futures.thread import ThreadPoolExecutor
 from typing import TYPE_CHECKING, Literal, NoReturn, Protocol, TypeVar
 
-from mindref.lib.adapters_v2.brokered.android.android_file_system import (
-    AndroidFileSystemAdapter,
-)
-from mindref.lib.adapters_v2.direct_file_system import DirectFileSystemAdapter
-
 if TYPE_CHECKING:
     from pathlib import Path
 
@@ -16,21 +11,20 @@ if TYPE_CHECKING:
 
     from mindref.app_notes import NoteFile
     from mindref.lib.adapters.atlas.fs.fs_atlas_repository import AtlasService
-
-    from mindref.lib.widgets import MindRefSettingsAndroid, MindRefSettingsNative
+    from mindref.lib.adapters_v2.base import FileSystemBase
+    from mindref.lib.widgets.settings.settings_mindref import MindrefSettings
 
 
 class AppRegistryProtocol(Protocol):
     atlas_service: AtlasService
-    note_service: FileSystemNoteRepository | AndroidNoteRepository
-    fs: DirectFileSystemAdapter | AndroidFileSystemAdapter
+    fs: FileSystemBase
     platform_android: bool
     error_message: str
     screen_manager: ScreenManager
     fonts: dict[str, str]
     base_font_size: int
     colors: dict[str, tuple[float, float, float] | tuple[float, float, float, float]]
-    settings_cls: str | MindRefSettingsAndroid | MindRefSettingsNative
+    settings_cls: str | MindrefSettings
     user_data_dir: str
     pool: ThreadPoolExecutor
     note_files: list[NoteFile]
@@ -41,7 +35,7 @@ class AppRegistryProtocol(Protocol):
 
     def open_settings(self) -> None: ...
 
-    def bind(self, **kwargs: Callable): ...
+    def bind(self, **kwargs: Callable) -> None: ...
 
     def stop(self) -> NoReturn: ...
 

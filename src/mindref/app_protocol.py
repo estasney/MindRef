@@ -3,12 +3,11 @@ from typing import TYPE_CHECKING, Protocol
 
 from kivy.properties import DictProperty
 
-from mindref.lib.adapters_v2.brokered.android.android_file_system import (
-    AndroidFileSystemAdapter,
-)
-from mindref.lib.adapters_v2.direct_file_system import DirectFileSystemAdapter
+from mindref.lib.adapters_v2.base import FileSystemBase
 
 if TYPE_CHECKING:
+    from kivy.uix.screenmanager import ScreenManager
+
     from mindref.app_notes import NoteFile
 
 
@@ -18,7 +17,7 @@ class AppSettingsProtocol(Protocol):
     base_font_size: int
     screen_manager: object
     platform_android: bool
-    fs: DirectFileSystemAdapter | AndroidFileSystemAdapter
+    fs: FileSystemBase
 
 
 class AppThemeProtocol(Protocol):
@@ -32,4 +31,4 @@ class AppNotesProtocol(Protocol):
     editing_note: list["NoteFile"]
     screen_manager: "ScreenManager"  # Should be ScreenManager type
     external_storage_path: str
-    fs: DirectFileSystemAdapter | AndroidFileSystemAdapter
+    fs: FileSystemBase

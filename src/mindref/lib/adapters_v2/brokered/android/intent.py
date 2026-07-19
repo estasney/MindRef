@@ -1,14 +1,12 @@
-_INTENT_CLS = None
+from functools import cache
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .types import IntentProtocol
 
 
-def _get_intent_cls():
-    global _INTENT_CLS  # noqa: PLW0603
-    if _INTENT_CLS is None:
-        from jnius import autoclass
+@cache
+def get_intent_cls() -> "IntentProtocol":
+    from jnius import autoclass
 
-        _INTENT_CLS = autoclass("android.content.Intent")
-    return _INTENT_CLS
-
-
-def get_intent_cls():
-    return _get_intent_cls()
+    return autoclass("android.content.Intent")

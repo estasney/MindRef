@@ -138,6 +138,7 @@ suppress-dummy-args = true
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401", "I001"]
+"**/android/**/*.py" = ["N"]
 "**/*.pyi" = ["ALL"]
 
 [[tool.ty.overrides]]

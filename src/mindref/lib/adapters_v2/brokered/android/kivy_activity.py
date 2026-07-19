@@ -1,15 +1,16 @@
-_KIVY_ACTIVITY_CLASS = None
+from functools import cache
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .types import ActivityProtocol
 
 
-def _get_kivy_activity_cls():
-    global _KIVY_ACTIVITY_CLASS  # noqa: PLW0603
-    if _KIVY_ACTIVITY_CLASS is None:
-        from jnius import autoclass
+@cache
+def get_kivy_activity_cls() -> "type[ActivityProtocol]":
+    from jnius import autoclass
 
-        _KIVY_ACTIVITY_CLASS = autoclass("org.kivy.android.PythonActivity")
-    return _KIVY_ACTIVITY_CLASS
+    return autoclass("org.kivy.android.PythonActivity")
 
 
-def get_kivy_activity():
-    cls = _get_kivy_activity_cls()
-    return cls().mActivity
+def get_kivy_activity() -> "ActivityProtocol":
+    return get_kivy_activity_cls().mActivity
