@@ -71,7 +71,7 @@ class MindRefUtilsCallback(PythonJavaClass):
         Logger.info(f"MindRefUtilsCallback: Import completed with code {result_code}")
         self.py_callback(result_code)
 
-    @java_method("I(V)")
+    @java_method("(I)V")
     def onFailure(self, key: int) -> None:
         self.py_callback(key * -1)  # Negative key to indicate failure
 

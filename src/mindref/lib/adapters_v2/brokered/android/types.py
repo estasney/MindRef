@@ -98,9 +98,7 @@ class ActivityProtocol(Protocol):
 
 
 class MindRefUtilsCallbackProtocol(Protocol):
-    onCompleteCreateCategory: Callable[[int, str], None]
-    onCompleteGetCategories: Callable[[int, list[str]], None]
-    onCompleteCopyStorage: Callable[[int], None]
+    onComplete: Callable[[int], None]
     onFailure: Callable[[int], None]
 
 

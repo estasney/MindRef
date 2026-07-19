@@ -4,24 +4,24 @@ clean-apk : $(wildcard *.apk)
 
 
 clean-all : clean-aar clean-apk clean-bytecode clean-builds clean-dists
-	uv run p4a clean-all
+	uv run --group android p4a clean-all
 .PHONY : clean-all
 
 clean-builds:
-	uv run p4a clean builds
+	uv run --group android p4a clean builds
 .PHONY : clean-builds
 
 clean-bootstraps:
-	uv run p4a clean bootstrap_builds
+	uv run --group android p4a clean bootstrap_builds
 .PHONY : clean-bootstraps
 
 clean-dists:
-	uv run p4a clean dists
+	uv run --group android p4a clean dists
 .PHONY : clean-dists
 
 
 build-apk :  $(MINDREF_UTILS_DEBUG) clean-bytecode prebuild
-	JAVA_HOME=$(PROJECT_JAVA_HOME) uv run p4a apk --private $(BUILD_DIR) \
+	JAVA_HOME=$(PROJECT_JAVA_HOME) uv run --group android p4a apk --private $(BUILD_DIR) \
   	--package=$(PROJECT_JAVA_PACKAGE) \
   	--name $(PROJECT_NAME_READABLE) \
   	--version $(PROJECT_VERSION) \
@@ -52,7 +52,7 @@ build-apk :  $(MINDREF_UTILS_DEBUG) clean-bytecode prebuild
 
 $(MINDREF_RELEASE_UNSIGNED_APK) : $(MINDREF_UTILS_RELEASE) clean-bytecode prebuild
 	JAVA_HOME=$(PROJECT_JAVA_HOME) \
- 	uv run p4a apk --private $(BUILD_DIR) \
+ 	uv run --group android p4a apk --private $(BUILD_DIR) \
   	--package=$(PROJECT_JAVA_PACKAGE) \
   	--name $(PROJECT_NAME_READABLE) \
   	--version $(PROJECT_VERSION) \

@@ -40,8 +40,8 @@ asset-fonts: $(ASSET_MATERIAL_TTF_DEST) $(ASSET_ROBOTO_TTF_DEST)
 
 clean-mindref-p4a-src:
 	rm -rf ~/.local/share/python-for-android/packages/mindref
-	uv run p4a clean-recipe-build mindref_android || true
-	uv run p4a clean_dists
+	uv run --group android p4a clean-recipe-build mindref_android || true
+	uv run --group android p4a clean_dists
 	rm -f $(BUILD_DIR)/$(MINDREF_UTILS_DEBUG)
 	rm -f $(BUILD_DIR)/$(MINDREF_UTILS_RELEASE)
 .PHONY : clean-mindref-p4a-src

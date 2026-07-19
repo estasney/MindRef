@@ -35,11 +35,11 @@ ASSET_MATERIAL_TTF_DEST:= $(BUILD_DIR)/assets/MaterialIcons.ttf
 ASSET_ROBOTO_TTF_SRC:= $(PROJECT_ROOT)/assets/RobotoMono-Regular.ttf
 ASSET_ROBOTO_TTF_DEST:= $(BUILD_DIR)/assets/RobotoMono-Regular.ttf
 
-NDK_VERSION:=25.2.9519653
+NDK_VERSION:=28.2.13676358
 SDK_DIR:=$(HOME)/.android
 NDK_DIR:=$(HOME)/.android/ndk/$(NDK_VERSION)
 NDK_API ?= 29
-SDK_VERSION ?= 34
+SDK_VERSION ?= 35
 BUILD_TOOLS_DIR:=$(SDK_DIR)/build-tools/$(SDK_VERSION).0.0
 
 
