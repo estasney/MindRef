@@ -39,6 +39,7 @@ build-apk :  $(MINDREF_UTILS_DEBUG) clean-bytecode prebuild
   	--icon $(PROJECT_ROOT)/assets/logo.png \
   	--depend "com.google.guava:guava:31.1-android" \
   	--depend "org.apache.commons:commons-io:1.3.2" \
+  	--depend "androidx.core:core:1.13.1" \
   	--add-aar $(ROOT_DIR)/$(MINDREF_UTILS_DEBUG) \
   	--no-byte-compile-python \
   	--add-compile-option "sourceCompatibility=17" \
@@ -70,6 +71,7 @@ $(MINDREF_RELEASE_UNSIGNED_APK) : $(MINDREF_UTILS_RELEASE) clean-bytecode prebui
   	--icon $(PROJECT_ROOT)/assets/logo.png \
   	--depend "com.google.guava:guava:31.1-android" \
   	--depend "org.apache.commons:commons-io:1.3.2" \
+  	--depend "androidx.core:core:1.13.1" \
   	--add-aar $(ROOT_DIR)/$(MINDREF_UTILS_RELEASE) \
   	--no-byte-compile-python \
   	--add-compile-option "sourceCompatibility=17" \

@@ -1,9 +1,7 @@
 import re
 from copy import copy
 from pathlib import Path
-from pathlib import Path
 from xml.etree import ElementTree as ET
-
 
 REPO_PATTERN = re.compile(r"(?<=repositories {)(?:[^}]+)(})")
 
@@ -29,7 +27,14 @@ def patch(doc: str) -> str:
     return doc_copy
 
 
-PROFILEABLE_TAG = {"{http://schemas.android.com/apk/res/android}shell": "true"}
+ANDROID_NAMESPACE = "http://schemas.android.com/apk/res/android"
+
+PROFILEABLE_TAG = {f"{{{ANDROID_NAMESPACE}}}shell": "true"}
+
+# Without this, rewriting the manifest renames the `android` prefix to `ns0`.
+# The manifest merger then fails to reconcile it against library manifests,
+# which declare their attributes against the `android` prefix.
+ET.register_namespace("android", ANDROID_NAMESPACE)
 
 
 def after_apk_build(ctx, **kwargs) -> None:
