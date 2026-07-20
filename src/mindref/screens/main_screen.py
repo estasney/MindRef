@@ -53,7 +53,7 @@ Builder.load_string(
             pos_hint: {"x": 0, "y": 0}
         NavDrawer:
             id: nav_drawer
-            size_hint_x: 0.5
+            size_hint_x: 0.8 if root.height > root.width else 0.5
             top_bar_left_inset: menu_button.width
             nav_link_padding: [0, dp(16), 0, dp(16)]
             nav_id_selected: root.selected_note
