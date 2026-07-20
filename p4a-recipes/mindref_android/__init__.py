@@ -30,6 +30,11 @@ class MindRefAndroidRecipe(PyProjectRecipe):
     def should_build(self, arch):
         return True
 
+    def check_prebuilt(self, arch: "Arch", msg: str = "") -> bool:
+        """MindRef is built from the local repository and never published, so
+        querying an index for a prebuilt wheel only produces a failed lookup."""
+        return False
+
     def clean_build(self, arch=None):
         if arch is None:
             base_dir = join(self.ctx.build_dir, "other_builds", self.name)
