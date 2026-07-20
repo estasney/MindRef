@@ -4,6 +4,7 @@ include makefiles/secrets.mk
 include makefiles/prebuild.mk
 include makefiles/apk.mk
 include makefiles/aar.mk
+include makefiles/desktop.mk
 
 
 echo-vars:
@@ -23,7 +24,7 @@ echo-vars:
 
 
 install : uninstall
-	adb $(ADB_TARGET) install mindref*.apk
+	adb $(ADB_TARGET) install $(MINDREF_DEBUG_APK)
 .PHONY : install
 
 install-release: uninstall

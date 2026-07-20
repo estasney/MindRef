@@ -25,7 +25,7 @@ Builder.load_string("""
         text: root.text
         text_size: root.width, None # Limit text to the width of the button, but allow it to grow vertically
         size: self.texture_size
-        font_size: app.base_font_size
+        font_size: sp(app.base_font_size)
         halign: 'center'
         valign: 'middle'
 

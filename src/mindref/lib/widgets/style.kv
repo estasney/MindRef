@@ -1,19 +1,19 @@
 <BaseLabel>:
-    font_size: app.base_font_size
+    font_size: sp(app.base_font_size)
     font_family: app.fonts['default']
     mipmap: True
 
 <SmallLabel>:
-    font_size: app.base_font_size - sp(2)
+    font_size: sp(app.base_font_size - 2)
 
 <XSmallLabel>:
-    font_size: app.base_font_size - sp(3)
+    font_size: sp(app.base_font_size - 3)
 
 <LargeLabel>:
-    font_size: app.base_font_size + sp(2)
+    font_size: sp(app.base_font_size + 2)
 
 <XLargeLabel>:
-    font_size: app.base_font_size + sp(3)
+    font_size: sp(app.base_font_size + 3)
 
 <ExpandingLabel>:
     # Grow Vertically, but Wrap at certain Width
@@ -22,12 +22,12 @@
 
 
 <TitleInput>:
-    font_size: app.base_font_size
+    font_size: sp(app.base_font_size)
     font_family: app.fonts['default']
     multiline: False
 
 <IconLabel>:
-    font_size: app.base_font_size
+    font_size: sp(app.base_font_size)
     markup: True
     mipmap: True
     text: f'[font={app.fonts["icons"]}]{self.icon_code}[/font]'

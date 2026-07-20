@@ -252,7 +252,7 @@ class MindRefApp(App):
                     "storage_path": Path(get_app().user_data_dir) / "notes",
                 },
             )
-            config.setdefaults("Display", {"base_font_size": 18})
+            config.setdefaults("Display", {"base_font_size": 16})
         else:
             config.setdefaults("Storage", {"storage_path": None})
             config.setdefaults("Display", {"base_font_size": 16})

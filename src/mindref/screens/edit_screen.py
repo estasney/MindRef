@@ -59,7 +59,7 @@ Builder.load_string("""
                     text: root.editing_note.label if root.editing_note else ""
                     text_size: root.width, None
                     size: self.texture_size
-                    font_size: app.base_font_size + dp(4)
+                    font_size: sp(app.base_font_size + 4)
                     halign: 'center'
                     valign: 'center'
         HSeparator:
@@ -73,7 +73,7 @@ Builder.load_string("""
             lexer: root.lexer
             style_name: 'github-dark'
             font_family: app.fonts['mono']
-            font_size: app.base_font_size
+            font_size: sp(app.base_font_size)
         LinearProgress:
             id: progress_bar
             size_hint_y: None

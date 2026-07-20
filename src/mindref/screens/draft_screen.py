@@ -96,7 +96,7 @@ Builder.load_string("""
             lexer: root.lexer
             style_name: 'github-dark'
             font_family: app.fonts['mono']
-            font_size: app.base_font_size
+            font_size: sp(app.base_font_size)
         LinearProgress:
             id: progress_bar
             size_hint_y: None
