@@ -57,6 +57,8 @@ UNPACK_DIR := $(HOME)/Downloads/apk
 # ADB
 # -d targets a USB device, -e an emulator
 ADB_TARGET ?= -d
+AVD_NAME ?= Pixel_10_Pro
+EMULATOR_BIN := $(SDK_DIR)/emulator/emulator
 PYTHON_LOG_LEVEL ?= 'I'
 JAVA_LOG_LEVEL ?= 'D'
 OTHER_LOG_LEVEL ?= '*:S'

@@ -1,6 +1,7 @@
-clean-apk : $(wildcard *.apk)
+clean-apk :
 	@echo "Cleaning APK files..."
-	rm -f $^
+	rm -f $(wildcard *.apk)
+.PHONY : clean-apk
 
 
 clean-all : clean-aar clean-apk clean-bytecode clean-builds clean-dists
@@ -36,7 +37,10 @@ build-apk :  $(MINDREF_UTILS_DEBUG) clean-bytecode prebuild
   	--requirements=$(PROJECT_REQUIREMENTS) \
   	--enable-androidx \
   	--presplash $(PROJECT_ROOT)/assets/presplash.png \
+  	--presplash-color '#37464F' \
   	--icon $(PROJECT_ROOT)/assets/logo.png \
+  	--icon-fg $(PROJECT_ROOT)/assets/icon_fg.png \
+  	--icon-bg $(PROJECT_ROOT)/assets/icon_bg.png \
   	--depend "com.google.guava:guava:31.1-android" \
   	--depend "org.apache.commons:commons-io:1.3.2" \
   	--depend "androidx.core:core:1.13.1" \
@@ -68,7 +72,10 @@ $(MINDREF_RELEASE_UNSIGNED_APK) : $(MINDREF_UTILS_RELEASE) clean-bytecode prebui
   	--requirements=$(PROJECT_REQUIREMENTS) \
   	--enable-androidx \
   	--presplash $(PROJECT_ROOT)/assets/presplash.png \
+  	--presplash-color '#37464F' \
   	--icon $(PROJECT_ROOT)/assets/logo.png \
+  	--icon-fg $(PROJECT_ROOT)/assets/icon_fg.png \
+  	--icon-bg $(PROJECT_ROOT)/assets/icon_bg.png \
   	--depend "com.google.guava:guava:31.1-android" \
   	--depend "org.apache.commons:commons-io:1.3.2" \
   	--depend "androidx.core:core:1.13.1" \

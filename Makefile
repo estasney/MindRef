@@ -23,12 +23,20 @@ echo-vars:
 .PHONY : echo-vars
 
 
-install : uninstall
-	adb $(ADB_TARGET) install $(MINDREF_DEBUG_APK)
+emulator :
+	$(EMULATOR_BIN) -avd $(AVD_NAME) &
+.PHONY : emulator
+
+install :
+	adb $(ADB_TARGET) install -r -d $(MINDREF_DEBUG_APK)
 .PHONY : install
 
-install-release: uninstall
-	adb $(ADB_TARGET) install $(MINDREF_RELEASE_SIGNED_APK)
+install-emulator : ADB_TARGET := -e
+install-emulator : install
+.PHONY : install-emulator
+
+install-release:
+	adb $(ADB_TARGET) install -r $(MINDREF_RELEASE_SIGNED_APK)
 .PHONY : install-release
 
 uninstall :

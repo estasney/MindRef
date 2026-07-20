@@ -133,6 +133,7 @@ suppress-dummy-args = true
 "**/android/**/*.py" = ["N"]
 "**/*.pyi" = ["ALL"]
 "p4a-recipes/**/*.py" = ["N"]
+"scripts/**/*.py" = ["INP"] 
 
 [[tool.ty.overrides]]
 include = ["stubs/**"]

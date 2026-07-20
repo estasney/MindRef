@@ -37,12 +37,44 @@ PROFILEABLE_TAG = {f"{{{ANDROID_NAMESPACE}}}shell": "true"}
 ET.register_namespace("android", ANDROID_NAMESPACE)
 
 
+def write_splash_theme_override(dist_dir: Path) -> None:
+    """
+    The launcher activity uses the generated KivySupportCutout style, which
+    API 31+ also consults for the system splash screen; without an override
+    the splash background falls back to white. A same-named style in
+    values-v31 replaces the base wholesale, so copy the generated style and
+    append the splash background color (matches the adaptive icon background).
+    """
+    res_dir = dist_dir / "src/main/res"
+    strings = ET.parse(res_dir / "values/strings.xml")
+    style = strings.getroot().find("style[@name='KivySupportCutout']")
+    if style is None:
+        raise RuntimeError("KivySupportCutout style not found in strings.xml")
+
+    item = ET.SubElement(
+        style, "item", {"name": "android:windowSplashScreenBackground"}
+    )
+    item.text = "#FF37464F"
+
+    resources = ET.Element("resources")
+    resources.append(style)
+    values_v31 = res_dir / "values-v31"
+    values_v31.mkdir(exist_ok=True)
+    ET.ElementTree(resources).write(
+        values_v31 / "themes.xml", encoding="utf-8", xml_declaration=True
+    )
+    print("[after_build] wrote values-v31 KivySupportCutout splash override")
+
+
 def after_apk_build(ctx, **kwargs) -> None:
     """
     p4a hook: runs once the dist is ready but *before* gradle builds.
     Adds `flatDir { dirs "libs" }` to <dist>/build.gradle unless present.
     """
-    gradle_path = Path(ctx._dist.dist_dir) / "build.gradle"
+    dist_dir = Path(ctx._dist.dist_dir)
+    write_splash_theme_override(dist_dir)
+
+    gradle_path = dist_dir / "build.gradle"
     if not gradle_path.exists():
         print(f"[after_build] build.gradle not found: {gradle_path}")
         return
@@ -65,4 +97,4 @@ def after_apk_build(ctx, **kwargs) -> None:
     if app.find("profileable") is None:
         ET.SubElement(app, "profileable", PROFILEABLE_TAG)
         tree.write(manifest, encoding="utf-8", xml_declaration=True)
-        print("✓ inserted <profileable/> into AndroidManifest.xml")
+        print("[after_build] inserted <profileable/> into AndroidManifest.xml")
