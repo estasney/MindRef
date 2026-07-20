@@ -98,7 +98,7 @@ class ActivityProtocol(Protocol):
 
 
 class MindRefWindowInsetsProtocol(Protocol):
-    applyToContentView: Callable[[ActivityProtocol], None]
+    applyToContentView: Callable[[ActivityProtocol, int], None]
 
 
 class MindRefUtilsCallbackProtocol(Protocol):
