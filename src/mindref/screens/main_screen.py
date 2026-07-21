@@ -55,6 +55,7 @@ Builder.load_string(
             id: nav_drawer
             size_hint_x: 0.8 if root.height > root.width else 0.5
             top_bar_left_inset: menu_button.width
+            top_bar_height: menu_button.height
             nav_link_padding: [0, dp(16), 0, dp(16)]
             nav_id_selected: root.selected_note
             open_state: 'closed'

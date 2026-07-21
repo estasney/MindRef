@@ -60,14 +60,16 @@ Builder.load_string(
         orientation: "horizontal"
         id: top_bar
         pos_hint: {"x": 0, "top": 1}
-        size_hint_y: 0.1
+        size_hint_y: None
+        height: root.top_bar_height if root.top_bar_height else root.height * 0.1
         padding: [root.top_bar_left_inset + dp(5), 0, 0, 0]
     V2RefreshContainer:
         id: nav_items
         item_spacing: root.nav_link_spacing
         item_padding: root.nav_link_padding
-        size_hint_y: 0.8
-        pos_hint: {"x": 0, "top": 0.9}
+        size_hint_y: None
+        height: root.height * 0.9 - top_bar.height
+        pos_hint: {"x": 0, "y": 0.1}
         opacity: 0
     DebugFloatLayout:
         id: bottom_bar
@@ -90,6 +92,7 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
     ids: NavDrawerIds = DictProperty({})
     open_progress = NumericProperty(0)
     top_bar_left_inset = NumericProperty(0)
+    top_bar_height = NumericProperty(0)
     animation_open_duration = NumericProperty(0.2)
     animation_open_timing = OptionProperty(
         AnimationTiming.in_out_quad, options=[AnimationTiming.__members__.values()]
