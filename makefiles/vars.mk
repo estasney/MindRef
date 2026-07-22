@@ -32,8 +32,8 @@ ICON_SRC:= $(PROJECT_ROOT)/assets/logo.png
 ICON_DEST:= $(BUILD_DIR)/assets/logo.png
 ASSET_MATERIAL_TTF_SRC:= $(PROJECT_ROOT)/assets/MaterialIcons.ttf
 ASSET_MATERIAL_TTF_DEST:= $(BUILD_DIR)/assets/MaterialIcons.ttf
-ASSET_ROBOTO_TTF_SRC:= $(PROJECT_ROOT)/assets/RobotoMono-Regular.ttf
-ASSET_ROBOTO_TTF_DEST:= $(BUILD_DIR)/assets/RobotoMono-Regular.ttf
+ASSET_ROBOTO_TTF_SRC:= $(PROJECT_ROOT)/assets/JetBrainsMono-Regular.ttf
+ASSET_ROBOTO_TTF_DEST:= $(BUILD_DIR)/assets/JetBrainsMono-Regular.ttf
 
 NDK_VERSION:=28.2.13676358
 SDK_DIR:=$(HOME)/.android
