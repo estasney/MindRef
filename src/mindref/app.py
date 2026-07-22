@@ -49,7 +49,9 @@ class MindRefApp(App):
         "app",
     )
 
-    fonts = DictProperty({"mono": "RobotoMono", "default": "Roboto", "icons": "Icon"})
+    fonts = DictProperty(
+        {"mono": "JetBrainsMono", "default": "Roboto", "icons": "Icon"}
+    )
     colors = DictProperty(THEME_COLORS)
 
     base_font_size = ConfigParserProperty(

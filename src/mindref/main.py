@@ -43,8 +43,8 @@ def run_desktop():
 
 def main():
     LabelBase.register(
-        name="RobotoMono",
-        fn_regular=str(Path(__file__).parent / "assets" / "RobotoMono-Regular.ttf"),
+        name="JetBrainsMono",
+        fn_regular=str(Path(__file__).parent / "assets" / "JetBrainsMono-Regular.ttf"),
     )
     LabelBase.register(
         name="Icon",

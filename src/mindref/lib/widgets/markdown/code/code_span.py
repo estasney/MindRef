@@ -1,9 +1,9 @@
 from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.gridlayout import GridLayout
-from pygments import styles
 from pygments.token import Token
 
 from mindref.lib.utils import import_kv
+from mindref.lib.widgets.markdown.code.jetbrains_dark import JetBrainsDark
 
 import_kv(__file__)
 
@@ -16,7 +16,7 @@ class MarkdownCodeSpan(GridLayout):
 
     def __init__(self, text, **kwargs):
         super().__init__(**kwargs)
-        self.styler = styles.get_style_by_name("paraiso-dark")
+        self.styler = JetBrainsDark
         self.background_color = self.styler.background_color
         self.raw_text = text
 

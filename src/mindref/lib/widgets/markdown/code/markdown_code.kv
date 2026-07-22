@@ -1,8 +1,8 @@
 #:import parse_color kivy.parser.parse_color
+#:import JetBrainsDark mindref.lib.widgets.markdown.code.jetbrains_dark.JetBrainsDark
 <MarkdownCode>:
     cols: 1
     content: content
-    id: parent
     size_hint_y: None
     height: content.minimum_height
     canvas:
@@ -16,21 +16,33 @@
         Rectangle:
             pos: self.pos
             size: self.size
-    CodeInput:
-        id: content
-        background_color: parse_color(parent.background_color)
-        size_hint: 0.99, 0.95
-        anchor_x: "center"
-        anchor_y: "center"
-        text: parent.text_content
-        readonly: True
-        style_name: "paraiso-dark"
-        lexer: parent.lexer
-        use_bubble: False
-        use_handles: False
-        font_family: "RobotoMono"
-        mipmap: True
-        font_size: sp(app.base_font_size)
-        cursor_color: 0, 0, 0, 0
-        is_focusable: False
-        keyboard_mode: "managed"
+    HorizontalWheelScrollView:
+        id: scroller
+        size_hint_y: None
+        height: content.minimum_height
+        do_scroll_x: True
+        do_scroll_y: False
+        effect_cls: "ScrollEffect"
+        bar_width: dp(4)
+        scroll_type: ["bars", "content"]
+        NoWrapCodeInput:
+            id: content
+            background_normal: ""
+            background_active: ""
+            background_color: parse_color(root.background_color)
+            size_hint: None, None
+            width: max(scroller.width, self.minimum_width)
+            height: self.minimum_height
+            do_wrap: False
+            text: root.text_content
+            readonly: True
+            style: JetBrainsDark
+            lexer: root.lexer
+            use_bubble: False
+            use_handles: False
+            font_name: "JetBrainsMono"
+            mipmap: True
+            font_size: sp(app.base_font_size - 4)
+            cursor_color: 0, 0, 0, 0
+            is_focusable: False
+            keyboard_mode: "managed"
