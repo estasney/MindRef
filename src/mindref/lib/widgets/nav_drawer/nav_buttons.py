@@ -15,7 +15,8 @@ Builder.load_string(
     """
 <OpenMenuButton>:
     icon_code: '\ue5d2'
-    background_color: app.colors['Primary'] if self.state == 'normal' else app.colors['Accent-One']
+    background_color: (0, 0, 0, 0)
+    color: (1.0, 1.0, 1.0, 1.0) if self.state == 'down' else (1.0, 1.0, 1.0, 0.5)
 
 
 <ClearSearchButton@ThemedIconButton>:
