@@ -20,7 +20,7 @@ PROJECT_ROOT:=$(ROOT_DIR)/src/mindref
 PROJECT_VERSION ?= $(shell python3.12 -c "import tomllib;fp=open('pyproject.toml', 'rb');d=tomllib.load(fp);print(d['project']['version']);fp.close()" )
 
 PRIVATE_DIR:=$(BUILD_DIR)
-PRIVATE_ENTRYPOINT_SRC:=$(SCRIPT_DIR)/build/main.py
+PRIVATE_ENTRYPOINT_SRC:=$(ROOT_DIR)/p4a-recipes/mindref_android/main.py
 PRIVATE_ENTRYPOINT_DEST:=$(BUILD_DIR)/main.py
 
 PYX_FILES := $(wildcard $(PROJECT_ROOT)/lib/**/*.pyx)
@@ -32,8 +32,8 @@ ICON_SRC:= $(PROJECT_ROOT)/assets/logo.png
 ICON_DEST:= $(BUILD_DIR)/assets/logo.png
 ASSET_MATERIAL_TTF_SRC:= $(PROJECT_ROOT)/assets/MaterialIcons.ttf
 ASSET_MATERIAL_TTF_DEST:= $(BUILD_DIR)/assets/MaterialIcons.ttf
-ASSET_ROBOTO_TTF_SRC:= $(PROJECT_ROOT)/assets/JetBrainsMono-Regular.ttf
-ASSET_ROBOTO_TTF_DEST:= $(BUILD_DIR)/assets/JetBrainsMono-Regular.ttf
+ASSET_MONO_TTF_SRC:= $(PROJECT_ROOT)/assets/JetBrainsMono-Regular.ttf
+ASSET_MONO_TTF_DEST:= $(BUILD_DIR)/assets/JetBrainsMono-Regular.ttf
 
 NDK_VERSION:=28.2.13676358
 SDK_DIR:=$(HOME)/.android
