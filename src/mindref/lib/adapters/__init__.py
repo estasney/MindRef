@@ -1,5 +1,12 @@
-"""
-Adapters contains abstractions over data storage.
+from kivy import platform
 
-Implemented correctly, downstream users can treat domain models as being in-memory
-"""
+if platform == "android":
+    from .brokered.android.android_file_system import AndroidFileSystemAdapter
+
+    FileManager = AndroidFileSystemAdapter
+else:
+    from .direct_file_system import DirectFileSystemAdapter
+
+    FileManager = DirectFileSystemAdapter
+
+__all__ = ["FileManager"]

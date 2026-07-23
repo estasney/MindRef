@@ -22,7 +22,7 @@ class SettingsAndroidPath(SettingString):
         Instead, we'll offload the path selection to the Android system.
         """
         from mindref.lib import get_app
-        from mindref.lib.adapters_v2.brokered.android.android_file_system import (
+        from mindref.lib.adapters.brokered.android.android_file_system import (
             AndroidFileSystemAdapter,
         )
 

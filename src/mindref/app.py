@@ -22,7 +22,7 @@ from mindref.app_settings import PathConfigParserProperty
 from mindref.app_theme import THEME_COLORS
 from mindref.lib import get_app
 from mindref.lib.adapters.atlas import AtlasService
-from mindref.lib.adapters_v2 import FileManager
+from mindref.lib.adapters import FileManager
 from mindref.lib.widgets.settings.settings_mindref import MindrefSettings
 from mindref.screens import NoteAppScreenManager
 
@@ -93,7 +93,7 @@ class MindRefApp(App):
         Logger.info(f"Platform changed: Android={value}")
         if self.platform_android:
             self.storage_path = Path(get_app().user_data_dir) / "notes"
-            from mindref.lib.adapters_v2.brokered.android.window_insets import (
+            from mindref.lib.adapters.brokered.android.window_insets import (
                 apply_window_insets,
             )
 

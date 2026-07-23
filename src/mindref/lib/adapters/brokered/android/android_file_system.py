@@ -7,8 +7,8 @@ from kivy.clock import Clock, mainthread
 from kivy.logger import Logger
 
 from mindref.lib import get_app, sch_cb, schedulable
-from mindref.lib.adapters_v2.base import FileSystemBase
-from mindref.lib.adapters_v2.brokered.android.types import V2MindRefCallCodes
+from mindref.lib.adapters.base import FileSystemBase
+from mindref.lib.adapters.brokered.android.types import V2MindRefCallCodes
 
 if TYPE_CHECKING:
     from mindref.app_notes import NoteFile
@@ -22,7 +22,7 @@ class AndroidFileSystemAdapter(FileSystemBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.app = get_app()
-        from mindref.lib.adapters_v2.brokered.android.external_storage import (
+        from mindref.lib.adapters.brokered.android.external_storage import (
             AndroidManager,
         )
 

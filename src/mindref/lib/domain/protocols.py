@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
     from mindref.app_notes import NoteFile
     from mindref.lib.adapters.atlas.fs.fs_atlas_repository import AtlasService
-    from mindref.lib.adapters_v2.base import FileSystemBase
+    from mindref.lib.adapters.base import FileSystemBase
     from mindref.lib.widgets.settings.settings_mindref import MindrefSettings
 
 

@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Protocol
 
 from kivy.properties import DictProperty
 
-from mindref.lib.adapters_v2.base import FileSystemBase
+from mindref.lib.adapters.base import FileSystemBase
 
 if TYPE_CHECKING:
     from kivy.uix.screenmanager import ScreenManager
