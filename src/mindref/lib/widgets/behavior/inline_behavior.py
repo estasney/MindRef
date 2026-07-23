@@ -29,6 +29,7 @@ from mindref.lib.utils.caching import (
 
 import_kv(__file__)
 
+
 class TextSnippet(NamedTuple):
     text: str
     highlight_tag: Literal["hl", "kbd"] | None
@@ -265,7 +266,9 @@ def get_cached_text_contrast(
 
 
 @kivy_cache(cache_name="color_norm", key_func=cache_key_color_norm, limit=1000)
-def get_cached_color_norm(color: str | tuple[float]) -> tuple[float, float, float, float]:
+def get_cached_color_norm(
+    color: str | tuple[float],
+) -> tuple[float, float, float, float]:
     def color_float_components(
         s: tuple[int] | tuple[float],
     ) -> tuple[float, float, float, float]:

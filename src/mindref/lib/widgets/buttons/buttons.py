@@ -1,10 +1,10 @@
 from kivy.properties import (
+    AliasProperty,
     BooleanProperty,
     ColorProperty,
     NumericProperty,
     StringProperty,
     VariableListProperty,
-    AliasProperty,
 )
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout

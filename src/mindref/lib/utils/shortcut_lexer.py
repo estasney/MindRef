@@ -24,7 +24,7 @@ class ShortcutLexer(RegexLexer):
 
 
 try:
-    from pygments.lexers import _mapping  # noqa
+    from pygments.lexers import _mapping
 
     _mapping.LEXERS["ShortcutLexer"] = (
         __name__,  # module path

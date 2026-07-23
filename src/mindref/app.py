@@ -21,8 +21,8 @@ from mindref.app_pool import get_pool
 from mindref.app_settings import PathConfigParserProperty
 from mindref.app_theme import THEME_COLORS
 from mindref.lib import get_app
-from mindref.lib.adapters.atlas import AtlasService
 from mindref.lib.adapters import FileManager
+from mindref.lib.adapters.atlas import AtlasService
 from mindref.lib.widgets.settings.settings_mindref import MindrefSettings
 from mindref.screens import NoteAppScreenManager
 

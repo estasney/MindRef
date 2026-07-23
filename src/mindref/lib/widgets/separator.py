@@ -14,7 +14,6 @@ import_kv(__file__)
 
 class Separator(Widget):
     color = ColorProperty()
-    ...
 
 
 class HSeparator(Separator): ...

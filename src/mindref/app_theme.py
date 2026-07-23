@@ -1,9 +1,4 @@
-from typing import Protocol, ClassVar
-
-from kivy.app import App
 from kivy.parser import parse_color
-from kivy.properties import DictProperty
-from mindref.app_protocol import AppThemeProtocol
 
 THEME_COLORS = {
     "White": (1, 1, 1),

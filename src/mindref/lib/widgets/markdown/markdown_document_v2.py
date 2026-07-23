@@ -1,6 +1,5 @@
 from kivy.lang import Builder
-from kivy.properties import BooleanProperty, ObjectProperty
-from kivy.uix.boxlayout import BoxLayout
+from kivy.properties import ObjectProperty
 
 from mindref.lib.widgets.behavior import DebugBoxLayout
 from mindref.lib.widgets.markdown.markdown_widget_parser import MarkdownWidgetParser

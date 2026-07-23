@@ -9,15 +9,13 @@ from kivy.logger import Logger
 from kivy.properties import (
     BooleanProperty,
     NumericProperty,
-    StringProperty,
     VariableListProperty,
 )  # type: ignore
-from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.widget import Widget
 
-from ..behavior import DebugFloatLayout
 from ...ext import compute_overscroll
+from ..behavior import DebugFloatLayout
 from . import V2RefreshBehavior
 
 if TYPE_CHECKING:
@@ -117,7 +115,6 @@ class V2RefreshContainer(DebugFloatLayout, V2RefreshBehavior):
         Called when the overscroll progress changes.
         This can be used to update the refresh icon or trigger a refresh.
         """
-        ...
 
     def add_widget_to_main(self, widget: Widget):
         """

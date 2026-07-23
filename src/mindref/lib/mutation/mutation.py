@@ -1,9 +1,9 @@
 from collections.abc import Callable
 from typing import Generic, ParamSpec, TypeVar
 
-from kivy.logger import Logger
 from kivy.clock import Clock
 from kivy.event import EventDispatcher
+from kivy.logger import Logger
 from kivy.properties import (
     AliasProperty,
     ObjectProperty,

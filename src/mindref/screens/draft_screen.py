@@ -1,6 +1,5 @@
-from typing import TYPE_CHECKING, NamedTuple, Optional
+from typing import TYPE_CHECKING, NamedTuple
 
-from kivy.clock import Clock
 from kivy.lang import Builder
 from kivy.properties import BooleanProperty, ObjectProperty
 from kivy.uix.screenmanager import Screen
@@ -14,7 +13,6 @@ if TYPE_CHECKING:
     from kivy.uix.codeinput import CodeInput
     from pygments.lexer import Lexer
 
-    from mindref.app_notes import NoteFile
     from mindref.lib.domain.protocols import AppRegistryProtocol
 
 

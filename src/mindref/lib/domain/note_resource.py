@@ -140,7 +140,7 @@ class CategoryResourceFiles:
                 matched_image = next(
                     (img for img in image if img.path.stem == category.lower()), None
                 )
-                image = matched_image if matched_image else image[0]
+                image = matched_image or image[0]
             elif n_img == 1:
                 image = image[0]
             else:

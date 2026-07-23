@@ -1,6 +1,6 @@
-from kivy.logger import Logger
 from kivy.lang import Builder
-from kivy.properties import ListProperty, NumericProperty, BooleanProperty
+from kivy.logger import Logger
+from kivy.properties import BooleanProperty, ListProperty, NumericProperty
 from kivy.uix.effectwidget import EffectWidget
 
 from mindref.lib.widgets.effects.linear_progress import LinearProgressEffect

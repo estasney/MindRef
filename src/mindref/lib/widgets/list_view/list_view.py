@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
-from kivy.logger import Logger
 from kivy.clock import Clock
+from kivy.logger import Logger
 from kivy.properties import (
     ListProperty,
     NumericProperty,

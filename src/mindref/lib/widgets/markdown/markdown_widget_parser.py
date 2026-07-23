@@ -242,11 +242,9 @@ class MarkdownWidgetParser:
                     case Widget():
                         delegate_parse(parsed_node)
                     case None:
-                        cell_align = cell_align if cell_align else "center"
+                        cell_align = cell_align or "center"
                         cell_bold = is_head
-                        self.state = MarkdownCell(
-                            **{"halign": cell_align, "bold": cell_bold}
-                        )
+                        self.state = MarkdownCell(halign=cell_align, bold=cell_bold)
                         for cell in children:
                             self.state.visit(cell)
             case {"type": "list", "children": list(), "level": 1}:

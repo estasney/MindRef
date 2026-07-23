@@ -6,10 +6,10 @@ from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.effects.opacityscroll import OpacityScrollEffect
 from kivy.properties import (
+    BooleanProperty,
     Logger,
     NumericProperty,
     StringProperty,
-    BooleanProperty,
 )
 from kivy.uix.floatlayout import FloatLayout
 

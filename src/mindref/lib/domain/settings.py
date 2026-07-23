@@ -1,5 +1,3 @@
-from kivy import platform
-
 _common_settings = [
     {"type": "title", "title": "Display"},
     {
