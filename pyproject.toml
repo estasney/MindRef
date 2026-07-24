@@ -114,6 +114,7 @@ ignore = [
     "ANN202",
     "ANN204",
     "ANN401",
+    "N803",
     "N818",
     "PLR0912",
     "PLR0913",
@@ -140,12 +141,14 @@ include = ["src"]
 ignore = ["tests"]
 pythonVersion = "3.12"
 reportAny = false
+reportConstantRedefinition = false
 reportExplicitAny = false
 reportImplicitOverride = false
 reportImplicitStringConcatenation = false
 reportUnannotatedClassAttribute = false
 reportUnknownLambdaType = false
 reportUnknownMemberType = false
+reportUnnecessaryComparison = false
 reportUnusedCallResult = false
 strictDictionaryInference = true
 strictListInference = true

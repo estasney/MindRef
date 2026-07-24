@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pathlib import Path
 from typing import TYPE_CHECKING, Protocol
 
@@ -27,8 +29,8 @@ class AppThemeProtocol(Protocol):
 
 class AppNotesProtocol(Protocol):
     storage_path: Path | None
-    note_files: list["NoteFile"]  # Should be NoteFile type
-    editing_note: list["NoteFile"]
-    screen_manager: "ScreenManager"  # Should be ScreenManager type
+    note_files: list[NoteFile]
+    editing_note: list[NoteFile]
+    screen_manager: ScreenManager
     external_storage_path: str
     fs: FileSystemBase
