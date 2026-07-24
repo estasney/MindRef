@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 import json
 from concurrent.futures import Future
 from pathlib import Path
+from typing import TypedDict, Unpack
 
 from kivy.app import App
 from kivy.clock import Clock, mainthread
@@ -15,29 +18,35 @@ from kivy.properties import (
     ObjectProperty,
     StringProperty,
 )
+from kivy.uix.settings import Settings as KivySettings
 from kivy.utils import platform
 
+from mindref.app_notes import NoteFile
 from mindref.app_pool import get_pool
 from mindref.app_settings import PathConfigParserProperty
 from mindref.app_theme import THEME_COLORS
-from mindref.lib import get_app
 from mindref.lib.adapters import FileManager
-from mindref.lib.adapters.atlas import AtlasService
+from mindref.lib.adapters.atlas.fs.fs_atlas_repository import AtlasService
+from mindref.lib.utils import get_app
 from mindref.lib.widgets.settings.settings_mindref import MindrefSettings
 from mindref.screens import NoteAppScreenManager
 
 
+class MindRefInitKwargs(TypedDict, total=False):
+    platform_android: bool
+
+
 class MindRefApp(App):
-    title = "MindRef"
+    title = StringProperty("MindRef")
     atlas_service = AtlasService(storage_path=Path(__file__).parent / "static")
     settings_cls = ObjectProperty(MindrefSettings)
 
     platform_android = BooleanProperty(defaultvalue=False)
     enable_profiling = BooleanProperty(defaultvalue=False)
-    note_files = ListProperty(force_dispatch=True)
-    editing_note = ObjectProperty(allownone=True)
+    note_files: ListProperty[NoteFile] = ListProperty(force_dispatch=True)
+    editing_note: ObjectProperty[NoteFile | None] = ObjectProperty(allownone=True)
     error_message = StringProperty()
-    screen_manager = ObjectProperty()
+    screen_manager: ObjectProperty[NoteAppScreenManager] = ObjectProperty()
 
     storage_path = PathConfigParserProperty(
         default=None, section="Storage", key="storage_path", config_name="app"
@@ -58,14 +67,11 @@ class MindRefApp(App):
         16, "Display", "base_font_size", "app", val_type=int, errorvalue=16
     )
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Unpack[MindRefInitKwargs]):
         platform_android = kwargs.pop("platform_android", False)
-        enable_profiling = kwargs.pop("enable_profiling", False)
         self.pool = get_pool()
-        self.profile = None
         super().__init__(**kwargs)
         self.platform_android = platform_android
-        self.enable_profiling = enable_profiling
         self.fs = FileManager()
         self.bind(
             external_storage_path=lambda *_: setattr(
@@ -73,23 +79,7 @@ class MindRefApp(App):
             )
         )
 
-    def on_start(self):
-        if self.enable_profiling:
-            import cProfile
-
-            self.profile = cProfile.Profile()
-            self.profile.enable()
-            Logger.info(
-                "Profiling enabled. MindRef will generate a profile file on exit."
-            )
-
-    def on_stop(self):
-        if self.profile is not None:
-            self.profile.disable()
-            self.profile.dump_stats("mindref.profile")
-            Logger.info("Saved profiling data to mindref.profile")
-
-    def on_platform_android(self, _instance, value):
+    def on_platform_android(self, _instance: MindRefApp, value: bool) -> None:
         Logger.info(f"Platform changed: Android={value}")
         if self.platform_android:
             self.storage_path = Path(get_app().user_data_dir) / "notes"
@@ -112,7 +102,7 @@ class MindRefApp(App):
         )
 
         @mainthread
-        def callback(future: Future[list[Path]]):
+        def callback(future: Future[list[NoteFile]]):
             res = future.result()
             Logger.info(
                 f"{self.__class__.__name__} : Note files successfully queried: {len(res)} files found."
@@ -126,11 +116,11 @@ class MindRefApp(App):
         """Read the contents of the note"""
         return self.fs.read_note(note_id=note_id, note_files=self.note_files)
 
-    def edit_note(self, note_id: str):
+    def edit_note(self, note_id: str) -> None:
         matched_note = next(
             (note for note in self.note_files if note.id == note_id), None
         )
-        if not matched_note:
+        if matched_note is None:
             Logger.error(
                 f"[{self.__class__.__name__}] Note with ID {note_id} not found."
             )
@@ -145,7 +135,7 @@ class MindRefApp(App):
         self.screen_manager.current = "main_screen"
         self.editing_note = None
 
-    def save_edit_note(self, text: str):
+    def save_edit_note(self, text: str) -> None:
         if not self.editing_note:
             Logger.error(
                 f"[{self.__class__.__name__}] No note is currently being edited."
@@ -170,7 +160,7 @@ class MindRefApp(App):
     def cancel_draft_note(self):
         self.screen_manager.current = "main_screen"
 
-    def save_draft_note(self, file_name: str, text: str):
+    def save_draft_note(self, file_name: str, text: str) -> None:
         draft_note_file = self.fs.save_draft_note(
             storage_path=self.storage_path,
             external_storage_path=self.external_storage_path,
@@ -184,7 +174,7 @@ class MindRefApp(App):
 
     def key_input(self, _window, key, _scancode, _codepoint, _modifier):
         if key == 27:
-            # TODO
+            # TODO - Close nav drawer? Something else?
             return True
         return False
 
@@ -198,7 +188,7 @@ class MindRefApp(App):
         Clock.schedule_once(lambda _: self.refresh_note_files())
         return self.screen_manager
 
-    def build_settings(self, settings):
+    def build_settings(self, settings: KivySettings) -> None:
         settings_data = [
             {
                 "type": "numeric",
@@ -230,7 +220,9 @@ class MindRefApp(App):
             )
         settings.add_json_panel("MindRef", self.config, data=json.dumps(settings_data))
 
-    def on_config_change(self, config, section, key, value):
+    def on_config_change(
+        self, config: ConfigParser, section: str, key: str, value: str
+    ) -> None:
         super().on_config_change(config, section, key, value)
         if section == "Storage":
             if key == "external_storage_path":
@@ -245,7 +237,7 @@ class MindRefApp(App):
             self.base_font_size = int(value)
             Logger.info(f"Base font size set to: {self.base_font_size}")
 
-    def build_config(self, config: ConfigParser):
+    def build_config(self, config: ConfigParser) -> None:
         if self.platform_android:
             config.setdefaults(
                 "Storage",
@@ -259,10 +251,10 @@ class MindRefApp(App):
             config.setdefaults("Storage", {"storage_path": None})
             config.setdefaults("Display", {"base_font_size": 16})
 
-    def open_settings(self, *largs):
-        super().open_settings(*largs)
+    def open_settings(self, *largs) -> bool:
+        return super().open_settings(*largs)
 
-    def close_settings(self, *largs):
+    def close_settings(self, *largs) -> None:
         super().close_settings(*largs)
 
     def on_pause(self):
@@ -271,4 +263,4 @@ class MindRefApp(App):
     def on_resume(self):
         Logger.info("On resume called, ensuring FBO is updated.")
         for ts in (0.01, 0.05, 0.2, 2.0):
-            Clock.schedule_once(lambda _dt: Window.canvas.ask_update(), ts)
+            Clock.schedule_once(lambda _dt: Window.canvas.ask_update(), ts)  # pyright: ignore[reportUnknownLambdaType]

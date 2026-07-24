@@ -13,6 +13,7 @@ from typing import (
     Protocol,
     TypeVar,
     Unpack,
+    cast,
 )
 
 from kivy.logger import Logger
@@ -21,8 +22,6 @@ from kivy.lang import Builder
 from .shortcut_lexer import ShortcutLexer
 
 if TYPE_CHECKING:
-    from line_profiler import LineProfiler
-
     from mindref.lib.domain.protocols import AppRegistryProtocol
 
 _LOG_LEVEL = None
@@ -31,42 +30,6 @@ T = TypeVar("T")
 P = ParamSpec("P")
 K = TypeVar("K", bound=str)
 V = TypeVar("V")
-
-
-_PROFILER: "LineProfiler | None" = None
-
-
-def get_stats() -> None:
-    global _PROFILER  # noqa: PLW0602
-    if _PROFILER is None:
-        print("No Profiler")
-        return
-    # noinspection PyUnresolvedReferences
-    from io import StringIO
-
-    fp = StringIO()
-
-    _PROFILER.print_stats(stream=fp)
-    stats = fp.getvalue()
-    fp.close()
-    print(stats)
-    Path("profile.txt").write_text(stats)
-
-
-def profile(func):
-    global _PROFILER
-    if _PROFILER is None:
-        try:
-            from line_profiler import LineProfiler
-
-            _PROFILER = LineProfiler()
-        except ImportError:
-            return func
-
-    _PROFILER.add_function(func)
-    _PROFILER.enable_by_count()
-    atexit.register(get_stats)
-    return func
 
 
 def mindref_path() -> Path:
@@ -82,31 +45,15 @@ def import_kv(path: str | Path) -> None:
         Builder.load_file(sp, rulesonly=True)
 
 
-def log_run_time(func: Callable[P, T]) -> Callable[P, T]:
-    @wraps(func)
-    def wrapped_log_run_time(*args: P.args, **kwargs: P.kwargs) -> T:
-        start_time = datetime.utcnow()
-        result = func(*args, **kwargs)
-        end_time = datetime.utcnow()
-        Logger.debug(f"Run Time {(end_time - start_time)}")
-        return result
-
-    return wrapped_log_run_time
-
-
-def schedulable(
+def schedulable[**P, T](
     func: Callable[P, T], *args: P.args, **kwargs: P.kwargs
-) -> Callable[P, T]:
+) -> Callable[[float], T]:
     """
     Decorator to make a function schedulable with Kivy's Clock.
 
     Since Kivy insists on passing the time elapsed since the last frame, this decorator
     will ignore the first argument and pass the rest to the function.
-
-    Internally, this decorator wraps the function in a partial that will ignore the first argument.
     """
-
-    # Use typing.Concatenate to annotate that Kivy will call scheduleable_inner with our args, kwargs and the time elapsed
 
     @wraps(func)
     def scheduleable_inner(*_iargs: float) -> T:
@@ -200,8 +147,7 @@ def get_app() -> "AppRegistryProtocol":
     """Calls App.get_running_app() but casts as expected protocol"""
     from kivy.app import App
 
-    app: AppRegistryProtocol = App.get_running_app()
-    return app
+    return cast("AppRegistryProtocol", App.get_running_app())  # pyright: ignore[reportInvalidCast]
 
 
 class SupportsGetItem(Protocol):
