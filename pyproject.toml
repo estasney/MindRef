@@ -140,6 +140,8 @@ suppress-dummy-args = true
 include = ["src"]
 ignore = ["tests"]
 pythonVersion = "3.12"
+stubPath="./typings"
+
 reportAny = false
 reportConstantRedefinition = false
 reportExplicitAny = false
@@ -153,3 +155,4 @@ reportUnusedCallResult = false
 strictDictionaryInference = true
 strictListInference = true
 strictSetInference = true
+

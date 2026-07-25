@@ -263,4 +263,4 @@ class MindRefApp(App):
     def on_resume(self):
         Logger.info("On resume called, ensuring FBO is updated.")
         for ts in (0.01, 0.05, 0.2, 2.0):
-            Clock.schedule_once(lambda _dt: Window.canvas.ask_update(), ts)  # pyright: ignore[reportUnknownLambdaType]
+            Clock.schedule_once(lambda _dt: Window.canvas.ask_update(), ts)
