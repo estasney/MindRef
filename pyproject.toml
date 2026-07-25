@@ -75,7 +75,6 @@ select = [
     "ANN",
     "ASYNC",
     "B",
-    "BLE",
     "C4",
     "DTZ",
     "ERA",

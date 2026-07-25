@@ -8,7 +8,7 @@ from typing import TypedDict, Unpack
 from kivy.app import App
 from kivy.clock import Clock, mainthread
 from kivy.config import ConfigParser
-from kivy.core.window import Window
+from kivy.core.window import Window, WindowBase
 from kivy.logger import Logger
 from kivy.properties import (
     BooleanProperty,
@@ -27,7 +27,7 @@ from mindref.app_settings import PathConfigParserProperty
 from mindref.app_theme import THEME_COLORS
 from mindref.lib.adapters import FileManager
 from mindref.lib.adapters.atlas.fs.fs_atlas_repository import AtlasService
-from mindref.lib.utils import get_app
+from mindref.lib.utils import get_app, required
 from mindref.lib.widgets.settings.settings_mindref import MindrefSettings
 from mindref.screens import NoteAppScreenManager
 
@@ -89,7 +89,7 @@ class MindRefApp(App):
 
             apply_window_insets()
 
-    def refresh_note_files(self, *_args):
+    def refresh_note_files(self, *_args: object) -> None:
         if self.storage_path is None:
             Logger.warning(
                 f"{self.__class__.__name__} : storage_path is not set. "
@@ -131,7 +131,7 @@ class MindRefApp(App):
         self.editing_note = matched_note
         self.screen_manager.current = "edit_screen"
 
-    def cancel_edit_note(self, *_args):
+    def cancel_edit_note(self, *_args: object) -> None:
         self.screen_manager.current = "main_screen"
         self.editing_note = None
 
@@ -142,11 +142,12 @@ class MindRefApp(App):
             )
             return
 
-        edit_file_name = str(
-            Path(self.editing_note.file_path).relative_to(self.storage_path)
+        storage_path = required(
+            self.storage_path, "Cannot save an edited note without a storage_path"
         )
+        edit_file_name = str(self.editing_note.file_path.relative_to(storage_path))
         self.fs.save_edit_note(
-            storage_path=self.storage_path,
+            storage_path=storage_path,
             external_storage_path=self.external_storage_path,
             file_name=edit_file_name,
             text=text,
@@ -161,8 +162,11 @@ class MindRefApp(App):
         self.screen_manager.current = "main_screen"
 
     def save_draft_note(self, file_name: str, text: str) -> None:
+        storage_path = required(
+            self.storage_path, "Cannot save a draft note without a storage_path"
+        )
         draft_note_file = self.fs.save_draft_note(
-            storage_path=self.storage_path,
+            storage_path=storage_path,
             external_storage_path=self.external_storage_path,
             file_name=file_name,
             text=text,
@@ -172,7 +176,14 @@ class MindRefApp(App):
         self.note_files = note_files
         self.screen_manager.current = "main_screen"
 
-    def key_input(self, _window, key, _scancode, _codepoint, _modifier):
+    def key_input(
+        self,
+        _window: WindowBase,
+        key: int,
+        _scancode: int,
+        _codepoint: str,
+        _modifier: list[str],
+    ) -> bool:
         if key == 27:
             # TODO - Close nav drawer? Something else?
             return True
@@ -251,10 +262,10 @@ class MindRefApp(App):
             config.setdefaults("Storage", {"storage_path": None})
             config.setdefaults("Display", {"base_font_size": 16})
 
-    def open_settings(self, *largs) -> bool:
+    def open_settings(self, *largs: object) -> bool:
         return super().open_settings(*largs)
 
-    def close_settings(self, *largs) -> None:
+    def close_settings(self, *largs: object) -> None:
         super().close_settings(*largs)
 
     def on_pause(self):

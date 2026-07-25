@@ -1,25 +1,21 @@
-import atexit
 import os
 from collections.abc import Callable
-from datetime import datetime
+
 from functools import partial, wraps
-from operator import itemgetter
+
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
-    Any,
     Generic,
     ParamSpec,
-    Protocol,
     TypeVar,
-    Unpack,
     cast,
 )
 
 from kivy.logger import Logger
 from kivy.clock import Clock
 from kivy.lang import Builder
-from .shortcut_lexer import ShortcutLexer
+
 
 if TYPE_CHECKING:
     from mindref.lib.domain.protocols import AppRegistryProtocol
@@ -30,6 +26,12 @@ T = TypeVar("T")
 P = ParamSpec("P")
 K = TypeVar("K", bound=str)
 V = TypeVar("V")
+
+
+def required[T](value: T | None, message: str) -> T:
+    if value is None:
+        raise RuntimeError(message)
+    return value
 
 
 def mindref_path() -> Path:
@@ -98,60 +100,11 @@ def def_cb(*args: Callable[P, T], timeout: float = 0) -> Callable[[], None]:
     return partial(_scheduled_func, func=next(func_pipe))
 
 
-def attrsetter(instance: object, attr: str, value: Any) -> Callable[[], None]:
-    """
-    Set an attribute of an instance operator style
-    Parameters
-    ----------
-    instance
-    attr
-    value
-    """
-
-    def attrsetter_inner(*_args: Any) -> None:
-        setattr(instance, attr, value)
-
-    return attrsetter_inner
-
-
-def fmt_attrs(instance: object, *attr: Unpack[tuple[str]]) -> str:
-    """
-    Build a param string formatted for logging with form
-    [attr=getattr(instance, attr)]
-
-    Returns
-    -------
-    """
-    params = ((a, getattr(instance, a)) for a in attr)
-    fmt_params = (f"{a!s}={v!s}" for a, v in params if v)
-    param_str = ", ".join(fmt_params)
-    return f"[{param_str}]"
-
-
-def fmt_items(instance: "SupportsGetItem", *attr) -> str:
-    """
-    Build a param string formatted for logging with form
-    [key=item]
-
-    Returns
-    -------
-    """
-    keys, values = attr, itemgetter(*attr)(instance)
-    params = ((k, v) for k, v in zip(keys, values, strict=True))
-    fmt_params = (f"{k!s}={v!s}" for k, v in params if v)
-    param_str = ", ".join(fmt_params)
-    return f"[{param_str}]"
-
-
 def get_app() -> "AppRegistryProtocol":
     """Calls App.get_running_app() but casts as expected protocol"""
     from kivy.app import App
 
     return cast("AppRegistryProtocol", App.get_running_app())  # pyright: ignore[reportInvalidCast]
-
-
-class SupportsGetItem(Protocol):
-    def __getitem__(self, item): ...
 
 
 class EnvironContext:
@@ -206,14 +159,3 @@ class LazyLoaded(Generic[T]):
         """Register a loader function"""
         self.loader = func.__name__
         return func
-
-
-class DottedDict(dict, Generic[K, V]):
-    def __init__(self):
-        super().__init__()
-
-    def __getattr__(self, item: K) -> V:
-        return self[item]
-
-    def __setattr__(self, key: K, value: V):
-        self.__setitem__(key, value)
