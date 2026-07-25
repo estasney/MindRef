@@ -5,11 +5,15 @@ Hand-written stub for the compiled `kivy.properties` Cython module
 Written against kivy 2.3.1 source: kivy/properties.pyx.
 
 `Property[T]` models the descriptor protocol: class-level access returns the
-property object, instance access returns `T`. Subclasses below are declared
-with their trivially-correct value types; only `BooleanProperty` is fully
-signed so far. For properties whose value type cannot be inferred from the
-constructor (`ObjectProperty`, `ListProperty`), annotate the declaration
-site explicitly.
+property object, instance access returns `T`. Fully signed so far:
+`BooleanProperty`, `ObjectProperty`, `ConfigParserProperty`; the rest are
+declared with their trivially-correct value types. For properties whose value
+type cannot be inferred from the constructor (`ObjectProperty`,
+`ListProperty`), annotate the declaration site explicitly.
+
+`ConfigParserProperty` accepts `Any` on assignment by design: incoming values
+(config strings or user input) are converted through `val_type` before
+storage, so `__get__` still returns `T`.
 
 Note on `allownone=True`: the value type must carry `| None` in the
 annotation; the runtime flag alone does not widen `T`.
@@ -18,6 +22,7 @@ annotation; the runtime flag alone does not widen `T`.
 from collections.abc import Callable
 from typing import Any, Generic, Self, TypeVar, overload
 
+from kivy.config import ConfigParser
 from kivy.event import EventDispatcher
 
 __all__ = (
@@ -154,10 +159,26 @@ class VariableListProperty(Property[list[float]]):
         self, defaultvalue: Any = None, length: int = 4, **kw: Any
     ) -> None: ...
 
-class ConfigParserProperty(Property[Any]):
+class ConfigParserProperty(Property[T]):
     def __init__(
-        self, defaultvalue: Any, section: str, key: str, config: Any, **kw: Any
+        self,
+        defaultvalue: T,
+        section: str,
+        key: str,
+        config: str | ConfigParser | None,
+        *,
+        val_type: Callable[[Any], T] | None = None,
+        verify: Callable[[T], bool] | None = None,
+        allownone: bool = False,
+        force_dispatch: bool = False,
+        errorvalue: T = ...,
+        errorhandler: Callable[[Any], T] | None = None,
+        comparator: Callable[[T, T], bool] | None = None,
+        deprecated: bool = False,
     ) -> None: ...
+    def __set__(self, obj: EventDispatcher, val: Any) -> None: ...
+    def set(self, obj: EventDispatcher, value: Any) -> bool: ...
+    def set_config(self, config: ConfigParser | None) -> None: ...
 
 class ColorProperty(Property[list[float]]):
     def __init__(self, defaultvalue: Any = 0, **kw: Any) -> None: ...
