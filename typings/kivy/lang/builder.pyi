@@ -75,6 +75,8 @@ class BuilderBase:
     By default, :class:`Builder` is a global Kivy instance used in widgets
     that you can use to load other kv files in addition to the default ones.
     """
+
+    files: list[str]
     def __init__(self) -> None: ...
     @classmethod
     def create_from(cls, builder) -> Self:
