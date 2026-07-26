@@ -8,7 +8,9 @@ from pathlib import Path
 from types import TracebackType
 from typing import (
     TYPE_CHECKING,
+    ClassVar,
     cast,
+    override,
 )
 
 from kivy.logger import Logger
@@ -126,16 +128,13 @@ class EnvironContext:
 
 
 class Singleton(type):
-    def __init__(
-        cls, name: str, bases: tuple[type, ...], namespace: dict[str, object]
-    ) -> None:
-        cls.__instance: object | None = None
-        super().__init__(name, bases, namespace)
+    instances: ClassVar[dict[type, object]] = {}
 
-    def __call__(cls, *args: object, **kwargs: object) -> object:
-        if cls.__instance is None:
-            cls.__instance = super().__call__(*args, **kwargs)
-        return cls.__instance
+    @override
+    def __call__[T](cls: type[T], *args: object, **kwargs: object) -> T:
+        if cls not in Singleton.instances:
+            Singleton.instances[cls] = super().__call__(*args, **kwargs)
+        return cast("T", Singleton.instances[cls])
 
 
 class LazyLoaded[T]:
