@@ -1,8 +1,15 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from kivy.lang import Builder
 from kivy.properties import ObjectProperty
 
 from mindref.lib.widgets.behavior import DebugBoxLayout
 from mindref.lib.widgets.markdown.markdown_widget_parser import MarkdownWidgetParser
+
+if TYPE_CHECKING:
+    from mindref.lib.domain.md_parser_types import TMdDocument
 
 Builder.load_string(
     """
@@ -23,15 +30,11 @@ class MarkdownDocumentLayout(DebugBoxLayout):
     It uses a GridLayout to arrange the content vertically.
     """
 
-    document = ObjectProperty()
+    document: ObjectProperty[TMdDocument] = ObjectProperty()
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    def on_parent(self, _instance, value):
-        _instance.bind(width=self.setter("width"))
-
-    def on_document(self, _instance, value):
+    def on_document(
+        self, _instance: MarkdownDocumentLayout, value: TMdDocument
+    ) -> None:
         self.clear_widgets()
         for child in value:
             parser = MarkdownWidgetParser()
