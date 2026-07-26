@@ -1,5 +1,6 @@
 from kivy.clock import Clock
 from kivy.graphics import Color, Line
+from kivy.lang import Builder
 from kivy.properties import (
     BooleanProperty,
     ListProperty,
@@ -10,12 +11,44 @@ from kivy.properties import (
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 
-from mindref.lib.utils import get_app, import_kv
+from mindref.lib.utils import get_app
 from mindref.lib.widgets.markdown.markdown_parsing_mixin import (
     MarkdownLabelParsingMixin,
 )
 
-import_kv(__file__)
+Builder.load_string("""
+#:import parse_color kivy.parser.parse_color
+#:import LabelHighlightInline mindref.lib.widgets.behavior
+
+<MarkdownTable>:
+    size_hint_y: None
+    cols: 1
+    height: self.minimum_height
+<MarkdownRow>:
+    orientation: 'horizontal'
+    padding: dp(4),dp(2)
+    size_hint_y: None
+    size_hint_x: 1
+    height: self.minimum_height
+
+
+<MarkdownCell>:
+    orientation: 'horizontal'
+    size_hint_y: None
+    height: self.minimum_height
+    size_hint_x: 1
+    padding: (dp(10), dp(2), dp(10), dp(2))
+    label: label
+    LabelHighlightInline:
+        id: label
+        snippets: root.snippets
+        bg_color: app.colors['Primary']
+        highlight_color: app.colors['Codespan']
+        valign: 'center'
+        halign: 'left'
+        height: self.texture_size[1]
+        size_hint_y: None
+""")
 
 
 class MarkdownTable(GridLayout):

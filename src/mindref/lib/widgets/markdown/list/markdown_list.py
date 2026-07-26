@@ -1,8 +1,12 @@
+from kivy.lang import Builder
 from kivy.uix.gridlayout import GridLayout
 
-from mindref.lib.utils import import_kv
-
-import_kv(__file__)
+Builder.load_string("""
+<MarkdownList>:
+    cols: 1
+    size_hint_y: None
+    height: self.minimum_height
+""")
 
 
 class MarkdownList(GridLayout):

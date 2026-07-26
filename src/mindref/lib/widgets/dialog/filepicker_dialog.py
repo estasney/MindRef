@@ -1,3 +1,4 @@
+from kivy.lang import Builder
 from kivy.logger import Logger
 from kivy.properties import (
     BooleanProperty,
@@ -7,9 +8,62 @@ from kivy.properties import (
 )
 from kivy.uix.floatlayout import FloatLayout
 
-from mindref.lib.utils import import_kv
+Builder.load_string("""
+#:import ThemedLabelButton mindref.lib.widgets.buttons.buttons
 
-import_kv(__file__)
+
+
+<LoadDialog>:
+    chooser: file_chooser
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: 'vertical'
+        FileChooserIconView:
+            id: file_chooser
+            dirselect: root.dirselect
+            filters: root.filters
+        BoxLayout:
+            size_hint_y: None
+            height: self.minimum_height
+            orientation: 'horizontal'
+            ThemedLabelButton:
+                text: 'OK'
+                disabled: not file_chooser.selection
+                on_release: root.dispatch('on_button_event', 'accept', file_chooser.path, file_chooser.selection)
+            ThemedLabelButton:
+                text: 'Cancel'
+                on_release: root.dispatch('on_button_event', 'cancel')
+
+
+<SaveDialog>:
+    chooser: file_chooser
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: 'vertical'
+        FileChooserIconView:
+            id: file_chooser
+            dirselect: root.dirselect
+            on_selection: text_input.text = self.selection and self.selection[0] or ''
+            filters: root.filters
+        TextInput:
+            id: text_input:
+            size_hint_y: None
+            height: sp(app.base_font_size * 2)
+            multiline: False
+            input_type: 'text'
+        BoxLayout:
+            orientation: 'horizontal'
+            ThemedLabelButton:
+                text: 'Save'
+                on_release: root.dispatch('on_button_event', 'accept', file_chooser.path, text_input.text)
+            ThemedLabelButton:
+                text: 'Cancel'
+                on_release: root.dispatch('on_button_event', 'cancel')
+
+
+""")
 
 
 class PickerDialog(FloatLayout):

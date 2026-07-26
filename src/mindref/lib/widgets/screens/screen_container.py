@@ -1,9 +1,42 @@
+from kivy.lang import Builder
 from kivy.properties import AliasProperty, ColorProperty, ObjectProperty
 
-from mindref.lib.utils import import_kv
 from mindref.lib.widgets.screens.interactive import InteractScreen
 
-import_kv(__file__)
+Builder.load_string("""
+<ScreenContainer>:
+    layout: layout
+    background_color: app.colors['Dark']
+    ScrollView:
+        do_scroll_x: False
+        do_scroll_y: True
+        ScatterLayout:
+            canvas.before:
+                Color:
+                    rgba: root.background_color
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+            id: layout
+            height: layout_content.minimum_height
+            scale: 1
+            do_translation: False, False
+            do_scale: True
+            do_rotation: False
+            BoxLayout:
+                id: layout_content
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+                padding: 0
+                spacing: 0
+                size_hint: None, None
+                width: root.width
+
+
+
+
+""")
 
 
 class ScreenContainer(InteractScreen):

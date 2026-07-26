@@ -2,6 +2,7 @@ from typing import Any, Literal, NamedTuple
 
 from kivy.clock import Clock
 from kivy.graphics import Color, RoundedRectangle
+from kivy.lang import Builder
 from kivy.metrics import sp
 from kivy.properties import (
     BooleanProperty,
@@ -20,14 +21,26 @@ from mindref.lib.ext import (
     compute_ref_coords,
     compute_text_contrast,
 )
-from mindref.lib.utils import import_kv
 from mindref.lib.utils.caching import (
     cache_key_color_norm,
     cache_key_text_contrast,
     kivy_cache,
 )
 
-import_kv(__file__)
+Builder.load_string("""
+<LabelHighlightInline>:
+    mipmap: True
+    width: self.texture_size[0]
+    height: self.texture_size[1]
+    text_size: self.width, None
+    font_size: sp(app.base_font_size)
+    markup: True
+    font_family_normal: app.fonts['default']
+    font_family_mono: app.fonts['mono']
+    highlight_padding: (dp(3), 0)
+    kbd_color: app.colors['Keyboard']
+    kbd_shadow_color: app.colors['KeyboardShadow']
+""")
 
 
 class TextSnippet(NamedTuple):

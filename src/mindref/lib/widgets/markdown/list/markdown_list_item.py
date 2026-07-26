@@ -1,10 +1,30 @@
+from kivy.lang import Builder
 from kivy.properties import AliasProperty, ListProperty, NumericProperty
 
-from mindref.lib.utils import import_kv
 from mindref.lib.widgets.behavior.inline_behavior import TextSnippet
 from mindref.lib.widgets.markdown.base.base import MarkdownLabelBase
 
-import_kv(__file__)
+Builder.load_string("""
+#:import styles mindref.lib.widgets.style
+#:import LabelHighlightInline mindref.lib.widgets.behavior
+
+<MarkdownListItem>:
+    label: label
+    cols: 1
+    size_hint_y: None
+    height: label.texture_size[1] + dp(20)
+    x: 0
+    LabelHighlightInline:
+        id: label
+        snippets: root.snippets
+        bg_color: app.colors['Primary']
+        highlight_color: app.colors['Codespan']
+        text_threshold: 170
+        valign: root.valign
+        halign: root.halign
+        height: self.texture_size[1]
+        size_hint_y: None
+""")
 
 
 class MarkdownListItem(MarkdownLabelBase):

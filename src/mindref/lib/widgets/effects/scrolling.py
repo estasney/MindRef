@@ -5,6 +5,7 @@ from kivy.animation import Animation
 from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.effects.opacityscroll import OpacityScrollEffect
+from kivy.lang import Builder
 from kivy.properties import (
     BooleanProperty,
     Logger,
@@ -14,9 +15,31 @@ from kivy.properties import (
 from kivy.uix.floatlayout import FloatLayout
 
 from mindref.lib.ext import compute_overscroll
-from mindref.lib.utils import get_app, import_kv
+from mindref.lib.utils import get_app
 
-import_kv(__file__)
+Builder.load_string("""
+<RefreshSymbol>:
+    size_hint_y: None
+    size_hint_x: None
+    width: dp(80)
+    height: dp(80)
+    pos_hint: {"center_x": 0.5, "center_y": 0.9}
+
+    canvas.before:
+        PushMatrix
+        Rotate:
+            angle: self.rotation
+            origin: self.center
+    canvas:
+        Color:
+            rgba: (*app.colors['White'], self.opacity)
+        Rectangle:
+            size: root.size
+            pos: self.pos
+            source: self.source
+    canvas.after:
+        PopMatrix
+""")
 
 
 class RefreshState(str, Enum):

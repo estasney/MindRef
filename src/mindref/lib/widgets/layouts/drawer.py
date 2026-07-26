@@ -2,6 +2,7 @@ from functools import partial
 from typing import Literal
 
 from kivy.animation import Animation
+from kivy.lang import Builder
 from kivy.properties import (
     AliasProperty,
     BooleanProperty,
@@ -12,11 +13,27 @@ from kivy.properties import (
 )
 from kivy.uix.anchorlayout import AnchorLayout
 
-from mindref.lib.utils import import_kv
-
 OPEN_STATE = Literal["open", "closed", "opening", "closing"]
 
-import_kv(__file__)
+Builder.load_string("""
+<DrawerLayout>:
+    background_color: app.colors['Primary']
+    overlay_alpha: 0.3
+    canvas:
+        Color:
+            rgba: [0,0,0,self._anim_alpha]
+        Rectangle:
+            size: self._window_size
+            pos: 0,0
+        Color:
+            rgba: self.background_color
+        BorderImage:
+            source: app.atlas_service.uri_for("bg_normal", atlas_name="textures")
+            border: [dp(16), dp(16), dp(16), dp(16)]
+            pos: self.pos
+            size: self.size
+
+""")
 
 
 class DrawerLayout(AnchorLayout):

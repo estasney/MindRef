@@ -1,5 +1,6 @@
 from kivy.animation import Animation
 from kivy.graphics.transformation import Matrix
+from kivy.lang import Builder
 from kivy.metrics import dp
 from kivy.properties import (
     AliasProperty,
@@ -10,9 +11,41 @@ from kivy.properties import (
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.scatter import Scatter
 
-from mindref.lib.utils import import_kv, sch_cb, schedulable
+from mindref.lib.utils import sch_cb, schedulable
 
-import_kv(__file__)
+Builder.load_string("""
+#:import icons mindref.lib.widgets.style
+
+<SwipeIcon@Label>:
+    font_size: sp(app.base_font_size * 3)
+    size_hint: None, None
+    size: self.texture_size
+    valign: 'middle'
+
+<SwipeNext@NavigateNext+SwipeIcon>:
+<SwipeBefore@NavigateBefore+SwipeIcon>:
+
+
+<LabeledBoundsLayout>:
+    label_right: label_right
+    label_left: label_left
+    canvas.before:
+        Color:
+            rgba: app.colors['Accent-One'] if root.swiping else (0,0,0,0)
+        Rectangle:
+            pos: [self.x-self.swipe_threshold, self.y]
+            size: [self.width + (2*self.swipe_threshold), self.height]
+    SwipeNext:
+        id: label_right
+        opacity: 1 if root.swiping else 0
+        y: root.y + root.height /2 - self.height /2
+        x: root.x + root.width + root.swipe_threshold - self.width
+    SwipeBefore:
+        id: label_left
+        opacity: 1 if root.swiping else 0
+        y: root.y + root.height /2 - self.height /2
+        x: root.x - self.width - root.swipe_threshold + self.width
+""")
 
 
 class LabeledBoundsLayout(FloatLayout):

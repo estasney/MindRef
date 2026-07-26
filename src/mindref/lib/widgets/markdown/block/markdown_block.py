@@ -1,3 +1,4 @@
+from kivy.lang import Builder
 from kivy.properties import (
     ListProperty,
     NumericProperty,
@@ -6,10 +7,71 @@ from kivy.properties import (
 )
 from kivy.uix.boxlayout import BoxLayout
 
-from mindref.lib.utils import import_kv
 from mindref.lib.widgets.markdown.base.base import MarkdownLabelBase
 
-import_kv(__file__)
+Builder.load_string("""
+#:import parse_color kivy.parser.parse_color
+#:import LabelHighlightInline mindref.lib.widgets.behavior
+#:import MarkdownLabelBase mindref.lib.widgets.markdown.base
+
+<MarkdownHeading@MarkdownLabelBase>:
+    orientation: 'horizontal'
+    size_hint_y: None
+    height: self.minimum_height
+    size_hint_x: 1
+    label: label
+    padding: (0, 0, 0, dp(2))
+    canvas:
+        Color:
+            rgba: app.colors['Dark']
+        Rectangle:
+            pos: self.x, self.y + dp(5)
+            size: self.width, dp(1)
+    LabelHighlightInline:
+        id: label
+        snippets: root.snippets
+        bg_color: app.colors['Primary']
+        highlight_color: app.colors['Codespan']
+        valign: 'top'
+        halign: 'left'
+        height: self.texture_size[1] + dp(20)
+        size_hint_y: None
+        font_size: sp(app.base_font_size + 5 - root.level)
+        padding: (0, 0)
+
+
+<MarkdownBlock@MarkdownLabelBase>:
+    orientation: 'horizontal'
+    size_hint_y: None
+    height: self.minimum_height
+    size_hint_x: 1
+    padding: (0, 0, 0, dp(10))
+    label: label
+    LabelHighlightInline:
+        id: label
+        snippets: root.snippets
+        bg_color: app.colors['Primary']
+        highlight_color: app.colors['Codespan']
+        text_threshold: 170
+        valign: 'center'
+        halign: 'left'
+        height: self.texture_size[1]
+        size_hint_y: None
+
+<MarkdownThematicBreak>:
+    orientation: 'vertical'
+    size_hint_y: None
+    height: sp(20)
+    size_hint_x: 1
+
+    canvas:
+        Color:
+            rgba: app.colors['Gray-100']
+        RoundedRectangle:
+            pos: self.x, self.center_y
+            size: self.width, sp(1)
+            radius: dp(1),dp(1)
+""")
 
 
 class MarkdownHeading(MarkdownLabelBase):

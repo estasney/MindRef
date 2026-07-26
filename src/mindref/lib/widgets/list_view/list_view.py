@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 
 from kivy.clock import Clock
+from kivy.lang import Builder
 from kivy.logger import Logger
 from kivy.properties import (
     ListProperty,
@@ -13,12 +14,71 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
 
-from mindref.lib.utils import import_kv, sch_cb, schedulable
+from mindref.lib.utils import sch_cb, schedulable
 
 if TYPE_CHECKING:
     from mindref.lib.domain.markdown_note import MarkdownNoteDict
 
-import_kv(__file__)
+Builder.load_string("""
+#:import LargeLabel mindref.lib.widgets.style
+#:import BaseLabel mindref.lib.widgets.style
+#:import FileButton mindref.lib.widgets.buttons
+<ListView>:
+    cols: 1
+    height: self.minimum_height
+    size_hint_y: None
+
+
+<ScrollingListView>:
+    do_scroll_x: False
+    do_scroll_y: True
+    content: content
+    Scatter:
+        size_hint_y: None
+        height: content.minimum_height
+        width: root.width
+        scale: 1
+        do_translation: False, False
+        do_scale: False
+        do_rotation: False
+        ListView:
+            meta_notes: app.note_category_meta
+            size_hint_y: None
+            id: content
+            cols: 1
+            height: self.minimum_height
+            width: root.width
+
+<ListItem>:
+    padding: dp(5)
+    canvas:
+        Color:
+            rgba: (*app.colors['Gray-400'][:3], 0.6)
+        Line:
+            width: dp(1.2)
+            rectangle: (self.x, self.y, self.width, self.height)
+        Color:
+            rgba: app.colors['Primary'] if self.state == 'normal' else app.colors['Accent-One']
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    orientation: 'horizontal'
+    height: dp(40)
+    size_hint_y: None
+    size_hint_x: 1
+    on_release: app.select_index(self.index)
+
+    BaseLabel:
+        text: root.title_text
+        size_hint_x: 0.9
+        size_hint_y: 1
+        mipmap: True
+        text_size: self.width, None
+        font_size: sp(app.base_font_size)
+        padding_x: dp(5)
+        valign: 'middle'
+        halign: 'left'
+""")
 
 
 class ScrollingListView(ScrollView):

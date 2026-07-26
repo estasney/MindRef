@@ -1,5 +1,6 @@
 from kivy.core.text import Label as CoreLabel
 from kivy.input.motionevent import MotionEvent
+from kivy.lang import Builder
 from kivy.logger import Logger
 from kivy.properties import AliasProperty, ObjectProperty, StringProperty
 from kivy.uix.codeinput import CodeInput
@@ -9,10 +10,58 @@ from pygments import lexers
 from pygments.lexers import PythonLexer
 from pygments.util import ClassNotFound
 
-from mindref.lib.utils import import_kv
 from mindref.lib.widgets.markdown.code.jetbrains_dark import JetBrainsDark
 
-import_kv(__file__)
+Builder.load_string("""
+#:import parse_color kivy.parser.parse_color
+#:import JetBrainsDark mindref.lib.widgets.markdown.code.jetbrains_dark.JetBrainsDark
+<MarkdownCode>:
+    cols: 1
+    content: content
+    size_hint_y: None
+    height: content.minimum_height
+    canvas:
+        Color:
+            rgb: parse_color(root.background_color)
+        Rectangle:
+            pos: self.x - 1, self.y - 1
+            size: self.width + 2, self.height + 2
+        Color:
+            rgb: parse_color(root.background_color)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    HorizontalWheelScrollView:
+        id: scroller
+        size_hint_y: None
+        height: content.minimum_height
+        do_scroll_x: True
+        do_scroll_y: False
+        effect_cls: "ScrollEffect"
+        bar_width: dp(4)
+        scroll_type: ["bars", "content"]
+        NoWrapCodeInput:
+            id: content
+            background_normal: ""
+            background_active: ""
+            background_color: parse_color(root.background_color)
+            size_hint: None, None
+            width: max(scroller.width, self.minimum_width)
+            height: self.minimum_height
+            do_wrap: False
+            text: root.text_content
+            readonly: True
+            style: JetBrainsDark
+            lexer: root.lexer
+            use_bubble: False
+            use_handles: False
+            font_name: "JetBrainsMono"
+            mipmap: True
+            font_size: sp(app.base_font_size - 4)
+            cursor_color: 0, 0, 0, 0
+            is_focusable: False
+            keyboard_mode: "managed"
+""")
 
 
 class HorizontalWheelScrollView(ScrollView):
