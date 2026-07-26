@@ -37,14 +37,6 @@ def mindref_path() -> Path:
     return Path(str(files("mindref")))
 
 
-def import_kv(path: str | Path) -> None:
-    base_path = Path(path).resolve()
-    kv_path = base_path.with_suffix(".kv")
-    if kv_path.exists() and (sp := str(kv_path)) not in Builder.files:
-        Logger.debug(f"Loading {kv_path.name}")
-        Builder.load_file(sp, rulesonly=True)
-
-
 def schedulable[**P](
     func: Callable[P, object], *args: P.args, **kwargs: P.kwargs
 ) -> ClockCallback:
