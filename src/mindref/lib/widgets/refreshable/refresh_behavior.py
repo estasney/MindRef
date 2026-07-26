@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 from kivy.logger import Logger
 
-from . import CustomBehavior
+from mindref.lib.widgets.behavior import CustomBehavior
 
 if TYPE_CHECKING:
     from kivy.uix.widget import Widget
@@ -31,7 +31,7 @@ class V2RefreshBehavior(CustomBehavior):
             None,
         )
 
-    def on_refresh(self, widget: "Widget", state: bool, to_children: bool):
+    def on_refresh(self, widget: "Widget", state: bool, to_children: bool) -> bool:
         """
         Called when the refresh state changes
         state: bool

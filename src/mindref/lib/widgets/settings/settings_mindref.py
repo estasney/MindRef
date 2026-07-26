@@ -1,6 +1,6 @@
 from kivy.uix.settings import SettingsWithSpinner
 
-from . import SettingsAndroidPath
+from mindref.lib.widgets.settings.settings_android_path import SettingsAndroidPath
 
 
 class MindrefSettings(SettingsWithSpinner):

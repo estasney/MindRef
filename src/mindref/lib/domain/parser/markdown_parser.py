@@ -5,10 +5,10 @@ import mistune
 
 from mindref.lib.utils import Singleton
 
-from .kbd_plugin import plugin_kbd
+from mindref.lib.domain.parser.kbd_plugin import plugin_kbd
 
 if TYPE_CHECKING:
-    from ..md_parser_types import MD_DOCUMENT, MD_TYPES
+    from mindref.lib.domain.md_parser_types import MD_DOCUMENT, MD_TYPES
 
 
 class MarkdownParser(metaclass=Singleton):

@@ -11,7 +11,9 @@ from typing import (
 )
 
 if TYPE_CHECKING:
-    from .external_storage import OnDocumentCallback
+    from mindref.lib.adapters.brokered.android.external_storage import (
+        OnDocumentCallback,
+    )
 
 LIntentFlags = Literal[1, 2, 64, 128]
 

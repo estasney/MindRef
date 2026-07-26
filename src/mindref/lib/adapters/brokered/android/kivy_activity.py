@@ -2,7 +2,7 @@ from functools import cache
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .types import ActivityProtocol
+    from mindref.lib.adapters.brokered.android.types import ActivityProtocol
 
 
 @cache

@@ -88,7 +88,7 @@ class MainScreen(Screen, V2RefreshBehavior):
     top_strip_height = NumericProperty(0)
     _markdown_parser: mistune.Markdown
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
         Clock.schedule_once(self._bind_nav_drawer, 0)
         self.app = get_app()

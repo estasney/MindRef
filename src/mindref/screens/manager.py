@@ -1,12 +1,13 @@
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from kivy.lang import Builder
 from kivy.logger import Logger
-from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import ScreenManager
-from kivy.uix.widget import Widget
 
 from mindref.lib.widgets.refreshable import V2RefreshBehavior
+
+if TYPE_CHECKING:
+    from kivy.uix.widget import Widget
 
 Builder.load_string(
     """
@@ -16,8 +17,6 @@ Builder.load_string(
 #:import DraftScreen mindref.screens.draft_screen
 
 <NoteAppScreenManager>:
-    id: screen_manager
-    app: app
     transition: SlideTransition()
     MainScreen:
         id: main_screen
@@ -31,18 +30,17 @@ Builder.load_string(
 """
 )
 
-TScreenNames = Literal["main_screen", "edit_screen", "draft_screen"]
+TScreenName = Literal["main_screen", "edit_screen", "draft_screen"]
 
 
 class NoteAppScreenManager(V2RefreshBehavior, ScreenManager):
-    app = ObjectProperty()
-    current: TScreenNames
+    current: TScreenName
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
         self.current = "main_screen"
 
-    def on_refresh(self, widget: "Widget", state: bool, to_children: bool):
+    def on_refresh(self, widget: "Widget", state: bool, to_children: bool) -> bool:
         Logger.debug(
             f"{type(self).__name__} : on_refresh called with src={widget}, {state=}, {to_children=}"
         )

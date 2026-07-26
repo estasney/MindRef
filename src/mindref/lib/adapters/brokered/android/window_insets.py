@@ -4,10 +4,10 @@ from typing import TYPE_CHECKING
 
 from mindref.lib import get_app
 
-from .kivy_activity import get_kivy_activity
+from mindref.lib.adapters.brokered.android.kivy_activity import get_kivy_activity
 
 if TYPE_CHECKING:
-    from .types import MindRefWindowInsetsProtocol
+    from mindref.lib.adapters.brokered.android.types import MindRefWindowInsetsProtocol
 
 SIGNED_INT_RANGE = 1 << 32
 SIGNED_INT_MAX = 1 << 31

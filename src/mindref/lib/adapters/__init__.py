@@ -1,11 +1,13 @@
 from kivy import platform
 
 if platform == "android":
-    from .brokered.android.android_file_system import AndroidFileSystemAdapter
+    from mindref.lib.adapters.brokered.android.android_file_system import (
+        AndroidFileSystemAdapter,
+    )
 
     FileManager = AndroidFileSystemAdapter
 else:
-    from .direct_file_system import DirectFileSystemAdapter
+    from mindref.lib.adapters.direct_file_system import DirectFileSystemAdapter
 
     FileManager = DirectFileSystemAdapter
 

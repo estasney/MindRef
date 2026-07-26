@@ -14,9 +14,9 @@ from kivy.properties import (
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.widget import Widget
 
-from ...ext import compute_overscroll
-from ..behavior import DebugFloatLayout
-from . import V2RefreshBehavior
+from mindref.lib.ext import compute_overscroll
+from mindref.lib.widgets.behavior import DebugFloatLayout
+from mindref.lib.widgets.refreshable.refresh_behavior import V2RefreshBehavior
 
 if TYPE_CHECKING:
     from mindref.lib.widgets.nav_drawer import NavItem

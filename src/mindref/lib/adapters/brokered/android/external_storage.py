@@ -7,10 +7,10 @@ from kivy.logger import Logger
 
 from mindref.lib.utils import Singleton
 
-from .intent import get_intent_cls
-from .kivy_activity import get_kivy_activity
-from .mindref_utils import get_mindref_utils_cls
-from .types import (
+from mindref.lib.adapters.brokered.android.intent import get_intent_cls
+from mindref.lib.adapters.brokered.android.kivy_activity import get_kivy_activity
+from mindref.lib.adapters.brokered.android.mindref_utils import get_mindref_utils_cls
+from mindref.lib.adapters.brokered.android.types import (
     ContentResolverProtocol,
     ContextProtocol,
     IntentProtocol,
@@ -18,7 +18,7 @@ from .types import (
     UriProtocol,
     V2MindRefCallCodes,
 )
-from .uri import get_uri_cls
+from mindref.lib.adapters.brokered.android.uri import get_uri_cls
 
 ACTIVITY_CLASS_NAMESPACE = "org/kivy/android/PythonActivity"
 

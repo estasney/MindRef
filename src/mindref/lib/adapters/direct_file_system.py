@@ -3,10 +3,10 @@ from typing import TYPE_CHECKING
 
 from kivy.logger import Logger
 
-from .base import FileSystemBase
+from mindref.lib.adapters.base import FileSystemBase
 
 if TYPE_CHECKING:
-    from ...app_notes import NoteFile
+    from mindref.app_notes import NoteFile
 
 
 class DirectFileSystemAdapter(FileSystemBase):
