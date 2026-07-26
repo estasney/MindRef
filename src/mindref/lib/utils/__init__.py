@@ -2,13 +2,12 @@ import os
 from collections.abc import Callable
 
 from functools import partial, wraps
+from importlib.resources import files
 
 from pathlib import Path
+from types import TracebackType
 from typing import (
     TYPE_CHECKING,
-    Generic,
-    ParamSpec,
-    TypeVar,
     cast,
 )
 
@@ -22,21 +21,18 @@ if TYPE_CHECKING:
 
 _LOG_LEVEL = None
 
-T = TypeVar("T")
-P = ParamSpec("P")
-K = TypeVar("K", bound=str)
-V = TypeVar("V")
+type ClockCallback = Callable[[float], object]
 
 
 def required[T](value: T | None, message: str) -> T:
+    """Type narrow Optional"""
     if value is None:
         raise RuntimeError(message)
     return value
 
 
 def mindref_path() -> Path:
-    # find our module location
-    return Path(__file__).parent.parent.resolve()
+    return Path(str(files("mindref")))
 
 
 def import_kv(path: str | Path) -> None:
@@ -47,9 +43,9 @@ def import_kv(path: str | Path) -> None:
         Builder.load_file(sp, rulesonly=True)
 
 
-def schedulable[**P, T](
-    func: Callable[P, T], *args: P.args, **kwargs: P.kwargs
-) -> Callable[[float], T]:
+def schedulable[**P](
+    func: Callable[P, object], *args: P.args, **kwargs: P.kwargs
+) -> ClockCallback:
     """
     Decorator to make a function schedulable with Kivy's Clock.
 
@@ -58,25 +54,25 @@ def schedulable[**P, T](
     """
 
     @wraps(func)
-    def scheduleable_inner(*_iargs: float) -> T:
+    def scheduleable_inner(_dt: float) -> None:
         """This is the function that will be called by Kivy's Clock"""
-        return func(*args, **kwargs)
+        func(*args, **kwargs)
 
     return scheduleable_inner
 
 
-def sch_cb(*args: Callable[P, T], timeout: float = 0) -> None:
+def sch_cb(*callbacks: ClockCallback, timeout: float = 0) -> None:
     """
     Chain functions that sequentially call the next
 
     Passed to Clock to schedule
     """
 
-    head_func = def_cb(timeout=timeout, *args)
+    head_func = def_cb(*callbacks, timeout=timeout)
     Clock.schedule_once(head_func, timeout=timeout)
 
 
-def def_cb(*args: Callable[P, T], timeout: float = 0) -> Callable[[], None]:
+def def_cb(*callbacks: ClockCallback, timeout: float = 0) -> ClockCallback:
     """
     Chain functions that sequentially call the next
 
@@ -87,17 +83,19 @@ def def_cb(*args: Callable[P, T], timeout: float = 0) -> Callable[[], None]:
     Returns a partial object that once called, starts a chain of events
     """
 
-    func_pipe = (f for f in args)
+    func_pipe = iter(callbacks)
 
-    def _scheduled_func(*s_args: P.args, **kwargs: P.kwargs) -> None:
-        func: Callable[P, T] = kwargs.pop("func")
-        func(*s_args, **kwargs)
+    def run_then_schedule_next(current: ClockCallback, dt: float) -> None:
+        current(dt)
         next_func = next(func_pipe, None)
-        if next_func:
-            cb = partial(_scheduled_func, func=next_func)
+        if next_func is not None:
+            cb = partial(run_then_schedule_next, next_func)
             Clock.schedule_once(cb, timeout)
 
-    return partial(_scheduled_func, func=next(func_pipe))
+    head_func = next(func_pipe, None)
+    if head_func is None:
+        return lambda _dt: None
+    return partial(run_then_schedule_next, head_func)
 
 
 def get_app() -> "AppRegistryProtocol":
@@ -117,45 +115,53 @@ class EnvironContext:
         for k, v in self.vals.items():
             os.environ[k] = v
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         for k in self.vals:
             del os.environ[k]
 
 
 class Singleton(type):
-    def __init__(cls, *args, **kwargs):
-        cls.__instance = None
-        super().__init__(*args, **kwargs)
+    def __init__(
+        cls, name: str, bases: tuple[type, ...], namespace: dict[str, object]
+    ) -> None:
+        cls.__instance: object | None = None
+        super().__init__(name, bases, namespace)
 
-    def __call__(cls, *args, **kwargs):
+    def __call__(cls, *args: object, **kwargs: object) -> object:
         if cls.__instance is None:
             cls.__instance = super().__call__(*args, **kwargs)
-            return cls.__instance
         return cls.__instance
 
 
-class LazyLoaded(Generic[T]):
-    def __init__(self, default: "Callable | None" = None):
+class LazyLoaded[T]:
+    def __init__(self, default: Callable[[], T] | None = None):
         self.default = default if default is None else default()
+        self.private_name = ""
+        self.loader = ""
 
-    def __set_name__(self, owner, name):
+    def __set_name__(self, owner: type[object], name: str) -> None:
         self.private_name = f"_{name}"
         setattr(owner, self.private_name, self.default)
 
-    def __get__(self, obj, objtype=None) -> "T":
+    def __get__(self, obj: object, objtype: type[object] | None = None) -> T:
         value = getattr(obj, self.private_name)
         if value == self.default:
             value = getattr(obj, self.loader)()
             setattr(obj, self.private_name, value)
         return value
 
-    def __set__(self, instance, value):
+    def __set__(self, instance: object, value: T | None) -> None:
         if not value:
             setattr(instance, self.private_name, self.default)
         else:
             setattr(instance, self.private_name, value)
 
-    def __call__(self, func):
+    def __call__(self, func: Callable[..., T]) -> Callable[..., T]:
         """Register a loader function"""
         self.loader = func.__name__
         return func
