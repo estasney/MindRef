@@ -151,6 +151,7 @@ reportUnknownLambdaType = false
 reportUnknownMemberType = false
 reportUnnecessaryComparison = false
 reportUnusedCallResult = false
+reportUnsafeMultipleInheritance = false
 strictDictionaryInference = true
 strictListInference = true
 strictSetInference = true
