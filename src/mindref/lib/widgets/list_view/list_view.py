@@ -13,7 +13,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
 
-from mindref.lib.utils import fmt_items, import_kv, sch_cb, schedulable
+from mindref.lib.utils import import_kv, sch_cb, schedulable
 
 if TYPE_CHECKING:
     from mindref.lib.domain.markdown_note import MarkdownNoteDict
