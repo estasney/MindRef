@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from _operator import itemgetter
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Protocol, TypedDict
+from typing import TYPE_CHECKING, Protocol
 
 from mindref.lib.domain.parser.markdown_parser import MarkdownParser
 
@@ -21,15 +21,6 @@ class FileLikeProtocol(Protocol):
     def write(self): ...
 
 
-class MarkdownNoteDict(TypedDict):
-    category: str
-    text: str
-    title: str
-    idx: int
-    filepath: Path | None
-    document: MD_DOCUMENT
-
-
 @dataclass
 class MarkdownNote:
     parser = MarkdownParser()
@@ -44,11 +35,8 @@ class MarkdownNote:
         attrs = ("category", "title", "idx", "filepath")
         return f"{type(self).__name__}({','.join(f'{p}={getattr(self, p)}' for p in attrs)})"
 
-    def to_dict(self) -> MarkdownNoteDict:
-        return asdict(self, dict_factory=MarkdownNoteDict)
-
     @classmethod
-    def from_file(cls, category: str, idx: int, fp: PathLike):
+    def from_file(cls, category: str, idx: int, fp: str | PathLike[str]):
         filepath = Path(fp)
         text = filepath.read_text(encoding="utf-8")
         document = cls.parser.parse(text)
