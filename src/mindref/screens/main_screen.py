@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, NamedTuple
 
-import mistune  # type: ignore
+import mistune
 from kivy.clock import Clock
 from kivy.lang import Builder
 from kivy.logger import Logger
@@ -11,6 +13,7 @@ from kivy.uix.screenmanager import Screen
 from mindref.app_notes import NoteFile
 from mindref.lib import get_app
 from mindref.lib.domain.parser.kbd_plugin import plugin_kbd
+from mindref.lib.domain.protocols import AppRegistryProtocol
 from mindref.lib.widgets.markdown.markdown_document_v2 import MarkdownDocumentLayout
 from mindref.lib.widgets.refreshable import V2RefreshBehavior
 
@@ -18,12 +21,12 @@ if TYPE_CHECKING:
     from kivy.uix.scrollview import ScrollView
     from kivy.uix.widget import Widget
 
+    from mindref.lib.domain.md_parser_types import TMdDocument
     from mindref.lib.widgets.nav_drawer import NavDrawer, NavItem
 
 Builder.load_string(
     """
 #:import V2RefreshContainer mindref.lib.widgets.refreshable.refresh_container
-#:import ScrollingListView mindref.lib.widgets.list_view.list_view
 #:import NavDrawer mindref.lib.widgets.nav_drawer
 #:import OpenMenuButton mindref.lib.widgets.buttons
 #:import AnimatedHSeparator mindref.lib.widgets.separator
@@ -77,16 +80,16 @@ Builder.load_string(
 
 
 class V2NoteListViewScreenIds(NamedTuple):
-    content: "ScrollView"
-    nav_drawer: "NavDrawer"
+    content: ScrollView
+    nav_drawer: NavDrawer
 
 
 class MainScreen(Screen, V2RefreshBehavior):
-    app = ObjectProperty()
+    app: ObjectProperty[AppRegistryProtocol] = ObjectProperty()
     ids: V2NoteListViewScreenIds
     selected_note = StringProperty(None, allownone=True)
     top_strip_height = NumericProperty(0)
-    _markdown_parser: mistune.Markdown
+    _markdown_parser: mistune.Markdown[TMdDocument]
 
     def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
@@ -97,18 +100,18 @@ class MainScreen(Screen, V2RefreshBehavior):
             escape=False, renderer=mistune.AstRenderer(), plugins=["table", plugin_kbd]
         )
 
-    def _bind_nav_drawer(self, _dt):
+    def _bind_nav_drawer(self, _dt: float) -> None:
         nav_drawer = self.ids.nav_drawer
         nav_drawer.fbind("on_nav_selected", self.handle_nav_click)
 
-    def on_refresh(self, widget: "Widget", state: bool, to_children: bool) -> bool:
+    def on_refresh(self, widget: Widget, state: bool, to_children: bool) -> bool:
         if not to_children:
             self.selected_note = None
             self.app.refresh_note_files()
             return True
         return super().on_refresh(widget, state, to_children)
 
-    def on_selected_note(self, _instance, note_id: str | None) -> bool:
+    def on_selected_note(self, _instance: MainScreen, note_id: str | None) -> bool:
         if not note_id:
             self.ids.content.clear_widgets()
             return True
@@ -116,7 +119,7 @@ class MainScreen(Screen, V2RefreshBehavior):
         Clock.schedule_once(lambda _: self.render_note(note_content), 0)
         return True
 
-    def handle_nav_click(self, _dt, instance: "NavItem"):
+    def handle_nav_click(self, _dt: NavDrawer, instance: NavItem) -> bool:
         nav_id = instance.nav_id
         self.selected_note = nav_id if not instance.selected else None
 
@@ -128,7 +131,7 @@ class MainScreen(Screen, V2RefreshBehavior):
             None,
         )
 
-    def render_note(self, note_text: str):
+    def render_note(self, note_text: str) -> None:
         """Read a markdown file, parse it, and render it in the scroller."""
 
         self.ids.content.clear_widgets()
@@ -138,7 +141,7 @@ class MainScreen(Screen, V2RefreshBehavior):
         self.ids.content.add_widget(layout)
         layout.document = document_md
 
-    def handle_note_files(self, _, value: list[NoteFile]):
+    def handle_note_files(self, _, value: list[NoteFile]) -> None:
         Logger.info(
             f"{type(self).__name__} : handle_note_files - {len(value)} note files found."
         )

@@ -1,201 +1,152 @@
 from __future__ import annotations
 
-from typing import Literal, TypedDict
-
-TEXT = Literal["text"]
-HEADING = Literal["heading"]
-TABLE = Literal["table"]
-TABLE_HEAD = Literal["table_head"]
-TABLE_BODY = Literal["table_body"]
-TABLE_ROW = Literal["table_row"]
-TABLE_CELL = Literal["table_cell"]
-TABLE_CELL_ALIGN_NAME = Literal["left", "right", "center"]
-TABLE_CELL_ALIGN = TABLE_CELL_ALIGN_NAME | None
-STRONG = Literal["strong"]
-EMPHASIS = Literal["emphasis"]
-CODESPAN = Literal["codespan"]
-LINEBREAK = Literal["linebreak"]
-LINK = Literal["link"]
-NEWLINE = Literal["newline"]
-THEMATIC_BREAK = Literal["thematic_break"]
-BLOCK_CODE = Literal["block_code"]
-BLOCK_TEXT = Literal["block_text"]
-BLOCK_QUOTE = Literal["block_quote"]
-LIST = Literal["list"]
-LIST_ITEM = Literal["list_item"]
-PARAGRAPH = Literal["paragraph"]
-INLINE_HTML = Literal["inline_html"]
-INLINE_KBD = Literal["kbd"]
-
-MD_LIT_TYPES = (
-    TEXT
-    | HEADING
-    | TABLE
-    | TABLE_HEAD
-    | TABLE_BODY
-    | TABLE_ROW
-    | TABLE_CELL
-    | TABLE_CELL_ALIGN
-    | STRONG
-    | CODESPAN
-    | LINEBREAK
-    | NEWLINE
-    | THEMATIC_BREAK
-    | BLOCK_CODE
-    | BLOCK_TEXT
-    | LIST
-    | LIST_ITEM
-    | PARAGRAPH
-    | LINK
-    | INLINE_HTML
-    | INLINE_KBD
-)
+from typing import Literal, NotRequired, TypedDict
 
 
-class MdLinkItem(TypedDict):
-    type: LINK
+class MdLink(TypedDict):
+    type: Literal["link"]
     link: str
-    children: MdText | None
+    children: list[TMdLinkChildTypes]
+    title: str | None
+
+
+class MdImage(TypedDict):
+    type: Literal["image"]
+    src: str
+    alt: str
     title: str | None
 
 
 class MdListItem(TypedDict):
-    type: LIST_ITEM
-    children: list[MD_TYPES]
+    type: Literal["list_item"]
+    children: list[TMdBlockChildTypes]
     level: int
 
 
 class MdListUnordered(TypedDict):
-    type: LIST
+    type: Literal["list"]
     children: list[MdListItem]
     ordered: Literal[False]
     level: int
 
 
 class MdListOrdered(TypedDict):
-    type: LIST
+    type: Literal["list"]
     children: list[MdListItem]
     ordered: Literal[True]
     level: int
+    start: NotRequired[int]
 
 
 class MdBlockCode(TypedDict):
-    type: BLOCK_CODE
+    type: Literal["block_code"]
     text: str
     info: str | None
 
 
 class MdThematicBreak(TypedDict):
-    type: THEMATIC_BREAK
+    type: Literal["thematic_break"]
 
 
 class MdNewLine(TypedDict):
-    type: NEWLINE
+    type: Literal["newline"]
 
 
 class MdLineBreak(TypedDict):
-    type: LINEBREAK
+    type: Literal["linebreak"]
 
 
 class MdCodeSpan(TypedDict):
-    type: CODESPAN
+    type: Literal["codespan"]
     text: str
 
 
 class MdBlockQuote(TypedDict):
-    type: BLOCK_QUOTE
-    children: list[MD_TYPES]
+    type: Literal["block_quote"]
+    children: list[TMdBlockChildTypes]
 
 
 class MdBlockText(TypedDict):
-    type: BLOCK_TEXT
-    children: list[MD_TYPES]
+    type: Literal["block_text"]
+    children: list[TMdInlineTypes]
+
+
+class MdBlockHTML(TypedDict):
+    type: Literal["block_html"]
+    text: str
 
 
 class MdText(TypedDict):
-    type: TEXT
+    type: Literal["text"]
     text: str
 
 
 class MdTextEmphasis(TypedDict):
-    type: EMPHASIS
-    children: list[MdText]
+    type: Literal["emphasis"]
+    children: list[TMdInlineTypes]
 
 
 class MdTextStrong(TypedDict):
-    type: STRONG
-    children: list[MdText]
+    type: Literal["strong"]
+    children: list[TMdInlineTypes]
 
 
 class MdHeading(TypedDict):
-    type: HEADING
-    children: list[MD_TYPES]
+    type: Literal["heading"]
+    children: list[TMdInlineTypes]
     level: int
 
 
 class MdParagraph(TypedDict):
-    type: PARAGRAPH
-    children: list[MD_TYPES]
+    type: Literal["paragraph"]
+    children: list[TMdInlineTypes]
 
 
 class MdTableBodyCell(TypedDict):
-    type: TABLE_CELL
-    children: list[MD_TYPES]
-    align: TABLE_CELL_ALIGN
+    type: Literal["table_cell"]
+    children: list[TMdInlineTypes]
+    align: Literal["left", "right", "center"] | None
     is_head: Literal[False]
 
 
 class MdTableHeadCell(TypedDict):
-    type: TABLE_CELL
-    children: list[MD_TYPES]
-    align: TABLE_CELL_ALIGN
+    type: Literal["table_cell"]
+    children: list[TMdInlineTypes]
+    align: Literal["left", "right", "center"] | None
     is_head: Literal[True]
 
 
 class MdTableBodyRow(TypedDict):
-    type: TABLE_ROW
+    type: Literal["table_row"]
     children: list[MdTableBodyCell]
 
 
 class MdTableHead(TypedDict):
-    type: TABLE_HEAD
+    type: Literal["table_head"]
     children: list[MdTableHeadCell]
 
 
 class MdTableBody(TypedDict):
-    type: TABLE_BODY
+    type: Literal["table_body"]
     children: list[MdTableBodyRow]
 
 
 class MdTable(TypedDict):
-    type: TABLE
+    type: Literal["table"]
     children: list[MdTableHead | MdTableBody]
 
 
 class MdInlineHTML(TypedDict):
-    type: INLINE_HTML
+    type: Literal["inline_html"]
     text: str
 
 
 class MdInlineKeyboard(TypedDict):
-    type: INLINE_KBD
+    type: Literal["kbd"]
     text: str
 
 
-class AnyMd(TypedDict):
-    type: MD_LIT_TYPES
-
-
-class AnyParentMd(TypedDict):
-    type: MD_LIT_TYPES
-    children: list[AnyMd] | None
-
-
-class AnyTextMd(TypedDict):
-    text: str
-
-
-MD_TYPES = (
+type TMdTypes = (
     MdListItem
     | MdListUnordered
     | MdListOrdered
@@ -206,8 +157,10 @@ MD_TYPES = (
     | MdCodeSpan
     | MdBlockText
     | MdBlockQuote
+    | MdBlockHTML
     | MdText
     | MdTextStrong
+    | MdTextEmphasis
     | MdHeading
     | MdTableBodyCell
     | MdTableBodyRow
@@ -216,44 +169,49 @@ MD_TYPES = (
     | MdTable
     | MdTableHeadCell
     | MdParagraph
+    | MdLink
+    | MdImage
     | MdInlineHTML
+    | MdInlineKeyboard
 )
 
-MD_DOCUMENT = list[MD_TYPES]
+type TMdDocument = list[TMdTypes]
 
-MD_LIT_BLOCK_TYPES = (
-    NEWLINE
-    | THEMATIC_BREAK
-    | HEADING
-    | BLOCK_CODE
-    | BLOCK_QUOTE
-    | BLOCK_TEXT
-    | LIST
-    | LIST_ITEM
-    | PARAGRAPH
-)
-
-MD_BLOCK_TYPES = (
+# Nested block containers parse with `list_rules`/`block_quote_rules`, snapshots of
+# the core rule names taken before plugins append to `md.block.rules`. `MdTable` is
+# therefore unreachable, and `MdListItem` only ever hangs off a list, never a peer.
+type TMdBlockChildTypes = (
     MdNewLine
     | MdThematicBreak
     | MdHeading
     | MdBlockCode
     | MdBlockText
     | MdBlockQuote
+    | MdBlockHTML
     | MdListOrdered
     | MdListUnordered
-    | MdListItem
     | MdParagraph
 )
 
-
-MD_LIT_INLINE_TYPES = CODESPAN | STRONG | TEXT | EMPHASIS | INLINE_HTML | INLINE_KBD
-
-MD_INLINE_TYPES = (
+type TMdInlineTypes = (
     MdCodeSpan
     | MdTextStrong
-    | MdText
     | MdTextEmphasis
+    | MdText
+    | MdLineBreak
+    | MdLink
+    | MdImage
+    | MdInlineHTML
+    | MdInlineKeyboard
+)
+
+type TMdLinkChildTypes = (
+    MdCodeSpan
+    | MdTextStrong
+    | MdTextEmphasis
+    | MdText
+    | MdLineBreak
+    | MdImage
     | MdInlineHTML
     | MdInlineKeyboard
 )

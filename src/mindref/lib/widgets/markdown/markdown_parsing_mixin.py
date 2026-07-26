@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Protocol, cast
 from kivy.logger import Logger
 
 from mindref.lib.domain.md_parser_types import (
-    MD_INLINE_TYPES,
+    TMdInlineTypes,
     MdTextEmphasis,
     MdTextStrong,
 )
@@ -29,7 +29,7 @@ class MarkdownLabelParsingProtocol(Protocol):
 
     __name__: str
 
-    def handle_intercept(self, node: MD_INLINE_TYPES): ...
+    def handle_intercept(self, node: TMdInlineTypes): ...
 
     def handle_intercept_exit(self): ...
 
@@ -58,7 +58,7 @@ class MarkdownLabelParsingMixin:
     def __init__(self):
         self.open_bbcode_tag = ""
 
-    def visit(self, node: MD_INLINE_TYPES) -> MD_INLINE_TYPES | None:
+    def visit(self, node: TMdInlineTypes) -> TMdInlineTypes | None:
         match node:
             case {"type": "strong", "children": list()}:
                 matched_node = cast(MdTextStrong, node)
@@ -143,7 +143,7 @@ class WidgetIntercept:
         self.visitor_push = visitor.push
         self.visitor_pop = visitor.pop
 
-    def intercept_push(self, widget: MD_INLINE_TYPES):
+    def intercept_push(self, widget: TMdInlineTypes):
         self.widget.handle_intercept(widget)
         return False
 

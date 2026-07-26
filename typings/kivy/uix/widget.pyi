@@ -767,32 +767,8 @@ class Widget(WidgetBase):
         """
         ...
 
-    def to_parent(self, x, y, relative=...) -> tuple[Any, Any]:
-        """Transform local (current widget) coordinates to parent coordinates.
-
-        See :mod:`~kivy.uix.relativelayout` for details on the coordinate
-        systems.
-
-        :Parameters:
-            `relative`: bool, defaults to False
-                Change to True if you want to translate relative positions from
-                a widget to its parent coordinates.
-        """
-        ...
-
-    def to_local(self, x, y, relative=...) -> tuple[Any, Any]:
-        """Transform parent coordinates to local (current widget) coordinates.
-
-        See :mod:`~kivy.uix.relativelayout` for details on the coordinate
-        systems.
-
-        :Parameters:
-            `relative`: bool, defaults to False
-                Change to True if you want to translate coordinates to
-                relative widget coordinates.
-        """
-        ...
-
+    def to_parent(self, x, y, *, relative: bool = ...) -> tuple[Any, Any]: ...
+    def to_local(self, x, y, *, relative: bool = ...) -> tuple[Any, Any]: ...
     def get_window_matrix(self, x=..., y=...):
         """Calculate the transformation matrix to convert between window and
         widget coordinates.
