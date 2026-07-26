@@ -142,9 +142,7 @@ class MindRefApp(App):
             )
             return
 
-        storage_path = required(
-            self.storage_path, "Cannot save an edited note without a storage_path"
-        )
+        storage_path = required(self.storage_path, "storage_path not set")
         edit_file_name = str(self.editing_note.file_path.relative_to(storage_path))
         self.fs.save_edit_note(
             storage_path=storage_path,
