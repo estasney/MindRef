@@ -137,7 +137,7 @@ suppress-dummy-args = true
 
 [tool.basedpyright]
 include = ["src"]
-ignore = ["tests"]
+ignore = ["tests", "**/*.pyx", "**/*.pxd"]
 extraPaths = ["src"]
 pythonVersion = "3.12"
 stubPath="./typings"
