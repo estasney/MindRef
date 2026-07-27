@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, NamedTuple, reveal_type
+from typing import TYPE_CHECKING, NamedTuple
 
 import mistune
 from kivy.clock import Clock
