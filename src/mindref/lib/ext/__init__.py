@@ -1,5 +1,4 @@
 from mindref.lib.ext.ext import (
-    RollingIndex,
     color_str_components,
     compute_overscroll,
     compute_ref_coords,
@@ -8,7 +7,6 @@ from mindref.lib.ext.ext import (
 )
 
 __all__ = [
-    "RollingIndex",
     "color_str_components",
     "compute_overscroll",
     "compute_ref_coords",
