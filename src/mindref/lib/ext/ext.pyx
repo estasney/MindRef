@@ -4,7 +4,7 @@ cdef inline double CLAMP(double x, double lower, double upper):
     return lower if x < lower else (upper if x > upper else x)
 
 
-cdef inline normalize_domain_range(double value, double lower, double upper):
+cdef inline double normalize_domain_range(double value, double lower, double upper):
     """
     Normalize a value to a range between 0.0 and 1.0 based on the given lower and upper bounds.
     """
@@ -13,11 +13,11 @@ cdef inline normalize_domain_range(double value, double lower, double upper):
         return 0.0  # Avoid division by zero, return min_value
     return (value - lower) / domain_diff
 
-def normalize_coordinates(double touch_x, double touch_y, double self_x, double self_y, double self_height=0.0,
-                          double self_width=0.0):
+def normalize_coordinates(double touch_x, double touch_y, double self_x, double self_y, double self_height,
+                          double self_width):
     cdef (double, double) result = (0.0, 0.0)
 
-    if self_width == 0.0:
+    if self_width <= 0.0 or self_height <= 0.0:
         return result
 
     result[0] = CLAMP((touch_x - self_x) / self_width, 0.0, 1.0)
@@ -105,7 +105,7 @@ def compute_ref_coords(double width, double height, double wX, double wY, double
 
 def color_str_components(color_str : str):
     """Convert hex color string to rgba float components"""
-    cdef float r, g, b, a
+    cdef double r, g, b, a
     color_str = color_str.removeprefix('#')
 
     cdef bint has_opacity = len(color_str) > 6
@@ -116,14 +116,14 @@ def color_str_components(color_str : str):
     a = ((colorInt >> 24) & 0xFF) / 255.0 if has_opacity else 1.0
     return r, g, b, a
 
-cdef float compute_brightness(float r, float g, float b, float a):
+cdef double compute_brightness(double r, double g, double b, double a):
     """Compute brightness of a color"""
 
     return (r * 0.299 + g * 0.587 + b * 0.114 + (1.0 - a)) * 255.0
 
-cdef float compute_mixed_brightness(float r1, float g1, float b1, float a1, float r2, float g2, float b2, float a2):
+cdef double compute_mixed_brightness(double r1, double g1, double b1, double a1, double r2, double g2, double b2, double a2):
     """Compute brightness of two colors mixed together with alpha"""
-    cdef float r, g, b, a
+    cdef double r, g, b, a
     a = 1.0 - (1.0 - a1) * (1.0 - a2)
     r = r1 * a1 / a + r2 * a2 * (1 - a1) / a
     g = g1 * a1 / a + g2 * a2 * (1 - a1) / a
@@ -131,7 +131,7 @@ cdef float compute_mixed_brightness(float r1, float g1, float b1, float a1, floa
     return compute_brightness(r, g, b, a)
 
 def compute_text_contrast(background_color: tuple[float, float, float, float], threshold: float,
-                          highlight_color: tuple[float, float, float, float] = None):
+                          highlight_color: tuple[float, float, float, float] = None) -> str:
     """
 
     Parameters
@@ -161,72 +161,9 @@ def compute_text_contrast(background_color: tuple[float, float, float, float], t
         return '#ffffff'
 
 
-def compute_overscroll(overscroll: float, target_height: float, overscroll_threshold: float):
+def compute_overscroll(double overscroll, double target_height, double overscroll_threshold):
     """
     Given our thresholds and target height, normalize the overscroll to a value between 0.0 and 1.0.
     """
     cdef double domain_height = target_height * overscroll_threshold
     return normalize_domain_range(CLAMP(abs(overscroll), 0, domain_height), 0.0, domain_height)
-
-
-cdef class RollingIndex:
-    """
-    Implements rolling index so that we can always call 'next' or 'previous'
-
-    As with `range`, `end` is not inclusive
-    """
-
-    def __init__(self, size, current=0):
-        self._size = size
-        self._start = 0
-        self._end = size - 1 if size > 0 else 0
-        self._current = current
-
-    cdef bint _set_current(self, int n):
-        if n > self._size:
-            return False
-        self._current = n
-        return True
-
-    @property
-    def size(self):
-        return self._size
-
-    @property
-    def current(self):
-        return self._current
-
-    @current.setter
-    def current(self, n):
-        if not self._set_current(n):
-            raise IndexError(f"{n} is greater than {self._size}")
-
-    cdef int _next(self, bint peek):
-        cdef int next_index
-        next_index = self._current + 1
-        if next_index > self._end:
-            next_index = 0
-        if peek:
-            return next_index
-        self._current = next_index
-        return next_index
-
-    def next(self, peek=False):
-        cdef bint flag
-        flag = True if peek else False
-        return self._next(flag)
-
-    cdef int _prev(self, bint peek):
-        cdef int prev_index
-        prev_index = self._current - 1
-        if prev_index < self._start:
-            prev_index = self._end
-        if peek:
-            return prev_index
-        self._current = prev_index
-        return prev_index
-
-    def previous(self, peek=False):
-        cdef bint flag
-        flag = True if peek else False
-        return self._prev(flag)
