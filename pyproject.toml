@@ -7,7 +7,7 @@ name = "MindRef"
 version = "0.5.2"
 description = "Cross-Platform Application for maintaining Markdown formatted notes"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 license = { text = "LGPLv3+" }
 authors = [
     { name = "Eric Stasney", email = "estasney@users.noreply.github.com" }
