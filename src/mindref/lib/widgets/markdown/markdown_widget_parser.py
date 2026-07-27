@@ -1,33 +1,14 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from kivy.logger import Logger
 from kivy.uix.widget import Widget
-from toolz import get_in
 
-from mindref.lib.domain.md_parser_types import (
-    MdBlockCode,
-    MdBlockQuote,
-    MdBlockText,
-    MdCodeSpan,
-    MdHeading,
-    MdInlineKeyboard,
-    MdListItem,
-    MdListOrdered,
-    MdListUnordered,
-    MdNewLine,
-    MdParagraph,
-    MdTable,
-    MdTableBodyCell,
-    MdTableBodyRow,
-    MdTableHead,
-    MdTableHeadCell,
-    MdTextStrong,
-)
 from mindref.lib.widgets.markdown.block.markdown_block import (
     MarkdownBlock,
     MarkdownHeading,
+    MarkdownThematicBreak,
 )
 from mindref.lib.widgets.markdown.code.code_span import MarkdownCodeSpan
 from mindref.lib.widgets.markdown.code.markdown_code import MarkdownCode
@@ -44,60 +25,59 @@ from mindref.lib.widgets.markdown.table.markdown_table import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Container
+    from collections.abc import Container, Iterator
+
+    from mindref.lib.domain.md_parser_types import TMdTags, TMdTypes
+
+
+@runtime_checkable
+class TextWidget(Protocol):
+    text: str
 
 
 class MarkdownWidgetParser:
+    parent: MarkdownWidgetParser | None
     state: Widget | None
-    current_state: Widget | None
 
-    def __init__(self, parent: MarkdownWidgetParser | None = None):
+    def __init__(self, parent: MarkdownWidgetParser | None = None) -> None:
         self.parent = parent
         self.state = None
 
     @staticmethod
     def _report_nested_lists(
-        data, idx: tuple[int | str, ...] | None, report_nodes: Container[str]
-    ):
+        data: TMdTypes, report_nodes: Container[TMdTags]
+    ) -> Iterator[TMdTypes]:
         """
-        Find any nodes with children, and notify return a tuple of keys/index to find them from `data`
+        Yield every descendant of `data` whose type is in `report_nodes`, pre-order
         """
         report = MarkdownWidgetParser._report_nested_lists
-        reports = []
-        match data:
-            case {"type": str(node)} if node in report_nodes:
-                if idx:
-                    reports.append(idx)
         match data:
             case {"children": list(children)}:
-                # Don't report, but still check children
-                for i, child in enumerate(children):
-                    child_idx = (
-                        (*idx, "children", i) if idx is not None else ("children", i)
-                    )
-                    child_report = report(child, child_idx, report_nodes)
-                    if child_report:
-                        reports.extend(child_report)
-                return reports
+                for child in children:
+                    match child:
+                        case {"type": str(tag)} if tag in report_nodes:
+                            yield child
+                        case _:
+                            pass
+                    yield from report(child, report_nodes)
             case _:
-                return reports
+                pass
 
-    def parse(self, node: dict) -> Widget | None:
-        def delegate_parse(n):
+    def parse(self, node: TMdTypes) -> Widget | None:
+        def delegate_parse(n: TMdTypes, target: Widget) -> None:
             parser_delegate = MarkdownWidgetParser(parent=self)
             delg_result = parser_delegate.parse(n)
             if delg_result:
-                self.state.add_widget(delg_result)
+                target.add_widget(delg_result)
 
-        def parse_for_result(n):
+        def parse_for_result(n: TMdTypes) -> Widget | None:
             parser_delegate = MarkdownWidgetParser(parent=self)
             return parser_delegate.parse(n)
 
         match node:
             case {"type": "heading", "level": int(level), "children": list()}:
-                parsed_node = cast(MdHeading, node)
                 widget = MarkdownHeading(level=level)
-                for child in parsed_node["children"]:
+                for child in node["children"]:
                     widget.visit(child)
                 match self.state:
                     case Widget():
@@ -107,69 +87,69 @@ class MarkdownWidgetParser:
             case {
                 "type": "strong" | "emphasis",
                 "children": list(),
-            } if self.state and issubclass(self.state, MarkdownLabelParsingMixin):
+            } if isinstance(self.state, MarkdownLabelParsingMixin):
                 self.state.visit(node)
 
             case {
                 "type": "text" | "kbd" | "codespan" | "inline_html",
                 "text": str(),
-            } if self.state and issubclass(self.state, MarkdownLabelParsingMixin):
+            } if isinstance(self.state, MarkdownLabelParsingMixin):
                 self.state.visit(node)
 
             case {"type": "paragraph" | "block_text" | "strong", "children": list()}:
-                parsed_node = cast(MdParagraph | MdBlockText | MdTextStrong, node)
                 match self.state:
                     case MarkdownListItem():
-                        for child in parsed_node["children"]:
+                        for child in node["children"]:
                             self.state.visit(child)
                     case Widget():
-                        delegate_parse(parsed_node)
+                        delegate_parse(node, self.state)
                     case None:
                         self.state = MarkdownBlock()
-                        for child in parsed_node["children"]:
-                            if unh := self.state.visit(child) and self.parent:
-                                self.parent.state.visit(unh)
+                        for child in node["children"]:
+                            if (unh := self.state.visit(child)) and self.parent:
+                                self.parent.parse(unh)
 
             case {"type": "kbd", "text": str(kbd_key)}:
-                parsed_node = cast(MdInlineKeyboard, node)
                 match self.state:
-                    case MarkdownLabelParsingMixin():
-                        self.state.visit(parsed_node)
                     case Widget():
-                        delegate_parse(parsed_node)
+                        delegate_parse(node, self.state)
                     case None:
                         Logger.error(
                             f"{type(self).__name__}: parse - fallthrough kbd {kbd_key}"
                         )
 
             case {"type": "block_quote", "children": list()}:
-                parsed_node = cast(MdBlockQuote, node)
                 match self.state:
                     case Widget():
-                        delegate_parse(parsed_node)
+                        delegate_parse(node, self.state)
                     case None:
                         self.state = MarkdownBlockQuote()
-                        for child in parsed_node["children"]:
-                            if unh := self.state.visit(child) and self.parent:
-                                self.parent.parse(unh)
+                        for child in node["children"]:
+                            delegate_parse(child, self.state)
 
             case {"type": "block_code", "text": str(node_text), "info": lexer}:
-                parsed_node = cast(MdBlockCode, node)
                 match self.state:
                     case Widget():
-                        delegate_parse(parsed_node)
+                        delegate_parse(node, self.state)
                     case None:
                         widget = MarkdownCode(lexer=lexer, text_content=node_text)
                         self.state = widget
 
             case {"type": "codespan", "text": str(node_text)}:
-                parsed_node = cast(MdCodeSpan, node)
                 match self.state:
                     case Widget():
-                        delegate_parse(parsed_node)
+                        delegate_parse(node, self.state)
                     case None:
                         widget = MarkdownCodeSpan(text=node_text)
                         self.state = widget
+
+            case {"type": "thematic_break"}:
+                match self.state:
+                    case Widget():
+                        delegate_parse(node, self.state)
+                    case None:
+                        self.state = MarkdownThematicBreak()
+
             case {
                 "type": "table",
                 "children": [
@@ -186,13 +166,12 @@ class MarkdownWidgetParser:
                         - table_cell
 
                 """
-                parsed_node = cast(MdTable, node)
                 match self.state:
                     case Widget():
                         Logger.info(
                             f"{type(self).__name__}: Trying to add a nested table"
                         )
-                        delegate_parse(parsed_node)
+                        delegate_parse(node, self.state)
                     case None:
                         self.state = MarkdownTable()
                         table_head_widget = parse_for_result(table_head)
@@ -212,24 +191,22 @@ class MarkdownWidgetParser:
                             self.state.add_widget(table_body_widget)
 
             case {"type": "table_head", "children": list(head_cells)}:
-                parsed_node = cast(MdTableHead, node)
                 match self.state:
                     case Widget():
-                        delegate_parse(parsed_node)
+                        delegate_parse(node, self.state)
                     case None:
                         self.state = MarkdownRow()
                         for cell in head_cells:
-                            delegate_parse(cell)
+                            delegate_parse(cell, self.state)
 
             case {"type": "table_row", "children": list(row_cells)}:
-                parsed_node = cast(MdTableBodyRow, node)
                 match self.state:
                     case Widget():
-                        delegate_parse(parsed_node)
+                        delegate_parse(node, self.state)
                     case None:
                         self.state = MarkdownRow()
                         for cell in row_cells:
-                            delegate_parse(cell)
+                            delegate_parse(cell, self.state)
 
             case {
                 "type": "table_cell",
@@ -237,10 +214,9 @@ class MarkdownWidgetParser:
                 "align": cell_align,
                 "children": list(children),
             }:
-                parsed_node = cast(MdTableHeadCell | MdTableBodyCell, node)
                 match self.state:
                     case Widget():
-                        delegate_parse(parsed_node)
+                        delegate_parse(node, self.state)
                     case None:
                         cell_align = cell_align or "center"
                         cell_bold = is_head
@@ -248,44 +224,37 @@ class MarkdownWidgetParser:
                         for cell in children:
                             self.state.visit(cell)
             case {"type": "list", "children": list(), "level": 1}:
-                parsed_node = cast(MdListOrdered | MdListUnordered, node)
-
                 # Bubble up any nested lists
-                node_reports = MarkdownWidgetParser._report_nested_lists(
-                    parsed_node,
-                    None,
-                    {
-                        "list_item",
-                    },
+                bubbled_children = MarkdownWidgetParser._report_nested_lists(
+                    node, {"list_item"}
                 )
-                bubbled_children = [get_in(nr, parsed_node) for nr in node_reports]
 
                 match self.state:
                     case None:
                         self.state = MarkdownList()
                         for child in bubbled_children:
-                            delegate_parse(child)
+                            delegate_parse(child, self.state)
                     case MarkdownList():
                         for item in bubbled_children:
-                            delegate_parse(item)
+                            delegate_parse(item, self.state)
                     case Widget():
-                        delegate_parse(parsed_node)
+                        delegate_parse(node, self.state)
 
             case {"type": "list_item", "children": list(children), "level": int(level)}:
-                parsed_node = cast(MdListItem, node)
                 match self.state:
                     case Widget():
-                        delegate_parse(parsed_node)
+                        delegate_parse(node, self.state)
                     case None:
                         self.state = MarkdownListItem(level=level)
                         for child in children:
                             self.parse(child)
 
             case {"type": "newline"}:
-                parsed_node = cast(MdNewLine, node)
                 match self.state:
-                    case Widget() if hasattr(self.state, "text"):
+                    case Widget() if isinstance(self.state, TextWidget):
                         self.state.text += "\n"
+                    case _:
+                        pass
 
             case _:
                 Logger.warning(f"{type(self).__name__}: parse - Unhandled node {node}")

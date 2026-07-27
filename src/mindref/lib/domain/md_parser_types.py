@@ -177,6 +177,33 @@ type TMdTypes = (
 
 type TMdDocument = list[TMdTypes]
 
+type TMdTags = Literal[
+    "list_item",
+    "list",
+    "block_code",
+    "thematic_break",
+    "newline",
+    "linebreak",
+    "codespan",
+    "block_text",
+    "block_quote",
+    "block_html",
+    "text",
+    "strong",
+    "emphasis",
+    "heading",
+    "table_cell",
+    "table_row",
+    "table_head",
+    "table_body",
+    "table",
+    "paragraph",
+    "link",
+    "image",
+    "inline_html",
+    "kbd",
+]
+
 # Nested block containers parse with `list_rules`/`block_quote_rules`, snapshots of
 # the core rule names taken before plugins append to `md.block.rules`. `MdTable` is
 # therefore unreachable, and `MdListItem` only ever hangs off a list, never a peer.

@@ -32,7 +32,7 @@ class MarkdownListItem(MarkdownLabelBase):
     _snippets = ListProperty()
 
     def get_snippets(self):
-        prefix = "  " * self.level
+        prefix: str = "  " * self.level  # pyright: ignore[reportOperatorIssue]
         prefix += f"{chr(8226)} "
         return [
             TextSnippet(text=prefix, highlight_tag=None),

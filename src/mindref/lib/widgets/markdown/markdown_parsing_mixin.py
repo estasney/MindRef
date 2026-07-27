@@ -1,13 +1,11 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import TYPE_CHECKING, Protocol
 
 from kivy.logger import Logger
 
 from mindref.lib.domain.md_parser_types import (
     TMdInlineTypes,
-    MdTextEmphasis,
-    MdTextStrong,
 )
 from mindref.lib.widgets.behavior.inline_behavior import TextSnippet
 
@@ -49,26 +47,21 @@ class MarkdownLabelParsingMixin:
     snippets: list[TextSnippet]
     open_bbcode_tag: str
 
-    def __new__(cls: MarkdownLabelParsingProtocol, *args, **kwargs):
-        for name in ("snippets", "open_bbcode_tag"):
-            if not hasattr(cls, name):
-                obj_name = kwargs.get("name", cls.__name__)
-                raise AttributeError(f"{obj_name} must have ")
-
     def __init__(self):
+        self.snippets = []
         self.open_bbcode_tag = ""
 
     def visit(self, node: TMdInlineTypes) -> TMdInlineTypes | None:
         match node:
             case {"type": "strong", "children": list()}:
-                matched_node = cast(MdTextStrong, node)
+                matched_node = node
                 self.open_bbcode_tag = "b"
                 for child in matched_node["children"]:
                     if unh := self.visit(child):
                         return unh
                 return None
             case {"type": "emphasis", "children": list()}:
-                matched_node = cast(MdTextEmphasis, node)
+                matched_node = node
                 self.open_bbcode_tag = "i"
                 for child in matched_node["children"]:
                     if unh := self.visit(child):
@@ -104,14 +97,7 @@ class MarkdownLabelParsingMixin:
                             *self.snippets[:],
                             TextSnippet(text, highlight_tag="hl"),
                         ]
-
                         return None
-                    case _:
-                        Logger.warning(
-                            f"{type(self).__name__}: visit - unhandled highlight type {span_type}"
-                        )
-                        return node
-
             case _:
                 Logger.warning(
                     f"{type(self).__name__}: visit - unhandled node type {node}"
