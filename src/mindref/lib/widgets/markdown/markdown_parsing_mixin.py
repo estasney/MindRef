@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
-
 from kivy.logger import Logger
 
 from mindref.lib.domain.md_parser_types import (
