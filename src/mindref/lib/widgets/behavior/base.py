@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from kivy.graphics import Color, Line
 from kivy.graphics.instructions import InstructionGroup
 from kivy.logger import Logger
