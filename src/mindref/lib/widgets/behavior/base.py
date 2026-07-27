@@ -21,9 +21,9 @@ class DebugLayout(Layout):
     """
 
     debug_layout = BooleanProperty(False)
-    outline = ObjectProperty(None, rebind=True)
+    outline: ObjectProperty[InstructionGroup | None] = ObjectProperty(None, rebind=True)
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
         fbind = self.fbind
         update_debug_layout = self.update_debug_layout
@@ -35,7 +35,7 @@ class DebugLayout(Layout):
         fbind("debug_layout", update_debug_layout)
         fbind("on_debug_layout", update_debug_layout)
 
-    def update_debug_layout(self, instance, value):
+    def update_debug_layout(self, _instance: "DebugLayout", _value: object) -> None:
         if self.debug_layout:
             if self.outline:
                 self.canvas.remove(self.outline)
