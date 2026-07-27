@@ -16,7 +16,7 @@ from mindref.lib.utils import mindref_path
 from mindref.lib.widgets.effects.ripple import RippleMixin
 
 texture_atlas = "atlas://" + str(mindref_path() / "static" / "textures" / "textures")
-icon_atlas = "atlas://" + str(mindref_path() / "static" / "icons" / "icons")
+
 Builder.load_string("""
 #:import seps mindref.lib.widgets.separator
 #:import style mindref.lib.widgets.style

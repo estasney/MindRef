@@ -144,30 +144,6 @@ Builder.load_string("""
 """)
 
 
-class CancelDraftButton(LabelButton, LoadingButtonMixin):
-    app = ObjectProperty()
-    root = ObjectProperty()
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.mutation = Mutation(self.cancel_edit_on_app)
-        self.mutation.bind(
-            on_mutate=self.handle_on_mutate,
-            on_resolved=self.handle_on_resolved,
-        )
-
-    def handle_on_mutate(self, _dt):
-        self.disabled = True
-
-    def handle_on_resolved(self, _dt):
-        self.disabled = False
-        self.root.is_loading = False
-
-    def cancel_draft_on_app(self):
-        self.root.is_loading = True
-        self.app.cancel_draft_note()
-
-
 class SaveDraftButton(LabelButton, LoadingButtonMixin):
     app = ObjectProperty()
     root = ObjectProperty()
