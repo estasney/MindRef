@@ -5,22 +5,36 @@ Hand-written stub for the compiled `kivy.properties` Cython module
 Written against kivy 2.3.1 source: kivy/properties.pyx.
 
 `Property[T]` models the descriptor protocol: class-level access returns the
-property object, instance access returns `T`. Fully signed so far:
-`BooleanProperty`, `ObjectProperty`, `ConfigParserProperty`; the rest are
-declared with their trivially-correct value types. For properties whose value
-type cannot be inferred from the constructor (`ObjectProperty`,
-`ListProperty`), annotate the declaration site explicitly.
+property object, instance access returns `T`. All concrete property classes
+are fully signed. For properties whose value type cannot be inferred from the
+constructor (`ObjectProperty()`, bare `ListProperty()`), annotate the
+declaration site explicitly.
+
+`__get__`/`__set__` accept any `obj`, not just `EventDispatcher`: Kivy's
+behavior-mixin idiom declares properties on plain classes that are only ever
+mixed into widgets. The explicit `get`/`set`/`bind` methods keep the
+`EventDispatcher` bound.
+
+`StringProperty` is generic over `str` vs `str | None`, selected by the
+`allownone` overloads: `StringProperty(None, allownone=True)` reads as
+`str | None`; `StringProperty(None)` without the flag is a genuine runtime
+`ValueError` and is rejected.
 
 `ConfigParserProperty` accepts `Any` on assignment by design: incoming values
 (config strings or user input) are converted through `val_type` before
 storage, so `__get__` still returns `T`.
 
-Note on `allownone=True`: the value type must carry `| None` in the
-annotation; the runtime flag alone does not widen `T`.
+Note on `allownone=True` (except `StringProperty`, see above): the value type
+must carry `| None` in the annotation; the runtime flag alone does not
+widen `T`.
+
+`NumericValue` mirrors what Kivy's numeric conversion accepts on assignment:
+a number, a unit string (`"10dp"`), or a `(value, unit)` tuple; reads always
+come back as plain numbers.
 """
 
-from collections.abc import Callable
-from typing import Any, Generic, Self, TypeVar, overload
+from collections.abc import Callable, Iterable, Sequence
+from typing import Any, Generic, Literal, Self, TypeVar, overload
 
 from kivy.config import ConfigParser
 from kivy.event import EventDispatcher
@@ -43,6 +57,10 @@ __all__ = (
 )
 
 T = TypeVar("T")
+K = TypeVar("K")
+V = TypeVar("V")
+
+type NumericValue = float | str | tuple[float, str]
 
 class PropertyStorage: ...
 class ObservableList(list[Any]): ...
@@ -67,8 +85,8 @@ class Property(Generic[T]):
     @overload
     def __get__(self, obj: None, objtype: type[Any] | None = None) -> Self: ...
     @overload
-    def __get__(self, obj: EventDispatcher, objtype: type[Any] | None = None) -> T: ...
-    def __set__(self, obj: EventDispatcher, val: T) -> None: ...
+    def __get__(self, obj: object, objtype: type[Any] | None = None) -> T: ...
+    def __set__(self, obj: object, val: T) -> None: ...
     def get(self, obj: EventDispatcher) -> T: ...
     def set(self, obj: EventDispatcher, value: T) -> bool: ...
     def bind(self, obj: EventDispatcher, observer: Callable[..., Any]) -> None: ...
@@ -110,17 +128,60 @@ class BooleanProperty(Property[bool]):
         deprecated: bool = False,
     ) -> None: ...
 
-# The classes below are placeholders pending full signatures: value types are
-# the trivially-correct ones, constructors are permissive.
-
 class NumericProperty(Property[float]):
-    def __init__(self, defaultvalue: Any = 0, **kw: Any) -> None: ...
+    def __init__(
+        self,
+        defaultvalue: NumericValue = 0,
+        *,
+        allownone: bool = False,
+        force_dispatch: bool = False,
+        errorvalue: NumericValue = ...,
+        errorhandler: Callable[[object], NumericValue] | None = None,
+        comparator: Callable[[float, float], bool] | None = None,
+        deprecated: bool = False,
+    ) -> None: ...
+    def __set__(self, obj: object, val: NumericValue) -> None: ...
+    def set(self, obj: EventDispatcher, value: NumericValue) -> bool: ...
+    def get_format(self, obj: EventDispatcher) -> str: ...
 
-class StringProperty(Property[str]):
-    def __init__(self, defaultvalue: Any = "", **kw: Any) -> None: ...
+class StringProperty(Property[T]):
+    @overload
+    def __init__(
+        self: StringProperty[str],
+        defaultvalue: str = "",
+        *,
+        allownone: Literal[False] = False,
+        force_dispatch: bool = False,
+        errorvalue: str = ...,
+        errorhandler: Callable[[object], str] | None = None,
+        comparator: Callable[[str, str], bool] | None = None,
+        deprecated: bool = False,
+    ) -> None: ...
+    @overload
+    def __init__(
+        self: StringProperty[str | None],
+        defaultvalue: str | None = None,
+        *,
+        allownone: Literal[True],
+        force_dispatch: bool = False,
+        errorvalue: str = ...,
+        errorhandler: Callable[[object], str] | None = None,
+        comparator: Callable[[str, str], bool] | None = None,
+        deprecated: bool = False,
+    ) -> None: ...
 
 class ListProperty(Property[list[T]]):
-    def __init__(self, defaultvalue: Any = ..., **kw: Any) -> None: ...
+    def __init__(
+        self,
+        defaultvalue: list[T] = ...,
+        *,
+        allownone: bool = False,
+        force_dispatch: bool = False,
+        errorvalue: list[T] = ...,
+        errorhandler: Callable[[object], list[T]] | None = None,
+        comparator: Callable[[list[T], list[T]], bool] | None = None,
+        deprecated: bool = False,
+    ) -> None: ...
 
 class ObjectProperty(Property[T]):
     def __init__(
@@ -138,26 +199,102 @@ class ObjectProperty(Property[T]):
     ) -> None: ...
 
 class BoundedNumericProperty(Property[float]):
-    def __init__(self, *largs: Any, **kw: Any) -> None: ...
-
-class OptionProperty(Property[Any]):
-    def __init__(self, *largs: Any, **kw: Any) -> None: ...
-
-class ReferenceListProperty(Property[list[Any]]):
-    def __init__(self, *largs: Any, **kw: Any) -> None: ...
-
-class AliasProperty(Property[Any]):
-    def __init__(self, *largs: Any, **kw: Any) -> None: ...
-
-class DictProperty(Property[dict[Any, Any]]):
     def __init__(
-        self, defaultvalue: Any = ..., rebind: bool = False, **kw: Any
+        self,
+        defaultvalue: float = 0,
+        *,
+        min: float = ...,
+        max: float = ...,
+        allownone: bool = False,
+        force_dispatch: bool = False,
+        errorvalue: float = ...,
+        errorhandler: Callable[[object], float] | None = None,
+        comparator: Callable[[float, float], bool] | None = None,
+        deprecated: bool = False,
+    ) -> None: ...
+    def set_min(self, obj: EventDispatcher, value: float | None) -> None: ...
+    def get_min(self, obj: EventDispatcher) -> float | None: ...
+    def set_max(self, obj: EventDispatcher, value: float | None) -> None: ...
+    def get_max(self, obj: EventDispatcher) -> float | None: ...
+
+class OptionProperty(Property[T]):
+    def __init__(
+        self,
+        defaultvalue: T,
+        *,
+        options: Iterable[T],
+        allownone: bool = False,
+        force_dispatch: bool = False,
+        errorvalue: T = ...,
+        errorhandler: Callable[[object], T] | None = None,
+        comparator: Callable[[T, T], bool] | None = None,
+        deprecated: bool = False,
+    ) -> None: ...
+    @property
+    def options(self) -> list[T]: ...
+
+class ReferenceListProperty(Property[list[T]]):
+    def __init__(
+        self,
+        *largs: Property[T],
+        allownone: bool = False,
+        force_dispatch: bool = False,
+        comparator: Callable[[list[T], list[T]], bool] | None = None,
+        deprecated: bool = False,
+    ) -> None: ...
+    def __set__(self, obj: object, val: Sequence[T]) -> None: ...
+    def set(self, obj: EventDispatcher, value: Sequence[T]) -> bool: ...
+    def setitem(
+        self, obj: EventDispatcher, key: int | slice, value: T | Sequence[T]
+    ) -> None: ...
+
+class AliasProperty(Property[T]):
+    def __init__(
+        self,
+        getter: Callable[..., T],
+        setter: Callable[..., bool | None] | None = None,
+        rebind: bool = False,
+        watch_before_use: bool = True,
+        *,
+        bind: Sequence[str] = ...,
+        cache: bool = False,
+        force_dispatch: bool = False,
+    ) -> None: ...
+    def trigger_change(self, obj: EventDispatcher, value: object) -> None: ...
+
+class DictProperty(Property[dict[K, V]]):
+    def __init__(
+        self,
+        defaultvalue: dict[K, V] = ...,
+        rebind: bool = False,
+        *,
+        allownone: bool = False,
+        force_dispatch: bool = False,
+        errorvalue: dict[K, V] = ...,
+        errorhandler: Callable[[object], dict[K, V]] | None = None,
+        comparator: Callable[[dict[K, V], dict[K, V]], bool] | None = None,
+        deprecated: bool = False,
     ) -> None: ...
 
 class VariableListProperty(Property[list[float]]):
     def __init__(
-        self, defaultvalue: Any = None, length: int = 4, **kw: Any
+        self,
+        defaultvalue: NumericValue | Sequence[NumericValue] | None = None,
+        length: Literal[2, 4] = 4,
+        *,
+        allownone: bool = False,
+        force_dispatch: bool = False,
+        errorvalue: list[float] = ...,
+        errorhandler: Callable[[object], list[float]] | None = None,
+        comparator: Callable[[list[float], list[float]], bool] | None = None,
+        deprecated: bool = False,
     ) -> None: ...
+    def __set__(
+        self, obj: object, val: NumericValue | Sequence[NumericValue]
+    ) -> None: ...
+    def set(
+        self, obj: EventDispatcher, value: NumericValue | Sequence[NumericValue]
+    ) -> bool: ...
 
 class ConfigParserProperty(Property[T]):
     def __init__(
@@ -176,9 +313,21 @@ class ConfigParserProperty(Property[T]):
         comparator: Callable[[T, T], bool] | None = None,
         deprecated: bool = False,
     ) -> None: ...
-    def __set__(self, obj: EventDispatcher, val: Any) -> None: ...
+    def __set__(self, obj: object, val: Any) -> None: ...
     def set(self, obj: EventDispatcher, value: Any) -> bool: ...
     def set_config(self, config: ConfigParser | None) -> None: ...
 
 class ColorProperty(Property[list[float]]):
-    def __init__(self, defaultvalue: Any = 0, **kw: Any) -> None: ...
+    def __init__(
+        self,
+        defaultvalue: str | Sequence[float] = ...,
+        *,
+        allownone: bool = False,
+        force_dispatch: bool = False,
+        errorvalue: str | Sequence[float] = ...,
+        errorhandler: Callable[[object], str | Sequence[float]] | None = None,
+        comparator: Callable[[list[float], list[float]], bool] | None = None,
+        deprecated: bool = False,
+    ) -> None: ...
+    def __set__(self, obj: object, val: str | Sequence[float]) -> None: ...
+    def set(self, obj: EventDispatcher, value: str | Sequence[float]) -> bool: ...
