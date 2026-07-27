@@ -26,7 +26,6 @@ dependencies = [
     "pillow<11.1.0",
     "Pygments==2.19.0",
     "python-dotenv==1.0.1",
-    "toolz>=1,<2",
 ]
 
 [project.scripts]
@@ -138,6 +137,7 @@ suppress-dummy-args = true
 [tool.basedpyright]
 include = ["src"]
 ignore = ["tests"]
+extraPaths = ["src"]
 pythonVersion = "3.12"
 stubPath="./typings"
 
@@ -146,13 +146,13 @@ reportConstantRedefinition = false
 reportExplicitAny = false
 reportImplicitOverride = false
 reportImplicitStringConcatenation = false
+reportMissingSuperCall = false
 reportUnannotatedClassAttribute = false
 reportUnknownLambdaType = false
 reportUnknownMemberType = false
 reportUnnecessaryComparison = false
-reportUnusedCallResult = false
 reportUnsafeMultipleInheritance = false
+reportUnusedCallResult = false
 strictDictionaryInference = true
 strictListInference = true
 strictSetInference = true
-
