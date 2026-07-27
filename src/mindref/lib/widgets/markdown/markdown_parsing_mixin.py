@@ -9,28 +9,6 @@ from mindref.lib.domain.md_parser_types import (
 )
 from mindref.lib.widgets.behavior.inline_behavior import TextSnippet
 
-if TYPE_CHECKING:
-    from kivy.uix.layout import Layout
-    from kivy.uix.widget import Widget
-
-
-class VisitorProtocol(Protocol):
-    def pop(self): ...
-
-    def push(self, node: Widget | Layout): ...
-
-
-class MarkdownLabelParsingProtocol(Protocol):
-    """
-    Protocol specifying expected methods for a Widget with InterceptingWidgetInlineMixin
-    """
-
-    __name__: str
-
-    def handle_intercept(self, node: TMdInlineTypes): ...
-
-    def handle_intercept_exit(self): ...
-
 
 class MarkdownLabelParsingMixin:
     """
