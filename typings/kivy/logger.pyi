@@ -184,8 +184,7 @@ __all__ = (
     "ProcessingStream",
     "UncoloredLogRecord",
 )
-Logger = ...
-LOG_LEVELS = ...
+LOG_LEVELS: dict[str, int]
 
 class FileHandler(logging.Handler):
     history = ...
@@ -287,8 +286,8 @@ def is_color_terminal() -> bool | Literal[""]:
     """
     ...
 
-Logger = ...
-file_log_handler = ...
+Logger: logging.Logger
+file_log_handler: FileHandler | None
 
 def add_kivy_handlers(logger) -> None:
     """Add Kivy-specific handlers to a logger.

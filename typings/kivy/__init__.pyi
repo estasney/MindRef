@@ -12,8 +12,10 @@ import kivy_deps
 from getopt import GetoptError, getopt
 from os import environ, mkdir
 from os.path import basename, dirname, exists, expanduser, join
-from kivy.logger import LOG_LEVELS, Logger, file_log_handler
-from kivy.utils import platform
+from kivy.logger import LOG_LEVELS as LOG_LEVELS
+from kivy.logger import Logger as Logger
+from kivy.logger import file_log_handler
+from kivy.utils import platform as platform
 from kivy._version import (
     RELEASE as _KIVY_RELEASE,
     __version__,
@@ -65,7 +67,7 @@ if platform == "macosx" and sys.maxsize < 9223372036854775807:
     r = ...
 if sys.version_info[0] == 2: ...
 
-def parse_kivy_version(version) -> tuple[list[int], str | Any, str | Any]:
+def parse_kivy_version(version) -> tuple[list[int], str | None, str | None]:
     """Parses the kivy version as described in :func:`require` into a 3-tuple
     of ([x, y, z], 'rc|a|b|dev|post', 'N') where N is the tag revision. The
     last two elements may be None.

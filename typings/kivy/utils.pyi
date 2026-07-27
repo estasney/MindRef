@@ -15,6 +15,9 @@ algebraic and platform functions.
     instead.
 
 """
+
+from typing import Literal
+
 __all__ = (
     "intersection",
     "difference",
@@ -175,7 +178,7 @@ def format_bytes_to_human(size, precision=...) -> str | None:
     """
     ...
 
-platform = ...
+platform: Literal["win", "linux", "android", "macosx", "ios", "unknown"]
 
 def escape_markup(text):
     """

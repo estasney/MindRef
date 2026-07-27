@@ -1,6 +1,7 @@
 from enum import Enum
 from math import sin
 
+from kivy import Logger
 from kivy.animation import Animation
 from kivy.clock import Clock
 from kivy.core.window import Window
@@ -8,7 +9,6 @@ from kivy.effects.opacityscroll import OpacityScrollEffect
 from kivy.lang import Builder
 from kivy.properties import (
     BooleanProperty,
-    Logger,
     NumericProperty,
     StringProperty,
 )
@@ -61,7 +61,7 @@ class RefreshSymbol(FloatLayout):
     rotation = NumericProperty(0)
     event_dt = NumericProperty(0)
     opacity = NumericProperty(0)
-    source = StringProperty(None)
+    source = StringProperty(None, allownone=True)
     animate = BooleanProperty(False)
 
     def __init__(self, **kwargs):
