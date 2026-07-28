@@ -65,6 +65,7 @@ where = ["src"]
 
 [tool.uv]
 package = true
+cache-keys =[{ file = "pyproject.toml"}, {file="src/**/*.c"}]
 
 [tool.ruff]
 target-version = "py312"

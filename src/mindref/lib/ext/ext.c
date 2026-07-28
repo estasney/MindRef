@@ -1219,6 +1219,7 @@ static CYTHON_INLINE float __PYX_NAN() {
 #define __PYX_HAVE__mindref__lib__ext__ext
 #define __PYX_HAVE_API__mindref__lib__ext__ext
 /* Early includes */
+#include <math.h>
 #ifdef _OPENMP
 #include <omp.h>
 #endif /* _OPENMP */
@@ -1467,7 +1468,7 @@ static const char *__pyx_filename;
 /* #### Code section: filename_table ### */
 
 static const char *__pyx_f[] = {
-  "src/mindref/lib/ext/ext.pyi",
+  "src/mindref/lib/ext/ext.pyx",
 };
 /* #### Code section: utility_code_proto_before_types ### */
 /* ForceInitThreads.proto */
@@ -1482,33 +1483,17 @@ static const char *__pyx_f[] = {
 /*--- Type declarations ---*/
 struct __pyx_ctuple_double__and_double;
 typedef struct __pyx_ctuple_double__and_double __pyx_ctuple_double__and_double;
-struct __pyx_ctuple_double__and_double__and_double__and_double;
-typedef struct __pyx_ctuple_double__and_double__and_double__and_double __pyx_ctuple_double__and_double__and_double__and_double;
 
-/* "mindref/lib/ext/ext.pyi":8
- *     self_height: float,
- *     self_width: float,
- * ) -> tuple[float, float]: ...             # <<<<<<<<<<<<<<
- * def compute_ref_coords(
- *     width: float,
+/* "mindref/lib/ext/ext.pyx":19
+ * def normalize_coordinates(double touch_x, double touch_y, double self_x, double self_y, double self_height,
+ *                           double self_width):
+ *     cdef (double, double) result = (0.0, 0.0)             # <<<<<<<<<<<<<<
+ * 
+ *     if self_width <= 0.0 or self_height <= 0.0:
  */
 struct __pyx_ctuple_double__and_double {
   double f0;
   double f1;
-};
-
-/* "mindref/lib/ext/ext.pyi":22
- *     hl_pad_x: float,
- *     hl_pad_y: float,
- * ) -> tuple[float, float, float, float]: ...             # <<<<<<<<<<<<<<
- * def compute_text_contrast(
- *     background_color: tuple[float, float, float, float],
- */
-struct __pyx_ctuple_double__and_double__and_double__and_double {
-  double f0;
-  double f1;
-  double f2;
-  double f3;
 };
 /* #### Code section: utility_code_proto ### */
 
@@ -1668,6 +1653,34 @@ static int __Pyx_ParseOptionalKeywords(PyObject *kwds, PyObject *const *kwvalues
     PyObject **argnames[],
     PyObject *kwds2, PyObject *values[], Py_ssize_t num_pos_args,
     const char* function_name);
+
+/* ArgTypeTest.proto */
+#define __Pyx_ArgTypeTest(obj, type, none_allowed, name, exact)\
+    ((likely(__Pyx_IS_TYPE(obj, type) | (none_allowed && (obj == Py_None)))) ? 1 :\
+        __Pyx__ArgTypeTest(obj, type, name, exact))
+static int __Pyx__ArgTypeTest(PyObject *obj, PyTypeObject *type, const char *name, int exact);
+
+/* GetItemInt.proto */
+#define __Pyx_GetItemInt(o, i, type, is_signed, to_py_func, is_list, wraparound, boundscheck)\
+    (__Pyx_fits_Py_ssize_t(i, type, is_signed) ?\
+    __Pyx_GetItemInt_Fast(o, (Py_ssize_t)i, is_list, wraparound, boundscheck) :\
+    (is_list ? (PyErr_SetString(PyExc_IndexError, "list index out of range"), (PyObject*)NULL) :\
+               __Pyx_GetItemInt_Generic(o, to_py_func(i))))
+#define __Pyx_GetItemInt_List(o, i, type, is_signed, to_py_func, is_list, wraparound, boundscheck)\
+    (__Pyx_fits_Py_ssize_t(i, type, is_signed) ?\
+    __Pyx_GetItemInt_List_Fast(o, (Py_ssize_t)i, wraparound, boundscheck) :\
+    (PyErr_SetString(PyExc_IndexError, "list index out of range"), (PyObject*)NULL))
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_List_Fast(PyObject *o, Py_ssize_t i,
+                                                              int wraparound, int boundscheck);
+#define __Pyx_GetItemInt_Tuple(o, i, type, is_signed, to_py_func, is_list, wraparound, boundscheck)\
+    (__Pyx_fits_Py_ssize_t(i, type, is_signed) ?\
+    __Pyx_GetItemInt_Tuple_Fast(o, (Py_ssize_t)i, wraparound, boundscheck) :\
+    (PyErr_SetString(PyExc_IndexError, "tuple index out of range"), (PyObject*)NULL))
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Tuple_Fast(PyObject *o, Py_ssize_t i,
+                                                              int wraparound, int boundscheck);
+static PyObject *__Pyx_GetItemInt_Generic(PyObject *o, PyObject* j);
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Fast(PyObject *o, Py_ssize_t i,
+                                                     int is_list, int wraparound, int boundscheck);
 
 /* IncludeStructmemberH.proto */
 #include <structmember.h>
@@ -1932,8 +1945,16 @@ static void __pyx_insert_code_object(int code_line, PyCodeObject* code_object);
 static void __Pyx_AddTraceback(const char *funcname, int c_line,
                                int py_line, const char *filename);
 
-/* FromPyCTupleUtility.proto */
-static CYTHON_INLINE __pyx_ctuple_double__and_double__and_double__and_double __pyx_convert__from_py___pyx_ctuple_double__and_double__and_double__and_double(PyObject *);
+/* ToPyCTupleUtility.proto */
+static PyObject* __pyx_convert__to_py___pyx_ctuple_double__and_double(__pyx_ctuple_double__and_double);
+
+/* GCCDiagnostics.proto */
+#if !defined(__INTEL_COMPILER) && defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))
+#define __Pyx_HAS_GCC_DIAGNOSTIC
+#endif
+
+/* CIntToPy.proto */
+static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value);
 
 /* FormatTypeName.proto */
 #if CYTHON_COMPILING_IN_LIMITED_API
@@ -1947,14 +1968,6 @@ typedef const char *__Pyx_TypeName;
 #define __Pyx_PyType_GetName(tp) ((tp)->tp_name)
 #define __Pyx_DECREF_TypeName(obj)
 #endif
-
-/* GCCDiagnostics.proto */
-#if !defined(__INTEL_COMPILER) && defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))
-#define __Pyx_HAS_GCC_DIAGNOSTIC
-#endif
-
-/* CIntToPy.proto */
-static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value);
 
 /* CIntFromPy.proto */
 static CYTHON_INLINE long __Pyx_PyInt_As_long(PyObject *);
@@ -1988,7 +2001,13 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 
 /* #### Code section: module_declarations ### */
 
+/* Module declarations from "libc.math" */
+
 /* Module declarations from "mindref.lib.ext.ext" */
+static CYTHON_INLINE double __pyx_f_7mindref_3lib_3ext_3ext_CLAMP(double, double, double); /*proto*/
+static CYTHON_INLINE double __pyx_f_7mindref_3lib_3ext_3ext_normalize_domain_range(double, double, double); /*proto*/
+static CYTHON_INLINE double __pyx_f_7mindref_3lib_3ext_3ext_srgb_channel_to_linear(double); /*proto*/
+static double __pyx_f_7mindref_3lib_3ext_3ext_relative_luminance(double, double, double); /*proto*/
 /* #### Code section: typeinfo ### */
 /* #### Code section: before_global_var ### */
 #define __Pyx_MODULE_NAME "mindref.lib.ext.ext"
@@ -1998,19 +2017,25 @@ int __pyx_module_is_main_mindref__lib__ext__ext = 0;
 /* Implementation of "mindref.lib.ext.ext" */
 /* #### Code section: global_var ### */
 /* #### Code section: string_decls ### */
+static const char __pyx_k_b[] = "b";
+static const char __pyx_k_g[] = "g";
+static const char __pyx_k_r[] = "r";
 static const char __pyx_k_wX[] = "wX";
 static const char __pyx_k_wY[] = "wY";
 static const char __pyx_k__10[] = "?";
-static const char __pyx_k_str[] = "str";
+static const char __pyx_k_hl_a[] = "hl_a";
 static const char __pyx_k_main[] = "__main__";
 static const char __pyx_k_name[] = "__name__";
 static const char __pyx_k_test[] = "__test__";
-static const char __pyx_k_float[] = "float";
 static const char __pyx_k_width[] = "width";
+static const char __pyx_k_000000[] = "#000000";
+static const char __pyx_k_ffffff[] = "#ffffff";
 static const char __pyx_k_height[] = "height";
-static const char __pyx_k_return[] = "return";
+static const char __pyx_k_result[] = "result";
 static const char __pyx_k_self_x[] = "self_x";
 static const char __pyx_k_self_y[] = "self_y";
+static const char __pyx_k_offsetX[] = "offsetX";
+static const char __pyx_k_offsetY[] = "offsetY";
 static const char __pyx_k_span_x1[] = "span_x1";
 static const char __pyx_k_span_x2[] = "span_x2";
 static const char __pyx_k_span_y1[] = "span_y1";
@@ -2023,12 +2048,12 @@ static const char __pyx_k_overscroll[] = "overscroll";
 static const char __pyx_k_self_width[] = "self_width";
 static const char __pyx_k_self_height[] = "self_height";
 static const char __pyx_k_is_coroutine[] = "_is_coroutine";
+static const char __pyx_k_domain_height[] = "domain_height";
 static const char __pyx_k_target_height[] = "target_height";
 static const char __pyx_k_texture_width[] = "texture_width";
 static const char __pyx_k_texture_height[] = "texture_height";
 static const char __pyx_k_highlight_color[] = "highlight_color";
 static const char __pyx_k_background_color[] = "background_color";
-static const char __pyx_k_tuple_float_float[] = "tuple[float, float]";
 static const char __pyx_k_asyncio_coroutines[] = "asyncio.coroutines";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_compute_overscroll[] = "compute_overscroll";
@@ -2037,14 +2062,12 @@ static const char __pyx_k_mindref_lib_ext_ext[] = "mindref.lib.ext.ext";
 static const char __pyx_k_overscroll_threshold[] = "overscroll_threshold";
 static const char __pyx_k_compute_text_contrast[] = "compute_text_contrast";
 static const char __pyx_k_normalize_coordinates[] = "normalize_coordinates";
-static const char __pyx_k_src_mindref_lib_ext_ext_pyi[] = "src/mindref/lib/ext/ext.pyi";
-static const char __pyx_k_tuple_float_float_float_float[] = "tuple[float, float, float, float]";
-static const char __pyx_k_tuple_float_float_float_float_No[] = "tuple[float, float, float, float] | None";
+static const char __pyx_k_src_mindref_lib_ext_ext_pyx[] = "src/mindref/lib/ext/ext.pyx";
 /* #### Code section: decls ### */
-static PyObject *__pyx_pf_7mindref_3lib_3ext_3ext_normalize_coordinates(CYTHON_UNUSED PyObject *__pyx_self, CYTHON_UNUSED double __pyx_v_touch_x, CYTHON_UNUSED double __pyx_v_touch_y, CYTHON_UNUSED double __pyx_v_self_x, CYTHON_UNUSED double __pyx_v_self_y, CYTHON_UNUSED double __pyx_v_self_height, CYTHON_UNUSED double __pyx_v_self_width); /* proto */
-static PyObject *__pyx_pf_7mindref_3lib_3ext_3ext_2compute_ref_coords(CYTHON_UNUSED PyObject *__pyx_self, CYTHON_UNUSED double __pyx_v_width, CYTHON_UNUSED double __pyx_v_height, CYTHON_UNUSED double __pyx_v_wX, CYTHON_UNUSED double __pyx_v_wY, CYTHON_UNUSED double __pyx_v_texture_width, CYTHON_UNUSED double __pyx_v_texture_height, CYTHON_UNUSED double __pyx_v_span_x1, CYTHON_UNUSED double __pyx_v_span_y1, CYTHON_UNUSED double __pyx_v_span_x2, CYTHON_UNUSED double __pyx_v_span_y2, CYTHON_UNUSED double __pyx_v_hl_pad_x, CYTHON_UNUSED double __pyx_v_hl_pad_y); /* proto */
-static PyObject *__pyx_pf_7mindref_3lib_3ext_3ext_4compute_text_contrast(CYTHON_UNUSED PyObject *__pyx_self, CYTHON_UNUSED __pyx_ctuple_double__and_double__and_double__and_double __pyx_v_background_color, CYTHON_UNUSED PyObject *__pyx_v_highlight_color); /* proto */
-static PyObject *__pyx_pf_7mindref_3lib_3ext_3ext_6compute_overscroll(CYTHON_UNUSED PyObject *__pyx_self, CYTHON_UNUSED double __pyx_v_overscroll, CYTHON_UNUSED double __pyx_v_target_height, CYTHON_UNUSED double __pyx_v_overscroll_threshold); /* proto */
+static PyObject *__pyx_pf_7mindref_3lib_3ext_3ext_normalize_coordinates(CYTHON_UNUSED PyObject *__pyx_self, double __pyx_v_touch_x, double __pyx_v_touch_y, double __pyx_v_self_x, double __pyx_v_self_y, double __pyx_v_self_height, double __pyx_v_self_width); /* proto */
+static PyObject *__pyx_pf_7mindref_3lib_3ext_3ext_2compute_ref_coords(CYTHON_UNUSED PyObject *__pyx_self, double __pyx_v_width, double __pyx_v_height, double __pyx_v_wX, double __pyx_v_wY, double __pyx_v_texture_width, double __pyx_v_texture_height, double __pyx_v_span_x1, double __pyx_v_span_y1, double __pyx_v_span_x2, double __pyx_v_span_y2, double __pyx_v_hl_pad_x, double __pyx_v_hl_pad_y); /* proto */
+static PyObject *__pyx_pf_7mindref_3lib_3ext_3ext_4compute_text_contrast(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_background_color, PyObject *__pyx_v_highlight_color); /* proto */
+static PyObject *__pyx_pf_7mindref_3lib_3ext_3ext_6compute_overscroll(CYTHON_UNUSED PyObject *__pyx_self, double __pyx_v_overscroll, double __pyx_v_target_height, double __pyx_v_overscroll_threshold); /* proto */
 /* #### Code section: late_includes ### */
 /* #### Code section: module_state ### */
 typedef struct {
@@ -2074,16 +2097,23 @@ typedef struct {
   #endif
   #if CYTHON_USE_MODULE_STATE
   #endif
+  #if CYTHON_USE_MODULE_STATE
+  #endif
+  PyObject *__pyx_kp_u_000000;
   PyObject *__pyx_n_s__10;
   PyObject *__pyx_n_s_asyncio_coroutines;
+  PyObject *__pyx_n_s_b;
   PyObject *__pyx_n_s_background_color;
   PyObject *__pyx_n_s_cline_in_traceback;
   PyObject *__pyx_n_s_compute_overscroll;
   PyObject *__pyx_n_s_compute_ref_coords;
   PyObject *__pyx_n_s_compute_text_contrast;
-  PyObject *__pyx_n_s_float;
+  PyObject *__pyx_n_s_domain_height;
+  PyObject *__pyx_kp_u_ffffff;
+  PyObject *__pyx_n_s_g;
   PyObject *__pyx_n_s_height;
   PyObject *__pyx_n_s_highlight_color;
+  PyObject *__pyx_n_s_hl_a;
   PyObject *__pyx_n_s_hl_pad_x;
   PyObject *__pyx_n_s_hl_pad_y;
   PyObject *__pyx_n_s_is_coroutine;
@@ -2091,9 +2121,12 @@ typedef struct {
   PyObject *__pyx_n_s_mindref_lib_ext_ext;
   PyObject *__pyx_n_s_name;
   PyObject *__pyx_n_s_normalize_coordinates;
+  PyObject *__pyx_n_s_offsetX;
+  PyObject *__pyx_n_s_offsetY;
   PyObject *__pyx_n_s_overscroll;
   PyObject *__pyx_n_s_overscroll_threshold;
-  PyObject *__pyx_n_s_return;
+  PyObject *__pyx_n_s_r;
+  PyObject *__pyx_n_s_result;
   PyObject *__pyx_n_s_self_height;
   PyObject *__pyx_n_s_self_width;
   PyObject *__pyx_n_s_self_x;
@@ -2102,17 +2135,13 @@ typedef struct {
   PyObject *__pyx_n_s_span_x2;
   PyObject *__pyx_n_s_span_y1;
   PyObject *__pyx_n_s_span_y2;
-  PyObject *__pyx_kp_s_src_mindref_lib_ext_ext_pyi;
-  PyObject *__pyx_n_s_str;
+  PyObject *__pyx_kp_s_src_mindref_lib_ext_ext_pyx;
   PyObject *__pyx_n_s_target_height;
   PyObject *__pyx_n_s_test;
   PyObject *__pyx_n_s_texture_height;
   PyObject *__pyx_n_s_texture_width;
   PyObject *__pyx_n_s_touch_x;
   PyObject *__pyx_n_s_touch_y;
-  PyObject *__pyx_kp_s_tuple_float_float;
-  PyObject *__pyx_kp_s_tuple_float_float_float_float;
-  PyObject *__pyx_kp_s_tuple_float_float_float_float_No;
   PyObject *__pyx_n_s_wX;
   PyObject *__pyx_n_s_wY;
   PyObject *__pyx_n_s_width;
@@ -2167,16 +2196,21 @@ static int __pyx_m_clear(PyObject *m) {
   #ifdef __Pyx_FusedFunction_USED
   Py_CLEAR(clear_module_state->__pyx_FusedFunctionType);
   #endif
+  Py_CLEAR(clear_module_state->__pyx_kp_u_000000);
   Py_CLEAR(clear_module_state->__pyx_n_s__10);
   Py_CLEAR(clear_module_state->__pyx_n_s_asyncio_coroutines);
+  Py_CLEAR(clear_module_state->__pyx_n_s_b);
   Py_CLEAR(clear_module_state->__pyx_n_s_background_color);
   Py_CLEAR(clear_module_state->__pyx_n_s_cline_in_traceback);
   Py_CLEAR(clear_module_state->__pyx_n_s_compute_overscroll);
   Py_CLEAR(clear_module_state->__pyx_n_s_compute_ref_coords);
   Py_CLEAR(clear_module_state->__pyx_n_s_compute_text_contrast);
-  Py_CLEAR(clear_module_state->__pyx_n_s_float);
+  Py_CLEAR(clear_module_state->__pyx_n_s_domain_height);
+  Py_CLEAR(clear_module_state->__pyx_kp_u_ffffff);
+  Py_CLEAR(clear_module_state->__pyx_n_s_g);
   Py_CLEAR(clear_module_state->__pyx_n_s_height);
   Py_CLEAR(clear_module_state->__pyx_n_s_highlight_color);
+  Py_CLEAR(clear_module_state->__pyx_n_s_hl_a);
   Py_CLEAR(clear_module_state->__pyx_n_s_hl_pad_x);
   Py_CLEAR(clear_module_state->__pyx_n_s_hl_pad_y);
   Py_CLEAR(clear_module_state->__pyx_n_s_is_coroutine);
@@ -2184,9 +2218,12 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_mindref_lib_ext_ext);
   Py_CLEAR(clear_module_state->__pyx_n_s_name);
   Py_CLEAR(clear_module_state->__pyx_n_s_normalize_coordinates);
+  Py_CLEAR(clear_module_state->__pyx_n_s_offsetX);
+  Py_CLEAR(clear_module_state->__pyx_n_s_offsetY);
   Py_CLEAR(clear_module_state->__pyx_n_s_overscroll);
   Py_CLEAR(clear_module_state->__pyx_n_s_overscroll_threshold);
-  Py_CLEAR(clear_module_state->__pyx_n_s_return);
+  Py_CLEAR(clear_module_state->__pyx_n_s_r);
+  Py_CLEAR(clear_module_state->__pyx_n_s_result);
   Py_CLEAR(clear_module_state->__pyx_n_s_self_height);
   Py_CLEAR(clear_module_state->__pyx_n_s_self_width);
   Py_CLEAR(clear_module_state->__pyx_n_s_self_x);
@@ -2195,17 +2232,13 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_span_x2);
   Py_CLEAR(clear_module_state->__pyx_n_s_span_y1);
   Py_CLEAR(clear_module_state->__pyx_n_s_span_y2);
-  Py_CLEAR(clear_module_state->__pyx_kp_s_src_mindref_lib_ext_ext_pyi);
-  Py_CLEAR(clear_module_state->__pyx_n_s_str);
+  Py_CLEAR(clear_module_state->__pyx_kp_s_src_mindref_lib_ext_ext_pyx);
   Py_CLEAR(clear_module_state->__pyx_n_s_target_height);
   Py_CLEAR(clear_module_state->__pyx_n_s_test);
   Py_CLEAR(clear_module_state->__pyx_n_s_texture_height);
   Py_CLEAR(clear_module_state->__pyx_n_s_texture_width);
   Py_CLEAR(clear_module_state->__pyx_n_s_touch_x);
   Py_CLEAR(clear_module_state->__pyx_n_s_touch_y);
-  Py_CLEAR(clear_module_state->__pyx_kp_s_tuple_float_float);
-  Py_CLEAR(clear_module_state->__pyx_kp_s_tuple_float_float_float_float);
-  Py_CLEAR(clear_module_state->__pyx_kp_s_tuple_float_float_float_float_No);
   Py_CLEAR(clear_module_state->__pyx_n_s_wX);
   Py_CLEAR(clear_module_state->__pyx_n_s_wY);
   Py_CLEAR(clear_module_state->__pyx_n_s_width);
@@ -2238,16 +2271,21 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   #ifdef __Pyx_FusedFunction_USED
   Py_VISIT(traverse_module_state->__pyx_FusedFunctionType);
   #endif
+  Py_VISIT(traverse_module_state->__pyx_kp_u_000000);
   Py_VISIT(traverse_module_state->__pyx_n_s__10);
   Py_VISIT(traverse_module_state->__pyx_n_s_asyncio_coroutines);
+  Py_VISIT(traverse_module_state->__pyx_n_s_b);
   Py_VISIT(traverse_module_state->__pyx_n_s_background_color);
   Py_VISIT(traverse_module_state->__pyx_n_s_cline_in_traceback);
   Py_VISIT(traverse_module_state->__pyx_n_s_compute_overscroll);
   Py_VISIT(traverse_module_state->__pyx_n_s_compute_ref_coords);
   Py_VISIT(traverse_module_state->__pyx_n_s_compute_text_contrast);
-  Py_VISIT(traverse_module_state->__pyx_n_s_float);
+  Py_VISIT(traverse_module_state->__pyx_n_s_domain_height);
+  Py_VISIT(traverse_module_state->__pyx_kp_u_ffffff);
+  Py_VISIT(traverse_module_state->__pyx_n_s_g);
   Py_VISIT(traverse_module_state->__pyx_n_s_height);
   Py_VISIT(traverse_module_state->__pyx_n_s_highlight_color);
+  Py_VISIT(traverse_module_state->__pyx_n_s_hl_a);
   Py_VISIT(traverse_module_state->__pyx_n_s_hl_pad_x);
   Py_VISIT(traverse_module_state->__pyx_n_s_hl_pad_y);
   Py_VISIT(traverse_module_state->__pyx_n_s_is_coroutine);
@@ -2255,9 +2293,12 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_mindref_lib_ext_ext);
   Py_VISIT(traverse_module_state->__pyx_n_s_name);
   Py_VISIT(traverse_module_state->__pyx_n_s_normalize_coordinates);
+  Py_VISIT(traverse_module_state->__pyx_n_s_offsetX);
+  Py_VISIT(traverse_module_state->__pyx_n_s_offsetY);
   Py_VISIT(traverse_module_state->__pyx_n_s_overscroll);
   Py_VISIT(traverse_module_state->__pyx_n_s_overscroll_threshold);
-  Py_VISIT(traverse_module_state->__pyx_n_s_return);
+  Py_VISIT(traverse_module_state->__pyx_n_s_r);
+  Py_VISIT(traverse_module_state->__pyx_n_s_result);
   Py_VISIT(traverse_module_state->__pyx_n_s_self_height);
   Py_VISIT(traverse_module_state->__pyx_n_s_self_width);
   Py_VISIT(traverse_module_state->__pyx_n_s_self_x);
@@ -2266,17 +2307,13 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_span_x2);
   Py_VISIT(traverse_module_state->__pyx_n_s_span_y1);
   Py_VISIT(traverse_module_state->__pyx_n_s_span_y2);
-  Py_VISIT(traverse_module_state->__pyx_kp_s_src_mindref_lib_ext_ext_pyi);
-  Py_VISIT(traverse_module_state->__pyx_n_s_str);
+  Py_VISIT(traverse_module_state->__pyx_kp_s_src_mindref_lib_ext_ext_pyx);
   Py_VISIT(traverse_module_state->__pyx_n_s_target_height);
   Py_VISIT(traverse_module_state->__pyx_n_s_test);
   Py_VISIT(traverse_module_state->__pyx_n_s_texture_height);
   Py_VISIT(traverse_module_state->__pyx_n_s_texture_width);
   Py_VISIT(traverse_module_state->__pyx_n_s_touch_x);
   Py_VISIT(traverse_module_state->__pyx_n_s_touch_y);
-  Py_VISIT(traverse_module_state->__pyx_kp_s_tuple_float_float);
-  Py_VISIT(traverse_module_state->__pyx_kp_s_tuple_float_float_float_float);
-  Py_VISIT(traverse_module_state->__pyx_kp_s_tuple_float_float_float_float_No);
   Py_VISIT(traverse_module_state->__pyx_n_s_wX);
   Py_VISIT(traverse_module_state->__pyx_n_s_wY);
   Py_VISIT(traverse_module_state->__pyx_n_s_width);
@@ -2319,16 +2356,23 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #endif
 #if CYTHON_USE_MODULE_STATE
 #endif
+#if CYTHON_USE_MODULE_STATE
+#endif
+#define __pyx_kp_u_000000 __pyx_mstate_global->__pyx_kp_u_000000
 #define __pyx_n_s__10 __pyx_mstate_global->__pyx_n_s__10
 #define __pyx_n_s_asyncio_coroutines __pyx_mstate_global->__pyx_n_s_asyncio_coroutines
+#define __pyx_n_s_b __pyx_mstate_global->__pyx_n_s_b
 #define __pyx_n_s_background_color __pyx_mstate_global->__pyx_n_s_background_color
 #define __pyx_n_s_cline_in_traceback __pyx_mstate_global->__pyx_n_s_cline_in_traceback
 #define __pyx_n_s_compute_overscroll __pyx_mstate_global->__pyx_n_s_compute_overscroll
 #define __pyx_n_s_compute_ref_coords __pyx_mstate_global->__pyx_n_s_compute_ref_coords
 #define __pyx_n_s_compute_text_contrast __pyx_mstate_global->__pyx_n_s_compute_text_contrast
-#define __pyx_n_s_float __pyx_mstate_global->__pyx_n_s_float
+#define __pyx_n_s_domain_height __pyx_mstate_global->__pyx_n_s_domain_height
+#define __pyx_kp_u_ffffff __pyx_mstate_global->__pyx_kp_u_ffffff
+#define __pyx_n_s_g __pyx_mstate_global->__pyx_n_s_g
 #define __pyx_n_s_height __pyx_mstate_global->__pyx_n_s_height
 #define __pyx_n_s_highlight_color __pyx_mstate_global->__pyx_n_s_highlight_color
+#define __pyx_n_s_hl_a __pyx_mstate_global->__pyx_n_s_hl_a
 #define __pyx_n_s_hl_pad_x __pyx_mstate_global->__pyx_n_s_hl_pad_x
 #define __pyx_n_s_hl_pad_y __pyx_mstate_global->__pyx_n_s_hl_pad_y
 #define __pyx_n_s_is_coroutine __pyx_mstate_global->__pyx_n_s_is_coroutine
@@ -2336,9 +2380,12 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_mindref_lib_ext_ext __pyx_mstate_global->__pyx_n_s_mindref_lib_ext_ext
 #define __pyx_n_s_name __pyx_mstate_global->__pyx_n_s_name
 #define __pyx_n_s_normalize_coordinates __pyx_mstate_global->__pyx_n_s_normalize_coordinates
+#define __pyx_n_s_offsetX __pyx_mstate_global->__pyx_n_s_offsetX
+#define __pyx_n_s_offsetY __pyx_mstate_global->__pyx_n_s_offsetY
 #define __pyx_n_s_overscroll __pyx_mstate_global->__pyx_n_s_overscroll
 #define __pyx_n_s_overscroll_threshold __pyx_mstate_global->__pyx_n_s_overscroll_threshold
-#define __pyx_n_s_return __pyx_mstate_global->__pyx_n_s_return
+#define __pyx_n_s_r __pyx_mstate_global->__pyx_n_s_r
+#define __pyx_n_s_result __pyx_mstate_global->__pyx_n_s_result
 #define __pyx_n_s_self_height __pyx_mstate_global->__pyx_n_s_self_height
 #define __pyx_n_s_self_width __pyx_mstate_global->__pyx_n_s_self_width
 #define __pyx_n_s_self_x __pyx_mstate_global->__pyx_n_s_self_x
@@ -2347,17 +2394,13 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_span_x2 __pyx_mstate_global->__pyx_n_s_span_x2
 #define __pyx_n_s_span_y1 __pyx_mstate_global->__pyx_n_s_span_y1
 #define __pyx_n_s_span_y2 __pyx_mstate_global->__pyx_n_s_span_y2
-#define __pyx_kp_s_src_mindref_lib_ext_ext_pyi __pyx_mstate_global->__pyx_kp_s_src_mindref_lib_ext_ext_pyi
-#define __pyx_n_s_str __pyx_mstate_global->__pyx_n_s_str
+#define __pyx_kp_s_src_mindref_lib_ext_ext_pyx __pyx_mstate_global->__pyx_kp_s_src_mindref_lib_ext_ext_pyx
 #define __pyx_n_s_target_height __pyx_mstate_global->__pyx_n_s_target_height
 #define __pyx_n_s_test __pyx_mstate_global->__pyx_n_s_test
 #define __pyx_n_s_texture_height __pyx_mstate_global->__pyx_n_s_texture_height
 #define __pyx_n_s_texture_width __pyx_mstate_global->__pyx_n_s_texture_width
 #define __pyx_n_s_touch_x __pyx_mstate_global->__pyx_n_s_touch_x
 #define __pyx_n_s_touch_y __pyx_mstate_global->__pyx_n_s_touch_y
-#define __pyx_kp_s_tuple_float_float __pyx_mstate_global->__pyx_kp_s_tuple_float_float
-#define __pyx_kp_s_tuple_float_float_float_float __pyx_mstate_global->__pyx_kp_s_tuple_float_float_float_float
-#define __pyx_kp_s_tuple_float_float_float_float_No __pyx_mstate_global->__pyx_kp_s_tuple_float_float_float_float_No
 #define __pyx_n_s_wX __pyx_mstate_global->__pyx_n_s_wX
 #define __pyx_n_s_wY __pyx_mstate_global->__pyx_n_s_wY
 #define __pyx_n_s_width __pyx_mstate_global->__pyx_n_s_width
@@ -2372,10 +2415,136 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_codeobj__9 __pyx_mstate_global->__pyx_codeobj__9
 /* #### Code section: module_code ### */
 
-/* "mindref/lib/ext/ext.pyi":1
- * def normalize_coordinates(             # <<<<<<<<<<<<<<
- *     touch_x: float,
- *     touch_y: float,
+/* "mindref/lib/ext/ext.pyx":4
+ * from libc.math cimport pow
+ * 
+ * cdef inline double CLAMP(double x, double lower, double upper):             # <<<<<<<<<<<<<<
+ *     return lower if x < lower else (upper if x > upper else x)
+ * 
+ */
+
+static CYTHON_INLINE double __pyx_f_7mindref_3lib_3ext_3ext_CLAMP(double __pyx_v_x, double __pyx_v_lower, double __pyx_v_upper) {
+  double __pyx_r;
+  double __pyx_t_1;
+  int __pyx_t_2;
+  double __pyx_t_3;
+  int __pyx_t_4;
+
+  /* "mindref/lib/ext/ext.pyx":5
+ * 
+ * cdef inline double CLAMP(double x, double lower, double upper):
+ *     return lower if x < lower else (upper if x > upper else x)             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  __pyx_t_2 = (__pyx_v_x < __pyx_v_lower);
+  if (__pyx_t_2) {
+    __pyx_t_1 = __pyx_v_lower;
+  } else {
+    __pyx_t_4 = (__pyx_v_x > __pyx_v_upper);
+    if (__pyx_t_4) {
+      __pyx_t_3 = __pyx_v_upper;
+    } else {
+      __pyx_t_3 = __pyx_v_x;
+    }
+    __pyx_t_1 = __pyx_t_3;
+  }
+  __pyx_r = __pyx_t_1;
+  goto __pyx_L0;
+
+  /* "mindref/lib/ext/ext.pyx":4
+ * from libc.math cimport pow
+ * 
+ * cdef inline double CLAMP(double x, double lower, double upper):             # <<<<<<<<<<<<<<
+ *     return lower if x < lower else (upper if x > upper else x)
+ * 
+ */
+
+  /* function exit code */
+  __pyx_L0:;
+  return __pyx_r;
+}
+
+/* "mindref/lib/ext/ext.pyx":8
+ * 
+ * 
+ * cdef inline double normalize_domain_range(double value, double lower, double upper):             # <<<<<<<<<<<<<<
+ *     """
+ *     Normalize a value to a range between 0.0 and 1.0 based on the given lower and upper bounds.
+ */
+
+static CYTHON_INLINE double __pyx_f_7mindref_3lib_3ext_3ext_normalize_domain_range(double __pyx_v_value, double __pyx_v_lower, double __pyx_v_upper) {
+  double __pyx_v_domain_diff;
+  double __pyx_r;
+  int __pyx_t_1;
+
+  /* "mindref/lib/ext/ext.pyx":12
+ *     Normalize a value to a range between 0.0 and 1.0 based on the given lower and upper bounds.
+ *     """
+ *     cdef double domain_diff = upper - lower             # <<<<<<<<<<<<<<
+ *     if domain_diff == 0.0:
+ *         return 0.0  # Avoid division by zero, return min_value
+ */
+  __pyx_v_domain_diff = (__pyx_v_upper - __pyx_v_lower);
+
+  /* "mindref/lib/ext/ext.pyx":13
+ *     """
+ *     cdef double domain_diff = upper - lower
+ *     if domain_diff == 0.0:             # <<<<<<<<<<<<<<
+ *         return 0.0  # Avoid division by zero, return min_value
+ *     return (value - lower) / domain_diff
+ */
+  __pyx_t_1 = (__pyx_v_domain_diff == 0.0);
+  if (__pyx_t_1) {
+
+    /* "mindref/lib/ext/ext.pyx":14
+ *     cdef double domain_diff = upper - lower
+ *     if domain_diff == 0.0:
+ *         return 0.0  # Avoid division by zero, return min_value             # <<<<<<<<<<<<<<
+ *     return (value - lower) / domain_diff
+ * 
+ */
+    __pyx_r = 0.0;
+    goto __pyx_L0;
+
+    /* "mindref/lib/ext/ext.pyx":13
+ *     """
+ *     cdef double domain_diff = upper - lower
+ *     if domain_diff == 0.0:             # <<<<<<<<<<<<<<
+ *         return 0.0  # Avoid division by zero, return min_value
+ *     return (value - lower) / domain_diff
+ */
+  }
+
+  /* "mindref/lib/ext/ext.pyx":15
+ *     if domain_diff == 0.0:
+ *         return 0.0  # Avoid division by zero, return min_value
+ *     return (value - lower) / domain_diff             # <<<<<<<<<<<<<<
+ * 
+ * def normalize_coordinates(double touch_x, double touch_y, double self_x, double self_y, double self_height,
+ */
+  __pyx_r = ((__pyx_v_value - __pyx_v_lower) / __pyx_v_domain_diff);
+  goto __pyx_L0;
+
+  /* "mindref/lib/ext/ext.pyx":8
+ * 
+ * 
+ * cdef inline double normalize_domain_range(double value, double lower, double upper):             # <<<<<<<<<<<<<<
+ *     """
+ *     Normalize a value to a range between 0.0 and 1.0 based on the given lower and upper bounds.
+ */
+
+  /* function exit code */
+  __pyx_L0:;
+  return __pyx_r;
+}
+
+/* "mindref/lib/ext/ext.pyx":17
+ *     return (value - lower) / domain_diff
+ * 
+ * def normalize_coordinates(double touch_x, double touch_y, double self_x, double self_y, double self_height,             # <<<<<<<<<<<<<<
+ *                           double self_width):
+ *     cdef (double, double) result = (0.0, 0.0)
  */
 
 /* Python wrapper */
@@ -2386,7 +2555,8 @@ PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_7mindref_3lib_3ext_3ext_1normalize_coordinates = {"normalize_coordinates", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_7mindref_3lib_3ext_3ext_1normalize_coordinates, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+PyDoc_STRVAR(__pyx_doc_7mindref_3lib_3ext_3ext_normalize_coordinates, "normalize_coordinates(double touch_x, double touch_y, double self_x, double self_y, double self_height, double self_width)");
+static PyMethodDef __pyx_mdef_7mindref_3lib_3ext_3ext_1normalize_coordinates = {"normalize_coordinates", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_7mindref_3lib_3ext_3ext_1normalize_coordinates, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_7mindref_3lib_3ext_3ext_normalize_coordinates};
 static PyObject *__pyx_pw_7mindref_3lib_3ext_3ext_1normalize_coordinates(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
@@ -2394,12 +2564,12 @@ PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ) {
-  CYTHON_UNUSED double __pyx_v_touch_x;
-  CYTHON_UNUSED double __pyx_v_touch_y;
-  CYTHON_UNUSED double __pyx_v_self_x;
-  CYTHON_UNUSED double __pyx_v_self_y;
-  CYTHON_UNUSED double __pyx_v_self_height;
-  CYTHON_UNUSED double __pyx_v_self_width;
+  double __pyx_v_touch_x;
+  double __pyx_v_touch_y;
+  double __pyx_v_self_x;
+  double __pyx_v_self_y;
+  double __pyx_v_self_height;
+  double __pyx_v_self_width;
   #if !CYTHON_METH_FASTCALL
   CYTHON_UNUSED Py_ssize_t __pyx_nargs;
   #endif
@@ -2446,7 +2616,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 1, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 17, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
@@ -2454,9 +2624,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 1, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 17, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("normalize_coordinates", 1, 6, 6, 1); __PYX_ERR(0, 1, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("normalize_coordinates", 1, 6, 6, 1); __PYX_ERR(0, 17, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -2464,9 +2634,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[2]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 1, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 17, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("normalize_coordinates", 1, 6, 6, 2); __PYX_ERR(0, 1, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("normalize_coordinates", 1, 6, 6, 2); __PYX_ERR(0, 17, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
@@ -2474,9 +2644,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[3]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 1, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 17, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("normalize_coordinates", 1, 6, 6, 3); __PYX_ERR(0, 1, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("normalize_coordinates", 1, 6, 6, 3); __PYX_ERR(0, 17, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
@@ -2484,9 +2654,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[4]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 1, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 17, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("normalize_coordinates", 1, 6, 6, 4); __PYX_ERR(0, 1, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("normalize_coordinates", 1, 6, 6, 4); __PYX_ERR(0, 17, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  5:
@@ -2494,14 +2664,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[5]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 1, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 17, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("normalize_coordinates", 1, 6, 6, 5); __PYX_ERR(0, 1, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("normalize_coordinates", 1, 6, 6, 5); __PYX_ERR(0, 17, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "normalize_coordinates") < 0)) __PYX_ERR(0, 1, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "normalize_coordinates") < 0)) __PYX_ERR(0, 17, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 6)) {
       goto __pyx_L5_argtuple_error;
@@ -2513,16 +2683,16 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       values[4] = __Pyx_Arg_FASTCALL(__pyx_args, 4);
       values[5] = __Pyx_Arg_FASTCALL(__pyx_args, 5);
     }
-    __pyx_v_touch_x = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_touch_x == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 2, __pyx_L3_error)
-    __pyx_v_touch_y = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_touch_y == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 3, __pyx_L3_error)
-    __pyx_v_self_x = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_self_x == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 4, __pyx_L3_error)
-    __pyx_v_self_y = __pyx_PyFloat_AsDouble(values[3]); if (unlikely((__pyx_v_self_y == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 5, __pyx_L3_error)
-    __pyx_v_self_height = __pyx_PyFloat_AsDouble(values[4]); if (unlikely((__pyx_v_self_height == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 6, __pyx_L3_error)
-    __pyx_v_self_width = __pyx_PyFloat_AsDouble(values[5]); if (unlikely((__pyx_v_self_width == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 7, __pyx_L3_error)
+    __pyx_v_touch_x = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_touch_x == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 17, __pyx_L3_error)
+    __pyx_v_touch_y = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_touch_y == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 17, __pyx_L3_error)
+    __pyx_v_self_x = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_self_x == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 17, __pyx_L3_error)
+    __pyx_v_self_y = __pyx_PyFloat_AsDouble(values[3]); if (unlikely((__pyx_v_self_y == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 17, __pyx_L3_error)
+    __pyx_v_self_height = __pyx_PyFloat_AsDouble(values[4]); if (unlikely((__pyx_v_self_height == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 17, __pyx_L3_error)
+    __pyx_v_self_width = __pyx_PyFloat_AsDouble(values[5]); if (unlikely((__pyx_v_self_width == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 18, __pyx_L3_error)
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("normalize_coordinates", 1, 6, 6, __pyx_nargs); __PYX_ERR(0, 1, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("normalize_coordinates", 1, 6, 6, __pyx_nargs); __PYX_ERR(0, 17, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -2549,24 +2719,131 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7mindref_3lib_3ext_3ext_normalize_coordinates(CYTHON_UNUSED PyObject *__pyx_self, CYTHON_UNUSED double __pyx_v_touch_x, CYTHON_UNUSED double __pyx_v_touch_y, CYTHON_UNUSED double __pyx_v_self_x, CYTHON_UNUSED double __pyx_v_self_y, CYTHON_UNUSED double __pyx_v_self_height, CYTHON_UNUSED double __pyx_v_self_width) {
+static PyObject *__pyx_pf_7mindref_3lib_3ext_3ext_normalize_coordinates(CYTHON_UNUSED PyObject *__pyx_self, double __pyx_v_touch_x, double __pyx_v_touch_y, double __pyx_v_self_x, double __pyx_v_self_y, double __pyx_v_self_height, double __pyx_v_self_width) {
+  __pyx_ctuple_double__and_double __pyx_v_result;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
+  __pyx_ctuple_double__and_double __pyx_t_1;
+  int __pyx_t_2;
+  int __pyx_t_3;
+  PyObject *__pyx_t_4 = NULL;
+  double __pyx_t_5;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("normalize_coordinates", 1);
 
+  /* "mindref/lib/ext/ext.pyx":19
+ * def normalize_coordinates(double touch_x, double touch_y, double self_x, double self_y, double self_height,
+ *                           double self_width):
+ *     cdef (double, double) result = (0.0, 0.0)             # <<<<<<<<<<<<<<
+ * 
+ *     if self_width <= 0.0 or self_height <= 0.0:
+ */
+  __pyx_t_1.f0 = 0.0;
+  __pyx_t_1.f1 = 0.0;
+  __pyx_v_result = __pyx_t_1;
+
+  /* "mindref/lib/ext/ext.pyx":21
+ *     cdef (double, double) result = (0.0, 0.0)
+ * 
+ *     if self_width <= 0.0 or self_height <= 0.0:             # <<<<<<<<<<<<<<
+ *         return result
+ * 
+ */
+  __pyx_t_3 = (__pyx_v_self_width <= 0.0);
+  if (!__pyx_t_3) {
+  } else {
+    __pyx_t_2 = __pyx_t_3;
+    goto __pyx_L4_bool_binop_done;
+  }
+  __pyx_t_3 = (__pyx_v_self_height <= 0.0);
+  __pyx_t_2 = __pyx_t_3;
+  __pyx_L4_bool_binop_done:;
+  if (__pyx_t_2) {
+
+    /* "mindref/lib/ext/ext.pyx":22
+ * 
+ *     if self_width <= 0.0 or self_height <= 0.0:
+ *         return result             # <<<<<<<<<<<<<<
+ * 
+ *     result[0] = CLAMP((touch_x - self_x) / self_width, 0.0, 1.0)
+ */
+    __Pyx_XDECREF(__pyx_r);
+    __pyx_t_4 = __pyx_convert__to_py___pyx_ctuple_double__and_double(__pyx_v_result); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 22, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_r = __pyx_t_4;
+    __pyx_t_4 = 0;
+    goto __pyx_L0;
+
+    /* "mindref/lib/ext/ext.pyx":21
+ *     cdef (double, double) result = (0.0, 0.0)
+ * 
+ *     if self_width <= 0.0 or self_height <= 0.0:             # <<<<<<<<<<<<<<
+ *         return result
+ * 
+ */
+  }
+
+  /* "mindref/lib/ext/ext.pyx":24
+ *         return result
+ * 
+ *     result[0] = CLAMP((touch_x - self_x) / self_width, 0.0, 1.0)             # <<<<<<<<<<<<<<
+ *     result[1] = CLAMP((1.0 - (touch_y - self_y) / self_height), 0.0, 1.0)
+ * 
+ */
+  __pyx_t_5 = __pyx_f_7mindref_3lib_3ext_3ext_CLAMP(((__pyx_v_touch_x - __pyx_v_self_x) / __pyx_v_self_width), 0.0, 1.0); if (unlikely(__pyx_t_5 == ((double)-1) && PyErr_Occurred())) __PYX_ERR(0, 24, __pyx_L1_error)
+  __pyx_v_result.f0 = __pyx_t_5;
+
+  /* "mindref/lib/ext/ext.pyx":25
+ * 
+ *     result[0] = CLAMP((touch_x - self_x) / self_width, 0.0, 1.0)
+ *     result[1] = CLAMP((1.0 - (touch_y - self_y) / self_height), 0.0, 1.0)             # <<<<<<<<<<<<<<
+ * 
+ *     return result
+ */
+  __pyx_t_5 = __pyx_f_7mindref_3lib_3ext_3ext_CLAMP((1.0 - ((__pyx_v_touch_y - __pyx_v_self_y) / __pyx_v_self_height)), 0.0, 1.0); if (unlikely(__pyx_t_5 == ((double)-1) && PyErr_Occurred())) __PYX_ERR(0, 25, __pyx_L1_error)
+  __pyx_v_result.f1 = __pyx_t_5;
+
+  /* "mindref/lib/ext/ext.pyx":27
+ *     result[1] = CLAMP((1.0 - (touch_y - self_y) / self_height), 0.0, 1.0)
+ * 
+ *     return result             # <<<<<<<<<<<<<<
+ * 
+ * def compute_ref_coords(double width, double height, double wX, double wY, double texture_width, double texture_height,
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_4 = __pyx_convert__to_py___pyx_ctuple_double__and_double(__pyx_v_result); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 27, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_r = __pyx_t_4;
+  __pyx_t_4 = 0;
+  goto __pyx_L0;
+
+  /* "mindref/lib/ext/ext.pyx":17
+ *     return (value - lower) / domain_diff
+ * 
+ * def normalize_coordinates(double touch_x, double touch_y, double self_x, double self_y, double self_height,             # <<<<<<<<<<<<<<
+ *                           double self_width):
+ *     cdef (double, double) result = (0.0, 0.0)
+ */
+
   /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_AddTraceback("mindref.lib.ext.ext.normalize_coordinates", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "mindref/lib/ext/ext.pyi":9
- *     self_width: float,
- * ) -> tuple[float, float]: ...
- * def compute_ref_coords(             # <<<<<<<<<<<<<<
- *     width: float,
- *     height: float,
+/* "mindref/lib/ext/ext.pyx":29
+ *     return result
+ * 
+ * def compute_ref_coords(double width, double height, double wX, double wY, double texture_width, double texture_height,             # <<<<<<<<<<<<<<
+ *                        double span_x1, double span_y1, double span_x2, double span_y2,
+ *                        double hl_pad_x, double hl_pad_y):
  */
 
 /* Python wrapper */
@@ -2577,7 +2854,8 @@ PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_7mindref_3lib_3ext_3ext_3compute_ref_coords = {"compute_ref_coords", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_7mindref_3lib_3ext_3ext_3compute_ref_coords, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+PyDoc_STRVAR(__pyx_doc_7mindref_3lib_3ext_3ext_2compute_ref_coords, "compute_ref_coords(double width, double height, double wX, double wY, double texture_width, double texture_height, double span_x1, double span_y1, double span_x2, double span_y2, double hl_pad_x, double hl_pad_y)\n\n    \n    \n        Since spans are computed relative to texture, we need to convert them to window coordinates\n\n        Spans (x1, y1) references the top left corner of the text, a texture. \n        So x1 = 0, y1 = 0 means the top left corner of the texture.\n        Relative to texture, the y coordinate increases as you go down.\n\n        Kivy's typical origin is (0,0) at bottom-left.\n\n        \342\224\214\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\220\n        \342\224\202                                 Parent                                \342\224\202\n        \342\224\202   \342\224\214\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200""\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\220   \342\224\202\n        \342\224\202   \342\224\202                             Label                             \342\224\202   \342\224\202\n        \342\224\202   \342\224\202                                                               \342\224\202   \342\224\202\n        \342\224\202   \342\224\202   \342\224\214\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\220  \342\224\202   \342\224\202\n        \342\224\202   \342\224\202   \342\224\202                                                        \342\224\202  \342\224\202   \342\224\202\n        \342\224\202   \342\224\202   \342\224\202                        Texture                         \342\224\202  \342\224\202   \342\224\202\n        \342\224\202   \342\224\202   \342\224\224\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200""\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\230  \342\224\202   \342\224\202\n        \342\224\202   \342\224\202                                                               \342\224\202   \342\224\202\n        \342\224\202   \342\224\224\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\230   \342\224\202\n        \342\224\202                                                                       \342\224\202\n        \342\224\202                                                                       \342\224\202\n        \342\224\224\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224""\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\200\342\224\230\n\n    Parameters\n    ----------\n    width : float\n        Widget width\n    height : float\n        Widget height\n    wX : float\n        Widget x position, in window coordinates\n    wY : float\n        Widget y position, in window coordinates\n    texture_width : float\n        Width of the rendered text texture\n    texture_height : float\n        Height of the rendered text texture\n    span_x1, span_y1 : float\n        Top-left corner of the ref bounding box, in texture coordinates\n    span_x2, span_y2 : float\n        Bottom-right corner of the ref bounding box, in texture coordinates\n    hl_pad_x : float\n        Horizontal highlight padding, extends the box beyond the text\n    hl_pad_y : float\n        Vertical highlight padding, extends the box beyond the text\n\n    Returns\n    -------\n    tuple[float, float, float, float]\n        (x1, y1, x2, y2) of the highlight box in window coordinates, y1 being the top edge\n\n    ");
+static PyMethodDef __pyx_mdef_7mindref_3lib_3ext_3ext_3compute_ref_coords = {"compute_ref_coords", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_7mindref_3lib_3ext_3ext_3compute_ref_coords, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_7mindref_3lib_3ext_3ext_2compute_ref_coords};
 static PyObject *__pyx_pw_7mindref_3lib_3ext_3ext_3compute_ref_coords(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
@@ -2585,18 +2863,18 @@ PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ) {
-  CYTHON_UNUSED double __pyx_v_width;
-  CYTHON_UNUSED double __pyx_v_height;
-  CYTHON_UNUSED double __pyx_v_wX;
-  CYTHON_UNUSED double __pyx_v_wY;
-  CYTHON_UNUSED double __pyx_v_texture_width;
-  CYTHON_UNUSED double __pyx_v_texture_height;
-  CYTHON_UNUSED double __pyx_v_span_x1;
-  CYTHON_UNUSED double __pyx_v_span_y1;
-  CYTHON_UNUSED double __pyx_v_span_x2;
-  CYTHON_UNUSED double __pyx_v_span_y2;
-  CYTHON_UNUSED double __pyx_v_hl_pad_x;
-  CYTHON_UNUSED double __pyx_v_hl_pad_y;
+  double __pyx_v_width;
+  double __pyx_v_height;
+  double __pyx_v_wX;
+  double __pyx_v_wY;
+  double __pyx_v_texture_width;
+  double __pyx_v_texture_height;
+  double __pyx_v_span_x1;
+  double __pyx_v_span_y1;
+  double __pyx_v_span_x2;
+  double __pyx_v_span_y2;
+  double __pyx_v_hl_pad_x;
+  double __pyx_v_hl_pad_y;
   #if !CYTHON_METH_FASTCALL
   CYTHON_UNUSED Py_ssize_t __pyx_nargs;
   #endif
@@ -2655,7 +2933,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 9, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 29, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
@@ -2663,9 +2941,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 9, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 29, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("compute_ref_coords", 1, 12, 12, 1); __PYX_ERR(0, 9, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("compute_ref_coords", 1, 12, 12, 1); __PYX_ERR(0, 29, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -2673,9 +2951,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[2]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 9, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 29, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("compute_ref_coords", 1, 12, 12, 2); __PYX_ERR(0, 9, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("compute_ref_coords", 1, 12, 12, 2); __PYX_ERR(0, 29, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
@@ -2683,9 +2961,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[3]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 9, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 29, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("compute_ref_coords", 1, 12, 12, 3); __PYX_ERR(0, 9, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("compute_ref_coords", 1, 12, 12, 3); __PYX_ERR(0, 29, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
@@ -2693,9 +2971,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[4]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 9, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 29, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("compute_ref_coords", 1, 12, 12, 4); __PYX_ERR(0, 9, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("compute_ref_coords", 1, 12, 12, 4); __PYX_ERR(0, 29, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  5:
@@ -2703,9 +2981,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[5]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 9, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 29, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("compute_ref_coords", 1, 12, 12, 5); __PYX_ERR(0, 9, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("compute_ref_coords", 1, 12, 12, 5); __PYX_ERR(0, 29, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  6:
@@ -2713,9 +2991,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[6]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 9, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 29, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("compute_ref_coords", 1, 12, 12, 6); __PYX_ERR(0, 9, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("compute_ref_coords", 1, 12, 12, 6); __PYX_ERR(0, 29, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  7:
@@ -2723,9 +3001,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[7]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 9, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 29, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("compute_ref_coords", 1, 12, 12, 7); __PYX_ERR(0, 9, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("compute_ref_coords", 1, 12, 12, 7); __PYX_ERR(0, 29, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  8:
@@ -2733,9 +3011,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[8]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 9, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 29, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("compute_ref_coords", 1, 12, 12, 8); __PYX_ERR(0, 9, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("compute_ref_coords", 1, 12, 12, 8); __PYX_ERR(0, 29, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  9:
@@ -2743,9 +3021,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[9]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 9, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 29, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("compute_ref_coords", 1, 12, 12, 9); __PYX_ERR(0, 9, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("compute_ref_coords", 1, 12, 12, 9); __PYX_ERR(0, 29, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case 10:
@@ -2753,9 +3031,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[10]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 9, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 29, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("compute_ref_coords", 1, 12, 12, 10); __PYX_ERR(0, 9, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("compute_ref_coords", 1, 12, 12, 10); __PYX_ERR(0, 29, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case 11:
@@ -2763,14 +3041,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[11]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 9, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 29, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("compute_ref_coords", 1, 12, 12, 11); __PYX_ERR(0, 9, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("compute_ref_coords", 1, 12, 12, 11); __PYX_ERR(0, 29, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "compute_ref_coords") < 0)) __PYX_ERR(0, 9, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "compute_ref_coords") < 0)) __PYX_ERR(0, 29, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 12)) {
       goto __pyx_L5_argtuple_error;
@@ -2788,22 +3066,22 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       values[10] = __Pyx_Arg_FASTCALL(__pyx_args, 10);
       values[11] = __Pyx_Arg_FASTCALL(__pyx_args, 11);
     }
-    __pyx_v_width = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_width == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 10, __pyx_L3_error)
-    __pyx_v_height = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_height == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 11, __pyx_L3_error)
-    __pyx_v_wX = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_wX == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 12, __pyx_L3_error)
-    __pyx_v_wY = __pyx_PyFloat_AsDouble(values[3]); if (unlikely((__pyx_v_wY == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 13, __pyx_L3_error)
-    __pyx_v_texture_width = __pyx_PyFloat_AsDouble(values[4]); if (unlikely((__pyx_v_texture_width == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 14, __pyx_L3_error)
-    __pyx_v_texture_height = __pyx_PyFloat_AsDouble(values[5]); if (unlikely((__pyx_v_texture_height == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 15, __pyx_L3_error)
-    __pyx_v_span_x1 = __pyx_PyFloat_AsDouble(values[6]); if (unlikely((__pyx_v_span_x1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 16, __pyx_L3_error)
-    __pyx_v_span_y1 = __pyx_PyFloat_AsDouble(values[7]); if (unlikely((__pyx_v_span_y1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 17, __pyx_L3_error)
-    __pyx_v_span_x2 = __pyx_PyFloat_AsDouble(values[8]); if (unlikely((__pyx_v_span_x2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 18, __pyx_L3_error)
-    __pyx_v_span_y2 = __pyx_PyFloat_AsDouble(values[9]); if (unlikely((__pyx_v_span_y2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 19, __pyx_L3_error)
-    __pyx_v_hl_pad_x = __pyx_PyFloat_AsDouble(values[10]); if (unlikely((__pyx_v_hl_pad_x == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 20, __pyx_L3_error)
-    __pyx_v_hl_pad_y = __pyx_PyFloat_AsDouble(values[11]); if (unlikely((__pyx_v_hl_pad_y == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 21, __pyx_L3_error)
+    __pyx_v_width = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_width == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 29, __pyx_L3_error)
+    __pyx_v_height = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_height == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 29, __pyx_L3_error)
+    __pyx_v_wX = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_wX == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 29, __pyx_L3_error)
+    __pyx_v_wY = __pyx_PyFloat_AsDouble(values[3]); if (unlikely((__pyx_v_wY == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 29, __pyx_L3_error)
+    __pyx_v_texture_width = __pyx_PyFloat_AsDouble(values[4]); if (unlikely((__pyx_v_texture_width == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 29, __pyx_L3_error)
+    __pyx_v_texture_height = __pyx_PyFloat_AsDouble(values[5]); if (unlikely((__pyx_v_texture_height == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 29, __pyx_L3_error)
+    __pyx_v_span_x1 = __pyx_PyFloat_AsDouble(values[6]); if (unlikely((__pyx_v_span_x1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 30, __pyx_L3_error)
+    __pyx_v_span_y1 = __pyx_PyFloat_AsDouble(values[7]); if (unlikely((__pyx_v_span_y1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 30, __pyx_L3_error)
+    __pyx_v_span_x2 = __pyx_PyFloat_AsDouble(values[8]); if (unlikely((__pyx_v_span_x2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 30, __pyx_L3_error)
+    __pyx_v_span_y2 = __pyx_PyFloat_AsDouble(values[9]); if (unlikely((__pyx_v_span_y2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 30, __pyx_L3_error)
+    __pyx_v_hl_pad_x = __pyx_PyFloat_AsDouble(values[10]); if (unlikely((__pyx_v_hl_pad_x == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 31, __pyx_L3_error)
+    __pyx_v_hl_pad_y = __pyx_PyFloat_AsDouble(values[11]); if (unlikely((__pyx_v_hl_pad_y == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 31, __pyx_L3_error)
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("compute_ref_coords", 1, 12, 12, __pyx_nargs); __PYX_ERR(0, 9, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("compute_ref_coords", 1, 12, 12, __pyx_nargs); __PYX_ERR(0, 29, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -2830,24 +3108,314 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7mindref_3lib_3ext_3ext_2compute_ref_coords(CYTHON_UNUSED PyObject *__pyx_self, CYTHON_UNUSED double __pyx_v_width, CYTHON_UNUSED double __pyx_v_height, CYTHON_UNUSED double __pyx_v_wX, CYTHON_UNUSED double __pyx_v_wY, CYTHON_UNUSED double __pyx_v_texture_width, CYTHON_UNUSED double __pyx_v_texture_height, CYTHON_UNUSED double __pyx_v_span_x1, CYTHON_UNUSED double __pyx_v_span_y1, CYTHON_UNUSED double __pyx_v_span_x2, CYTHON_UNUSED double __pyx_v_span_y2, CYTHON_UNUSED double __pyx_v_hl_pad_x, CYTHON_UNUSED double __pyx_v_hl_pad_y) {
+static PyObject *__pyx_pf_7mindref_3lib_3ext_3ext_2compute_ref_coords(CYTHON_UNUSED PyObject *__pyx_self, double __pyx_v_width, double __pyx_v_height, double __pyx_v_wX, double __pyx_v_wY, double __pyx_v_texture_width, double __pyx_v_texture_height, double __pyx_v_span_x1, double __pyx_v_span_y1, double __pyx_v_span_x2, double __pyx_v_span_y2, double __pyx_v_hl_pad_x, double __pyx_v_hl_pad_y) {
+  double __pyx_v_offsetX;
+  double __pyx_v_offsetY;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  PyObject *__pyx_t_4 = NULL;
+  PyObject *__pyx_t_5 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("compute_ref_coords", 1);
 
+  /* "mindref/lib/ext/ext.pyx":92
+ *     # For X coordinate, we only need to consider the offset. The distance between the left edge of the widget and the text.
+ * 
+ *     cdef double offsetX = (width - texture_width) / 2.0             # <<<<<<<<<<<<<<
+ *     span_x1 += offsetX
+ *     span_x2 += offsetX
+ */
+  __pyx_v_offsetX = ((__pyx_v_width - __pyx_v_texture_width) / 2.0);
+
+  /* "mindref/lib/ext/ext.pyx":93
+ * 
+ *     cdef double offsetX = (width - texture_width) / 2.0
+ *     span_x1 += offsetX             # <<<<<<<<<<<<<<
+ *     span_x2 += offsetX
+ * 
+ */
+  __pyx_v_span_x1 = (__pyx_v_span_x1 + __pyx_v_offsetX);
+
+  /* "mindref/lib/ext/ext.pyx":94
+ *     cdef double offsetX = (width - texture_width) / 2.0
+ *     span_x1 += offsetX
+ *     span_x2 += offsetX             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  __pyx_v_span_x2 = (__pyx_v_span_x2 + __pyx_v_offsetX);
+
+  /* "mindref/lib/ext/ext.pyx":102
+ *     # places the texture edge, and subtracting from height flips the axis.
+ * 
+ *     cdef double offsetY = (height - texture_height) / 2.0             # <<<<<<<<<<<<<<
+ *     # After this flip, span_y1 is the top edge and span_y2 the bottom edge, y-up.
+ *     span_y1 = height - span_y1 - offsetY
+ */
+  __pyx_v_offsetY = ((__pyx_v_height - __pyx_v_texture_height) / 2.0);
+
+  /* "mindref/lib/ext/ext.pyx":104
+ *     cdef double offsetY = (height - texture_height) / 2.0
+ *     # After this flip, span_y1 is the top edge and span_y2 the bottom edge, y-up.
+ *     span_y1 = height - span_y1 - offsetY             # <<<<<<<<<<<<<<
+ *     span_y2 = height - span_y2 - offsetY
+ * 
+ */
+  __pyx_v_span_y1 = ((__pyx_v_height - __pyx_v_span_y1) - __pyx_v_offsetY);
+
+  /* "mindref/lib/ext/ext.pyx":105
+ *     # After this flip, span_y1 is the top edge and span_y2 the bottom edge, y-up.
+ *     span_y1 = height - span_y1 - offsetY
+ *     span_y2 = height - span_y2 - offsetY             # <<<<<<<<<<<<<<
+ * 
+ *     # Highlight Padding
+ */
+  __pyx_v_span_y2 = ((__pyx_v_height - __pyx_v_span_y2) - __pyx_v_offsetY);
+
+  /* "mindref/lib/ext/ext.pyx":112
+ *     # y (y-up now): add to y1 (top edge), subtract from y2 (bottom edge).
+ * 
+ *     span_x1 -= hl_pad_x             # <<<<<<<<<<<<<<
+ *     span_x2 += hl_pad_x
+ *     span_y1 += hl_pad_y
+ */
+  __pyx_v_span_x1 = (__pyx_v_span_x1 - __pyx_v_hl_pad_x);
+
+  /* "mindref/lib/ext/ext.pyx":113
+ * 
+ *     span_x1 -= hl_pad_x
+ *     span_x2 += hl_pad_x             # <<<<<<<<<<<<<<
+ *     span_y1 += hl_pad_y
+ *     span_y2 -= hl_pad_y
+ */
+  __pyx_v_span_x2 = (__pyx_v_span_x2 + __pyx_v_hl_pad_x);
+
+  /* "mindref/lib/ext/ext.pyx":114
+ *     span_x1 -= hl_pad_x
+ *     span_x2 += hl_pad_x
+ *     span_y1 += hl_pad_y             # <<<<<<<<<<<<<<
+ *     span_y2 -= hl_pad_y
+ * 
+ */
+  __pyx_v_span_y1 = (__pyx_v_span_y1 + __pyx_v_hl_pad_y);
+
+  /* "mindref/lib/ext/ext.pyx":115
+ *     span_x2 += hl_pad_x
+ *     span_y1 += hl_pad_y
+ *     span_y2 -= hl_pad_y             # <<<<<<<<<<<<<<
+ * 
+ *     # Convert to window coordinates using the widget's position.
+ */
+  __pyx_v_span_y2 = (__pyx_v_span_y2 - __pyx_v_hl_pad_y);
+
+  /* "mindref/lib/ext/ext.pyx":118
+ * 
+ *     # Convert to window coordinates using the widget's position.
+ *     span_x1 += wX             # <<<<<<<<<<<<<<
+ *     span_x2 += wX
+ *     span_y1 += wY
+ */
+  __pyx_v_span_x1 = (__pyx_v_span_x1 + __pyx_v_wX);
+
+  /* "mindref/lib/ext/ext.pyx":119
+ *     # Convert to window coordinates using the widget's position.
+ *     span_x1 += wX
+ *     span_x2 += wX             # <<<<<<<<<<<<<<
+ *     span_y1 += wY
+ *     span_y2 += wY
+ */
+  __pyx_v_span_x2 = (__pyx_v_span_x2 + __pyx_v_wX);
+
+  /* "mindref/lib/ext/ext.pyx":120
+ *     span_x1 += wX
+ *     span_x2 += wX
+ *     span_y1 += wY             # <<<<<<<<<<<<<<
+ *     span_y2 += wY
+ * 
+ */
+  __pyx_v_span_y1 = (__pyx_v_span_y1 + __pyx_v_wY);
+
+  /* "mindref/lib/ext/ext.pyx":121
+ *     span_x2 += wX
+ *     span_y1 += wY
+ *     span_y2 += wY             # <<<<<<<<<<<<<<
+ * 
+ *     return span_x1, span_y1, span_x2, span_y2
+ */
+  __pyx_v_span_y2 = (__pyx_v_span_y2 + __pyx_v_wY);
+
+  /* "mindref/lib/ext/ext.pyx":123
+ *     span_y2 += wY
+ * 
+ *     return span_x1, span_y1, span_x2, span_y2             # <<<<<<<<<<<<<<
+ * 
+ * cdef inline double srgb_channel_to_linear(double c):
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_span_x1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 123, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_span_y1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 123, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_span_x2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 123, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_span_y2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 123, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_5 = PyTuple_New(4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 123, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_5);
+  __Pyx_GIVEREF(__pyx_t_1);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_1)) __PYX_ERR(0, 123, __pyx_L1_error);
+  __Pyx_GIVEREF(__pyx_t_2);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_t_2)) __PYX_ERR(0, 123, __pyx_L1_error);
+  __Pyx_GIVEREF(__pyx_t_3);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_5, 2, __pyx_t_3)) __PYX_ERR(0, 123, __pyx_L1_error);
+  __Pyx_GIVEREF(__pyx_t_4);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_5, 3, __pyx_t_4)) __PYX_ERR(0, 123, __pyx_L1_error);
+  __pyx_t_1 = 0;
+  __pyx_t_2 = 0;
+  __pyx_t_3 = 0;
+  __pyx_t_4 = 0;
+  __pyx_r = __pyx_t_5;
+  __pyx_t_5 = 0;
+  goto __pyx_L0;
+
+  /* "mindref/lib/ext/ext.pyx":29
+ *     return result
+ * 
+ * def compute_ref_coords(double width, double height, double wX, double wY, double texture_width, double texture_height,             # <<<<<<<<<<<<<<
+ *                        double span_x1, double span_y1, double span_x2, double span_y2,
+ *                        double hl_pad_x, double hl_pad_y):
+ */
+
   /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_XDECREF(__pyx_t_5);
+  __Pyx_AddTraceback("mindref.lib.ext.ext.compute_ref_coords", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "mindref/lib/ext/ext.pyi":23
- *     hl_pad_y: float,
- * ) -> tuple[float, float, float, float]: ...
- * def compute_text_contrast(             # <<<<<<<<<<<<<<
- *     background_color: tuple[float, float, float, float],
- *     highlight_color: tuple[float, float, float, float] | None = None,
+/* "mindref/lib/ext/ext.pyx":125
+ *     return span_x1, span_y1, span_x2, span_y2
+ * 
+ * cdef inline double srgb_channel_to_linear(double c):             # <<<<<<<<<<<<<<
+ *     return c / 12.92 if c <= 0.04045 else pow((c + 0.055) / 1.055, 2.4)
+ * 
+ */
+
+static CYTHON_INLINE double __pyx_f_7mindref_3lib_3ext_3ext_srgb_channel_to_linear(double __pyx_v_c) {
+  double __pyx_r;
+  double __pyx_t_1;
+  int __pyx_t_2;
+
+  /* "mindref/lib/ext/ext.pyx":126
+ * 
+ * cdef inline double srgb_channel_to_linear(double c):
+ *     return c / 12.92 if c <= 0.04045 else pow((c + 0.055) / 1.055, 2.4)             # <<<<<<<<<<<<<<
+ * 
+ * cdef double relative_luminance(double r, double g, double b):
+ */
+  __pyx_t_2 = (__pyx_v_c <= 0.04045);
+  if (__pyx_t_2) {
+    __pyx_t_1 = (__pyx_v_c / 12.92);
+  } else {
+    __pyx_t_1 = pow(((__pyx_v_c + 0.055) / 1.055), 2.4);
+  }
+  __pyx_r = __pyx_t_1;
+  goto __pyx_L0;
+
+  /* "mindref/lib/ext/ext.pyx":125
+ *     return span_x1, span_y1, span_x2, span_y2
+ * 
+ * cdef inline double srgb_channel_to_linear(double c):             # <<<<<<<<<<<<<<
+ *     return c / 12.92 if c <= 0.04045 else pow((c + 0.055) / 1.055, 2.4)
+ * 
+ */
+
+  /* function exit code */
+  __pyx_L0:;
+  return __pyx_r;
+}
+
+/* "mindref/lib/ext/ext.pyx":128
+ *     return c / 12.92 if c <= 0.04045 else pow((c + 0.055) / 1.055, 2.4)
+ * 
+ * cdef double relative_luminance(double r, double g, double b):             # <<<<<<<<<<<<<<
+ *     """WCAG relative luminance of an sRGB color, 0.0 (black) to 1.0 (white)"""
+ *     return (0.2126 * srgb_channel_to_linear(r)
+ */
+
+static double __pyx_f_7mindref_3lib_3ext_3ext_relative_luminance(double __pyx_v_r, double __pyx_v_g, double __pyx_v_b) {
+  double __pyx_r;
+  double __pyx_t_1;
+  double __pyx_t_2;
+  double __pyx_t_3;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+
+  /* "mindref/lib/ext/ext.pyx":130
+ * cdef double relative_luminance(double r, double g, double b):
+ *     """WCAG relative luminance of an sRGB color, 0.0 (black) to 1.0 (white)"""
+ *     return (0.2126 * srgb_channel_to_linear(r)             # <<<<<<<<<<<<<<
+ *             + 0.7152 * srgb_channel_to_linear(g)
+ *             + 0.0722 * srgb_channel_to_linear(b))
+ */
+  __pyx_t_1 = __pyx_f_7mindref_3lib_3ext_3ext_srgb_channel_to_linear(__pyx_v_r); if (unlikely(__pyx_t_1 == ((double)-1) && PyErr_Occurred())) __PYX_ERR(0, 130, __pyx_L1_error)
+
+  /* "mindref/lib/ext/ext.pyx":131
+ *     """WCAG relative luminance of an sRGB color, 0.0 (black) to 1.0 (white)"""
+ *     return (0.2126 * srgb_channel_to_linear(r)
+ *             + 0.7152 * srgb_channel_to_linear(g)             # <<<<<<<<<<<<<<
+ *             + 0.0722 * srgb_channel_to_linear(b))
+ * 
+ */
+  __pyx_t_2 = __pyx_f_7mindref_3lib_3ext_3ext_srgb_channel_to_linear(__pyx_v_g); if (unlikely(__pyx_t_2 == ((double)-1) && PyErr_Occurred())) __PYX_ERR(0, 131, __pyx_L1_error)
+
+  /* "mindref/lib/ext/ext.pyx":132
+ *     return (0.2126 * srgb_channel_to_linear(r)
+ *             + 0.7152 * srgb_channel_to_linear(g)
+ *             + 0.0722 * srgb_channel_to_linear(b))             # <<<<<<<<<<<<<<
+ * 
+ * def compute_text_contrast(tuple background_color, tuple highlight_color = None):
+ */
+  __pyx_t_3 = __pyx_f_7mindref_3lib_3ext_3ext_srgb_channel_to_linear(__pyx_v_b); if (unlikely(__pyx_t_3 == ((double)-1) && PyErr_Occurred())) __PYX_ERR(0, 132, __pyx_L1_error)
+  __pyx_r = (((0.2126 * __pyx_t_1) + (0.7152 * __pyx_t_2)) + (0.0722 * __pyx_t_3));
+  goto __pyx_L0;
+
+  /* "mindref/lib/ext/ext.pyx":128
+ *     return c / 12.92 if c <= 0.04045 else pow((c + 0.055) / 1.055, 2.4)
+ * 
+ * cdef double relative_luminance(double r, double g, double b):             # <<<<<<<<<<<<<<
+ *     """WCAG relative luminance of an sRGB color, 0.0 (black) to 1.0 (white)"""
+ *     return (0.2126 * srgb_channel_to_linear(r)
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_AddTraceback("mindref.lib.ext.ext.relative_luminance", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = -1;
+  __pyx_L0:;
+  return __pyx_r;
+}
+
+/* "mindref/lib/ext/ext.pyx":134
+ *             + 0.0722 * srgb_channel_to_linear(b))
+ * 
+ * def compute_text_contrast(tuple background_color, tuple highlight_color = None):             # <<<<<<<<<<<<<<
+ *     """
+ *     Pick black or white text for a background.
  */
 
 /* Python wrapper */
@@ -2858,7 +3426,8 @@ PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_7mindref_3lib_3ext_3ext_5compute_text_contrast = {"compute_text_contrast", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_7mindref_3lib_3ext_3ext_5compute_text_contrast, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+PyDoc_STRVAR(__pyx_doc_7mindref_3lib_3ext_3ext_4compute_text_contrast, "compute_text_contrast(tuple background_color, tuple highlight_color=None)\n\n    Pick black or white text for a background.\n\n    White text when the background's WCAG relative luminance is at most 0.179,\n    the point where black and white text have equal contrast ratio\n    (sqrt(1.05 * 0.05) - 0.05).\n\n    Parameters\n    ----------\n    background_color : tuple[float, float, float, float]\n        Background color of the widget, treated as opaque\n    highlight_color : tuple[float, float, float, float], optional\n        Highlight drawn over the background, composited using its alpha\n\n    Returns\n    -------\n    str\n        '#000000' or '#ffffff'\n    ");
+static PyMethodDef __pyx_mdef_7mindref_3lib_3ext_3ext_5compute_text_contrast = {"compute_text_contrast", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_7mindref_3lib_3ext_3ext_5compute_text_contrast, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_7mindref_3lib_3ext_3ext_4compute_text_contrast};
 static PyObject *__pyx_pw_7mindref_3lib_3ext_3ext_5compute_text_contrast(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
@@ -2866,8 +3435,8 @@ PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ) {
-  CYTHON_UNUSED __pyx_ctuple_double__and_double__and_double__and_double __pyx_v_background_color;
-  CYTHON_UNUSED PyObject *__pyx_v_highlight_color = 0;
+  PyObject *__pyx_v_background_color = 0;
+  PyObject *__pyx_v_highlight_color = 0;
   #if !CYTHON_METH_FASTCALL
   CYTHON_UNUSED Py_ssize_t __pyx_nargs;
   #endif
@@ -2889,15 +3458,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   __pyx_kwvalues = __Pyx_KwValues_FASTCALL(__pyx_args, __pyx_nargs);
   {
     PyObject **__pyx_pyargnames[] = {&__pyx_n_s_background_color,&__pyx_n_s_highlight_color,0};
-
-    /* "mindref/lib/ext/ext.pyi":25
- * def compute_text_contrast(
- *     background_color: tuple[float, float, float, float],
- *     highlight_color: tuple[float, float, float, float] | None = None,             # <<<<<<<<<<<<<<
- * ) -> str: ...
- * def compute_overscroll(
- */
-    values[1] = __Pyx_Arg_NewRef_FASTCALL(((PyObject *)Py_None));
+    values[1] = __Pyx_Arg_NewRef_FASTCALL(((PyObject*)Py_None));
     if (__pyx_kwds) {
       Py_ssize_t kw_args;
       switch (__pyx_nargs) {
@@ -2915,19 +3476,19 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 23, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 134, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
         if (kw_args > 0) {
           PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_highlight_color);
           if (value) { values[1] = __Pyx_Arg_NewRef_FASTCALL(value); kw_args--; }
-          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 23, __pyx_L3_error)
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 134, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "compute_text_contrast") < 0)) __PYX_ERR(0, 23, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "compute_text_contrast") < 0)) __PYX_ERR(0, 134, __pyx_L3_error)
       }
     } else {
       switch (__pyx_nargs) {
@@ -2938,12 +3499,12 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         default: goto __pyx_L5_argtuple_error;
       }
     }
-    __pyx_v_background_color = __pyx_convert__from_py___pyx_ctuple_double__and_double__and_double__and_double(values[0]); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 24, __pyx_L3_error)
-    __pyx_v_highlight_color = values[1];
+    __pyx_v_background_color = ((PyObject*)values[0]);
+    __pyx_v_highlight_color = ((PyObject*)values[1]);
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("compute_text_contrast", 0, 1, 2, __pyx_nargs); __PYX_ERR(0, 23, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("compute_text_contrast", 0, 1, 2, __pyx_nargs); __PYX_ERR(0, 134, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -2957,17 +3518,15 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_background_color), (&PyTuple_Type), 1, "background_color", 1))) __PYX_ERR(0, 134, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_highlight_color), (&PyTuple_Type), 1, "highlight_color", 1))) __PYX_ERR(0, 134, __pyx_L1_error)
   __pyx_r = __pyx_pf_7mindref_3lib_3ext_3ext_4compute_text_contrast(__pyx_self, __pyx_v_background_color, __pyx_v_highlight_color);
 
-  /* "mindref/lib/ext/ext.pyi":23
- *     hl_pad_y: float,
- * ) -> tuple[float, float, float, float]: ...
- * def compute_text_contrast(             # <<<<<<<<<<<<<<
- *     background_color: tuple[float, float, float, float],
- *     highlight_color: tuple[float, float, float, float] | None = None,
- */
-
   /* function exit code */
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __pyx_r = NULL;
+  __pyx_L0:;
   {
     Py_ssize_t __pyx_temp;
     for (__pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
@@ -2978,24 +3537,268 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7mindref_3lib_3ext_3ext_4compute_text_contrast(CYTHON_UNUSED PyObject *__pyx_self, CYTHON_UNUSED __pyx_ctuple_double__and_double__and_double__and_double __pyx_v_background_color, CYTHON_UNUSED PyObject *__pyx_v_highlight_color) {
+static PyObject *__pyx_pf_7mindref_3lib_3ext_3ext_4compute_text_contrast(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_background_color, PyObject *__pyx_v_highlight_color) {
+  double __pyx_v_r;
+  double __pyx_v_g;
+  double __pyx_v_b;
+  double __pyx_v_hl_a;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  double __pyx_t_2;
+  int __pyx_t_3;
+  PyObject *__pyx_t_4 = NULL;
+  PyObject *__pyx_t_5 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("compute_text_contrast", 1);
 
+  /* "mindref/lib/ext/ext.pyx":154
+ *         '#000000' or '#ffffff'
+ *     """
+ *     cdef double r = background_color[0]             # <<<<<<<<<<<<<<
+ *     cdef double g = background_color[1]
+ *     cdef double b = background_color[2]
+ */
+  if (unlikely(__pyx_v_background_color == Py_None)) {
+    PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
+    __PYX_ERR(0, 154, __pyx_L1_error)
+  }
+  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v_background_color, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 154, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 154, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_v_r = __pyx_t_2;
+
+  /* "mindref/lib/ext/ext.pyx":155
+ *     """
+ *     cdef double r = background_color[0]
+ *     cdef double g = background_color[1]             # <<<<<<<<<<<<<<
+ *     cdef double b = background_color[2]
+ *     cdef double hl_a
+ */
+  if (unlikely(__pyx_v_background_color == Py_None)) {
+    PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
+    __PYX_ERR(0, 155, __pyx_L1_error)
+  }
+  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v_background_color, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 155, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 155, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_v_g = __pyx_t_2;
+
+  /* "mindref/lib/ext/ext.pyx":156
+ *     cdef double r = background_color[0]
+ *     cdef double g = background_color[1]
+ *     cdef double b = background_color[2]             # <<<<<<<<<<<<<<
+ *     cdef double hl_a
+ * 
+ */
+  if (unlikely(__pyx_v_background_color == Py_None)) {
+    PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
+    __PYX_ERR(0, 156, __pyx_L1_error)
+  }
+  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v_background_color, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 156, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 156, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_v_b = __pyx_t_2;
+
+  /* "mindref/lib/ext/ext.pyx":159
+ *     cdef double hl_a
+ * 
+ *     if highlight_color is not None:             # <<<<<<<<<<<<<<
+ *         # Composite in gamma space, matching how the renderer blends the highlight
+ *         hl_a = highlight_color[3]
+ */
+  __pyx_t_3 = (__pyx_v_highlight_color != ((PyObject*)Py_None));
+  if (__pyx_t_3) {
+
+    /* "mindref/lib/ext/ext.pyx":161
+ *     if highlight_color is not None:
+ *         # Composite in gamma space, matching how the renderer blends the highlight
+ *         hl_a = highlight_color[3]             # <<<<<<<<<<<<<<
+ *         r = highlight_color[0] * hl_a + r * (1.0 - hl_a)
+ *         g = highlight_color[1] * hl_a + g * (1.0 - hl_a)
+ */
+    if (unlikely(__pyx_v_highlight_color == Py_None)) {
+      PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
+      __PYX_ERR(0, 161, __pyx_L1_error)
+    }
+    __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v_highlight_color, 3, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 161, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_t_2 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 161, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __pyx_v_hl_a = __pyx_t_2;
+
+    /* "mindref/lib/ext/ext.pyx":162
+ *         # Composite in gamma space, matching how the renderer blends the highlight
+ *         hl_a = highlight_color[3]
+ *         r = highlight_color[0] * hl_a + r * (1.0 - hl_a)             # <<<<<<<<<<<<<<
+ *         g = highlight_color[1] * hl_a + g * (1.0 - hl_a)
+ *         b = highlight_color[2] * hl_a + b * (1.0 - hl_a)
+ */
+    if (unlikely(__pyx_v_highlight_color == Py_None)) {
+      PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
+      __PYX_ERR(0, 162, __pyx_L1_error)
+    }
+    __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v_highlight_color, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 162, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_t_4 = PyFloat_FromDouble(__pyx_v_hl_a); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 162, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_t_5 = PyNumber_Multiply(__pyx_t_1, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 162, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __pyx_t_4 = PyFloat_FromDouble((__pyx_v_r * (1.0 - __pyx_v_hl_a))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 162, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_t_1 = PyNumber_Add(__pyx_t_5, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 162, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __pyx_t_2 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 162, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __pyx_v_r = __pyx_t_2;
+
+    /* "mindref/lib/ext/ext.pyx":163
+ *         hl_a = highlight_color[3]
+ *         r = highlight_color[0] * hl_a + r * (1.0 - hl_a)
+ *         g = highlight_color[1] * hl_a + g * (1.0 - hl_a)             # <<<<<<<<<<<<<<
+ *         b = highlight_color[2] * hl_a + b * (1.0 - hl_a)
+ * 
+ */
+    if (unlikely(__pyx_v_highlight_color == Py_None)) {
+      PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
+      __PYX_ERR(0, 163, __pyx_L1_error)
+    }
+    __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v_highlight_color, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 163, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_t_4 = PyFloat_FromDouble(__pyx_v_hl_a); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 163, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_t_5 = PyNumber_Multiply(__pyx_t_1, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 163, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __pyx_t_4 = PyFloat_FromDouble((__pyx_v_g * (1.0 - __pyx_v_hl_a))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 163, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_t_1 = PyNumber_Add(__pyx_t_5, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 163, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __pyx_t_2 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 163, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __pyx_v_g = __pyx_t_2;
+
+    /* "mindref/lib/ext/ext.pyx":164
+ *         r = highlight_color[0] * hl_a + r * (1.0 - hl_a)
+ *         g = highlight_color[1] * hl_a + g * (1.0 - hl_a)
+ *         b = highlight_color[2] * hl_a + b * (1.0 - hl_a)             # <<<<<<<<<<<<<<
+ * 
+ *     if relative_luminance(r, g, b) > 0.179:
+ */
+    if (unlikely(__pyx_v_highlight_color == Py_None)) {
+      PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
+      __PYX_ERR(0, 164, __pyx_L1_error)
+    }
+    __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v_highlight_color, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 164, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_t_4 = PyFloat_FromDouble(__pyx_v_hl_a); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 164, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_t_5 = PyNumber_Multiply(__pyx_t_1, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 164, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __pyx_t_4 = PyFloat_FromDouble((__pyx_v_b * (1.0 - __pyx_v_hl_a))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 164, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_t_1 = PyNumber_Add(__pyx_t_5, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 164, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __pyx_t_2 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 164, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __pyx_v_b = __pyx_t_2;
+
+    /* "mindref/lib/ext/ext.pyx":159
+ *     cdef double hl_a
+ * 
+ *     if highlight_color is not None:             # <<<<<<<<<<<<<<
+ *         # Composite in gamma space, matching how the renderer blends the highlight
+ *         hl_a = highlight_color[3]
+ */
+  }
+
+  /* "mindref/lib/ext/ext.pyx":166
+ *         b = highlight_color[2] * hl_a + b * (1.0 - hl_a)
+ * 
+ *     if relative_luminance(r, g, b) > 0.179:             # <<<<<<<<<<<<<<
+ *         return '#000000'
+ *     return '#ffffff'
+ */
+  __pyx_t_2 = __pyx_f_7mindref_3lib_3ext_3ext_relative_luminance(__pyx_v_r, __pyx_v_g, __pyx_v_b); if (unlikely(__pyx_t_2 == ((double)-1) && PyErr_Occurred())) __PYX_ERR(0, 166, __pyx_L1_error)
+  __pyx_t_3 = (__pyx_t_2 > 0.179);
+  if (__pyx_t_3) {
+
+    /* "mindref/lib/ext/ext.pyx":167
+ * 
+ *     if relative_luminance(r, g, b) > 0.179:
+ *         return '#000000'             # <<<<<<<<<<<<<<
+ *     return '#ffffff'
+ * 
+ */
+    __Pyx_XDECREF(__pyx_r);
+    __Pyx_INCREF(__pyx_kp_u_000000);
+    __pyx_r = __pyx_kp_u_000000;
+    goto __pyx_L0;
+
+    /* "mindref/lib/ext/ext.pyx":166
+ *         b = highlight_color[2] * hl_a + b * (1.0 - hl_a)
+ * 
+ *     if relative_luminance(r, g, b) > 0.179:             # <<<<<<<<<<<<<<
+ *         return '#000000'
+ *     return '#ffffff'
+ */
+  }
+
+  /* "mindref/lib/ext/ext.pyx":168
+ *     if relative_luminance(r, g, b) > 0.179:
+ *         return '#000000'
+ *     return '#ffffff'             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __Pyx_INCREF(__pyx_kp_u_ffffff);
+  __pyx_r = __pyx_kp_u_ffffff;
+  goto __pyx_L0;
+
+  /* "mindref/lib/ext/ext.pyx":134
+ *             + 0.0722 * srgb_channel_to_linear(b))
+ * 
+ * def compute_text_contrast(tuple background_color, tuple highlight_color = None):             # <<<<<<<<<<<<<<
+ *     """
+ *     Pick black or white text for a background.
+ */
+
   /* function exit code */
-  __pyx_r = ((PyObject*)Py_None); __Pyx_INCREF(Py_None);
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_XDECREF(__pyx_t_5);
+  __Pyx_AddTraceback("mindref.lib.ext.ext.compute_text_contrast", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "mindref/lib/ext/ext.pyi":27
- *     highlight_color: tuple[float, float, float, float] | None = None,
- * ) -> str: ...
- * def compute_overscroll(             # <<<<<<<<<<<<<<
- *     overscroll: float,
- *     target_height: float,
+/* "mindref/lib/ext/ext.pyx":171
+ * 
+ * 
+ * def compute_overscroll(double overscroll, double target_height, double overscroll_threshold):             # <<<<<<<<<<<<<<
+ *     """
+ *     Given our thresholds and target height, normalize the overscroll to a value between 0.0 and 1.0.
  */
 
 /* Python wrapper */
@@ -3006,7 +3809,8 @@ PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_7mindref_3lib_3ext_3ext_7compute_overscroll = {"compute_overscroll", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_7mindref_3lib_3ext_3ext_7compute_overscroll, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+PyDoc_STRVAR(__pyx_doc_7mindref_3lib_3ext_3ext_6compute_overscroll, "compute_overscroll(double overscroll, double target_height, double overscroll_threshold)\n\n    Given our thresholds and target height, normalize the overscroll to a value between 0.0 and 1.0.\n    ");
+static PyMethodDef __pyx_mdef_7mindref_3lib_3ext_3ext_7compute_overscroll = {"compute_overscroll", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_7mindref_3lib_3ext_3ext_7compute_overscroll, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_7mindref_3lib_3ext_3ext_6compute_overscroll};
 static PyObject *__pyx_pw_7mindref_3lib_3ext_3ext_7compute_overscroll(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
@@ -3014,9 +3818,9 @@ PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ) {
-  CYTHON_UNUSED double __pyx_v_overscroll;
-  CYTHON_UNUSED double __pyx_v_target_height;
-  CYTHON_UNUSED double __pyx_v_overscroll_threshold;
+  double __pyx_v_overscroll;
+  double __pyx_v_target_height;
+  double __pyx_v_overscroll_threshold;
   #if !CYTHON_METH_FASTCALL
   CYTHON_UNUSED Py_ssize_t __pyx_nargs;
   #endif
@@ -3057,7 +3861,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 27, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 171, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
@@ -3065,9 +3869,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 27, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 171, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("compute_overscroll", 1, 3, 3, 1); __PYX_ERR(0, 27, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("compute_overscroll", 1, 3, 3, 1); __PYX_ERR(0, 171, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -3075,14 +3879,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[2]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 27, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 171, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("compute_overscroll", 1, 3, 3, 2); __PYX_ERR(0, 27, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("compute_overscroll", 1, 3, 3, 2); __PYX_ERR(0, 171, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "compute_overscroll") < 0)) __PYX_ERR(0, 27, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "compute_overscroll") < 0)) __PYX_ERR(0, 171, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 3)) {
       goto __pyx_L5_argtuple_error;
@@ -3091,13 +3895,13 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       values[1] = __Pyx_Arg_FASTCALL(__pyx_args, 1);
       values[2] = __Pyx_Arg_FASTCALL(__pyx_args, 2);
     }
-    __pyx_v_overscroll = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_overscroll == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 28, __pyx_L3_error)
-    __pyx_v_target_height = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_target_height == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 29, __pyx_L3_error)
-    __pyx_v_overscroll_threshold = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_overscroll_threshold == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 30, __pyx_L3_error)
+    __pyx_v_overscroll = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_overscroll == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 171, __pyx_L3_error)
+    __pyx_v_target_height = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_target_height == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 171, __pyx_L3_error)
+    __pyx_v_overscroll_threshold = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_overscroll_threshold == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 171, __pyx_L3_error)
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("compute_overscroll", 1, 3, 3, __pyx_nargs); __PYX_ERR(0, 27, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("compute_overscroll", 1, 3, 3, __pyx_nargs); __PYX_ERR(0, 171, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -3124,13 +3928,54 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7mindref_3lib_3ext_3ext_6compute_overscroll(CYTHON_UNUSED PyObject *__pyx_self, CYTHON_UNUSED double __pyx_v_overscroll, CYTHON_UNUSED double __pyx_v_target_height, CYTHON_UNUSED double __pyx_v_overscroll_threshold) {
+static PyObject *__pyx_pf_7mindref_3lib_3ext_3ext_6compute_overscroll(CYTHON_UNUSED PyObject *__pyx_self, double __pyx_v_overscroll, double __pyx_v_target_height, double __pyx_v_overscroll_threshold) {
+  double __pyx_v_domain_height;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
+  double __pyx_t_1;
+  double __pyx_t_2;
+  PyObject *__pyx_t_3 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("compute_overscroll", 1);
 
+  /* "mindref/lib/ext/ext.pyx":175
+ *     Given our thresholds and target height, normalize the overscroll to a value between 0.0 and 1.0.
+ *     """
+ *     cdef double domain_height = target_height * overscroll_threshold             # <<<<<<<<<<<<<<
+ *     return normalize_domain_range(CLAMP(abs(overscroll), 0, domain_height), 0.0, domain_height)
+ */
+  __pyx_v_domain_height = (__pyx_v_target_height * __pyx_v_overscroll_threshold);
+
+  /* "mindref/lib/ext/ext.pyx":176
+ *     """
+ *     cdef double domain_height = target_height * overscroll_threshold
+ *     return normalize_domain_range(CLAMP(abs(overscroll), 0, domain_height), 0.0, domain_height)             # <<<<<<<<<<<<<<
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __pyx_f_7mindref_3lib_3ext_3ext_CLAMP(fabs(__pyx_v_overscroll), 0.0, __pyx_v_domain_height); if (unlikely(__pyx_t_1 == ((double)-1) && PyErr_Occurred())) __PYX_ERR(0, 176, __pyx_L1_error)
+  __pyx_t_2 = __pyx_f_7mindref_3lib_3ext_3ext_normalize_domain_range(__pyx_t_1, 0.0, __pyx_v_domain_height); if (unlikely(__pyx_t_2 == ((double)-1) && PyErr_Occurred())) __PYX_ERR(0, 176, __pyx_L1_error)
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 176, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_r = __pyx_t_3;
+  __pyx_t_3 = 0;
+  goto __pyx_L0;
+
+  /* "mindref/lib/ext/ext.pyx":171
+ * 
+ * 
+ * def compute_overscroll(double overscroll, double target_height, double overscroll_threshold):             # <<<<<<<<<<<<<<
+ *     """
+ *     Given our thresholds and target height, normalize the overscroll to a value between 0.0 and 1.0.
+ */
+
   /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_AddTraceback("mindref.lib.ext.ext.compute_overscroll", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
@@ -3152,16 +3997,21 @@ static PyMethodDef __pyx_methods[] = {
 
 static int __Pyx_CreateStringTabAndInitStrings(void) {
   __Pyx_StringTabEntry __pyx_string_tab[] = {
+    {&__pyx_kp_u_000000, __pyx_k_000000, sizeof(__pyx_k_000000), 0, 1, 0, 0},
     {&__pyx_n_s__10, __pyx_k__10, sizeof(__pyx_k__10), 0, 0, 1, 1},
     {&__pyx_n_s_asyncio_coroutines, __pyx_k_asyncio_coroutines, sizeof(__pyx_k_asyncio_coroutines), 0, 0, 1, 1},
+    {&__pyx_n_s_b, __pyx_k_b, sizeof(__pyx_k_b), 0, 0, 1, 1},
     {&__pyx_n_s_background_color, __pyx_k_background_color, sizeof(__pyx_k_background_color), 0, 0, 1, 1},
     {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
     {&__pyx_n_s_compute_overscroll, __pyx_k_compute_overscroll, sizeof(__pyx_k_compute_overscroll), 0, 0, 1, 1},
     {&__pyx_n_s_compute_ref_coords, __pyx_k_compute_ref_coords, sizeof(__pyx_k_compute_ref_coords), 0, 0, 1, 1},
     {&__pyx_n_s_compute_text_contrast, __pyx_k_compute_text_contrast, sizeof(__pyx_k_compute_text_contrast), 0, 0, 1, 1},
-    {&__pyx_n_s_float, __pyx_k_float, sizeof(__pyx_k_float), 0, 0, 1, 1},
+    {&__pyx_n_s_domain_height, __pyx_k_domain_height, sizeof(__pyx_k_domain_height), 0, 0, 1, 1},
+    {&__pyx_kp_u_ffffff, __pyx_k_ffffff, sizeof(__pyx_k_ffffff), 0, 1, 0, 0},
+    {&__pyx_n_s_g, __pyx_k_g, sizeof(__pyx_k_g), 0, 0, 1, 1},
     {&__pyx_n_s_height, __pyx_k_height, sizeof(__pyx_k_height), 0, 0, 1, 1},
     {&__pyx_n_s_highlight_color, __pyx_k_highlight_color, sizeof(__pyx_k_highlight_color), 0, 0, 1, 1},
+    {&__pyx_n_s_hl_a, __pyx_k_hl_a, sizeof(__pyx_k_hl_a), 0, 0, 1, 1},
     {&__pyx_n_s_hl_pad_x, __pyx_k_hl_pad_x, sizeof(__pyx_k_hl_pad_x), 0, 0, 1, 1},
     {&__pyx_n_s_hl_pad_y, __pyx_k_hl_pad_y, sizeof(__pyx_k_hl_pad_y), 0, 0, 1, 1},
     {&__pyx_n_s_is_coroutine, __pyx_k_is_coroutine, sizeof(__pyx_k_is_coroutine), 0, 0, 1, 1},
@@ -3169,9 +4019,12 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s_mindref_lib_ext_ext, __pyx_k_mindref_lib_ext_ext, sizeof(__pyx_k_mindref_lib_ext_ext), 0, 0, 1, 1},
     {&__pyx_n_s_name, __pyx_k_name, sizeof(__pyx_k_name), 0, 0, 1, 1},
     {&__pyx_n_s_normalize_coordinates, __pyx_k_normalize_coordinates, sizeof(__pyx_k_normalize_coordinates), 0, 0, 1, 1},
+    {&__pyx_n_s_offsetX, __pyx_k_offsetX, sizeof(__pyx_k_offsetX), 0, 0, 1, 1},
+    {&__pyx_n_s_offsetY, __pyx_k_offsetY, sizeof(__pyx_k_offsetY), 0, 0, 1, 1},
     {&__pyx_n_s_overscroll, __pyx_k_overscroll, sizeof(__pyx_k_overscroll), 0, 0, 1, 1},
     {&__pyx_n_s_overscroll_threshold, __pyx_k_overscroll_threshold, sizeof(__pyx_k_overscroll_threshold), 0, 0, 1, 1},
-    {&__pyx_n_s_return, __pyx_k_return, sizeof(__pyx_k_return), 0, 0, 1, 1},
+    {&__pyx_n_s_r, __pyx_k_r, sizeof(__pyx_k_r), 0, 0, 1, 1},
+    {&__pyx_n_s_result, __pyx_k_result, sizeof(__pyx_k_result), 0, 0, 1, 1},
     {&__pyx_n_s_self_height, __pyx_k_self_height, sizeof(__pyx_k_self_height), 0, 0, 1, 1},
     {&__pyx_n_s_self_width, __pyx_k_self_width, sizeof(__pyx_k_self_width), 0, 0, 1, 1},
     {&__pyx_n_s_self_x, __pyx_k_self_x, sizeof(__pyx_k_self_x), 0, 0, 1, 1},
@@ -3180,17 +4033,13 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s_span_x2, __pyx_k_span_x2, sizeof(__pyx_k_span_x2), 0, 0, 1, 1},
     {&__pyx_n_s_span_y1, __pyx_k_span_y1, sizeof(__pyx_k_span_y1), 0, 0, 1, 1},
     {&__pyx_n_s_span_y2, __pyx_k_span_y2, sizeof(__pyx_k_span_y2), 0, 0, 1, 1},
-    {&__pyx_kp_s_src_mindref_lib_ext_ext_pyi, __pyx_k_src_mindref_lib_ext_ext_pyi, sizeof(__pyx_k_src_mindref_lib_ext_ext_pyi), 0, 0, 1, 0},
-    {&__pyx_n_s_str, __pyx_k_str, sizeof(__pyx_k_str), 0, 0, 1, 1},
+    {&__pyx_kp_s_src_mindref_lib_ext_ext_pyx, __pyx_k_src_mindref_lib_ext_ext_pyx, sizeof(__pyx_k_src_mindref_lib_ext_ext_pyx), 0, 0, 1, 0},
     {&__pyx_n_s_target_height, __pyx_k_target_height, sizeof(__pyx_k_target_height), 0, 0, 1, 1},
     {&__pyx_n_s_test, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
     {&__pyx_n_s_texture_height, __pyx_k_texture_height, sizeof(__pyx_k_texture_height), 0, 0, 1, 1},
     {&__pyx_n_s_texture_width, __pyx_k_texture_width, sizeof(__pyx_k_texture_width), 0, 0, 1, 1},
     {&__pyx_n_s_touch_x, __pyx_k_touch_x, sizeof(__pyx_k_touch_x), 0, 0, 1, 1},
     {&__pyx_n_s_touch_y, __pyx_k_touch_y, sizeof(__pyx_k_touch_y), 0, 0, 1, 1},
-    {&__pyx_kp_s_tuple_float_float, __pyx_k_tuple_float_float, sizeof(__pyx_k_tuple_float_float), 0, 0, 1, 0},
-    {&__pyx_kp_s_tuple_float_float_float_float, __pyx_k_tuple_float_float_float_float, sizeof(__pyx_k_tuple_float_float_float_float), 0, 0, 1, 0},
-    {&__pyx_kp_s_tuple_float_float_float_float_No, __pyx_k_tuple_float_float_float_float_No, sizeof(__pyx_k_tuple_float_float_float_float_No), 0, 0, 1, 0},
     {&__pyx_n_s_wX, __pyx_k_wX, sizeof(__pyx_k_wX), 0, 0, 1, 1},
     {&__pyx_n_s_wY, __pyx_k_wY, sizeof(__pyx_k_wY), 0, 0, 1, 1},
     {&__pyx_n_s_width, __pyx_k_width, sizeof(__pyx_k_width), 0, 0, 1, 1},
@@ -3208,54 +4057,56 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "mindref/lib/ext/ext.pyi":1
- * def normalize_coordinates(             # <<<<<<<<<<<<<<
- *     touch_x: float,
- *     touch_y: float,
+  /* "mindref/lib/ext/ext.pyx":17
+ *     return (value - lower) / domain_diff
+ * 
+ * def normalize_coordinates(double touch_x, double touch_y, double self_x, double self_y, double self_height,             # <<<<<<<<<<<<<<
+ *                           double self_width):
+ *     cdef (double, double) result = (0.0, 0.0)
  */
-  __pyx_tuple_ = PyTuple_Pack(6, __pyx_n_s_touch_x, __pyx_n_s_touch_y, __pyx_n_s_self_x, __pyx_n_s_self_y, __pyx_n_s_self_height, __pyx_n_s_self_width); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 1, __pyx_L1_error)
+  __pyx_tuple_ = PyTuple_Pack(7, __pyx_n_s_touch_x, __pyx_n_s_touch_y, __pyx_n_s_self_x, __pyx_n_s_self_y, __pyx_n_s_self_height, __pyx_n_s_self_width, __pyx_n_s_result); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple_);
   __Pyx_GIVEREF(__pyx_tuple_);
-  __pyx_codeobj__2 = (PyObject*)__Pyx_PyCode_New(6, 0, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple_, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_mindref_lib_ext_ext_pyi, __pyx_n_s_normalize_coordinates, 1, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__2)) __PYX_ERR(0, 1, __pyx_L1_error)
+  __pyx_codeobj__2 = (PyObject*)__Pyx_PyCode_New(6, 0, 0, 7, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple_, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_mindref_lib_ext_ext_pyx, __pyx_n_s_normalize_coordinates, 17, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__2)) __PYX_ERR(0, 17, __pyx_L1_error)
 
-  /* "mindref/lib/ext/ext.pyi":9
- *     self_width: float,
- * ) -> tuple[float, float]: ...
- * def compute_ref_coords(             # <<<<<<<<<<<<<<
- *     width: float,
- *     height: float,
+  /* "mindref/lib/ext/ext.pyx":29
+ *     return result
+ * 
+ * def compute_ref_coords(double width, double height, double wX, double wY, double texture_width, double texture_height,             # <<<<<<<<<<<<<<
+ *                        double span_x1, double span_y1, double span_x2, double span_y2,
+ *                        double hl_pad_x, double hl_pad_y):
  */
-  __pyx_tuple__3 = PyTuple_Pack(12, __pyx_n_s_width, __pyx_n_s_height, __pyx_n_s_wX, __pyx_n_s_wY, __pyx_n_s_texture_width, __pyx_n_s_texture_height, __pyx_n_s_span_x1, __pyx_n_s_span_y1, __pyx_n_s_span_x2, __pyx_n_s_span_y2, __pyx_n_s_hl_pad_x, __pyx_n_s_hl_pad_y); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(0, 9, __pyx_L1_error)
+  __pyx_tuple__3 = PyTuple_Pack(14, __pyx_n_s_width, __pyx_n_s_height, __pyx_n_s_wX, __pyx_n_s_wY, __pyx_n_s_texture_width, __pyx_n_s_texture_height, __pyx_n_s_span_x1, __pyx_n_s_span_y1, __pyx_n_s_span_x2, __pyx_n_s_span_y2, __pyx_n_s_hl_pad_x, __pyx_n_s_hl_pad_y, __pyx_n_s_offsetX, __pyx_n_s_offsetY); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(0, 29, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__3);
   __Pyx_GIVEREF(__pyx_tuple__3);
-  __pyx_codeobj__4 = (PyObject*)__Pyx_PyCode_New(12, 0, 0, 12, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__3, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_mindref_lib_ext_ext_pyi, __pyx_n_s_compute_ref_coords, 9, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__4)) __PYX_ERR(0, 9, __pyx_L1_error)
+  __pyx_codeobj__4 = (PyObject*)__Pyx_PyCode_New(12, 0, 0, 14, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__3, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_mindref_lib_ext_ext_pyx, __pyx_n_s_compute_ref_coords, 29, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__4)) __PYX_ERR(0, 29, __pyx_L1_error)
 
-  /* "mindref/lib/ext/ext.pyi":23
- *     hl_pad_y: float,
- * ) -> tuple[float, float, float, float]: ...
- * def compute_text_contrast(             # <<<<<<<<<<<<<<
- *     background_color: tuple[float, float, float, float],
- *     highlight_color: tuple[float, float, float, float] | None = None,
+  /* "mindref/lib/ext/ext.pyx":134
+ *             + 0.0722 * srgb_channel_to_linear(b))
+ * 
+ * def compute_text_contrast(tuple background_color, tuple highlight_color = None):             # <<<<<<<<<<<<<<
+ *     """
+ *     Pick black or white text for a background.
  */
-  __pyx_tuple__5 = PyTuple_Pack(2, __pyx_n_s_background_color, __pyx_n_s_highlight_color); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(0, 23, __pyx_L1_error)
+  __pyx_tuple__5 = PyTuple_Pack(6, __pyx_n_s_background_color, __pyx_n_s_highlight_color, __pyx_n_s_r, __pyx_n_s_g, __pyx_n_s_b, __pyx_n_s_hl_a); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(0, 134, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__5);
   __Pyx_GIVEREF(__pyx_tuple__5);
-  __pyx_codeobj__6 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__5, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_mindref_lib_ext_ext_pyi, __pyx_n_s_compute_text_contrast, 23, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__6)) __PYX_ERR(0, 23, __pyx_L1_error)
-  __pyx_tuple__7 = PyTuple_Pack(1, Py_None); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(0, 23, __pyx_L1_error)
+  __pyx_codeobj__6 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__5, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_mindref_lib_ext_ext_pyx, __pyx_n_s_compute_text_contrast, 134, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__6)) __PYX_ERR(0, 134, __pyx_L1_error)
+  __pyx_tuple__7 = PyTuple_Pack(1, Py_None); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(0, 134, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__7);
   __Pyx_GIVEREF(__pyx_tuple__7);
 
-  /* "mindref/lib/ext/ext.pyi":27
- *     highlight_color: tuple[float, float, float, float] | None = None,
- * ) -> str: ...
- * def compute_overscroll(             # <<<<<<<<<<<<<<
- *     overscroll: float,
- *     target_height: float,
+  /* "mindref/lib/ext/ext.pyx":171
+ * 
+ * 
+ * def compute_overscroll(double overscroll, double target_height, double overscroll_threshold):             # <<<<<<<<<<<<<<
+ *     """
+ *     Given our thresholds and target height, normalize the overscroll to a value between 0.0 and 1.0.
  */
-  __pyx_tuple__8 = PyTuple_Pack(3, __pyx_n_s_overscroll, __pyx_n_s_target_height, __pyx_n_s_overscroll_threshold); if (unlikely(!__pyx_tuple__8)) __PYX_ERR(0, 27, __pyx_L1_error)
+  __pyx_tuple__8 = PyTuple_Pack(4, __pyx_n_s_overscroll, __pyx_n_s_target_height, __pyx_n_s_overscroll_threshold, __pyx_n_s_domain_height); if (unlikely(!__pyx_tuple__8)) __PYX_ERR(0, 171, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__8);
   __Pyx_GIVEREF(__pyx_tuple__8);
-  __pyx_codeobj__9 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__8, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_mindref_lib_ext_ext_pyi, __pyx_n_s_compute_overscroll, 27, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__9)) __PYX_ERR(0, 27, __pyx_L1_error)
+  __pyx_codeobj__9 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__8, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_mindref_lib_ext_ext_pyx, __pyx_n_s_compute_overscroll, 171, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__9)) __PYX_ERR(0, 171, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -3504,7 +4355,6 @@ static CYTHON_SMALL_CODE int __pyx_pymod_exec_ext(PyObject *__pyx_pyinit_module)
   #endif
   PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
-  PyObject *__pyx_t_3 = NULL;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -3620,100 +4470,59 @@ if (!__Pyx_RefNanny) {
   if (__Pyx_patch_abc() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
 
-  /* "mindref/lib/ext/ext.pyi":1
- * def normalize_coordinates(             # <<<<<<<<<<<<<<
- *     touch_x: float,
- *     touch_y: float,
+  /* "mindref/lib/ext/ext.pyx":17
+ *     return (value - lower) / domain_diff
+ * 
+ * def normalize_coordinates(double touch_x, double touch_y, double self_x, double self_y, double self_height,             # <<<<<<<<<<<<<<
+ *                           double self_width):
+ *     cdef (double, double) result = (0.0, 0.0)
  */
-  __pyx_t_2 = __Pyx_PyDict_NewPresized(7); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_7mindref_3lib_3ext_3ext_1normalize_coordinates, 0, __pyx_n_s_normalize_coordinates, NULL, __pyx_n_s_mindref_lib_ext_ext, __pyx_d, ((PyObject *)__pyx_codeobj__2)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_touch_x, __pyx_n_s_float) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_touch_y, __pyx_n_s_float) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_self_x, __pyx_n_s_float) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_self_y, __pyx_n_s_float) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_self_height, __pyx_n_s_float) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_self_width, __pyx_n_s_float) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_return, __pyx_kp_s_tuple_float_float) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  __pyx_t_3 = __Pyx_CyFunction_New(&__pyx_mdef_7mindref_3lib_3ext_3ext_1normalize_coordinates, 0, __pyx_n_s_normalize_coordinates, NULL, __pyx_n_s_mindref_lib_ext_ext, __pyx_d, ((PyObject *)__pyx_codeobj__2)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_CyFunction_SetAnnotationsDict(__pyx_t_3, __pyx_t_2);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_normalize_coordinates, __pyx_t_3) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-
-  /* "mindref/lib/ext/ext.pyi":9
- *     self_width: float,
- * ) -> tuple[float, float]: ...
- * def compute_ref_coords(             # <<<<<<<<<<<<<<
- *     width: float,
- *     height: float,
- */
-  __pyx_t_3 = __Pyx_PyDict_NewPresized(13); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 9, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_width, __pyx_n_s_float) < 0) __PYX_ERR(0, 9, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_height, __pyx_n_s_float) < 0) __PYX_ERR(0, 9, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_wX, __pyx_n_s_float) < 0) __PYX_ERR(0, 9, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_wY, __pyx_n_s_float) < 0) __PYX_ERR(0, 9, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_texture_width, __pyx_n_s_float) < 0) __PYX_ERR(0, 9, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_texture_height, __pyx_n_s_float) < 0) __PYX_ERR(0, 9, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_span_x1, __pyx_n_s_float) < 0) __PYX_ERR(0, 9, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_span_y1, __pyx_n_s_float) < 0) __PYX_ERR(0, 9, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_span_x2, __pyx_n_s_float) < 0) __PYX_ERR(0, 9, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_span_y2, __pyx_n_s_float) < 0) __PYX_ERR(0, 9, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_hl_pad_x, __pyx_n_s_float) < 0) __PYX_ERR(0, 9, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_hl_pad_y, __pyx_n_s_float) < 0) __PYX_ERR(0, 9, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_return, __pyx_kp_s_tuple_float_float_float_float) < 0) __PYX_ERR(0, 9, __pyx_L1_error)
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_7mindref_3lib_3ext_3ext_3compute_ref_coords, 0, __pyx_n_s_compute_ref_coords, NULL, __pyx_n_s_mindref_lib_ext_ext, __pyx_d, ((PyObject *)__pyx_codeobj__4)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 9, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_CyFunction_SetAnnotationsDict(__pyx_t_2, __pyx_t_3);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_compute_ref_coords, __pyx_t_2) < 0) __PYX_ERR(0, 9, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_normalize_coordinates, __pyx_t_2) < 0) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "mindref/lib/ext/ext.pyi":23
- *     hl_pad_y: float,
- * ) -> tuple[float, float, float, float]: ...
- * def compute_text_contrast(             # <<<<<<<<<<<<<<
- *     background_color: tuple[float, float, float, float],
- *     highlight_color: tuple[float, float, float, float] | None = None,
+  /* "mindref/lib/ext/ext.pyx":29
+ *     return result
+ * 
+ * def compute_ref_coords(double width, double height, double wX, double wY, double texture_width, double texture_height,             # <<<<<<<<<<<<<<
+ *                        double span_x1, double span_y1, double span_x2, double span_y2,
+ *                        double hl_pad_x, double hl_pad_y):
  */
-  __pyx_t_2 = __Pyx_PyDict_NewPresized(3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 23, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_7mindref_3lib_3ext_3ext_3compute_ref_coords, 0, __pyx_n_s_compute_ref_coords, NULL, __pyx_n_s_mindref_lib_ext_ext, __pyx_d, ((PyObject *)__pyx_codeobj__4)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 29, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_background_color, __pyx_kp_s_tuple_float_float_float_float) < 0) __PYX_ERR(0, 23, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_highlight_color, __pyx_kp_s_tuple_float_float_float_float_No) < 0) __PYX_ERR(0, 23, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_return, __pyx_n_s_str) < 0) __PYX_ERR(0, 23, __pyx_L1_error)
-  __pyx_t_3 = __Pyx_CyFunction_New(&__pyx_mdef_7mindref_3lib_3ext_3ext_5compute_text_contrast, 0, __pyx_n_s_compute_text_contrast, NULL, __pyx_n_s_mindref_lib_ext_ext, __pyx_d, ((PyObject *)__pyx_codeobj__6)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 23, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_CyFunction_SetDefaultsTuple(__pyx_t_3, __pyx_tuple__7);
-  __Pyx_CyFunction_SetAnnotationsDict(__pyx_t_3, __pyx_t_2);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_compute_text_contrast, __pyx_t_3) < 0) __PYX_ERR(0, 23, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-
-  /* "mindref/lib/ext/ext.pyi":27
- *     highlight_color: tuple[float, float, float, float] | None = None,
- * ) -> str: ...
- * def compute_overscroll(             # <<<<<<<<<<<<<<
- *     overscroll: float,
- *     target_height: float,
- */
-  __pyx_t_3 = __Pyx_PyDict_NewPresized(4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 27, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_overscroll, __pyx_n_s_float) < 0) __PYX_ERR(0, 27, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_target_height, __pyx_n_s_float) < 0) __PYX_ERR(0, 27, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_overscroll_threshold, __pyx_n_s_float) < 0) __PYX_ERR(0, 27, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_return, __pyx_n_s_float) < 0) __PYX_ERR(0, 27, __pyx_L1_error)
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_7mindref_3lib_3ext_3ext_7compute_overscroll, 0, __pyx_n_s_compute_overscroll, NULL, __pyx_n_s_mindref_lib_ext_ext, __pyx_d, ((PyObject *)__pyx_codeobj__9)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 27, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_CyFunction_SetAnnotationsDict(__pyx_t_2, __pyx_t_3);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_compute_overscroll, __pyx_t_2) < 0) __PYX_ERR(0, 27, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_compute_ref_coords, __pyx_t_2) < 0) __PYX_ERR(0, 29, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "mindref/lib/ext/ext.pyi":1
- * def normalize_coordinates(             # <<<<<<<<<<<<<<
- *     touch_x: float,
- *     touch_y: float,
+  /* "mindref/lib/ext/ext.pyx":134
+ *             + 0.0722 * srgb_channel_to_linear(b))
+ * 
+ * def compute_text_contrast(tuple background_color, tuple highlight_color = None):             # <<<<<<<<<<<<<<
+ *     """
+ *     Pick black or white text for a background.
+ */
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_7mindref_3lib_3ext_3ext_5compute_text_contrast, 0, __pyx_n_s_compute_text_contrast, NULL, __pyx_n_s_mindref_lib_ext_ext, __pyx_d, ((PyObject *)__pyx_codeobj__6)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 134, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_CyFunction_SetDefaultsTuple(__pyx_t_2, __pyx_tuple__7);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_compute_text_contrast, __pyx_t_2) < 0) __PYX_ERR(0, 134, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "mindref/lib/ext/ext.pyx":171
+ * 
+ * 
+ * def compute_overscroll(double overscroll, double target_height, double overscroll_threshold):             # <<<<<<<<<<<<<<
+ *     """
+ *     Given our thresholds and target height, normalize the overscroll to a value between 0.0 and 1.0.
+ */
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_7mindref_3lib_3ext_3ext_7compute_overscroll, 0, __pyx_n_s_compute_overscroll, NULL, __pyx_n_s_mindref_lib_ext_ext, __pyx_d, ((PyObject *)__pyx_codeobj__9)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 171, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_compute_overscroll, __pyx_t_2) < 0) __PYX_ERR(0, 171, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "mindref/lib/ext/ext.pyx":1
+ * # cython: language_level=3, cdivision=True, embedsignature=True             # <<<<<<<<<<<<<<
+ * from libc.math cimport pow
+ * 
  */
   __pyx_t_2 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
@@ -3725,7 +4534,6 @@ if (!__Pyx_RefNanny) {
   goto __pyx_L0;
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_3);
   if (__pyx_m) {
     if (__pyx_d && stringtab_initialized) {
       __Pyx_AddTraceback("init mindref.lib.ext.ext", __pyx_clineno, __pyx_lineno, __pyx_filename);
@@ -4208,6 +5016,128 @@ bad:
     Py_XDECREF(key);
     Py_XDECREF(value);
     return -1;
+}
+
+/* ArgTypeTest */
+static int __Pyx__ArgTypeTest(PyObject *obj, PyTypeObject *type, const char *name, int exact)
+{
+    __Pyx_TypeName type_name;
+    __Pyx_TypeName obj_type_name;
+    if (unlikely(!type)) {
+        PyErr_SetString(PyExc_SystemError, "Missing type object");
+        return 0;
+    }
+    else if (exact) {
+        #if PY_MAJOR_VERSION == 2
+        if ((type == &PyBaseString_Type) && likely(__Pyx_PyBaseString_CheckExact(obj))) return 1;
+        #endif
+    }
+    else {
+        if (likely(__Pyx_TypeCheck(obj, type))) return 1;
+    }
+    type_name = __Pyx_PyType_GetName(type);
+    obj_type_name = __Pyx_PyType_GetName(Py_TYPE(obj));
+    PyErr_Format(PyExc_TypeError,
+        "Argument '%.200s' has incorrect type (expected " __Pyx_FMT_TYPENAME
+        ", got " __Pyx_FMT_TYPENAME ")", name, type_name, obj_type_name);
+    __Pyx_DECREF_TypeName(type_name);
+    __Pyx_DECREF_TypeName(obj_type_name);
+    return 0;
+}
+
+/* GetItemInt */
+static PyObject *__Pyx_GetItemInt_Generic(PyObject *o, PyObject* j) {
+    PyObject *r;
+    if (unlikely(!j)) return NULL;
+    r = PyObject_GetItem(o, j);
+    Py_DECREF(j);
+    return r;
+}
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_List_Fast(PyObject *o, Py_ssize_t i,
+                                                              CYTHON_NCP_UNUSED int wraparound,
+                                                              CYTHON_NCP_UNUSED int boundscheck) {
+#if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
+    Py_ssize_t wrapped_i = i;
+    if (wraparound & unlikely(i < 0)) {
+        wrapped_i += PyList_GET_SIZE(o);
+    }
+    if ((!boundscheck) || likely(__Pyx_is_valid_index(wrapped_i, PyList_GET_SIZE(o)))) {
+        PyObject *r = PyList_GET_ITEM(o, wrapped_i);
+        Py_INCREF(r);
+        return r;
+    }
+    return __Pyx_GetItemInt_Generic(o, PyInt_FromSsize_t(i));
+#else
+    return PySequence_GetItem(o, i);
+#endif
+}
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Tuple_Fast(PyObject *o, Py_ssize_t i,
+                                                              CYTHON_NCP_UNUSED int wraparound,
+                                                              CYTHON_NCP_UNUSED int boundscheck) {
+#if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
+    Py_ssize_t wrapped_i = i;
+    if (wraparound & unlikely(i < 0)) {
+        wrapped_i += PyTuple_GET_SIZE(o);
+    }
+    if ((!boundscheck) || likely(__Pyx_is_valid_index(wrapped_i, PyTuple_GET_SIZE(o)))) {
+        PyObject *r = PyTuple_GET_ITEM(o, wrapped_i);
+        Py_INCREF(r);
+        return r;
+    }
+    return __Pyx_GetItemInt_Generic(o, PyInt_FromSsize_t(i));
+#else
+    return PySequence_GetItem(o, i);
+#endif
+}
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Fast(PyObject *o, Py_ssize_t i, int is_list,
+                                                     CYTHON_NCP_UNUSED int wraparound,
+                                                     CYTHON_NCP_UNUSED int boundscheck) {
+#if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS && CYTHON_USE_TYPE_SLOTS
+    if (is_list || PyList_CheckExact(o)) {
+        Py_ssize_t n = ((!wraparound) | likely(i >= 0)) ? i : i + PyList_GET_SIZE(o);
+        if ((!boundscheck) || (likely(__Pyx_is_valid_index(n, PyList_GET_SIZE(o))))) {
+            PyObject *r = PyList_GET_ITEM(o, n);
+            Py_INCREF(r);
+            return r;
+        }
+    }
+    else if (PyTuple_CheckExact(o)) {
+        Py_ssize_t n = ((!wraparound) | likely(i >= 0)) ? i : i + PyTuple_GET_SIZE(o);
+        if ((!boundscheck) || likely(__Pyx_is_valid_index(n, PyTuple_GET_SIZE(o)))) {
+            PyObject *r = PyTuple_GET_ITEM(o, n);
+            Py_INCREF(r);
+            return r;
+        }
+    } else {
+        PyMappingMethods *mm = Py_TYPE(o)->tp_as_mapping;
+        PySequenceMethods *sm = Py_TYPE(o)->tp_as_sequence;
+        if (mm && mm->mp_subscript) {
+            PyObject *r, *key = PyInt_FromSsize_t(i);
+            if (unlikely(!key)) return NULL;
+            r = mm->mp_subscript(o, key);
+            Py_DECREF(key);
+            return r;
+        }
+        if (likely(sm && sm->sq_item)) {
+            if (wraparound && unlikely(i < 0) && likely(sm->sq_length)) {
+                Py_ssize_t l = sm->sq_length(o);
+                if (likely(l >= 0)) {
+                    i += l;
+                } else {
+                    if (!PyErr_ExceptionMatches(PyExc_OverflowError))
+                        return NULL;
+                    PyErr_Clear();
+                }
+            }
+            return sm->sq_item(o, i);
+        }
+    }
+#else
+    if (is_list || !PyMapping_Check(o)) {
+        return PySequence_GetItem(o, i);
+    }
+#endif
+    return __Pyx_GetItemInt_Generic(o, PyInt_FromSsize_t(i));
 }
 
 /* FixUpExtensionType */
@@ -5951,100 +6881,23 @@ bad:
 }
 #endif
 
-/* FromPyCTupleUtility */
-#if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-static void __Pyx_tuple___pyx_convert__from_py___pyx_ctuple_double__and_double__and_double__and_double(PyObject * o, __pyx_ctuple_double__and_double__and_double__and_double *result) {
-        result->f0 = __pyx_PyFloat_AsDouble(PyTuple_GET_ITEM(o, 0));
-        if ((result->f0 == (double)-1) && PyErr_Occurred()) goto bad;
-        result->f1 = __pyx_PyFloat_AsDouble(PyTuple_GET_ITEM(o, 1));
-        if ((result->f1 == (double)-1) && PyErr_Occurred()) goto bad;
-        result->f2 = __pyx_PyFloat_AsDouble(PyTuple_GET_ITEM(o, 2));
-        if ((result->f2 == (double)-1) && PyErr_Occurred()) goto bad;
-        result->f3 = __pyx_PyFloat_AsDouble(PyTuple_GET_ITEM(o, 3));
-        if ((result->f3 == (double)-1) && PyErr_Occurred()) goto bad;
-    return;
-bad:
-    return;
-}
-static void __Pyx_list___pyx_convert__from_py___pyx_ctuple_double__and_double__and_double__and_double(PyObject * o, __pyx_ctuple_double__and_double__and_double__and_double *result) {
-        result->f0 = __pyx_PyFloat_AsDouble(PyList_GET_ITEM(o, 0));
-        if ((result->f0 == (double)-1) && PyErr_Occurred()) goto bad;
-        result->f1 = __pyx_PyFloat_AsDouble(PyList_GET_ITEM(o, 1));
-        if ((result->f1 == (double)-1) && PyErr_Occurred()) goto bad;
-        result->f2 = __pyx_PyFloat_AsDouble(PyList_GET_ITEM(o, 2));
-        if ((result->f2 == (double)-1) && PyErr_Occurred()) goto bad;
-        result->f3 = __pyx_PyFloat_AsDouble(PyList_GET_ITEM(o, 3));
-        if ((result->f3 == (double)-1) && PyErr_Occurred()) goto bad;
-    return;
-bad:
-    return;
-}
-#endif
-static void __Pyx_seq___pyx_convert__from_py___pyx_ctuple_double__and_double__and_double__and_double(PyObject * o, __pyx_ctuple_double__and_double__and_double__and_double *result) {
-    if (unlikely(!PySequence_Check(o))) {
-        __Pyx_TypeName o_type_name = __Pyx_PyType_GetName(Py_TYPE(o));
-        PyErr_Format(PyExc_TypeError,
-                     "Expected a sequence of size %zd, got " __Pyx_FMT_TYPENAME, (Py_ssize_t) 4, o_type_name);
-        __Pyx_DECREF_TypeName(o_type_name);
-        goto bad;
-    } else if (unlikely(PySequence_Length(o) != 4)) {
-        PyErr_Format(PyExc_TypeError,
-                     "Expected a sequence of size %zd, got size %zd", (Py_ssize_t) 4, PySequence_Length(o));
-        goto bad;
-    }
-    {
-        PyObject *item;
-        item = PySequence_ITEM(o, 0);  if (unlikely(!item)) goto bad;
-        result->f0 = __pyx_PyFloat_AsDouble(item);
-        Py_DECREF(item);
-        if ((result->f0 == (double)-1) && PyErr_Occurred()) goto bad;
-        item = PySequence_ITEM(o, 1);  if (unlikely(!item)) goto bad;
-        result->f1 = __pyx_PyFloat_AsDouble(item);
-        Py_DECREF(item);
-        if ((result->f1 == (double)-1) && PyErr_Occurred()) goto bad;
-        item = PySequence_ITEM(o, 2);  if (unlikely(!item)) goto bad;
-        result->f2 = __pyx_PyFloat_AsDouble(item);
-        Py_DECREF(item);
-        if ((result->f2 == (double)-1) && PyErr_Occurred()) goto bad;
-        item = PySequence_ITEM(o, 3);  if (unlikely(!item)) goto bad;
-        result->f3 = __pyx_PyFloat_AsDouble(item);
-        Py_DECREF(item);
-        if ((result->f3 == (double)-1) && PyErr_Occurred()) goto bad;
-    }
-    return;
-bad:
-    return;
-}
-static CYTHON_INLINE __pyx_ctuple_double__and_double__and_double__and_double __pyx_convert__from_py___pyx_ctuple_double__and_double__and_double__and_double(PyObject * o) {
-    __pyx_ctuple_double__and_double__and_double__and_double result;
-    #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-    if (likely(PyTuple_Check(o) && PyTuple_GET_SIZE(o) == 4)) {
-        __Pyx_tuple___pyx_convert__from_py___pyx_ctuple_double__and_double__and_double__and_double(o, &result);
-    } else if (likely(PyList_Check(o) && PyList_GET_SIZE(o) == 4)) {
-        __Pyx_list___pyx_convert__from_py___pyx_ctuple_double__and_double__and_double__and_double(o, &result);
-    } else
-    #endif
-    {
-        __Pyx_seq___pyx_convert__from_py___pyx_ctuple_double__and_double__and_double__and_double(o, &result);
-    }
+/* ToPyCTupleUtility */
+static PyObject* __pyx_convert__to_py___pyx_ctuple_double__and_double(__pyx_ctuple_double__and_double value) {
+    PyObject* item = NULL;
+    PyObject* result = PyTuple_New(2);
+    if (!result) goto bad;
+        item = PyFloat_FromDouble(value.f0);
+        if (!item) goto bad;
+        PyTuple_SET_ITEM(result, 0, item);
+        item = PyFloat_FromDouble(value.f1);
+        if (!item) goto bad;
+        PyTuple_SET_ITEM(result, 1, item);
     return result;
+bad:
+    Py_XDECREF(item);
+    Py_XDECREF(result);
+    return NULL;
 }
-
-/* FormatTypeName */
-#if CYTHON_COMPILING_IN_LIMITED_API
-static __Pyx_TypeName
-__Pyx_PyType_GetName(PyTypeObject* tp)
-{
-    PyObject *name = __Pyx_PyObject_GetAttrStr((PyObject *)tp,
-                                               __pyx_n_s_name);
-    if (unlikely(name == NULL) || unlikely(!PyUnicode_Check(name))) {
-        PyErr_Clear();
-        Py_XDECREF(name);
-        name = __Pyx_NewRef(__pyx_n_s__10);
-    }
-    return name;
-}
-#endif
 
 /* CIntToPy */
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {
@@ -6116,6 +6969,22 @@ static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {
 #endif
     }
 }
+
+/* FormatTypeName */
+#if CYTHON_COMPILING_IN_LIMITED_API
+static __Pyx_TypeName
+__Pyx_PyType_GetName(PyTypeObject* tp)
+{
+    PyObject *name = __Pyx_PyObject_GetAttrStr((PyObject *)tp,
+                                               __pyx_n_s_name);
+    if (unlikely(name == NULL) || unlikely(!PyUnicode_Check(name))) {
+        PyErr_Clear();
+        Py_XDECREF(name);
+        name = __Pyx_NewRef(__pyx_n_s__10);
+    }
+    return name;
+}
+#endif
 
 /* CIntFromPyVerify */
 #define __PYX_VERIFY_RETURN_INT(target_type, func_type, func_value)\
