@@ -20,10 +20,8 @@ def compute_ref_coords(
     hl_pad_x: float,
     hl_pad_y: float,
 ) -> tuple[float, float, float, float]: ...
-def color_str_components(color_str: str) -> tuple[float, float, float, float]: ...
 def compute_text_contrast(
     background_color: tuple[float, float, float, float],
-    threshold: float,
     highlight_color: tuple[float, float, float, float] | None = None,
 ) -> str: ...
 def compute_overscroll(
