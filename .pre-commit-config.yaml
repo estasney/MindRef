@@ -10,3 +10,12 @@ repos:
     rev: v0.15.22
     hooks:
       - id: ruff-format
+
+  - repo: local
+    hooks:
+      - id: cythonize
+        name: regenerate .c from .pyx
+        entry: uv run cython -3
+        language: system
+        types: [cython]
+        files: \.pyx$
