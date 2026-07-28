@@ -17,12 +17,10 @@ from kivy.uix.label import Label
 from kivy.utils import escape_markup
 
 from mindref.lib.ext import (
-    color_str_components,
     compute_ref_coords,
     compute_text_contrast,
 )
 from mindref.lib.utils.caching import (
-    cache_key_color_norm,
     cache_key_text_contrast,
     kivy_cache,
 )
@@ -63,7 +61,6 @@ class LabelHighlightInline(Label):
         Refers to the color applied for highlighting `<kbd>` tags (keyboard)
     kbd_shadow_color: ColorProperty
         Refers to the shadow applied for <kbd> tags
-    text_threshold: NumericProperty
         'Magic' number that determines when text should be black/white
     text_color: StringProperty
         Refers to the computed contrast color for non-highlighted text
@@ -86,7 +83,6 @@ class LabelHighlightInline(Label):
     highlight_color = ColorProperty()
     kbd_color = ColorProperty()
     kbd_shadow_color = ColorProperty()
-    text_threshold = NumericProperty(defaultvalue=186)
     text_color = StringProperty("#ffffff")
     text_color_highlight = StringProperty("#ffffff")
     font_family_normal = StringProperty()
@@ -111,7 +107,6 @@ class LabelHighlightInline(Label):
             fbind("text_color", self.markup_text_trigger)
             fbind("text_color_highlight", self.markup_text_trigger)
             fbind("bg_color", self.handle_contrast_trigger)
-            fbind("text_threshold", self.handle_contrast_trigger)
             fbind("snippets", self.markup_text_trigger)
             fbind("refs", self.draw_ref_spans_trigger)
             fbind("size", self.draw_ref_spans_trigger)
@@ -123,7 +118,6 @@ class LabelHighlightInline(Label):
             funbind("text_color", self.markup_text_trigger)
             funbind("text_color_highlight", self.markup_text_trigger)
             funbind("bg_color", self.handle_contrast_trigger)
-            funbind("text_threshold", self.handle_contrast_trigger)
             funbind("snippets", self.markup_text_trigger)
             funbind("refs", self.draw_ref_spans_trigger)
             funbind("size", self.draw_ref_spans_trigger)
@@ -137,13 +131,11 @@ class LabelHighlightInline(Label):
     def handle_contrast(self, *_args):
         """Update computed text_colors"""
         self.text_color = get_cached_text_contrast(
-            background_color=self.bg_color,
-            threshold=self.text_threshold,
+            background_color=tuple(self.bg_color),
             highlight_color=None,
         )
         self.text_color_highlight = get_cached_text_contrast(
-            background_color=self.bg_color,
-            threshold=self.text_threshold,
+            background_color=tuple(self.bg_color),
             highlight_color=tuple(self.highlight_color),
         )
         return True
@@ -215,8 +207,12 @@ class LabelHighlightInline(Label):
             self.height,
             self.x,
             self.y,
-            *self.texture_size,
-            *span,
+            self.texture_size[0],
+            self.texture_size[1],
+            span[0],
+            span[1],
+            span[2],
+            span[3],
             self.highlight_padding_x,
             self.highlight_padding_y,
         )
@@ -269,35 +265,9 @@ class LabelHighlightInline(Label):
 def get_cached_text_contrast(
     *,
     background_color: tuple[float, float, float, float],
-    threshold: float,
     highlight_color: Any | None = None,
 ):
     """
     Set text as white or black depending on bg
     """
-    return compute_text_contrast(background_color, threshold, highlight_color)
-
-
-@kivy_cache(cache_name="color_norm", key_func=cache_key_color_norm, limit=1000)
-def get_cached_color_norm(
-    color: str | tuple[float],
-) -> tuple[float, float, float, float]:
-    def color_float_components(
-        s: tuple[int] | tuple[float],
-    ) -> tuple[float, float, float, float]:
-        """Return r, g, b (0.0-1.0) as (0-1) and opacity as (0-1)"""
-        match s:
-            case [float(r), float(g), float(b), float(opacity)]:
-                return r, g, b, opacity
-            case [float(r), float(g), float(b)]:
-                return r, g, b, 1.0
-            case _:
-                raise ValueError(f"Invalid color: {s}")
-
-    match color:
-        case str():
-            components = color_str_components(color)
-        case _:
-            components = color_float_components(color)
-
-    return components
+    return compute_text_contrast(background_color, highlight_color)

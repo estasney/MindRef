@@ -55,14 +55,12 @@ def kivy_cache(
     return dec_kivy_cache
 
 
-def cache_key_text_contrast(*_args, **kwargs) -> tuple[tuple, int, tuple | None]:
+def cache_key_text_contrast(*_args, **kwargs) -> tuple[tuple, tuple | None]:
     """Generate key for 'text_contrast'"""
     background_color = kwargs.get("background_color")
-    threshold = kwargs.get("threshold")
     highlight_color = kwargs.get("highlight_color")
     return (
         tuple(background_color),
-        int(threshold),
         tuple(highlight_color) if highlight_color else None,
     )
 
