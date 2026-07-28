@@ -52,7 +52,6 @@ Builder.load_string("""
         snippets: root.snippets
         bg_color: app.colors['Primary']
         highlight_color: app.colors['Codespan']
-        text_threshold: 170
         valign: 'center'
         halign: 'left'
         height: self.texture_size[1]

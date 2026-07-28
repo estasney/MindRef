@@ -1,5 +1,5 @@
 from functools import lru_cache
-from typing import Any, Literal, NamedTuple
+from typing import Literal, NamedTuple
 
 from kivy.clock import Clock
 from kivy.graphics import Color, RoundedRectangle
@@ -262,8 +262,8 @@ class LabelHighlightInline(Label):
 def get_cached_text_contrast(
     *,
     background_color: tuple[float, float, float, float],
-    highlight_color: Any | None = None,
-):
+    highlight_color: tuple[float, float, float, float] | None = None,
+) -> str:
     """
     Set text as white or black depending on bg
     """
