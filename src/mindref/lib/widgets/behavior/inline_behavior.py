@@ -1,3 +1,4 @@
+from functools import lru_cache
 from typing import Any, Literal, NamedTuple
 
 from kivy.clock import Clock
@@ -19,10 +20,6 @@ from kivy.utils import escape_markup
 from mindref.lib.ext import (
     compute_ref_coords,
     compute_text_contrast,
-)
-from mindref.lib.utils.caching import (
-    cache_key_text_contrast,
-    kivy_cache,
 )
 
 Builder.load_string("""
@@ -88,7 +85,7 @@ class LabelHighlightInline(Label):
     font_family_normal = StringProperty()
     font_family_mono = StringProperty()
     snippets: list[TextSnippet] = ListProperty()
-    has_parent: BooleanProperty(defaultvalue=False)
+    has_parent = BooleanProperty(defaultvalue=False)
     highlight_padding_x = NumericProperty(defaultvalue=0)
     highlight_padding_y = NumericProperty(defaultvalue=0)
     highlight_padding = ReferenceListProperty(highlight_padding_x, highlight_padding_y)
@@ -261,7 +258,7 @@ class LabelHighlightInline(Label):
                 )
 
 
-@kivy_cache(cache_name="text_contrast", key_func=cache_key_text_contrast, limit=1000)
+@lru_cache(maxsize=128)
 def get_cached_text_contrast(
     *,
     background_color: tuple[float, float, float, float],
