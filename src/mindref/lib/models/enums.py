@@ -83,3 +83,13 @@ class MutationStatus(StrEnum):
 TMutationStatusLit = Literal["idle", "pending", "error", "success"]
 
 TMutationStatus = MutationStatus | TMutationStatusLit
+
+
+class OpenState(StrEnum):
+    open = "open"
+    opening = "opening"
+    closed = "closed"
+    closing = "closing"
+
+
+TOpenState = Literal["open", "opening", "closed", "closing"]

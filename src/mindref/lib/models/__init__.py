@@ -4,6 +4,8 @@ from mindref.lib.models.enums import (
     MutationStatus,
     TMutationStatus,
     TMutationStatusLit,
+    OpenState,
+    TOpenState,
 )
 
 __all__ = [
@@ -12,4 +14,6 @@ __all__ = [
     "TAnimationTiming",
     "TMutationStatus",
     "TMutationStatusLit",
+    "OpenState",
+    "TOpenState",
 ]

@@ -1,6 +1,5 @@
-from enum import Enum
 from functools import partial
-from typing import TYPE_CHECKING, Literal, NamedTuple
+from typing import TYPE_CHECKING, NamedTuple
 
 from kivy.animation import Animation
 from kivy.app import App
@@ -17,7 +16,7 @@ from kivy.properties import (
     VariableListProperty,
 )
 
-from mindref.lib.models import AnimationTiming
+from mindref.lib.models import AnimationTiming, OpenState, TOpenState
 from mindref.lib.widgets.behavior import DebugFloatLayout
 from mindref.lib.widgets.buttons.buttons import ThemedIconButton
 from mindref.lib.widgets.nav_drawer.nav_buttons import (
@@ -31,20 +30,6 @@ from mindref.lib.widgets.refreshable import V2RefreshBehavior, V2RefreshContaine
 
 if TYPE_CHECKING:
     from kivy.uix.boxlayout import BoxLayout
-
-
-class OpenState(str, Enum):
-    open = "open"
-    opening = "opening"
-    closed = "closed"
-    closing = "closing"
-
-    def __str__(self) -> str:
-        return str.__str__(self)
-
-
-TOpenState = Literal["open", "opening", "closed", "closing"]
-
 
 Builder.load_string(
     """
