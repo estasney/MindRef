@@ -1,7 +1,7 @@
 from enum import Enum
 from math import sin
 
-from kivy import Logger
+from kivy.logger import Logger
 from kivy.animation import Animation
 from kivy.clock import Clock
 from kivy.core.window import Window
