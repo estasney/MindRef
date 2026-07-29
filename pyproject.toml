@@ -142,7 +142,7 @@ ignore = ["tests", "**/*.pyx", "**/*.pxd"]
 extraPaths = ["src"]
 pythonVersion = "3.12"
 stubPath="./typings"
-
+reportImportCycles = false
 reportAny = false
 reportConstantRedefinition = false
 reportExplicitAny = false
