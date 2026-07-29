@@ -177,9 +177,9 @@ class EditScreenIds(NamedTuple):
 class EditScreen(Screen):
     ids: EditScreenIds
     is_loading = BooleanProperty(False)
-    app: "AppRegistryProtocol" = ObjectProperty()
-    lexer: "Lexer" = ObjectProperty()
-    editing_note: "NoteFile" = ObjectProperty(allownone=True)
+    app: "ObjectProperty[AppRegistryProtocol]" = ObjectProperty()
+    lexer: "ObjectProperty[Lexer]" = ObjectProperty()
+    editing_note: "ObjectProperty[NoteFile | None]" = ObjectProperty(allownone=True)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

@@ -1,6 +1,8 @@
+from collections.abc import Sequence
+
 from kivy.parser import parse_color
 
-THEME_COLORS = {
+THEME_COLORS: dict[str, Sequence[float]] = {
     "White": (1, 1, 1, 1),
     "Black": (0, 0, 0, 1),
     "RichBlack": parse_color("#161D28"),

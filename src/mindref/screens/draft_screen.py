@@ -176,8 +176,8 @@ class DraftScreenIds(NamedTuple):
 class DraftScreen(Screen):
     ids: DraftScreenIds
     is_loading = BooleanProperty(False)
-    app: "AppRegistryProtocol" = ObjectProperty()
-    lexer: "Lexer" = ObjectProperty()
+    app: "ObjectProperty[AppRegistryProtocol]" = ObjectProperty()
+    lexer: "ObjectProperty[Lexer]" = ObjectProperty()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

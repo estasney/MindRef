@@ -1,12 +1,20 @@
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from concurrent.futures.thread import ThreadPoolExecutor
 from typing import TYPE_CHECKING, Protocol, TypeVar
 
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from kivy.properties import (
+        BooleanProperty,
+        ConfigParserProperty,
+        DictProperty,
+        ListProperty,
+        ObjectProperty,
+        StringProperty,
+    )
     from kivy.uix.screenmanager import ScreenManager
 
     from mindref.app_notes import NoteFile
@@ -18,16 +26,18 @@ if TYPE_CHECKING:
 class AppRegistryProtocol(Protocol):
     atlas_service: AtlasService
     fs: FileSystemBase
-    platform_android: bool
-    error_message: str
-    screen_manager: ScreenManager
-    fonts: dict[str, str]
-    base_font_size: int
-    colors: dict[str, tuple[float, float, float] | tuple[float, float, float, float]]
-    settings_cls: str | MindrefSettings
-    user_data_dir: str
+    platform_android: BooleanProperty
+    error_message: StringProperty[str]
+    screen_manager: ObjectProperty[ScreenManager]
+    fonts: DictProperty[str, str]
+    base_font_size: ConfigParserProperty[int]
+    colors: DictProperty[str, Sequence[float]]
+    settings_cls: ObjectProperty[type[MindrefSettings]]
     pool: ThreadPoolExecutor
-    note_files: list[NoteFile]
+    note_files: ListProperty[NoteFile]
+
+    @property
+    def user_data_dir(self) -> str: ...
 
     def open_settings(self, *largs: object) -> bool: ...
 

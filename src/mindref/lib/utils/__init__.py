@@ -96,7 +96,10 @@ def get_app() -> "AppRegistryProtocol":
     """Calls App.get_running_app() but casts as expected protocol"""
     from kivy.app import App
 
-    return cast("AppRegistryProtocol", App.get_running_app())  # pyright: ignore[reportInvalidCast]
+    running_app = App.get_running_app()
+    if running_app is None:
+        raise RuntimeError("No running application")
+    return cast("AppRegistryProtocol", cast(object, running_app))
 
 
 class EnvironContext:

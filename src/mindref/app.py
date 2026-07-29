@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Sequence
 from concurrent.futures import Future
 from pathlib import Path
 from typing import TypedDict, Unpack
@@ -18,6 +19,7 @@ from kivy.properties import (
     ObjectProperty,
     StringProperty,
 )
+from kivy.uix.screenmanager import ScreenManager
 from kivy.uix.settings import Settings as KivySettings
 from kivy.utils import platform
 
@@ -27,6 +29,7 @@ from mindref.app_settings import PathConfigParserProperty
 from mindref.app_theme import THEME_COLORS
 from mindref.lib.adapters import FileManager
 from mindref.lib.adapters.atlas.fs.fs_atlas_repository import AtlasService
+from mindref.lib.adapters.base import FileSystemBase
 from mindref.lib.utils import get_app, required
 from mindref.lib.widgets.settings.settings_mindref import MindrefSettings
 from mindref.screens import NoteAppScreenManager
@@ -39,14 +42,16 @@ class MindRefInitKwargs(TypedDict, total=False):
 class MindRefApp(App):
     title = StringProperty("MindRef")
     atlas_service = AtlasService(storage_path=Path(__file__).parent / "static")
-    settings_cls = ObjectProperty(MindrefSettings)
+    settings_cls: ObjectProperty[type[MindrefSettings]] = ObjectProperty(
+        MindrefSettings
+    )
 
-    platform_android = BooleanProperty(defaultvalue=False)
+    platform_android: BooleanProperty = BooleanProperty(defaultvalue=False)
     enable_profiling = BooleanProperty(defaultvalue=False)
     note_files: ListProperty[NoteFile] = ListProperty(force_dispatch=True)
     editing_note: ObjectProperty[NoteFile | None] = ObjectProperty(allownone=True)
-    error_message = StringProperty()
-    screen_manager: ObjectProperty[NoteAppScreenManager] = ObjectProperty()
+    error_message: StringProperty[str] = StringProperty()
+    screen_manager: ObjectProperty[ScreenManager] = ObjectProperty()
 
     storage_path = PathConfigParserProperty(
         default=None, section="Storage", key="storage_path", config_name="app"
@@ -58,12 +63,12 @@ class MindRefApp(App):
         "app",
     )
 
-    fonts = DictProperty(
+    fonts: DictProperty[str, str] = DictProperty(
         {"mono": "JetBrainsMono", "default": "Roboto", "icons": "Icon"}
     )
-    colors = DictProperty(THEME_COLORS)
+    colors: DictProperty[str, Sequence[float]] = DictProperty(THEME_COLORS)
 
-    base_font_size = ConfigParserProperty(
+    base_font_size: ConfigParserProperty[int] = ConfigParserProperty(
         16, "Display", "base_font_size", "app", val_type=int, errorvalue=16
     )
 
@@ -72,7 +77,7 @@ class MindRefApp(App):
         self.pool = get_pool()
         super().__init__(**kwargs)
         self.platform_android = platform_android
-        self.fs = FileManager()
+        self.fs: FileSystemBase = FileManager()
         self.bind(
             external_storage_path=lambda *_: setattr(
                 self.fs, "external_storage_path", self.external_storage_path
