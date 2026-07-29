@@ -1,13 +1,8 @@
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Literal
 
 
-class StrEnum(str, Enum):
-    def __str__(self) -> str:
-        return str.__str__(self)
-
-
-class AnimationTiming(str, Enum):
+class AnimationTiming(StrEnum):
     in_back = "in_back"
     in_bounce = "in_bounce"
     in_circ = "in_circ"
