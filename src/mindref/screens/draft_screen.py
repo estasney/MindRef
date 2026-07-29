@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING, NamedTuple, Protocol
 
 from kivy.lang import Builder
 from kivy.properties import BooleanProperty, ObjectProperty
@@ -144,11 +144,17 @@ Builder.load_string("""
 """)
 
 
-class SaveDraftButton(LabelButton, LoadingButtonMixin):
-    app = ObjectProperty()
-    root = ObjectProperty()
+class LoadingStateProtocol(Protocol):
+    """A widget whose loading state a child button drives."""
 
-    def __init__(self, **kwargs):
+    is_loading: bool
+
+
+class SaveDraftButton(LabelButton, LoadingButtonMixin):
+    app: ObjectProperty[AppRegistryProtocol] = ObjectProperty()
+    root: ObjectProperty[LoadingStateProtocol] = ObjectProperty()
+
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
         self.mutation = Mutation(self.save_draft_on_app)
         self.mutation.bind(
@@ -156,14 +162,14 @@ class SaveDraftButton(LabelButton, LoadingButtonMixin):
             on_resolved=self.handle_on_resolved,
         )
 
-    def handle_on_mutate(self, _dt):
+    def handle_on_mutate(self, *_args: object) -> None:
         self.disabled = True
 
-    def handle_on_resolved(self, _dt):
+    def handle_on_resolved(self, *_args: object) -> None:
         self.disabled = False
         self.root.is_loading = False
 
-    def save_draft_on_app(self, file_name: str, text: str):
+    def save_draft_on_app(self, file_name: str, text: str) -> None:
         self.root.is_loading = True
         self.app.save_draft_note(file_name, text)
 
@@ -179,6 +185,6 @@ class DraftScreen(Screen):
     app: "ObjectProperty[AppRegistryProtocol]" = ObjectProperty()
     lexer: "ObjectProperty[Lexer]" = ObjectProperty()
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
         self.lexer = get_lexer_by_name("markdown")
