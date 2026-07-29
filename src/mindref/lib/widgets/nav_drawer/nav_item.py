@@ -1,11 +1,12 @@
 from dataclasses import dataclass
+from functools import partial
 
 from kivy.animation import Animation
 from kivy.clock import Clock
 from kivy.graphics import Color, RoundedRectangle
 from kivy.lang import Builder
 from kivy.metrics import dp
-from kivy.properties import BooleanProperty, ColorProperty, StringProperty, partial
+from kivy.properties import BooleanProperty, ColorProperty, StringProperty
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.widget import Widget
 
