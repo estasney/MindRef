@@ -1,14 +1,14 @@
+from __future__ import annotations
+
 from functools import partial
 from typing import TYPE_CHECKING, NamedTuple
 
 from kivy.animation import Animation
-from kivy.app import App
 from kivy.clock import Clock
 from kivy.lang import Builder
 from kivy.logger import Logger
 from kivy.properties import (
     BooleanProperty,
-    DictProperty,
     ListProperty,
     NumericProperty,
     OptionProperty,
@@ -17,6 +17,7 @@ from kivy.properties import (
 )
 
 from mindref.lib.models import AnimationTiming, OpenState, TOpenState
+from mindref.lib.utils import get_app
 from mindref.lib.widgets.behavior import DebugFloatLayout
 from mindref.lib.widgets.buttons.buttons import ThemedIconButton
 from mindref.lib.widgets.nav_drawer.nav_buttons import (
@@ -68,27 +69,25 @@ Builder.load_string(
 
 
 class NavDrawerIds(NamedTuple):
-    top_bar: "BoxLayout"
-    bottom_bar: "BoxLayout"
-    nav_items: "V2RefreshContainer"
+    top_bar: BoxLayout
+    bottom_bar: BoxLayout
+    nav_items: V2RefreshContainer
 
 
 class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
-    ids: NavDrawerIds = DictProperty({})
+    ids: NavDrawerIds
     open_progress = NumericProperty(0)
     top_bar_left_inset = NumericProperty(0)
     top_bar_height = NumericProperty(0)
     animation_open_duration = NumericProperty(0.2)
     animation_open_timing = OptionProperty(
-        AnimationTiming.in_out_quad, options=[AnimationTiming.__members__.values()]
+        AnimationTiming.in_out_quad, options=list(AnimationTiming)
     )
     animation_closed_duration = NumericProperty(0.2)
     animation_closed_timing = OptionProperty(
-        AnimationTiming.in_out_quad, options=[AnimationTiming.__members__.values()]
+        AnimationTiming.in_out_quad, options=list(AnimationTiming)
     )
-    open_state = OptionProperty(
-        OpenState.closed, options=list(OpenState.__members__.values())
-    )
+    open_state = OptionProperty(OpenState.closed, options=list(OpenState))
 
     clear_search_button: ClearSearchButton | None
     settings_button: ThemedIconButton | None
@@ -97,7 +96,7 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
     note_actions_bind_uid: int
     edit_note_button: ThemedIconButton | None
     new_note_button: ThemedIconButton | None
-    search_filter: str = StringProperty()
+    search_filter: StringProperty[str] = StringProperty()
 
     drawer_open_animation: Animation
     drawer_close_animation: Animation
@@ -106,7 +105,7 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
 
     nav_link_spacing = VariableListProperty([0, 0], length=2)
     nav_link_padding = VariableListProperty([0, 0, 0, 0], length=4)
-    nav_data_items: list[NavItemData] = ListProperty([], force_dispatch=True)
+    nav_data_items: ListProperty[NavItemData] = ListProperty([], force_dispatch=True)
     nav_id_selected = StringProperty(None, allownone=True)
     close_on_nav = BooleanProperty(True)
 
@@ -122,7 +121,7 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
         "on_refresh",
     )
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object) -> None:
         super().__init__(**kwargs)
         self.rebuild_animations()
         self.fbind("animation_open_duration", self.rebuild_animations)
@@ -138,21 +137,24 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
         self.edit_note_button = None
         self.new_note_button = None
 
-    def open_state_open_cb(self, *args, **kwargs):
+    def open_state_open_cb(self, *args: object, **kwargs: object) -> None:
         Logger.debug(
             f"{type(self).__name__} : open_state_open_cb called with args: {args}, kwargs: {kwargs}"
         )
         self.open_state = OpenState.open
         self.ids.nav_items.refresh_enabled = True
 
-    def open_state_closed_cb(self, *args, **kwargs):
+    def open_state_closed_cb(self, *args: object, **kwargs: object) -> None:
         Logger.debug(
             f"{type(self).__name__} : open_state_closed_cb called with args: {args}, kwargs: {kwargs}"
         )
         self.open_state = OpenState.closed
         self.ids.nav_items.refresh_enabled = False
 
-    def attach_search_box(self):
+    def handle_search_clear(self, *_args: object) -> bool:
+        return self.dispatch("on_search_clear", self.clear_search_button)
+
+    def attach_search_box(self) -> None:
         if self.search_box is None:
             self.search_box = SearchBox(pos_hint={"center_y": 0.5}, hint_text="Search")
             self.search_box.text = self.search_filter
@@ -162,22 +164,23 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
             self.clear_search_button = ClearSearchButton()
             self.clear_search_button.bind(
                 height=self.clear_search_button.setter("width"),
-                on_release=lambda _: self.dispatch(
-                    "on_search_clear", self.clear_search_button
-                ),
+                on_release=self.handle_search_clear,
             )
             self.ids.top_bar.add_widget(self.clear_search_button)
 
-    def attach_settings_button(self):
+    def handle_open_settings(self, *_args: object) -> bool:
+        return get_app().open_settings()
+
+    def attach_settings_button(self) -> None:
         if self.settings_button is None:
             self.settings_button = SettingsButton()
             self.settings_button.bind(
                 height=self.settings_button.setter("width"),
-                on_release=lambda _: App.get_running_app().open_settings(),
+                on_release=self.handle_open_settings,
             )
             self.ids.bottom_bar.add_widget(self.settings_button)
 
-    def attach_note_actions(self):
+    def attach_note_actions(self) -> None:
         if self.note_actions_container is None:
             self.note_actions_container = NoteActionsContainer(
                 nav_id_selected=self.nav_id_selected
@@ -188,7 +191,7 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
             )
             self.ids.bottom_bar.add_widget(self.note_actions_container)
 
-    def detach_search_box(self):
+    def detach_search_box(self) -> None:
         if self.clear_search_button is not None:
             self.ids.top_bar.remove_widget(self.clear_search_button)
             self.clear_search_button = None
@@ -196,12 +199,12 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
             self.ids.top_bar.remove_widget(self.search_box)
             self.search_box = None
 
-    def detach_settings_button(self):
+    def detach_settings_button(self) -> None:
         if self.settings_button is not None:
             self.ids.bottom_bar.remove_widget(self.settings_button)
             self.settings_button = None
 
-    def detach_note_actions(self):
+    def detach_note_actions(self) -> None:
         if self.note_actions_container is not None:
             self.note_actions_container.detach()
             self.ids.bottom_bar.remove_widget(self.note_actions_container)
@@ -212,7 +215,7 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
             self.edit_note_button = None
             self.new_note_button = None
 
-    def rebuild_animations(self, *args):
+    def rebuild_animations(self, *_args: object) -> None:
         """Construct all four animations from the current duration/timing properties"""
         self.drawer_open_animation = Animation(
             open_progress=1,
@@ -237,7 +240,7 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
             t=self.animation_closed_timing,
         )
 
-    def on_open_state(self, _instance, _value: TOpenState | OpenState):
+    def on_open_state(self, _instance: object, _value: TOpenState | OpenState) -> None:
         match _value:
             case OpenState.open:
                 self.dispatch("on_open", _instance, _value)
@@ -251,14 +254,14 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
                 msg = f"Invalid state: {_value}"
                 raise ValueError(msg)
 
-    def on_open(self, _instance, _value):
+    def on_open(self, _instance: object, _value: TOpenState | OpenState) -> None:
         self.open_state = OpenState.open
         self.fade_in_animation.start(self.clear_search_button)
         self.fade_in_animation.start(self.search_box)
         self.fade_in_animation.start(self.settings_button)
         self.fade_in_animation.start(self.note_actions_container)
 
-    def on_opening(self, _instance, _value):
+    def on_opening(self, _instance: object, _value: TOpenState | OpenState) -> None:
         self.drawer_close_animation.cancel(self)
 
         self.attach_search_box()
@@ -274,7 +277,7 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
 
         self.drawer_open_animation.start(self)
 
-    def on_closing(self, _instance, _value):
+    def on_closing(self, _instance: object, _value: TOpenState | OpenState) -> None:
         self.drawer_open_animation.cancel(self)
 
         self.fade_in_animation.cancel(self.ids.nav_items)
@@ -289,14 +292,14 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
         self.fade_out_animation.start(self.note_actions_container)
         self.drawer_close_animation.start(self)
 
-    def on_close(self, _instance, _value):
+    def on_close(self, _instance: object, _value: TOpenState | OpenState) -> None:
         self.open_state = OpenState.closed
 
         self.detach_search_box()
         self.detach_note_actions()
         self.detach_settings_button()
 
-    def toggle(self, _instance: ThemedIconButton | None):
+    def toggle(self, _instance: ThemedIconButton | None) -> None:
         match self.open_state:
             case OpenState.open:
                 self.on_open_state(self, OpenState.closing)
@@ -307,7 +310,7 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
             case OpenState.closing:
                 self.on_open_state(self, OpenState.opening)
 
-    def handle_nav_selected(self, instance: "NavItem") -> bool:
+    def handle_nav_selected(self, instance: NavItem) -> bool:
         """Before bubbling up, check that the drawer is open"""
         if self.open_state == OpenState.closed:
             return True
@@ -319,10 +322,10 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
 
         return self.dispatch("on_nav_selected", instance)
 
-    def on_nav_selected(self, _instance: "NavItem"):
+    def on_nav_selected(self, _instance: NavItem) -> bool:
         return True
 
-    def on_search_clear(self, _instance: ThemedIconButton | None):
+    def on_search_clear(self, _instance: ThemedIconButton | None) -> bool:
         if self.search_box is not None:
             self.search_filter = ""
             self.search_box.text = ""
@@ -330,7 +333,7 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
 
         return True
 
-    def on_search_filter(self, _instance, value: str):
+    def on_search_filter(self, _instance: object, value: str) -> None:
         """We maintain the state of search filter but debounce our dispatches - unless its cleared"""
 
         if self._search_filter_sch_event is not None:
@@ -341,19 +344,19 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
             timeout=0.1 if value else 0,
         )
 
-    def _dispatch_search_filter(self, _dt, value: str):
+    def _dispatch_search_filter(self, _dt: float, value: str) -> None:
         self._search_filter_sch_event = None
         self.render_nav_items()
 
-    def update_nav_selection(self, _dt):
+    def update_nav_selection(self, _dt: float) -> None:
         for widget in self.ids.nav_items.main_children():
             widget.selected = self.nav_id_selected == widget.nav_id
 
-    def add_widget_to_drawer(self, widget: "NavItem"):
-        widget.bind(on_release=lambda _: self.handle_nav_selected(widget))
+    def add_widget_to_drawer(self, widget: NavItem) -> None:
+        widget.bind(on_release=self.handle_nav_selected)
         self.ids.nav_items.add_widget_to_main(widget)
 
-    def render_nav_items(self, *_args):
+    def render_nav_items(self, *_args: object) -> None:
         """On a change, re-render all the nav items"""
         self.ids.nav_items.clear_widgets_from_main()
         items: list[NavItemData] = self.nav_data_items[:]
@@ -373,6 +376,6 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
                 lambda _: setattr(self, "open_state", OpenState.opening),
             )
 
-    def on_nav_data_items(self, _widget, value):
+    def on_nav_data_items(self, _widget: object, _value: list[NavItemData]) -> None:
         self.nav_id_selected = None
         self.render_nav_items()
