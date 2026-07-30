@@ -122,7 +122,7 @@ class LabelHighlightInline(Label):
             funbind("padding_x", self.draw_ref_spans_trigger)
             funbind("padding_y", self.draw_ref_spans_trigger)
 
-    def add_snippet(self, snippet: TextSnippet):
+    def add_snippet(self, snippet: TextSnippet) -> None:
         self.snippets.append(snippet)
 
     def handle_contrast(self, *_args):

@@ -156,7 +156,7 @@ class SwipingLayout(Scatter):
         cache=True,
     )
 
-    def on_swipe(self, swipe_direction: bool): ...
+    def on_swipe(self, swipe_direction: bool) -> None: ...
 
     def add_widget(self, *args, **kwargs):
         self.content.add_widget(*args, **kwargs)

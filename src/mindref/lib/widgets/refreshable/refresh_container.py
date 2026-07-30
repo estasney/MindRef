@@ -116,7 +116,7 @@ class V2RefreshContainer(DebugFloatLayout, V2RefreshBehavior):
         This can be used to update the refresh icon or trigger a refresh.
         """
 
-    def add_widget_to_main(self, widget: Widget):
+    def add_widget_to_main(self, widget: Widget) -> None:
         """
         Add a widget to the grid layout
         :param widget: The widget to add

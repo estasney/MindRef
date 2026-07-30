@@ -117,7 +117,7 @@ class AtlasService(AbstractAtlasRepository):
         atlas_name: str,
         atlas_size: tuple[int, int] | None = None,
         padding: int = 2,
-    ):
+    ) -> None:
         """
         Lazy implementation that will create an n+1 atlas image large enough to contain the passed images.
 
@@ -252,6 +252,6 @@ class AtlasService(AbstractAtlasRepository):
 
         raise KeyError(f"{name} not found in atlas {atlas_name}")
 
-    def uri_for(self, name: str, atlas_name: str):
+    def uri_for(self, name: str, atlas_name: str) -> str:
         matched = self._match_atlas(atlas_name)
         return f"atlas://{matched.path.with_suffix('')}/{name}"

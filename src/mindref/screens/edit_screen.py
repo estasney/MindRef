@@ -164,7 +164,7 @@ class SaveEditButton(LabelButton, LoadingButtonMixin):
         self.disabled = False
         self.root.is_loading = False
 
-    def save_edit_on_app(self, text: str):
+    def save_edit_on_app(self, text: str) -> None:
         self.root.is_loading = True
         self.app.save_edit_note(text)
 
@@ -189,7 +189,7 @@ class EditScreen(Screen):
     def _bind_editing_note(self, _dt):
         self.app.bind(editing_note=self.setter("editing_note"))
 
-    def on_editing_note(self, _instance, value: Optional["NoteFile"]):
+    def on_editing_note(self, _instance, value: Optional["NoteFile"]) -> bool:
         editor = self.ids.code_input
         if not value:
             editor.text = ""
