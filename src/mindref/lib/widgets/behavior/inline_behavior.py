@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from functools import lru_cache
 from typing import Literal, NamedTuple
 
@@ -84,7 +86,7 @@ class LabelHighlightInline(Label):
     text_color_highlight = StringProperty("#ffffff")
     font_family_normal = StringProperty()
     font_family_mono = StringProperty()
-    snippets: list[TextSnippet] = ListProperty()
+    snippets: ListProperty[TextSnippet] = ListProperty()
     has_parent = BooleanProperty(defaultvalue=False)
     highlight_padding_x = NumericProperty(defaultvalue=0)
     highlight_padding_y = NumericProperty(defaultvalue=0)
@@ -97,7 +99,7 @@ class LabelHighlightInline(Label):
         self.handle_contrast_trigger = Clock.create_trigger(self.handle_contrast)
         self.draw_ref_spans_trigger = Clock.create_trigger(self.draw_ref_spans)
 
-    def on_parent(self, *_args):
+    def on_parent(self, *_args: object) -> None:
         fbind = self.fbind
         funbind = self.funbind
         if self.parent:
@@ -125,7 +127,7 @@ class LabelHighlightInline(Label):
     def add_snippet(self, snippet: TextSnippet) -> None:
         self.snippets.append(snippet)
 
-    def handle_contrast(self, *_args):
+    def handle_contrast(self, *_args: object) -> bool:
         """Update computed text_colors"""
         self.text_color = get_cached_text_contrast(
             background_color=tuple(self.bg_color),
@@ -137,9 +139,9 @@ class LabelHighlightInline(Label):
         )
         return True
 
-    def markup_text(self, *_args, **_kwargs):
+    def markup_text(self, *_args: object, **_kwargs: object) -> bool:
         """Update the markup within text to reflect new colors"""
-        texts = []
+        texts: list[str] = []
         for snippet in self.snippets:
             # If our last snippet is highlighted we add additional
             snippet_text = snippet.text
@@ -214,7 +216,7 @@ class LabelHighlightInline(Label):
             self.highlight_padding_y,
         )
 
-    def draw_ref_spans(self, *_args, **_kwargs):
+    def draw_ref_spans(self, *_args: object, **_kwargs: object) -> None:
         """
         Draw ref highlights
 
