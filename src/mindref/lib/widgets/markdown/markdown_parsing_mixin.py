@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from kivy.logger import Logger
+from kivy.properties import Property
 
 from mindref.lib.domain.md_parser_types import (
     TMdInlineTypes,
@@ -16,15 +17,21 @@ class MarkdownLabelParsingMixin:
 
     Notes
     -----
-    Subclasses must have an attribute 'snippets' as a ListProperty
+    Subclasses own how snippets are stored, and expose them through
+    'get_snippets' and 'set_snippets'.
 
     """
 
-    snippets: list[TextSnippet]
-    open_bbcode_tag: str
+    open_bbcode_tag: Property[str]
+
+    def get_snippets(self) -> list[TextSnippet]:
+        raise NotImplementedError
+
+    def set_snippets(self, value: list[TextSnippet]) -> None:
+        raise NotImplementedError
 
     def __init__(self):
-        self.snippets = []
+        self.set_snippets([])
         self.open_bbcode_tag = ""
 
     def visit(self, node: TMdInlineTypes) -> TMdInlineTypes | None:
@@ -53,26 +60,29 @@ class MarkdownLabelParsingMixin:
                 else:
                     text = node["text"]
                 match span_type:
-                    # We copy snippets in case cls.snippets is an AliasProperty
-                    # In this case, snippets.append would not trigger a change
                     case "text" | "inline_html":
-                        self.snippets = [
-                            *self.snippets[:],
-                            TextSnippet(text, highlight_tag=None),
-                        ]
+                        self.set_snippets(
+                            [
+                                *self.get_snippets(),
+                                TextSnippet(text, highlight_tag=None),
+                            ]
+                        )
                         return None
                     case "kbd":
-                        self.snippets = [
-                            *self.snippets[:],
-                            TextSnippet(text, highlight_tag="kbd"),
-                        ]
-
+                        self.set_snippets(
+                            [
+                                *self.get_snippets(),
+                                TextSnippet(text, highlight_tag="kbd"),
+                            ]
+                        )
                         return None
                     case "codespan":
-                        self.snippets = [
-                            *self.snippets[:],
-                            TextSnippet(text, highlight_tag="hl"),
-                        ]
+                        self.set_snippets(
+                            [
+                                *self.get_snippets(),
+                                TextSnippet(text, highlight_tag="hl"),
+                            ]
+                        )
                         return None
             case _:
                 Logger.warning(

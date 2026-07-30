@@ -12,6 +12,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 
 from mindref.lib.utils import get_app
+from mindref.lib.widgets.behavior.inline_behavior import TextSnippet
 from mindref.lib.widgets.markdown.markdown_parsing_mixin import (
     MarkdownLabelParsingMixin,
 )
@@ -96,6 +97,12 @@ class MarkdownCell(BoxLayout, MarkdownLabelParsingMixin):
         fbind("halign", label.setter("halign"))
         fbind("valign", label.setter("valign"))
         fbind("bold", self.handle_bold)
+
+    def get_snippets(self) -> list[TextSnippet]:
+        return self.snippets
+
+    def set_snippets(self, value: list[TextSnippet]) -> None:
+        self.snippets = value
 
     def handle_bold(self, *_args):
         if self.bold:

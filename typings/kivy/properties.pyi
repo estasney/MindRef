@@ -173,7 +173,7 @@ class StringProperty(Property[T]):
 class ListProperty(Property[list[T]]):
     def __init__(
         self,
-        defaultvalue: list[T] = ...,
+        defaultvalue: list[T] = [],
         *,
         allownone: bool = False,
         force_dispatch: bool = False,

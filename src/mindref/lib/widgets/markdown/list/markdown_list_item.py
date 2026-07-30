@@ -1,5 +1,5 @@
 from kivy.lang import Builder
-from kivy.properties import AliasProperty, ListProperty, NumericProperty
+from kivy.properties import NumericProperty
 
 from mindref.lib.widgets.behavior.inline_behavior import TextSnippet
 from mindref.lib.widgets.markdown.base.base import MarkdownLabelBase
@@ -28,27 +28,16 @@ Builder.load_string("""
 
 class MarkdownListItem(MarkdownLabelBase):
     level = NumericProperty(1)
-    _snippets = ListProperty()
 
-    def get_snippets(self):
-        prefix: str = "  " * self.level  # pyright: ignore[reportOperatorIssue]
-        prefix += f"{chr(8226)} "
-        return [
+    def get_snippets(self) -> list[TextSnippet]:
+        return self.snippets
+
+    def set_snippets(self, value: list[TextSnippet]) -> None:
+        prefix = "  " * int(self.level) + f"{chr(8226)} "
+        self.snippets = [
             TextSnippet(text=prefix, highlight_tag=None),
-            *(s for s in self._snippets if chr(8226) not in s.text),
+            *(s for s in value if chr(8226) not in s.text),
         ]
-
-    def set_snippets(self, value):
-        self._snippets = value
-
-        return True
-
-    snippets = AliasProperty(
-        get_snippets,
-        set_snippets,
-        bind=("_snippets", "level"),
-        cache=True,
-    )
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

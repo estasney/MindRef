@@ -1,6 +1,5 @@
 from kivy.lang import Builder
 from kivy.properties import (
-    ListProperty,
     NumericProperty,
     ObjectProperty,
     StringProperty,
@@ -83,7 +82,6 @@ class MarkdownHeading(MarkdownLabelBase):
 class MarkdownBlock(MarkdownLabelBase):
     label = ObjectProperty()
     open_bbcode_tag = StringProperty()
-    snippets = ListProperty()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
