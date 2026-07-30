@@ -68,7 +68,7 @@ class AnimatedHSeparator(HSeparator):
     _width = NumericProperty()
     _color = ColorProperty()
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
 
     def get_animation_active(self):

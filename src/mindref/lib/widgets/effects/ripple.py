@@ -40,7 +40,7 @@ class RippleMixin:
     fs = StringProperty()
     size: tuple[int, int]
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         EventLoop.ensure_window()
         super().__init__(**kwargs)
         self.canvas = RenderContext(

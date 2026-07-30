@@ -75,7 +75,7 @@ Builder.load_string("""
 class MarkdownHeading(MarkdownLabelBase):
     level = NumericProperty()
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
 
 
@@ -83,10 +83,10 @@ class MarkdownBlock(MarkdownLabelBase):
     label = ObjectProperty()
     open_bbcode_tag = StringProperty()
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
 
 
 class MarkdownThematicBreak(BoxLayout):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)

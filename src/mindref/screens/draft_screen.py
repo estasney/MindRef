@@ -177,15 +177,15 @@ class SaveDraftButton(LabelButton, LoadingButtonMixin):
 
 
 class DraftScreenIds(NamedTuple):
-    code_input: "CodeInput"
-    layout: "BoxLayout"
+    code_input: CodeInput
+    layout: BoxLayout
 
 
 class DraftScreen(Screen):
     ids: DraftScreenIds
     is_loading = BooleanProperty(False)
-    app: "ObjectProperty[AppRegistryProtocol]" = ObjectProperty()
-    lexer: "ObjectProperty[Lexer]" = ObjectProperty()
+    app: ObjectProperty[AppRegistryProtocol] = ObjectProperty()
+    lexer: ObjectProperty[Lexer] = ObjectProperty()
 
     def __init__(self, **kwargs: object):
         super().__init__(**kwargs)

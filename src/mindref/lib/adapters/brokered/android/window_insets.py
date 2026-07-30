@@ -3,7 +3,6 @@ from functools import cache
 from typing import TYPE_CHECKING
 
 from mindref.lib import get_app
-
 from mindref.lib.adapters.brokered.android.kivy_activity import get_kivy_activity
 
 if TYPE_CHECKING:

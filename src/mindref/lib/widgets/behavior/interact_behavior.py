@@ -7,7 +7,7 @@ class InteractBehavior(Widget):
     This fires when 'on_touch_down' is received and defers to super
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
         self.register_event_type("on_interact")
 

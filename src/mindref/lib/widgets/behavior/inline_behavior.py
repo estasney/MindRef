@@ -91,7 +91,7 @@ class LabelHighlightInline(Label):
     highlight_padding = ReferenceListProperty(highlight_padding_x, highlight_padding_y)
     highlight_radius = VariableListProperty([sp(1)])
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
         self.markup_text_trigger = Clock.create_trigger(self.markup_text)
         self.handle_contrast_trigger = Clock.create_trigger(self.handle_contrast)

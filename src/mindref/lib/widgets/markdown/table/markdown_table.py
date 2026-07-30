@@ -57,7 +57,7 @@ class MarkdownTable(GridLayout):
 
 
 class MarkdownRow(BoxLayout):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
         fbind = self.fbind
         draw = self.schedule_draw
@@ -90,7 +90,7 @@ class MarkdownCell(BoxLayout, MarkdownLabelParsingMixin):
     valign = OptionProperty("center", options=["bottom", "middle", "center", "top"])
     bold = BooleanProperty(False)
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
         fbind = self.fbind
         label = self.label

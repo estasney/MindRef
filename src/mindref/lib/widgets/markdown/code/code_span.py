@@ -44,7 +44,7 @@ class MarkdownCodeSpan(GridLayout):
     text = StringProperty()
     background_color = StringProperty()
 
-    def __init__(self, text, **kwargs):
+    def __init__(self, text, **kwargs: object):
         super().__init__(**kwargs)
         self.styler = JetBrainsDark
         self.background_color = self.styler.background_color

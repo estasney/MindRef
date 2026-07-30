@@ -91,7 +91,7 @@ class DrawerLayout(AnchorLayout):
 
     __events__ = ("on_opening", "on_open", "on_closing", "on_close")
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
         self.register_event_type("on_opening")
         self.register_event_type("on_open")
@@ -110,7 +110,7 @@ class DrawerLayout(AnchorLayout):
 
     _window_size = AliasProperty(_get_window_size, None, bind=("_window",), cache=True)
 
-    def open(self, *_args, **kwargs):
+    def open(self, *_args, **kwargs: object):
         """
         Display the drawer in the Window
 
@@ -127,7 +127,7 @@ class DrawerLayout(AnchorLayout):
         self.right = 0
         self.dispatch("on_opening")
 
-    def close(self, *_args, **kwargs):
+    def close(self, *_args, **kwargs: object):
         """
         Close the drawer
 

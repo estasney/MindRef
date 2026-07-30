@@ -11,9 +11,9 @@ from mindref.lib.models.enums import (
 __all__ = [
     "AnimationTiming",
     "MutationStatus",
+    "OpenState",
     "TAnimationTiming",
     "TMutationStatus",
     "TMutationStatusLit",
-    "OpenState",
     "TOpenState",
 ]

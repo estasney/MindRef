@@ -10,5 +10,5 @@ Builder.load_string("""
 
 
 class MarkdownList(GridLayout):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)

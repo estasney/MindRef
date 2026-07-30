@@ -24,7 +24,7 @@ class LinearProgress(EffectWidget):
     animated = BooleanProperty(False)
     effects = ListProperty()
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
         fbind = self.fbind
         fbind("grad_start", self.setup_effect)

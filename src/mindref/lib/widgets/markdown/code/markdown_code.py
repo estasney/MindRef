@@ -120,7 +120,7 @@ class MarkdownCode(GridLayout):
         _get_text_content, _set_text_content, bind=["_text_content"]
     )
 
-    def __init__(self, lexer: str | None, **kwargs) -> None:
+    def __init__(self, lexer: str | None, **kwargs: object) -> None:
         super().__init__(**kwargs)
         self.styler = JetBrainsDark
         self.lexer_name = lexer.strip() if lexer else "markdown"

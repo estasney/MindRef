@@ -125,7 +125,7 @@ class CancelEditButton(LabelButton, LoadingButtonMixin):
     app = ObjectProperty()
     root = ObjectProperty()
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
         self.mutation = Mutation(self.cancel_edit_on_app)
         self.mutation.bind(
@@ -149,7 +149,7 @@ class SaveEditButton(LabelButton, LoadingButtonMixin):
     app = ObjectProperty()
     root = ObjectProperty()
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
         self.mutation = Mutation(self.save_edit_on_app)
         self.mutation.bind(
@@ -181,7 +181,7 @@ class EditScreen(Screen):
     lexer: "ObjectProperty[Lexer]" = ObjectProperty()
     editing_note: "ObjectProperty[NoteFile | None]" = ObjectProperty(allownone=True)
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
         self.lexer = get_lexer_by_name("markdown")
         Clock.schedule_once(self._bind_editing_note, 0)

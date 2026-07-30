@@ -39,7 +39,7 @@ class LinearProgressEffect(EffectBase):
     speed = NumericProperty(3.5)
     bar_width = NumericProperty(3.0)
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
         self.do_glsl()
 

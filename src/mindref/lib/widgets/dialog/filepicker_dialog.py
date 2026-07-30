@@ -74,7 +74,7 @@ class PickerDialog(FloatLayout):
     start_folder = StringProperty()
     chooser = ObjectProperty()
 
-    def __init__(self, on_accept, on_cancel, **kwargs):
+    def __init__(self, on_accept, on_cancel, **kwargs: object):
         super().__init__(**kwargs)
         self.on_accept = on_accept
         self.on_cancel = on_cancel
@@ -97,10 +97,10 @@ class PickerDialog(FloatLayout):
 class LoadDialog(PickerDialog):
     chooser = ObjectProperty()
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
 
 
 class SaveDialog(PickerDialog):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)

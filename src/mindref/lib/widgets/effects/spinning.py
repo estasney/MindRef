@@ -27,7 +27,7 @@ vec4 effect(vec4 color, sampler2D texture, vec2 text_coords, vec2 coords) {{
 class SpinningEffect(EffectBase):
     spin_rate = NumericProperty(defaultvalue=10)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs: object):
         self.spin_rate = kwargs.pop("spin_rate", 10)
         super().__init__(*args, **kwargs)
         self.glsl = effect_spinning.format(spinRate=self.spin_rate)

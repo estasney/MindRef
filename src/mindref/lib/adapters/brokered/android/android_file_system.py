@@ -19,7 +19,7 @@ TCopyToExternalStorageCallback = Callable[[str], None]
 
 
 class AndroidFileSystemAdapter(FileSystemBase):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs: object):
         super().__init__(*args, **kwargs)
         self.app = get_app()
         from mindref.lib.adapters.brokered.android.external_storage import (
@@ -129,7 +129,7 @@ class AndroidFileSystemAdapter(FileSystemBase):
 
         # Dispatch to MindRefUtils, using a thread to copy to external storage
 
-        def handle_copy_complete(*args, **kwargs):
+        def handle_copy_complete(*args, **kwargs: object):
             Logger.info(
                 f"{self.__class__.__name__} : Draft note saved to external storage: {note_file.file_path}"
             )
@@ -167,7 +167,7 @@ class AndroidFileSystemAdapter(FileSystemBase):
 
         # Dispatch to MindRefUtils, using a thread to copy to external storage
 
-        def handle_copy_complete(*args, **kwargs):
+        def handle_copy_complete(*args, **kwargs: object):
             Logger.info(
                 f"{self.__class__.__name__} : Edit note saved to external storage: {note_file.file_path}"
             )

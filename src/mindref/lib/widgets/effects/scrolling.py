@@ -1,12 +1,12 @@
 from enum import Enum
 from math import sin
 
-from kivy.logger import Logger
 from kivy.animation import Animation
 from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.effects.opacityscroll import OpacityScrollEffect
 from kivy.lang import Builder
+from kivy.logger import Logger
 from kivy.properties import (
     BooleanProperty,
     NumericProperty,
@@ -64,7 +64,7 @@ class RefreshSymbol(FloatLayout):
     source = StringProperty(None, allownone=True)
     animate = BooleanProperty(False)
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         self.source = get_app().atlas_service.uri_for("refresh", atlas_name="icons")
         super().__init__(**kwargs)
         self._scheduler = None
@@ -99,7 +99,7 @@ class RefreshOverscrollEffect(OpacityScrollEffect):
     )  # how far to pull (0..1) to trigger refresh
     refresh_threshold_met = BooleanProperty(False)
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
         self.refresh_scheduler = None
 

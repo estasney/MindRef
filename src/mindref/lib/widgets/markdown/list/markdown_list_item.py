@@ -39,5 +39,5 @@ class MarkdownListItem(MarkdownLabelBase):
             *(s for s in value if chr(8226) not in s.text),
         ]
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)

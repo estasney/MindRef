@@ -49,7 +49,7 @@ class PulsingEffect(EffectBase):
     
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs: object):
         EventLoop.ensure_window()
         super().__init__(*args, **kwargs)
         self.bind(

@@ -97,7 +97,7 @@ class SwipingLayout(Scatter):
     _last_touch_pos_y = NumericProperty(0)
     _touch_translate_y = NumericProperty(0)
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         # We need to add content here instead of in the kv file as we've overridden add_widget
         self.content = LabeledBoundsLayout(size_hint=(None, None))
 
@@ -158,13 +158,13 @@ class SwipingLayout(Scatter):
 
     def on_swipe(self, swipe_direction: bool) -> None: ...
 
-    def add_widget(self, *args, **kwargs):
+    def add_widget(self, *args, **kwargs: object):
         self.content.add_widget(*args, **kwargs)
 
-    def remove_widget(self, *args, **kwargs):
+    def remove_widget(self, *args, **kwargs: object):
         self.content.remove_widget(*args, **kwargs)
 
-    def clear_widgets(self, *args, **kwargs):
+    def clear_widgets(self, *args, **kwargs: object):
         self.content.clear_widgets(*args, **kwargs)
 
     def on_touch_down(self, touch):

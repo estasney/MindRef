@@ -54,7 +54,7 @@ class ScreenContainer(InteractScreen):
     layout = ObjectProperty()
     background_color = ColorProperty()
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
 
     def get_content(self):

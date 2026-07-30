@@ -15,7 +15,7 @@ class V2RefreshBehavior(CustomBehavior):
 
     __events__ = ("on_refresh",)
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
 
     def _find_closest_parent_handler(self) -> "Widget | None":

@@ -37,7 +37,7 @@ class DebugLayout(Layout):
         fbind("debug_layout", update_debug_layout)
         fbind("on_debug_layout", update_debug_layout)
 
-    def update_debug_layout(self, _instance: "DebugLayout", _value: object) -> None:
+    def update_debug_layout(self, _instance: DebugLayout, _value: object) -> None:
         if self.debug_layout:
             if self.outline:
                 self.canvas.remove(self.outline)

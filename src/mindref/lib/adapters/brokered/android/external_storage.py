@@ -5,8 +5,6 @@ from typing import Any, Concatenate, Literal, ParamSpec
 from jnius import PythonJavaClass, java_method
 from kivy.logger import Logger
 
-from mindref.lib.utils import Singleton
-
 from mindref.lib.adapters.brokered.android.intent import get_intent_cls
 from mindref.lib.adapters.brokered.android.kivy_activity import get_kivy_activity
 from mindref.lib.adapters.brokered.android.mindref_utils import get_mindref_utils_cls
@@ -19,6 +17,7 @@ from mindref.lib.adapters.brokered.android.types import (
     V2MindRefCallCodes,
 )
 from mindref.lib.adapters.brokered.android.uri import get_uri_cls
+from mindref.lib.utils import Singleton
 
 ACTIVITY_CLASS_NAMESPACE = "org/kivy/android/PythonActivity"
 

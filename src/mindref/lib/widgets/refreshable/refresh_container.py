@@ -28,7 +28,7 @@ class RefreshScrollView(V2RefreshBehavior, ScrollView):
         0.8
     )  # how far to pull (0..1) to trigger refresh
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
         self.effect_y = OpacityScrollEffect()
 
@@ -83,7 +83,7 @@ class V2RefreshContainer(DebugFloatLayout, V2RefreshBehavior):
     refresh_enabled = BooleanProperty(True)
     animate_icon_hide: Animation
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
         Clock.schedule_once(
             self._bind_scroll_effect, 0

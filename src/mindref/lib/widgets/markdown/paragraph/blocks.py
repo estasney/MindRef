@@ -22,5 +22,5 @@ Builder.load_string("""
 
 
 class MarkdownBlockQuote(GridLayout):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)

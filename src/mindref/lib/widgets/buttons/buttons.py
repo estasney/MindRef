@@ -145,7 +145,7 @@ class ThemedButton(ButtonBehavior, BoxLayout, RippleMixin):
     enable_ripple_effect = BooleanProperty(True)
     color = ColorProperty()
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         self._on_touch_down_plain = super().on_touch_down
         self._on_touch_move_plain = super().on_touch_move
         self._on_touch_up_plain = super().on_touch_up
@@ -206,28 +206,28 @@ class ThemedLabelButton(ThemedButton):
 
     text = StringProperty()
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
 
 
 class ContainedLabelButton(ThemedLabelButton):
     """Renders a button without a background, but draws a rectangle border"""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
 
 
 class LabelButton(ThemedLabelButton):
     """Renders the most basic"""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
 
 
 class LoadingButtonMixin:
     mutation: Mutation
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
 
     def get_is_loading(self):
@@ -245,12 +245,12 @@ class ThemedIconButton(ThemedLabelButton):
     icon_code = StringProperty()
     icon_size = NumericProperty()
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
 
 
 class ImageButton(ThemedButton):
     source = StringProperty()
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
