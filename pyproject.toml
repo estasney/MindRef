@@ -155,6 +155,7 @@ reportUnknownMemberType = false
 reportUnnecessaryComparison = false
 reportUnsafeMultipleInheritance = false
 reportUnusedCallResult = false
+reportUnusedParameter = "hint"
 strictDictionaryInference = true
 strictListInference = true
 strictSetInference = true
