@@ -180,18 +180,7 @@ def format_bytes_to_human(size, precision=...) -> str | None:
 
 platform: Literal["win", "linux", "android", "macosx", "ios", "unknown"]
 
-def escape_markup(text):
-    """
-    Escape markup characters found in the text. Intended to be used when markup
-    text is activated on the Label::
-
-        untrusted_text = escape_markup('Look at the example [1]')
-        text = '[color=ff0000]' + untrusted_text + '[/color]'
-        w = Label(text=text, markup=True)
-
-    .. versionadded:: 1.3.0
-    """
-    ...
+def escape_markup(text: str) -> str: ...
 
 class reify:
     """

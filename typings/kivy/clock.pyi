@@ -8,7 +8,13 @@ from os import environ
 from collections.abc import Callable
 from typing import Protocol
 
-from kivy._clock import CyClockBase, CyClockBaseFree
+from kivy._clock import (
+    ClockEvent,
+    ClockNotRunningError,
+    CyClockBase,
+    CyClockBaseFree,
+    FreeClockEvent,
+)
 
 """
 Clock object

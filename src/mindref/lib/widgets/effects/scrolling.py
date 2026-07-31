@@ -1,8 +1,8 @@
-from enum import Enum
+from enum import StrEnum
 from math import sin
 
 from kivy.animation import Animation
-from kivy.clock import Clock
+from kivy.clock import Clock, ClockEvent
 from kivy.core.window import Window
 from kivy.effects.opacityscroll import OpacityScrollEffect
 from kivy.lang import Builder
@@ -42,17 +42,14 @@ Builder.load_string("""
 """)
 
 
-class RefreshState(str, Enum):
+class RefreshState(StrEnum):
     """
     Enum for the refresh state
     """
 
-    HIDDEN = "hidden"
-    VISIBLE = "visible"
-    ACTIVE = "active"
-
-    def __str__(self) -> str:
-        return str.__str__(self)
+    hidden = "hidden"
+    visible = "visible"
+    active = "active"
 
 
 class RefreshSymbol(FloatLayout):
@@ -64,19 +61,22 @@ class RefreshSymbol(FloatLayout):
     source = StringProperty(None, allownone=True)
     animate = BooleanProperty(False)
 
+    _scheduler: ClockEvent | None
+
     def __init__(self, **kwargs: object):
         self.source = get_app().atlas_service.uri_for("refresh", atlas_name="icons")
         super().__init__(**kwargs)
         self._scheduler = None
 
-    def on_animate(self, _, value):
+    def on_animate(self, _instance: object, value: bool) -> None:
         if value:
             self._scheduler = Clock.schedule_interval(self.increment_spin, 1 / 60)
             self._scheduler()
-        else:
+            return
+        if self._scheduler is not None:
             self._scheduler.cancel()
             self._scheduler = None
-            Animation(opacity=0, d=0.2).start(self)
+        Animation(opacity=0, d=0.2).start(self)
 
     def increment_spin(self, dt):
         self.event_dt = self.event_dt + dt

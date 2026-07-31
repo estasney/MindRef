@@ -4,7 +4,7 @@ from functools import partial
 from typing import TYPE_CHECKING, NamedTuple
 
 from kivy.animation import Animation
-from kivy.clock import Clock
+from kivy.clock import Clock, ClockEvent
 from kivy.lang import Builder
 from kivy.logger import Logger
 from kivy.properties import (
@@ -109,7 +109,7 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
     nav_id_selected = StringProperty(None, allownone=True)
     close_on_nav = BooleanProperty(True)
 
-    _search_filter_sch_event: None
+    _search_filter_sch_event: ClockEvent | None
 
     __events__ = (
         "on_open",

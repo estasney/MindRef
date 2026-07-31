@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 from functools import partial
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from kivy.animation import Animation
+from kivy.input.motionevent import MotionEvent
 from kivy.lang import Builder
 from kivy.properties import (
     AliasProperty,
@@ -12,8 +15,12 @@ from kivy.properties import (
     OptionProperty,
 )
 from kivy.uix.anchorlayout import AnchorLayout
+from kivy.uix.widget import Widget
 
-OPEN_STATE = Literal["open", "closed", "opening", "closing"]
+from mindref.lib.models import OpenState
+
+if TYPE_CHECKING:
+    from kivy.core.window import WindowBase
 
 Builder.load_string("""
 <DrawerLayout>:
@@ -79,15 +86,15 @@ class DrawerLayout(AnchorLayout):
     background_color = ColorProperty()
     overlay_color = ColorProperty()
     overlay_alpha = NumericProperty(0.95)
-    content = ObjectProperty(None, allownone=True)
+    content: ObjectProperty[Widget | None] = ObjectProperty(None, allownone=True)
     anim_duration = NumericProperty(0.2)
-    _open_state: OPEN_STATE = OptionProperty(
-        "closed", options=("closed", "open", "closing", "opening")
+    _open_state: OptionProperty[OpenState] = OptionProperty(
+        OpenState.closed, options=list(OpenState)
     )
-    _anim = ObjectProperty(None, allownone=True)
+    _anim: ObjectProperty[Animation | None] = ObjectProperty(None, allownone=True)
     _anim_alpha = NumericProperty(0)
-    _window = ObjectProperty(None, allownone=True)
-    _touch_started_inside = None
+    _window: ObjectProperty[WindowBase | None] = ObjectProperty(None, allownone=True)
+    _touch_started_inside: bool | None = None
 
     __events__ = ("on_opening", "on_open", "on_closing", "on_close")
 
@@ -98,19 +105,19 @@ class DrawerLayout(AnchorLayout):
         self.register_event_type("on_closing")
         self.register_event_type("on_close")
 
-    def _get_is_open(self):
-        return self._open_state == "open"
+    def _get_is_open(self) -> bool:
+        return self._open_state == OpenState.open
 
     is_open = AliasProperty(_get_is_open, None, bind=("_open_state",), cache=True)
 
-    def _get_window_size(self):
+    def _get_window_size(self) -> tuple[float, float]:
         if self._window:
             return self._window.size
         return 0, 0
 
     _window_size = AliasProperty(_get_window_size, None, bind=("_window",), cache=True)
 
-    def open(self, *_args, **kwargs: object):
+    def open(self, *_args: object, **_kwargs: object) -> None:
         """
         Display the drawer in the Window
 
@@ -127,7 +134,7 @@ class DrawerLayout(AnchorLayout):
         self.right = 0
         self.dispatch("on_opening")
 
-    def close(self, *_args, **kwargs: object):
+    def close(self, *_args: object, **_kwargs: object) -> None:
         """
         Close the drawer
 
@@ -138,16 +145,16 @@ class DrawerLayout(AnchorLayout):
             return
         self.dispatch("on_closing")
 
-    def on_opening(self, *_args):
+    def on_opening(self, *_args: object) -> None:
         """Setup animation to slide in drawer from left side of screen"""
         self._anim = Animation(
             right=self.width + self.padding[0], duration=self.anim_duration
         ) + Animation(_anim_alpha=self.overlay_alpha, duration=self.anim_duration)
         self._anim.bind(on_complete=partial(self.dispatch, "on_open"))
         self._anim.start(self)
-        self._open_state = "opening"
+        self._open_state = OpenState.opening
 
-    def on_closing(self, *_args):
+    def on_closing(self, *_args: object) -> None:
         """Setup animation to slide in drawer from left side of screen to offscreen"""
         funbind = self.funbind
         funbind("x", self._align_to_window)
@@ -157,50 +164,50 @@ class DrawerLayout(AnchorLayout):
         self._anim.bind(on_complete=partial(self.dispatch, "on_close"))
         self._anim.start(self)
 
-    def on_open(self, *_args):
+    def on_open(self, *_args: object) -> None:
         """Set state to 'open', and listen for Window resize events"""
         self._anim = None
-        self._open_state = "open"
+        self._open_state = OpenState.open
         fbind = self.fbind
         fbind("x", self._align_to_window)
         fbind("width", self._align_to_window)
         fbind("size", self._align_to_window)
 
-    def on_close(self, *_args):
+    def on_close(self, *_args: object) -> None:
         """Set state to 'closed', and stop listening for Window resize events"""
         if self._window:
             self._window.remove_widget(self)
             self._window = None
         self._anim = None
-        self._open_state = "closed"
+        self._open_state = OpenState.closed
 
-    def _align_to_window(self, *_args):
+    def _align_to_window(self, *_args: object) -> None:
         if self.is_open:
             self.right = self.width + self.padding[0]
 
-    def on_content(self, _instance, value):
+    def on_content(self, _instance: object, value: Widget | None) -> None:
         if value:
             self.clear_widgets()
             self.add_widget(value)
         else:
             self.clear_widgets()
 
-    def on_motion(self, etype, me):
+    def on_motion(self, etype: str, me: MotionEvent) -> Literal[True]:
         super().on_motion(etype, me)
         return True
 
-    def on_touch_down(self, touch):
+    def on_touch_down(self, touch: MotionEvent) -> Literal[True]:
         self._touch_started_inside = self.collide_point(*touch.pos)
         if not self.auto_dismiss or self._touch_started_inside:
             super().on_touch_down(touch)
         return True
 
-    def on_touch_move(self, touch):
+    def on_touch_move(self, touch: MotionEvent) -> Literal[True]:
         if not self.auto_dismiss or self._touch_started_inside:
             super().on_touch_move(touch)
         return True
 
-    def on_touch_up(self, touch):
+    def on_touch_up(self, touch: MotionEvent) -> Literal[True]:
         if self.auto_dismiss or self._touch_started_inside is False:
             self.close()
         else:
