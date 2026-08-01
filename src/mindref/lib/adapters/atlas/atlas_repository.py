@@ -18,7 +18,7 @@ class AbstractAtlasRepository(abc.ABC):
         atlas_name: str,
         atlas_size: tuple[int, int] | None = None,
         padding: int = 2,
-    ):
+    ) -> None:
         raise NotImplementedError
 
     @abc.abstractmethod

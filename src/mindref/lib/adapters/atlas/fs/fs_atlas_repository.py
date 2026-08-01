@@ -4,15 +4,14 @@ import re
 import shutil
 import tempfile
 from collections.abc import Sequence
-from operator import itemgetter
 from pathlib import Path
-from typing import ClassVar, NamedTuple, NewType
+from typing import ClassVar, NamedTuple
 
 import PIL.Image
 from kivy.atlas import Atlas as KivyAtlas
 
 from mindref.lib.adapters.atlas import AbstractAtlasRepository
-from mindref.lib.utils import EnvironContext, LazyLoaded
+from mindref.lib.utils import EnvironContext, LazyLoaded, required
 
 
 class AtlasItem(NamedTuple):
@@ -20,11 +19,15 @@ class AtlasItem(NamedTuple):
     path: Path
 
 
-X = NewType("X", int)
-Y = NewType("Y", int)
-W = NewType("W", int)
-H = NewType("H", int)
-ImgPos = NewType("ImgPos", tuple[X, Y, W, H])
+class ImgPos(NamedTuple):
+    """Position and extent of one image inside an atlas image."""
+
+    x: int
+    y: int
+    w: int
+    h: int
+
+
 AtlasFileData = dict[str, dict[str, ImgPos]]
 
 
@@ -41,11 +44,11 @@ class AtlasService(AbstractAtlasRepository):
     _storage_path: Path | None
     _instance = None
 
-    def __init__(self, storage_path: Path | str | None = None):
-        self.storage_path = storage_path
+    def __init__(self, storage_path: Path | None = None):
+        self._storage_path = storage_path
         self._atlases = None
 
-    def __contains__(self, item):
+    def __contains__(self, item: str) -> bool:
         """
         Determine if an image belongs in one of AtlasService's atlases
 
@@ -65,18 +68,19 @@ class AtlasService(AbstractAtlasRepository):
         return self._storage_path
 
     @storage_path.setter
-    def storage_path(self, value: Path | str):
-        self._storage_path = Path(value)
+    def storage_path(self, value: Path) -> None:
+        self._storage_path = value
 
     @atlases
     def _discover_atlases(self) -> list[AtlasItem]:
         """
         Discover all atlases in storage path
         """
-        atlas: list[AtlasItem] = []
-        for item in self.storage_path.iterdir():
-            if item.is_dir() and (af := next(item.glob("*.atlas"), None)):
-                atlas.append(AtlasItem(item.stem, af))
+        atlas: list[AtlasItem] = [
+            AtlasItem(item.stem, af)
+            for item in self.storage_path.iterdir()
+            if item.is_dir() and (af := next(item.glob("*.atlas"), None))
+        ]
         missed = self.builtin_atlases - {name for name, _ in atlas}
         if not missed:
             return atlas
@@ -99,9 +103,13 @@ class AtlasService(AbstractAtlasRepository):
     def _read_atlas(self, atlas_name: str) -> AtlasFileData:
         matched_item = self._match_atlas(atlas_name)
         with matched_item.path.open(mode="r", encoding="utf-8") as fp:
-            return json.load(fp)
+            raw: dict[str, dict[str, list[int]]] = json.load(fp)
+        return {
+            atlas_img: {name: ImgPos(*pos) for name, pos in members.items()}
+            for atlas_img, members in raw.items()
+        }
 
-    def _store_atlas(self, atlas_name, data):
+    def _store_atlas(self, atlas_name: str, data: AtlasFileData) -> None:
         matched_item = self._match_atlas(atlas_name)
         with matched_item.path.open(mode="w+", encoding="utf-8") as fp:
             json.dump(data, fp)
@@ -138,17 +146,15 @@ class AtlasService(AbstractAtlasRepository):
 
         """
 
-        # noinspection PyTypeChecker
-        def get_width(x: ImgPos):
-            return sum(itemgetter(0, 2)(x)) + padding
+        def get_width(pos: ImgPos) -> int:
+            return pos.x + pos.w + padding
 
-        # noinspection PyTypeChecker
-        def get_height(x: ImgPos):
-            return sum(itemgetter(1, 3)(x)) + padding
+        def get_height(pos: ImgPos) -> int:
+            return pos.y + pos.h + padding
 
-        def get_max_dimension(data: AtlasFileData):
+        def get_max_dimension(data: AtlasFileData) -> tuple[int, int]:
             w_max, h_max = 0, 0
-            for _, img_names in data.items():
+            for img_names in data.values():
                 w_max = max(w_max, *(get_width(img_names[k]) for k in img_names))
                 h_max = max(h_max, *(get_height(img_names[k]) for k in img_names))
             return w_max, h_max
@@ -186,9 +192,10 @@ class AtlasService(AbstractAtlasRepository):
         temp_dir_atlas = Path(temp_dir_container.name) / "kv_temp_atlas"
 
         with EnvironContext({"KIVY_NO_ARGS": "1"}):
-            out_name, meta = KivyAtlas.create(
-                os.fspath(temp_dir_atlas), images, (atlas_w, atlas_w)
+            created = KivyAtlas.create(
+                os.fspath(temp_dir_atlas), images, (atlas_w, atlas_h)
             )
+        _, meta = required(created, f"Atlas creation failed for {atlas_name}")
 
         # Now set about appending these atlas images
         atlas_n_start = get_last_image(atlas_data) + 1
@@ -207,7 +214,7 @@ class AtlasService(AbstractAtlasRepository):
             atlas_data.update(
                 {
                     atlas_img_name: {
-                        k.lower(): v for k, v in meta[atlas_img.name].items()
+                        k.lower(): ImgPos(*v) for k, v in meta[atlas_img.name].items()
                     }
                 }
             )
@@ -234,11 +241,10 @@ class AtlasService(AbstractAtlasRepository):
             atlas_data, atlas_name, name
         )
 
-        matched_img_size = matched_img[1]
         atlas_path = self._atlas_path(atlas_name)
         atlas_img_path = atlas_path / matched_atlas_img
         img_obj = PIL.Image.open(atlas_img_path)
-        x, y, w, h = matched_img_size
+        x, y, w, h = matched_img
         return img_obj.crop((x, (img_obj.height - h - y), x + w, y + h))
 
     def _match_atlas_member(
