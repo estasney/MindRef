@@ -5,7 +5,12 @@ from collections.abc import Sequence
 from typing import ClassVar
 
 from pygments.lexer import RegexLexer
-from pygments.token import Name, Operator, Whitespace
+from pygments.token import (
+    Name,
+    Operator,
+    Whitespace,
+    _TokenType,  # pyright: ignore[reportPrivateUsage]
+)
 
 
 class ShortcutLexer(RegexLexer):
@@ -15,7 +20,7 @@ class ShortcutLexer(RegexLexer):
     aliases: ClassVar[Sequence[str]] = ["shortcut"]
     filenames: ClassVar[Sequence[str]] = []  # no automatic filename mapping
 
-    tokens: ClassVar[dict] = {
+    tokens: ClassVar[dict[str, list[tuple[str, _TokenType]]]] = {
         "root": [
             (r"\s+", Whitespace),  # allow arbitrary spacing
             (r",", Operator),  # the separator
