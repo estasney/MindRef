@@ -149,6 +149,7 @@ reportExplicitAny = false
 reportImplicitOverride = false
 reportImplicitStringConcatenation = false
 reportMissingSuperCall = false
+reportMissingModuleSource = false
 reportUnannotatedClassAttribute = false
 reportUnknownLambdaType = false
 reportUnknownMemberType = false
