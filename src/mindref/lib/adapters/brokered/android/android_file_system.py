@@ -1,14 +1,17 @@
 from collections.abc import Callable
 from concurrent.futures import Future
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from kivy.clock import Clock, mainthread
 from kivy.logger import Logger
 
-from mindref.lib import get_app, sch_cb, schedulable
+from mindref.lib import get_app, schedulable
 from mindref.lib.adapters.base import FileSystemBase
-from mindref.lib.adapters.brokered.android.types import V2MindRefCallCodes
+from mindref.lib.adapters.brokered.android.types import (
+    MindRefUtilsCallbackPyMediator,
+    V2MindRefCallCodes,
+)
 
 if TYPE_CHECKING:
     from mindref.app_notes import NoteFile
@@ -19,7 +22,7 @@ TCopyToExternalStorageCallback = Callable[[str], None]
 
 
 class AndroidFileSystemAdapter(FileSystemBase):
-    def __init__(self, *args, **kwargs: object):
+    def __init__(self, *args: object, **kwargs: object) -> None:
         super().__init__(*args, **kwargs)
         self.app = get_app()
         from mindref.lib.adapters.brokered.android.external_storage import (
@@ -28,7 +31,7 @@ class AndroidFileSystemAdapter(FileSystemBase):
 
         self.android_manager = AndroidManager()
         self.android_manager.set_py_mediator(self.py_mediator)
-        self.py_callbacks: dict[V2MindRefCallCodes, Callable] = {}
+        self.py_callbacks: dict[int, Callable[..., None]] = {}
 
     def _import_note_files(
         self, storage_path: str | Path, external_storage_path: str
@@ -36,7 +39,7 @@ class AndroidFileSystemAdapter(FileSystemBase):
         # Before we hand off to Android Manager, we need to setup a callback to notify us that import is complete
         # That callback ? Refresh our notes from app storage. But we need to wait on the JNI method to complete first.
 
-        fut = Future()
+        fut: Future[bool] = Future()
 
         # Sentinel to notify us that import is complete
         self.py_callbacks[V2MindRefCallCodes.IMPORT_EXTERNAL_STORAGE] = lambda: (
@@ -44,11 +47,12 @@ class AndroidFileSystemAdapter(FileSystemBase):
         )
 
         # We want to return Future immediately but still need this ro run
-        func = lambda _: self.android_manager.import_external_storage(
-            external_storage_path, str(storage_path)
-        )
+        def start_import(_dt: float) -> None:
+            self.android_manager.import_external_storage(
+                external_storage_path, str(storage_path)
+            )
 
-        sch_cb(func)
+        Clock.schedule_once(start_import)
 
         return fut
 
@@ -129,12 +133,12 @@ class AndroidFileSystemAdapter(FileSystemBase):
 
         # Dispatch to MindRefUtils, using a thread to copy to external storage
 
-        def handle_copy_complete(*args, **kwargs: object):
+        def handle_copy_complete(*args: object, **kwargs: object) -> None:
             Logger.info(
                 f"{self.__class__.__name__} : Draft note saved to external storage: {note_file.file_path}"
             )
 
-        def handle_copy():
+        def handle_copy() -> None:
             self.copy_to_external_storage(
                 external_storage_path,
                 storage_path,
@@ -167,12 +171,12 @@ class AndroidFileSystemAdapter(FileSystemBase):
 
         # Dispatch to MindRefUtils, using a thread to copy to external storage
 
-        def handle_copy_complete(*args, **kwargs: object):
+        def handle_copy_complete(*args: object, **kwargs: object) -> None:
             Logger.info(
                 f"{self.__class__.__name__} : Edit note saved to external storage: {note_file.file_path}"
             )
 
-        def handle_copy():
+        def handle_copy() -> None:
             self.copy_to_external_storage(
                 external_storage_path,
                 storage_path,
@@ -188,11 +192,11 @@ class AndroidFileSystemAdapter(FileSystemBase):
 
         return note_file
 
-    def py_mediator(self) -> Callable[[V2MindRefCallCodes, tuple[Any, ...]], None]:
+    def py_mediator(self) -> MindRefUtilsCallbackPyMediator:
         return self.py_mediator_impl
 
     @mainthread
-    def py_mediator_impl(self, key: V2MindRefCallCodes, *args) -> None:
+    def py_mediator_impl(self, key: int, *args: object) -> None:
         Logger.info(
             f"AndroidFileSystemAdapter: py_mediator called with key={key}, args={args}"
         )

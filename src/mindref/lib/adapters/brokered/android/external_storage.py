@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Concatenate, Literal, ParamSpec
+from typing import Any, Literal
 
 from jnius import PythonJavaClass, java_method
 from kivy.logger import Logger
@@ -12,6 +12,8 @@ from mindref.lib.adapters.brokered.android.types import (
     ContentResolverProtocol,
     ContextProtocol,
     IntentProtocol,
+    MindRefUtilsCallbackPyMediator,
+    MindRefUtilsCallbackPyMediatorProvider,
     MindRefUtilsProtocol,
     UriProtocol,
     V2MindRefCallCodes,
@@ -22,11 +24,6 @@ from mindref.lib.utils import Singleton
 ACTIVITY_CLASS_NAMESPACE = "org/kivy/android/PythonActivity"
 
 TDocumentResultCode = Literal[-1, 0, 1]
-CBArgs = ParamSpec("CBArgs")
-
-
-TKeyedCallbackInner = Callable[Concatenate[V2MindRefCallCodes, CBArgs], None]
-TKeyedCallback = Callable[[], TKeyedCallbackInner]
 
 
 class OnDocumentCallback(PythonJavaClass):
@@ -41,7 +38,7 @@ class OnDocumentCallback(PythonJavaClass):
     __javainterfaces__ = [ACTIVITY_CLASS_NAMESPACE + "$ActivityResultListener"]  # noqa: RUF012
     __javacontext__ = "app"
 
-    def __init__(self, callback: Callable[[int, str | UriProtocol], None]) -> None:
+    def __init__(self, callback: Callable[[int, str], None]) -> None:
         super().__init__()
         self.py_callback = callback
         self.activity_code = 1
@@ -65,9 +62,10 @@ class MindRefUtilsCallback(PythonJavaClass):
         super().__init__()
         self.py_callback = callback
 
-    @java_method("(I)V", name="onComplete")
-    def onCompleteImportExternalStorage(self, result_code: int) -> None:
-        Logger.info(f"MindRefUtilsCallback: Import completed with code {result_code}")
+    @java_method("(I)V")
+    def onComplete(self, result_code: int) -> None:
+        """Called from Java when external storage is synced"""
+        Logger.info(f"MindRefUtilsCallback: Completed with code {result_code}")
         self.py_callback(result_code)
 
     @java_method("(I)V")
@@ -84,20 +82,22 @@ class AndroidManager(metaclass=Singleton):
     to implement it and set it as the `py_mediator` attribute.
     """
 
-    _py_mediator: TKeyedCallback | None = None
+    _py_mediator: MindRefUtilsCallbackPyMediatorProvider | None = None
     _java_prompt_picker_callback: OnDocumentCallback | None = None
     _java_mindref_utils_callback: MindRefUtilsCallback | None = None
     _java_mindref_utils_class: type[MindRefUtilsProtocol] | None = None
     _java_mindref_utils: MindRefUtilsProtocol | None = None
 
     @classmethod
-    def get_py_mediator(cls) -> TKeyedCallbackInner:
+    def get_py_mediator(cls) -> MindRefUtilsCallbackPyMediator:
         if cls._py_mediator is None:
             raise ValueError("py_mediator is not set.")
         return cls._py_mediator()
 
     @classmethod
-    def set_py_mediator(cls, py_mediator: TKeyedCallback) -> None:
+    def set_py_mediator(
+        cls, py_mediator: MindRefUtilsCallbackPyMediatorProvider
+    ) -> None:
         if cls._py_mediator is not None:
             raise ValueError("py_mediator is already set - cannot overwrite it.")
         cls._py_mediator = py_mediator
@@ -127,21 +127,20 @@ class AndroidManager(metaclass=Singleton):
         utils = cls._java_mindref_utils_class(
             externalStorageRoot, appStorageRoot, context
         )
-        if cls._java_mindref_utils_callback is None:
-            cls._register_mindref_utils_callback()
+        callback = cls._java_mindref_utils_callback
+        if callback is None:
+            callback = cls._register_mindref_utils_callback()
         Logger.info(
             f"{cls.__name__} : Setting MindRefUtilsCallback for {utils.externalStorageRoot=}, {utils.appStorageRoot=}"
         )
-        utils.setMindRefCallback(cls._java_mindref_utils_callback)
+        utils.setMindRefCallback(callback)
 
         cls._java_mindref_utils = utils
         return cls._java_mindref_utils
 
     @classmethod
     def _register_kivy_java_callbacks(cls) -> None:
-        def wrapped_external_storage_callback(
-            request_code: int, uri: str | UriProtocol
-        ):
+        def wrapped_external_storage_callback(request_code: int, uri: str) -> None:
             Logger.info(
                 f"AndroidManager: wrapped_callback called with request_code={request_code}, uri={uri}, taking persistable permission"
             )
@@ -167,7 +166,7 @@ class AndroidManager(metaclass=Singleton):
         )
 
     @classmethod
-    def _register_mindref_utils_callback(cls) -> None:
+    def _register_mindref_utils_callback(cls) -> "MindRefUtilsCallback":
         def wrapped_mindref_utils_callback(operation_code: int):
             if operation_code < 0:
                 Logger.error(
@@ -192,6 +191,7 @@ class AndroidManager(metaclass=Singleton):
             wrapped_mindref_utils_callback
         )
         Logger.info("AndroidManager: Created MindRefUtilsCallback instance")
+        return cls._java_mindref_utils_callback
 
     @classmethod
     def register_java_callbacks(cls):
@@ -211,8 +211,8 @@ class AndroidManager(metaclass=Singleton):
     @classmethod
     def take_persistable_permission(cls, uri: str | UriProtocol) -> str | UriProtocol:
         """After user selects DocumentTree, we want to persist the permission"""
-        Intent: IntentProtocol = get_intent_cls()
-        resolver: ContentResolverProtocol = get_kivy_activity().getContentResolver()
+        Intent = get_intent_cls()
+        resolver = get_kivy_activity().getContentResolver()
         uri_native: UriProtocol = cls.ensure_is_uri(uri)
         resolver.takePersistableUriPermission(
             uri_native,
@@ -264,7 +264,7 @@ class AndroidManager(metaclass=Singleton):
 
     @classmethod
     def copy_to_external_storage(
-        cls, externalStoragePath: str, appStoragePath: str, filePath: str | UriProtocol
+        cls, externalStoragePath: str, appStoragePath: str, filePath: str
     ) -> None:
         source = Path(filePath)
 

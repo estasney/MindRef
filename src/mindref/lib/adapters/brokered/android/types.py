@@ -37,12 +37,12 @@ class IntentProtocol(Protocol):
     ACTION_OPEN_DOCUMENT: Any
     CATEGORY_OPENABLE: str
     EXTRA_MIME_TYPES: list[MIME_TYPE]
-    addCategory: Callable[[str], None]
+    addCategory: Callable[[str], "IntentProtocol"]
     data: Any
-    addFlags: Callable[[LIntentFlags], None]
-    getData: Callable
-    setAction: Callable
-    setType: Callable[[MIME_TYPE], None]
+    addFlags: Callable[[LIntentFlags], "IntentProtocol"]
+    getData: Callable[[], "UriProtocol"]
+    setAction: Callable[[str], "IntentProtocol"]
+    setType: Callable[[MIME_TYPE], "IntentProtocol"]
 
 
 @runtime_checkable
@@ -77,7 +77,7 @@ class ParcelFileDescriptorProtocol(Protocol):
 
 
 class ContentResolverProtocol(Protocol):
-    takePersistableUriPermission: Callable[[UriProtocol, LIntentFlags], None]
+    takePersistableUriPermission: Callable[[UriProtocol, int], None]
     getType: Callable[[UriProtocol], str]
     openFile: Callable[[UriProtocol, str, None], ParcelFileDescriptorProtocol]
 
@@ -110,18 +110,19 @@ class MindRefUtilsCallbackProtocol(Protocol):
 
 class MindRefUtilsCallbackPyMediator(Protocol):
     @overload
-    def __call__(self, _key: int, category: str) -> None: ...
+    def __call__(self, _key: int, category: str, /) -> None: ...
 
     @overload
-    def __call__(self, _key: int, categories: list[str]) -> None: ...
+    def __call__(self, _key: int, categories: list[str], /) -> None: ...
 
     @overload
-    def __call__(self, _key: int) -> None: ...
-
-    def __call__(self, _key, *args) -> None: ...
+    def __call__(self, _key: int, /) -> None: ...
 
 
-# noinspection PyUnusedLocal
+class MindRefUtilsCallbackPyMediatorProvider(Protocol):
+    def __call__(self) -> MindRefUtilsCallbackPyMediator: ...
+
+
 class MindRefUtilsProtocol(Protocol):
     externalStorageRoot: str
     appStorageRoot: str
