@@ -60,6 +60,7 @@ where = ["src"]
 [tool.setuptools.package-data]
 "mindref" = [
     "assets/*",
+    "static/**/*"
 ]
 
 [tool.uv]

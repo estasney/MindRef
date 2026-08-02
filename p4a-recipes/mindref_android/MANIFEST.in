@@ -1,3 +1,0 @@
-graft src/mindref/assets
-graft src/mindref/static
-global-include src/mindref/**/*.kv

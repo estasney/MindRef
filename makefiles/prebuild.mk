@@ -46,7 +46,7 @@ clean-mindref-p4a-src:
 	rm -f $(BUILD_DIR)/$(MINDREF_UTILS_RELEASE)
 .PHONY : clean-mindref-p4a-src
 
-prebuild : $(BUILD_DIR) $(PRIVATE_ENTRYPOINT_DEST) clean-mindref-p4a-src asset-image asset-fonts
+prebuild : $(BUILD_DIR) $(PRIVATE_ENTRYPOINT_DEST) asset-image asset-fonts
 .PHONY : prebuild
 
 
