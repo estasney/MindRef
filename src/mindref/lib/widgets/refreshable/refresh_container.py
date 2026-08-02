@@ -10,7 +10,7 @@ from kivy.properties import (
     BooleanProperty,
     NumericProperty,
     VariableListProperty,
-)  # type: ignore
+)
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.widget import Widget
 
