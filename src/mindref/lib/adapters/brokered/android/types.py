@@ -18,7 +18,6 @@ if TYPE_CHECKING:
 LIntentFlags = Literal[1, 2, 64, 128]
 
 MIME_TYPE = NewType("MIME_TYPE", str)
-DISPLAY_NAME_TYPE = NewType("DISPLAY_NAME_TYPE", str)
 
 
 class V2MindRefCallCodes(IntEnum):
@@ -61,14 +60,6 @@ class UriProtocol(Protocol):
 class FileDescriptorProtocol(Protocol):
     # native java, use with FileInput/OutputStream
     ...
-
-
-# noinspection PyUnusedLocal
-class AutoCloseInputStreamProtocol(Protocol):
-    def __init__(self, pfd: "ParcelFileDescriptorProtocol") -> None: ...
-
-    close: Callable[[], None]
-    read: Callable[[], int]
 
 
 class ParcelFileDescriptorProtocol(Protocol):

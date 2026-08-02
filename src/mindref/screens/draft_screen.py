@@ -21,9 +21,6 @@ if TYPE_CHECKING:
 Builder.load_string("""
 #:import DebugBoxLayout mindref.lib.widgets.behavior.DebugBoxLayout
 #:import DebugFloatLayout mindref.lib.widgets.behavior.DebugFloatLayout
-#:import ThemedLabelButton mindref.lib.widgets.buttons.buttons.ThemedLabelButton
-#:import ContainedLabelButton mindref.lib.widgets.buttons.buttons.ContainedLabelButton
-#:import LabelButton mindref.lib.widgets.buttons.buttons.LabelButton
 #:import HSeparator mindref.lib.widgets.separator.HSeparator
 #:import LinearProgress mindref.lib.widgets.progress.LinearProgress
 

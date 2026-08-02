@@ -60,16 +60,6 @@ Builder.load_string("""
         height: self.texture_size[1] * 2
         color: root.color
 
-<ContainedLabelButton@ThemedLabelButton>:
-    disable_ripple_effect: True
-    background_color: (0,0,0,0)
-    canvas:
-        Color:
-            rgba: self.color
-        Line:
-            rounded_rectangle: self.x, self.y, self.width, self.height, dp(8)
-            width: dp(1)
-
 <LabelButton@ThemedLabelButton>:
     disable_ripple_effect: True
     background_color: (0,0,0,0)
@@ -101,27 +91,6 @@ Builder.load_string("""
         size_hint: None, None
         pos_hint: {"center_x": .5, "center_y": .5}
         color: root.color
-
-<-ImageButton>:
-    state_image: self.background_normal if self.state == 'normal' else self.background_down
-    background_color: app.colors['Primary'] if self.state == 'normal' else app.colors['Accent-One']
-    orientation: 'vertical'
-    padding: dp(5)
-    spacing: dp(2)
-
-    canvas:
-        Color:
-            rgba: self.background_color
-        BorderImage:
-            border:  [dp(8), dp(8), dp(8), dp(8)]
-            pos: self.pos
-            size: self.size
-            source: root.state_image if not root.disabled else root.background_disabled
-
-    Image:
-        mipmap: True
-        source: root.source
-
 
 
 <SaveButton@ThemedIconButton>:
@@ -215,13 +184,6 @@ class ThemedLabelButton(ThemedButton):
         super().__init__(**kwargs)
 
 
-class ContainedLabelButton(ThemedLabelButton):
-    """Renders a button without a background, but draws a rectangle border"""
-
-    def __init__(self, **kwargs: object):
-        super().__init__(**kwargs)
-
-
 class LabelButton(ThemedLabelButton):
     """Renders the most basic"""
 
@@ -249,13 +211,6 @@ class ThemedIconButton(ThemedLabelButton):
 
     icon_code = StringProperty()
     icon_size = NumericProperty()
-
-    def __init__(self, **kwargs: object):
-        super().__init__(**kwargs)
-
-
-class ImageButton(ThemedButton):
-    source = StringProperty()
 
     def __init__(self, **kwargs: object):
         super().__init__(**kwargs)

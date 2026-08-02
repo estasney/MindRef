@@ -3,10 +3,7 @@ from math import sin
 
 from kivy.animation import Animation
 from kivy.clock import Clock, ClockEvent
-from kivy.core.window import Window
-from kivy.effects.opacityscroll import OpacityScrollEffect
 from kivy.lang import Builder
-from kivy.logger import Logger
 from kivy.properties import (
     BooleanProperty,
     NumericProperty,
@@ -14,7 +11,6 @@ from kivy.properties import (
 )
 from kivy.uix.floatlayout import FloatLayout
 
-from mindref.lib.ext import compute_overscroll
 from mindref.lib.utils import get_app
 
 Builder.load_string("""
@@ -85,39 +81,3 @@ class RefreshSymbol(FloatLayout):
 
     def collide_point(self, x, y):
         return False
-
-
-class RefreshOverscrollEffect(OpacityScrollEffect):
-    """
-    Reduces opacity when over-scrolling up
-    """
-
-    min_opacity = NumericProperty(0.25)
-    target_height = NumericProperty(0)
-    refresh_threshold = NumericProperty(
-        0.25
-    )  # how far to pull (0..1) to trigger refresh
-    refresh_threshold_met = BooleanProperty(False)
-
-    def __init__(self, **kwargs: object):
-        super().__init__(**kwargs)
-        self.refresh_scheduler = None
-
-    def on_refresh_threshold_met(self, *args):
-        Logger.info(f"Refresh threshold met: {self.refresh_threshold_met}")
-
-    def on_overscroll(self, *args):
-        """
-        When we overscroll, we want to mirror the effect of OpacityScrollEffect, but only when over-scrolling up
-        (when overscroll is negative).
-
-        Additionally, we want to trigger a refresh but only when the user has held the overscroll for a configurable
-        amount of time AND past a configurable threshold for overscroll.
-        """
-        if self.overscroll >= 0:
-            return
-
-        normalized_overscroll = compute_overscroll(
-            self.overscroll, Window.height, self.refresh_threshold
-        )
-        self.refresh_threshold_met = normalized_overscroll == 1

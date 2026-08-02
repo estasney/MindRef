@@ -36,8 +36,6 @@ class RefreshScrollView(V2RefreshBehavior, ScrollView):
 Builder.load_string(
     """
 #:import RefreshSymbol mindref.lib.widgets.effects.scrolling.RefreshSymbol
-#:import RefreshOverscrollEffect mindref.lib.widgets.effects.scrolling.RefreshOverscrollEffect
-#:import OpacityScrollEffect kivy.effects.opacityscroll.OpacityScrollEffect
 <V2RefreshContainer>:
     debug_layout: False
     scroll_view: scroll_view

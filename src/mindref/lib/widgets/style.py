@@ -9,29 +9,6 @@ Builder.load_string("""
     font_family: app.fonts['default']
     mipmap: True
 
-<SmallLabel>:
-    font_size: sp(app.base_font_size - 2)
-
-<XSmallLabel>:
-    font_size: sp(app.base_font_size - 3)
-
-<LargeLabel>:
-    font_size: sp(app.base_font_size + 2)
-
-<XLargeLabel>:
-    font_size: sp(app.base_font_size + 3)
-
-<ExpandingLabel>:
-    # Grow Vertically, but Wrap at certain Width
-    text_size: self.width, None
-    size: self.texture_size
-
-
-<TitleInput>:
-    font_size: sp(app.base_font_size)
-    font_family: app.fonts['default']
-    multiline: False
-
 <IconLabel>:
     font_size: sp(app.base_font_size)
     markup: True
@@ -69,24 +46,6 @@ Builder.load_string("""
 
 
 class BaseLabel(Label): ...
-
-
-class XSmallLabel(BaseLabel): ...
-
-
-class SmallLabel(BaseLabel): ...
-
-
-class LargeLabel(BaseLabel): ...
-
-
-class XLargeLabel(BaseLabel): ...
-
-
-class ExpandingLabel(BaseLabel): ...
-
-
-class TitleInput(TextInput): ...
 
 
 class IconLabel(BaseLabel):

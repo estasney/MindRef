@@ -17,7 +17,6 @@ if TYPE_CHECKING:
     from mindref.app_notes import NoteFile
 
 TPromptExternalStorageCallback = Callable[[str], None]
-TImportExternalStorageCallback = Callable[[], None]
 TCopyToExternalStorageCallback = Callable[[str], None]
 
 

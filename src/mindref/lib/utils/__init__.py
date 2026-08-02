@@ -13,15 +13,11 @@ from typing import (
     override,
 )
 
-from kivy.logger import Logger
 from kivy.clock import Clock
-from kivy.lang import Builder
 
 
 if TYPE_CHECKING:
     from mindref.lib.domain.protocols import AppRegistryProtocol
-
-_LOG_LEVEL = None
 
 type ClockCallback = Callable[[float], object]
 

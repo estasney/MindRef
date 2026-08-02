@@ -2,11 +2,9 @@ from __future__ import annotations
 
 from collections.abc import Callable, Sequence
 from concurrent.futures.thread import ThreadPoolExecutor
-from typing import TYPE_CHECKING, Protocol, TypeVar
+from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from kivy.properties import (
         BooleanProperty,
         ConfigParserProperty,
@@ -58,13 +56,3 @@ class AppRegistryProtocol(Protocol):
     def refresh_note_files(self) -> None: ...
 
     def read_note(self, note_id: str) -> str: ...
-
-
-T = TypeVar("T", bound=AppRegistryProtocol)
-GetApp = Callable[[], T]
-
-
-class NoteDiscoveryProtocol(Protocol):
-    category: str
-    image_path: Path | None
-    notes: list[Path]
