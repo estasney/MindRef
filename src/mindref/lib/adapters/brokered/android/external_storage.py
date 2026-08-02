@@ -9,7 +9,6 @@ from mindref.lib.adapters.brokered.android.intent import get_intent_cls
 from mindref.lib.adapters.brokered.android.kivy_activity import get_kivy_activity
 from mindref.lib.adapters.brokered.android.mindref_utils import get_mindref_utils_cls
 from mindref.lib.adapters.brokered.android.types import (
-    ContentResolverProtocol,
     ContextProtocol,
     IntentProtocol,
     MindRefUtilsCallbackPyMediator,

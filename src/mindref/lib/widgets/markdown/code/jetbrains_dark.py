@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from typing import ClassVar
 
 from pygments.style import Style
@@ -13,6 +14,7 @@ from pygments.token import (
     String,
     Token,
     Whitespace,
+    _TokenType,  # pyright: ignore[reportPrivateUsage]
 )
 
 
@@ -20,7 +22,7 @@ class JetBrainsDark(Style):
     background_color = "#191A1C"
     highlight_color = "#214283"
 
-    styles: ClassVar[dict] = {
+    styles: ClassVar[Mapping[_TokenType, str]] = {
         Token.Text: "#BCBEC4",
         Whitespace: "#BCBEC4",
         Error: "#F75464",
