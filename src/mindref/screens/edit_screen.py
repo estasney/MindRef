@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, NamedTuple, Optional
+from typing import TYPE_CHECKING, NamedTuple
 
 from kivy.clock import Clock
 from kivy.lang import Builder
@@ -119,8 +119,8 @@ Builder.load_string("""
 
 
 class CancelEditButton(LabelButton, LoadingButtonMixin):
-    app = ObjectProperty()
-    root = ObjectProperty()
+    app: "ObjectProperty[AppRegistryProtocol]" = ObjectProperty()
+    root: "ObjectProperty[EditScreen]" = ObjectProperty()
 
     def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
@@ -130,21 +130,21 @@ class CancelEditButton(LabelButton, LoadingButtonMixin):
             on_resolved=self.handle_on_resolved,
         )
 
-    def handle_on_mutate(self, _dt):
+    def handle_on_mutate(self, _instance: object) -> None:
         self.disabled = True
 
-    def handle_on_resolved(self, _dt):
+    def handle_on_resolved(self, _instance: object) -> None:
         self.disabled = False
         self.root.is_loading = False
 
-    def cancel_edit_on_app(self):
+    def cancel_edit_on_app(self) -> None:
         self.root.is_loading = True
         self.app.cancel_edit_note()
 
 
 class SaveEditButton(LabelButton, LoadingButtonMixin):
-    app = ObjectProperty()
-    root = ObjectProperty()
+    app: "ObjectProperty[AppRegistryProtocol]" = ObjectProperty()
+    root: "ObjectProperty[EditScreen]" = ObjectProperty()
 
     def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
@@ -154,10 +154,10 @@ class SaveEditButton(LabelButton, LoadingButtonMixin):
             on_resolved=self.handle_on_resolved,
         )
 
-    def handle_on_mutate(self, _dt):
+    def handle_on_mutate(self, _instance: object) -> None:
         self.disabled = True
 
-    def handle_on_resolved(self, _dt):
+    def handle_on_resolved(self, _instance: object) -> None:
         self.disabled = False
         self.root.is_loading = False
 
@@ -183,10 +183,10 @@ class EditScreen(Screen):
         self.lexer = get_lexer_by_name("markdown")
         Clock.schedule_once(self._bind_editing_note, 0)
 
-    def _bind_editing_note(self, _dt):
+    def _bind_editing_note(self, _dt: float) -> None:
         self.app.bind(editing_note=self.setter("editing_note"))
 
-    def on_editing_note(self, _instance, value: Optional["NoteFile"]) -> bool:
+    def on_editing_note(self, _instance: object, value: "NoteFile | None") -> bool:
         editor = self.ids.code_input
         if not value:
             editor.text = ""
