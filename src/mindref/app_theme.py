@@ -3,8 +3,8 @@ from collections.abc import Sequence
 from kivy.parser import parse_color
 
 THEME_COLORS: dict[str, Sequence[float]] = {
-    "White": (1, 1, 1, 1),
-    "Black": (0, 0, 0, 1),
+    "White": (1, 1, 1),
+    "Black": (0, 0, 0),
     "RichBlack": parse_color("#161D28"),
     "Gray-100": parse_color("#f5f5f5"),
     "Gray-200": parse_color("#dadbda"),
