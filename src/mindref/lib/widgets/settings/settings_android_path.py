@@ -1,5 +1,5 @@
 from kivy.logger import Logger
-from kivy.uix.settings import SettingString
+from kivy.uix.settings import SettingsPanel, SettingString
 
 
 class SettingsAndroidPath(SettingString):
@@ -10,12 +10,12 @@ class SettingsAndroidPath(SettingString):
     Then, we need to get persistent access to the path
     """
 
-    def on_panel(self, instance, value):
+    def on_panel(self, instance: object, value: SettingsPanel | None) -> None:
         if value is None:
             return
         self.fbind("on_release", self._create_popup)
 
-    def _create_popup(self, *args):
+    def _create_popup(self, *args: object) -> None:
         """
         Here we override to prevent the default behavior of opening a file picker.
         Instead, we'll offload the path selection to the Android system.
@@ -33,6 +33,6 @@ class SettingsAndroidPath(SettingString):
 
         app.fs.prompt_for_external_storage(self._external_path_callback)
 
-    def _external_path_callback(self, value):
+    def _external_path_callback(self, value: str) -> None:
         Logger.info(f"SettingsAndroidPath: External storage path selected - {value}")
         self.value = value

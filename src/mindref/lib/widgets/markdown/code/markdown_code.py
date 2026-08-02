@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from kivy.core.text import Label as CoreLabel
 from kivy.input.motionevent import MotionEvent
 from kivy.lang import Builder
@@ -7,6 +9,7 @@ from kivy.uix.codeinput import CodeInput
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
 from pygments import lexers
+from pygments.lexer import Lexer
 from pygments.lexers import PythonLexer
 from pygments.util import ClassNotFound
 
@@ -105,18 +108,18 @@ class NoWrapCodeInput(CodeInput):
 
 class MarkdownCode(GridLayout):
     _text_content = StringProperty()
-    content = ObjectProperty()
-    lexer = ObjectProperty(PythonLexer())
+    content: ObjectProperty[NoWrapCodeInput] = ObjectProperty()
+    lexer: ObjectProperty[Lexer] = ObjectProperty(PythonLexer())
     background_color = StringProperty()
     lexer_name = StringProperty()
 
-    def _get_text_content(self):
+    def _get_text_content(self) -> str:
         return self._text_content
 
-    def _set_text_content(self, value):
+    def _set_text_content(self, value: str) -> None:
         self._text_content = value.strip()
 
-    text_content = AliasProperty(
+    text_content: AliasProperty[str] = AliasProperty(
         _get_text_content, _set_text_content, bind=["_text_content"]
     )
 
@@ -131,6 +134,8 @@ class MarkdownCode(GridLayout):
                 else lexers.get_lexer_by_name("markdown")
             )
         except ClassNotFound:
-            Logger.warn(f"Unknown lexer {self.lexer_name} - falling back to markdown")
+            Logger.warning(
+                f"Unknown lexer {self.lexer_name} - falling back to markdown"
+            )
             self.lexer = lexers.get_lexer_by_name("markdown")
         self.background_color = self.styler.background_color
