@@ -81,7 +81,6 @@ class V2RefreshContainer(DebugFloatLayout, V2RefreshBehavior):
     refresh_threshold = NumericProperty(0.25)
     refreshing = BooleanProperty(False)
     refresh_enabled = BooleanProperty(True)
-    animate_icon_hide: Animation
 
     def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
@@ -89,11 +88,11 @@ class V2RefreshContainer(DebugFloatLayout, V2RefreshBehavior):
             self._bind_scroll_effect, 0
         )  # bind scroll effect after layout is ready
 
-    def _bind_scroll_effect(self, _dt):
+    def _bind_scroll_effect(self, _dt: float) -> None:
         effect = self.ids.scroll_view.effect_y
         effect.bind(overscroll=self._on_overscroll_value)
 
-    def _on_overscroll_value(self, effect, value) -> bool:
+    def _on_overscroll_value(self, effect: OpacityScrollEffect, value: float) -> bool:
         if not self.refresh_enabled:
             self.overscroll_progress = 0
             return True
@@ -110,13 +109,13 @@ class V2RefreshContainer(DebugFloatLayout, V2RefreshBehavior):
             Animation(overscroll_progress=0, d=0.2).start(self)
         return True
 
-    def on_overscroll_progress(self, _widget, value):
+    def on_overscroll_progress(self, _widget: object, value: float) -> None:
         """
         Called when the overscroll progress changes.
         This can be used to update the refresh icon or trigger a refresh.
         """
 
-    def add_widget_to_main(self, widget: Widget) -> None:
+    def add_widget_to_main(self, widget: "NavItem") -> None:
         """
         Add a widget to the grid layout
         :param widget: The widget to add
@@ -127,7 +126,7 @@ class V2RefreshContainer(DebugFloatLayout, V2RefreshBehavior):
         widget.padding = self.item_padding
         self.ids.main.add_widget(widget)
 
-    def clear_widgets_from_main(self):
+    def clear_widgets_from_main(self) -> None:
         """
         Clear all widgets from the grid layout
         """
@@ -139,10 +138,10 @@ class V2RefreshContainer(DebugFloatLayout, V2RefreshBehavior):
     def main_children(self) -> list["NavItem"]:
         return self.ids.main.children
 
-    def on_overscroll(self, *args):
+    def on_overscroll(self, *args: object) -> None:
         Logger.info(f"{type(self).__name__} : on_overscroll called with args: {args}")
 
-    def on_refresh(self, widget: "Widget", state: bool, to_children: bool):
+    def on_refresh(self, widget: "Widget", state: bool, to_children: bool) -> bool:
         if to_children:
             # We've been told to set our state to refreshing from a parent
             self.refreshing = state
