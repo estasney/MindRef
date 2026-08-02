@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+from kivy.input.motionevent import MotionEvent
 from kivy.lang import Builder
 from kivy.properties import (
     AliasProperty,
@@ -153,7 +156,9 @@ class ThemedButton(ButtonBehavior, BoxLayout, RippleMixin):
         self.bind(enable_ripple_effect=self.toggle_ripple_effect)
         self.toggle_ripple_effect()
 
-    def normalize_touch_pos(self, touch_x, touch_y):
+    def normalize_touch_pos(
+        self, touch_x: float, touch_y: float
+    ) -> tuple[float, float]:
         """
         Normalize touch position to texture coordinates.
 
@@ -170,7 +175,7 @@ class ThemedButton(ButtonBehavior, BoxLayout, RippleMixin):
             self.width - self.border[1] - self.border[3],
         )
 
-    def toggle_ripple_effect(self, *_args):
+    def toggle_ripple_effect(self, *_args: object) -> None:
         if self.enable_ripple_effect:
             self.on_touch_down = self._on_touch_down_ripple
             self.on_touch_move = self._on_touch_move
@@ -180,7 +185,7 @@ class ThemedButton(ButtonBehavior, BoxLayout, RippleMixin):
             self.on_touch_move = self._on_touch_move_plain
             self.on_touch_up = self._on_touch_up_plain
 
-    def _on_touch_down_ripple(self, touch):
+    def _on_touch_down_ripple(self, touch: MotionEvent) -> bool:
         if super().on_touch_down(touch):
             self.touch = self.normalize_touch_pos(*touch.pos)
             self.no_touch_trigger.cancel()
@@ -188,13 +193,13 @@ class ThemedButton(ButtonBehavior, BoxLayout, RippleMixin):
             return True
         return False
 
-    def _on_touch_move(self, touch):
+    def _on_touch_move(self, touch: MotionEvent) -> bool:
         if super().on_touch_move(touch):
             self.touch = self.normalize_touch_pos(*touch.pos)
             return True
         return False
 
-    def _on_touch_up(self, touch):
+    def _on_touch_up(self, touch: MotionEvent) -> bool:
         super().on_touch_up(touch)
         self.has_touch_trigger.cancel()
         self.no_touch_trigger()
@@ -225,18 +230,18 @@ class LabelButton(ThemedLabelButton):
 
 
 class LoadingButtonMixin:
-    mutation: Mutation
+    mutation: Mutation[..., None] | None = None
 
     def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
 
-    def get_is_loading(self):
+    def get_is_loading(self) -> bool:
         """
         Check if the mutation is pending.
         """
-        return self.mutation.is_mutating
+        return self.mutation is not None and self.mutation.is_mutating
 
-    is_loading = AliasProperty(get_is_loading, rebind=True)
+    is_loading: AliasProperty[bool] = AliasProperty(get_is_loading, rebind=True)
 
 
 class ThemedIconButton(ThemedLabelButton):
