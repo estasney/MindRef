@@ -147,28 +147,7 @@ class Widget(WidgetBase):
         """
         ...
 
-    def collide_point(self, x, y):
-        """
-        Check if a point (x, y) is inside the widget's axis aligned bounding
-        box.
-
-        :Parameters:
-            `x`: numeric
-                x position of the point (in parent coordinates)
-            `y`: numeric
-                y position of the point (in parent coordinates)
-
-        :Returns:
-            A bool. True if the point is inside the bounding box, False
-            otherwise.
-
-        .. code-block:: python
-
-            >>> Widget(pos=(10, 10), size=(50, 50)).collide_point(40, 40)
-            True
-        """
-        ...
-
+    def collide_point(self, x: float, y: float) -> bool: ...
     def collide_widget(self, wid) -> bool:
         """
         Check if another widget collides with this widget. This function

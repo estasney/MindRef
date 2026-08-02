@@ -61,7 +61,9 @@ class RefreshSymbol(FloatLayout):
 
     def __init__(self, **kwargs: object):
         self.source = get_app().atlas_service.uri_for("refresh", atlas_name="icons")
-        super().__init__(**kwargs)
+        super().__init__(
+            **kwargs | {"disabled": True}
+        )  # Disabled so we don't handle touch events - ever.
         self._scheduler = None
 
     def on_animate(self, _instance: object, value: bool) -> None:
@@ -74,10 +76,7 @@ class RefreshSymbol(FloatLayout):
             self._scheduler = None
         Animation(opacity=0, d=0.2).start(self)
 
-    def increment_spin(self, dt):
+    def increment_spin(self, dt: float) -> None:
         self.event_dt = self.event_dt + dt
         rot = (sin(self.event_dt) * 4) + 5
         self.rotation = self.rotation + rot
-
-    def collide_point(self, x, y):
-        return False
