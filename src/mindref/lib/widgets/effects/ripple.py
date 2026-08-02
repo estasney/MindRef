@@ -7,7 +7,6 @@ from kivy.properties import (
     NumericProperty,
     StringProperty,
 )
-from kivy.uix.widget import Widget
 
 fs_header = """
 $HEADER$
@@ -33,12 +32,13 @@ void main(void) {
 """
 
 
-class RippleMixin(Widget):
+class RippleMixin:
     touch = ListProperty([0.0, 0.0])
     touch_time = NumericProperty(0.0)
     intensity = BoundedNumericProperty(0.4, min=0, max=1)
     growth_rate = NumericProperty(1)
     fs = StringProperty()
+    size: tuple[int, int]  # pyright: ignore[reportUninitializedInstanceVariable]
 
     def __init__(self, **kwargs: object):
         EventLoop.ensure_window()
