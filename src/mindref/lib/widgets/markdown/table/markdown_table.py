@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from kivy.clock import Clock
 from kivy.graphics import Color, Line
 from kivy.lang import Builder
@@ -12,7 +14,10 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 
 from mindref.lib.utils import get_app
-from mindref.lib.widgets.behavior.inline_behavior import TextSnippet
+from mindref.lib.widgets.behavior.inline_behavior import (
+    LabelHighlightInline,
+    TextSnippet,
+)
 from mindref.lib.widgets.markdown.markdown_parsing_mixin import (
     MarkdownLabelParsingMixin,
 )
@@ -67,11 +72,11 @@ class MarkdownRow(BoxLayout):
         fbind("height", draw)
         fbind("children", draw)
 
-    def schedule_draw(self, *_args):
+    def schedule_draw(self, *_args: object) -> bool:
         Clock.schedule_once(self.draw_cell_border)
         return True
 
-    def draw_cell_border(self, *_args):
+    def draw_cell_border(self, *_args: object) -> None:
         with self.canvas.before:
             self.canvas.before.clear()
             Color(rgba=get_app().colors["Dark"])
@@ -81,9 +86,9 @@ class MarkdownRow(BoxLayout):
 
 
 class MarkdownCell(BoxLayout, MarkdownLabelParsingMixin):
-    label = ObjectProperty()
+    label: ObjectProperty[LabelHighlightInline] = ObjectProperty()
     open_bbcode_tag = StringProperty()
-    snippets = ListProperty()
+    snippets: ListProperty[TextSnippet] = ListProperty()
     halign = OptionProperty(
         "auto", options=["left", "center", "right", "justify", "auto"]
     )
@@ -104,7 +109,7 @@ class MarkdownCell(BoxLayout, MarkdownLabelParsingMixin):
     def set_snippets(self, value: list[TextSnippet]) -> None:
         self.snippets = value
 
-    def handle_bold(self, *_args):
+    def handle_bold(self, *_args: object) -> None:
         if self.bold:
             self.open_bbcode_tag = "b"
         else:
