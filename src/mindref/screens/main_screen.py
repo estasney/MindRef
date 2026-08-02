@@ -139,7 +139,7 @@ class MainScreen(Screen, V2RefreshBehavior):
         self.ids.content.add_widget(layout)
         layout.document = document_md
 
-    def handle_note_files(self, _, value: list[NoteFile]) -> None:
+    def handle_note_files(self, _: MainScreen, value: list[NoteFile]) -> None:
         Logger.info(
             f"{type(self).__name__} : handle_note_files - {len(value)} note files found."
         )
