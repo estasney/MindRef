@@ -10,7 +10,7 @@ class NoteFile:
 
     def __post_init__(self):
         self.file_path = Path(self.file_path)
-        self.label = self.file_path.stem
+        self.label = self.file_path.stem.replace("_", " ").strip()
         self.id = str(self.file_path)
 
     @classmethod
