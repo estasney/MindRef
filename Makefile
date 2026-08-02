@@ -20,7 +20,19 @@ echo-vars:
 	@echo LOGCAT_FILTER = \"$(LOGCAT_FILTER)\"
 	@echo PYX_FILES = \"$(PYX_FILES)\"
 	@echo MINDREF_APK = \"$(MINDREF_APK)\"
-.PHONY : echo-vars
+.PHONY : echo-vars version-patch version-minor version-major check-clean
+
+# Target name minus the prefix.
+BUMP = $(@:version-%=%)
+
+check-clean:
+	@test -z "$$(git status --porcelain)" || { echo "Git tree is dirty."; exit 1; }
+
+version-patch version-minor version-major: check-clean
+	@NEW_VERSION=$$(uv version --bump $(BUMP) --short) && \
+	git add pyproject.toml && \
+	git commit -q -m "v$$NEW_VERSION" && \
+	git tag -a "v$$NEW_VERSION" -m "v$$NEW_VERSION"
 
 
 emulator :
