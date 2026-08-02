@@ -25,7 +25,7 @@ dependencies = [
     "mistune==2.0.5",
     "pillow<11.1.0",
     "Pygments==2.19.0",
-    "python-dotenv==1.0.1",
+    "python-dotenv>=1.2.2,<2.0.0",
 ]
 
 [project.scripts]
@@ -39,7 +39,6 @@ dev = [
     "cython>3,<=3.0.11",
     "line-profiler>=4.2.0",
     "pre-commit>=4.1.0",
-    "pytest>=8.4.1",
     "ruff>=0.15.22",
 ]
 
@@ -65,6 +64,7 @@ where = ["src"]
 
 [tool.uv]
 package = true
+add-bounds = "major"
 cache-keys =[{ file = "pyproject.toml"}, {file="src/**/*.c"}]
 
 [tool.ruff]
