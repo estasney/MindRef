@@ -13,6 +13,7 @@ from kivy.properties import (
 )
 
 from mindref.lib.models import MutationStatus
+from mindref.lib.utils import schedulable
 
 
 class Mutation[**P, R](EventDispatcher):
@@ -88,7 +89,7 @@ class Mutation[**P, R](EventDispatcher):
     def __call__(self, *args: P.args, **kwargs: P.kwargs) -> None:
         self.reset()
         Clock.schedule_once(self.dispatch_on_mutate)
-        Clock.schedule_once(partial(self.dispatch_run, *args, **kwargs))
+        Clock.schedule_once(schedulable(self._run, *args, **kwargs))
 
     def _get_is_mutating(self) -> bool:
         return self.status == MutationStatus.pending
@@ -110,9 +111,6 @@ class Mutation[**P, R](EventDispatcher):
 
     def dispatch_on_mutate(self, _dt: float) -> None:
         self.dispatch("on_mutate")
-
-    def dispatch_run(self, *args: P.args, **kwargs: P.kwargs) -> None:
-        self._run(*args, **kwargs)
 
     def reset(self, *_args: object) -> None:
         """Reset the mutation to its initial state."""
