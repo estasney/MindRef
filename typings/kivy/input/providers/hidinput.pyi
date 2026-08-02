@@ -6,53 +6,6 @@ import os
 from kivy.input.motionevent import MotionEvent
 from kivy.input.provider import MotionEventProvider
 
-"""
-Native support for HID input from the linux kernel
-==================================================
-
-Support starts from 2.6.32-ubuntu, or 2.6.34.
-
-To configure HIDInput, add this to your configuration::
-
-    [input]
-    # devicename = hidinput,/dev/input/eventXX
-    # example with Stantum MTP4.3" screen
-    stantum = hidinput,/dev/input/event2
-
-.. note::
-    You must have read access to the input event.
-
-You can use a custom range for the X, Y and pressure values.
-For some drivers, the range reported is invalid.
-To fix that, you can add these options to the argument line:
-
-* invert_x : 1 to invert X axis
-* invert_y : 1 to invert Y axis
-* min_position_x : X relative minimum
-* max_position_x : X relative maximum
-* min_position_y : Y relative minimum
-* max_position_y : Y relative maximum
-* min_abs_x : X absolute minimum
-* min_abs_y : Y absolute minimum
-* max_abs_x : X absolute maximum
-* max_abs_y : Y absolute maximum
-* min_pressure : pressure minimum
-* max_pressure : pressure maximum
-* rotation : rotate the input coordinate (0, 90, 180, 270)
-
-For example, on the Asus T101M, the touchscreen reports a range from 0-4095 for
-the X and Y values, but the real values are in a range from 0-32768. To correct
-this, you can add the following to the configuration::
-
-    [input]
-    t101m = hidinput,/dev/input/event7,max_position_x=32768,\
-max_position_y=32768
-
-.. versionadded:: 1.9.1
-
-    `rotation` configuration token added.
-
-"""
 __all__ = ("HIDInputMotionEventProvider", "HIDMotionEvent")
 Window = ...
 Keyboard = ...

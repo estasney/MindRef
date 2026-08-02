@@ -1,10 +1,6 @@
-from kivy.animation import Animation
 from kivy.lang import Builder
 from kivy.properties import (
-    AliasProperty,
-    BooleanProperty,
     ColorProperty,
-    NumericProperty,
 )
 from kivy.uix.widget import Widget
 

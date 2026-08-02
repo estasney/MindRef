@@ -6,10 +6,6 @@ import os
 from kivy.input.motionevent import MotionEvent
 from kivy.input.provider import MotionEventProvider
 
-"""
-Support for WM_PEN messages (Windows platform)
-==============================================
-"""
 __all__ = ("WM_PenProvider", "WM_Pen")
 
 class WM_Pen(MotionEvent):

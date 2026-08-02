@@ -147,7 +147,6 @@ class MainScreen(Screen, V2RefreshBehavior):
         from mindref.lib.widgets.nav_drawer.nav_item import NavItemData
 
         nav_data_items = [
-            NavItemData.from_note_file(note, selected=self.selected_note == note.id)
-            for note in value
+            NavItemData.from_note_file(note, selected=False) for note in value
         ]
         self.ids.nav_drawer.nav_data_items = nav_data_items

@@ -22,13 +22,6 @@ from kivy.graphics.opengl import (
 from kivy.graphics.cgl import cgl_get_initialized_backend_name
 from kivy.utils import platform
 
-"""
-OpenGL
-======
-
-Select and use the best OpenGL library available. Depending on your system, the
-core provider can select an OpenGL ES or a 'classic' desktop OpenGL library.
-"""
 MIN_REQUIRED_GL_VERSION = ...
 
 def msgbox(message) -> None: ...

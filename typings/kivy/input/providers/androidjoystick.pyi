@@ -6,16 +6,6 @@ import os
 from kivy.input.provider import MotionEventProvider
 from kivy.input.motionevent import MotionEvent
 
-"""
-Android Joystick Input Provider
-===============================
-
-This module is based on the PyGame JoyStick Input Provider. For more
-information, please refer to
-`<http://www.pygame.org/docs/ref/joystick.html>`_
-
-
-"""
 __all__ = ("AndroidMotionEventProvider",)
 if "KIVY_DOC" not in os.environ: ...
 

@@ -29,13 +29,6 @@ from kivy.setupconfig import USE_SDL2
 from kivy.graphics.transformation import Matrix
 from kivy.graphics.cgl import cgl_get_backend_name
 
-"""
-Window
-======
-
-Core class for creating the default Kivy window. Kivy supports only one window
-per application: please don't try to create more than one.
-"""
 __all__ = ("Keyboard", "WindowBase", "Window")
 VKeyboard = ...
 android = ...

@@ -7,24 +7,6 @@ from kivy.core import core_select_lib
 from kivy.utils import platform
 from kivy.setupconfig import USE_SDL2
 
-"""
-Clipboard
-=========
-
-Core class for accessing the Clipboard. If we are not able to access the
-system clipboard, a fake one will be used.
-
-Usage example:
-
-.. code-block:: kv
-
-    #:import Clipboard kivy.core.clipboard.Clipboard
-
-    Button:
-        on_release:
-            self.text = Clipboard.paste()
-            Clipboard.copy('Data')
-"""
 __all__ = ("ClipboardBase", "Clipboard")
 
 class ClipboardBase:

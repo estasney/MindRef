@@ -46,7 +46,7 @@ class LinearProgress(EffectWidget):
             )
         ]
 
-    def toggle_effect(self, *_args):
+    def toggle_effect(self, *_args: object) -> None:
         """
         Enable or disable the linear progress effect based on the animated property.
         """

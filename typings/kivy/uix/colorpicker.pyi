@@ -7,40 +7,6 @@ from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.widget import Widget
 from kivy.app import App
 
-"""
-Color Picker
-============
-
-.. versionadded:: 1.7.0
-
-.. warning::
-
-    This widget is experimental. Its use and API can change at any time until
-    this warning is removed.
-
-.. image:: images/colorpicker.png
-    :align: right
-
-The ColorPicker widget allows a user to select a color from a chromatic
-wheel where pinch and zoom can be used to change the wheel's saturation.
-Sliders and TextInputs are also provided for entering the RGBA/HSV/HEX values
-directly.
-
-Usage::
-
-    clr_picker = ColorPicker()
-    parent.add_widget(clr_picker)
-
-    # To monitor changes, we can bind to color property changes
-    def on_color(instance, value):
-        print("RGBA = ", str(value))  #  or instance.color
-        print("HSV = ", str(instance.hsv))
-        print("HEX = ", str(instance.hex_color))
-
-    clr_picker.bind(color=on_color)
-
-
-"""
 __all__ = ("ColorPicker", "ColorWheel")
 
 def distance(pt1, pt2) -> float: ...

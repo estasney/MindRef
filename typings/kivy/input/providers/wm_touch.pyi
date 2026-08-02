@@ -6,10 +6,6 @@ import os
 from kivy.input.motionevent import MotionEvent
 from kivy.input.provider import MotionEventProvider
 
-"""
-Support for WM_TOUCH messages (Windows platform)
-================================================
-"""
 __all__ = ("WM_MotionEventProvider", "WM_MotionEvent")
 Window = ...
 

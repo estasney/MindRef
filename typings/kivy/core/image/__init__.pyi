@@ -21,68 +21,6 @@ from io import BytesIO
 from os import environ
 from kivy.graphics.texture import Texture, TextureRegion
 
-"""
-Image
-=====
-
-Core classes for loading images and converting them to a
-:class:`~kivy.graphics.texture.Texture`. The raw image data can be keep in
-memory for further access.
-
-.. versionchanged:: 1.11.0
-
-    Add support for argb and abgr image data
-
-In-memory image loading
------------------------
-
-.. versionadded:: 1.9.0
-
-    Official support for in-memory loading. Not all the providers support it,
-    but currently SDL2, pygame, pil and imageio work.
-
-To load an image with a filename, you would usually do::
-
-    from kivy.core.image import Image as CoreImage
-    im = CoreImage("image.png")
-
-You can also load the image data directly from a memory block. Instead of
-passing the filename, you'll need to pass the data as a BytesIO object
-together with an "ext" parameter. Both are mandatory::
-
-    import io
-    from kivy.core.image import Image as CoreImage
-    data = io.BytesIO(open("image.png", "rb").read())
-    im = CoreImage(data, ext="png")
-
-By default, the image will not be cached as our internal cache requires a
-filename. If you want caching, add a filename that represents your file (it
-will be used only for caching)::
-
-    import io
-    from kivy.core.image import Image as CoreImage
-    data = io.BytesIO(open("image.png", "rb").read())
-    im = CoreImage(data, ext="png", filename="image.png")
-
-Saving an image
----------------
-
-A CoreImage can be saved to a file::
-
-    from kivy.core.image import Image as CoreImage
-    image = CoreImage(...)
-    image.save("/tmp/test.png")
-
-Or you can get the bytes (new in `1.11.0`):
-
-    import io
-    from kivy.core.image import Image as CoreImage
-    data = io.BytesIO()
-    image = CoreImage(...)
-    image.save(data, fmt="png")
-    png_bytes = data.read()
-
-"""
 __all__ = ("Image", "ImageLoader", "ImageData")
 TextureRegion = ...
 

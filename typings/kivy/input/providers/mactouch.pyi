@@ -7,10 +7,6 @@ import os
 from kivy.input.provider import MotionEventProvider
 from kivy.input.motionevent import MotionEvent
 
-"""
-Native support of MultitouchSupport framework for MacBook (MaxOSX platform)
-===========================================================================
-"""
 __all__ = ("MacMotionEventProvider",)
 if "KIVY_DOC" not in os.environ:
     CFArrayRef = ctypes.c_void_p

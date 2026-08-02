@@ -10,11 +10,6 @@ from kivy.input.postproc.retaintouch import InputPostprocRetainTouch
 from kivy.input.postproc.dejitter import InputPostprocDejitter
 from kivy.input.postproc.calibration import InputPostprocCalibration
 
-"""
-Input Postprocessing
-====================
-
-"""
 __all__ = ("kivy_postproc_modules",)
 kivy_postproc_modules = ...
 if "KIVY_DOC" not in os.environ: ...

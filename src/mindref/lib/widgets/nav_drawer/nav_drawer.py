@@ -17,7 +17,7 @@ from kivy.properties import (
 )
 
 from mindref.lib.models import AnimationTiming, OpenState, TOpenState
-from mindref.lib.utils import get_app
+from mindref.lib.utils import get_app, required
 from mindref.lib.widgets.behavior import DebugFloatLayout
 from mindref.lib.widgets.buttons.buttons import ThemedIconButton
 from mindref.lib.widgets.nav_drawer.nav_buttons import (
@@ -256,10 +256,20 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
 
     def on_open(self, _instance: object, _value: TOpenState | OpenState) -> None:
         self.open_state = OpenState.open
-        self.fade_in_animation.start(self.clear_search_button)
-        self.fade_in_animation.start(self.search_box)
-        self.fade_in_animation.start(self.settings_button)
-        self.fade_in_animation.start(self.note_actions_container)
+
+        clear_search_button = required(
+            self.clear_search_button, "no clear_search_button"
+        )
+        search_box = required(self.search_box, "no search_box")
+        settings_button = required(self.settings_button, "no settings_button")
+        note_actions_container = required(
+            self.note_actions_container, "no note_actions_container"
+        )
+
+        self.fade_in_animation.start(clear_search_button)
+        self.fade_in_animation.start(search_box)
+        self.fade_in_animation.start(settings_button)
+        self.fade_in_animation.start(note_actions_container)
 
     def on_opening(self, _instance: object, _value: TOpenState | OpenState) -> None:
         self.drawer_close_animation.cancel(self)
@@ -268,10 +278,19 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
         self.attach_settings_button()
         self.attach_note_actions()
 
-        self.fade_out_animation.cancel(self.clear_search_button)
-        self.fade_out_animation.cancel(self.search_box)
-        self.fade_out_animation.cancel(self.settings_button)
-        self.fade_out_animation.cancel(self.note_actions_container)
+        clear_search_button = required(
+            self.clear_search_button, "no clear_search_button"
+        )
+        search_box = required(self.search_box, "no search_box")
+        settings_button = required(self.settings_button, "no settings_button")
+        note_actions_container = required(
+            self.note_actions_container, "no note_actions_container"
+        )
+
+        self.fade_out_animation.cancel(clear_search_button)
+        self.fade_out_animation.cancel(search_box)
+        self.fade_out_animation.cancel(settings_button)
+        self.fade_out_animation.cancel(note_actions_container)
         self.fade_out_animation.cancel(self.ids.nav_items)
         self.fade_in_animation.start(self.ids.nav_items)
 
@@ -280,16 +299,25 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
     def on_closing(self, _instance: object, _value: TOpenState | OpenState) -> None:
         self.drawer_open_animation.cancel(self)
 
+        clear_search_button = required(
+            self.clear_search_button, "no clear_search_button"
+        )
+        search_box = required(self.search_box, "no search_box")
+        settings_button = required(self.settings_button, "no settings_button")
+        note_actions_container = required(
+            self.note_actions_container, "no note_actions_container"
+        )
+
         self.fade_in_animation.cancel(self.ids.nav_items)
-        self.fade_in_animation.cancel(self.clear_search_button)
-        self.fade_in_animation.cancel(self.search_box)
-        self.fade_in_animation.cancel(self.settings_button)
-        self.fade_in_animation.cancel(self.note_actions_container)
-        self.fade_out_animation.start(self.clear_search_button)
-        self.fade_out_animation.start(self.search_box)
-        self.fade_out_animation.start(self.settings_button)
+        self.fade_in_animation.cancel(clear_search_button)
+        self.fade_in_animation.cancel(search_box)
+        self.fade_in_animation.cancel(settings_button)
+        self.fade_in_animation.cancel(note_actions_container)
+        self.fade_out_animation.start(clear_search_button)
+        self.fade_out_animation.start(search_box)
+        self.fade_out_animation.start(settings_button)
         self.fade_out_animation.start(self.ids.nav_items)
-        self.fade_out_animation.start(self.note_actions_container)
+        self.fade_out_animation.start(note_actions_container)
         self.drawer_close_animation.start(self)
 
     def on_close(self, _instance: object, _value: TOpenState | OpenState) -> None:

@@ -26,26 +26,6 @@ from kivy import deps as old_deps
 from kivy.config import Config
 from kivy.modules import Modules
 
-"""
-Kivy framework
-==============
-
-Kivy is an open source library for developing multi-touch applications. It is
-cross-platform (Linux/OSX/Windows/Android/iOS) and released under
-the terms of the `MIT License <https://en.wikipedia.org/wiki/MIT_License>`_.
-
-It comes with native support for many multi-touch input devices, a growing
-library of multi-touch aware widgets and hardware accelerated OpenGL drawing.
-Kivy is designed to let you focus on building custom and highly interactive
-applications as quickly and easily as possible.
-
-With Kivy, you can take full advantage of the dynamic nature of Python. There
-are thousands of high-quality, free libraries that can be integrated in your
-application. At the same time, performance-critical parts are implemented
-using `Cython <http://cython.org/>`_.
-
-See http://kivy.org for more information.
-"""
 __all__ = (
     "require",
     "parse_kivy_version",

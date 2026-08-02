@@ -27,7 +27,7 @@ def _to_path(value: str | Path | None) -> Path | None:
         case Path():
             return value
         case _:
-            raise ValueError(f"Invalid value {value}")
+            raise ValueError(f"Invalid value {value}")  # pyright: ignore[reportUnreachable]
 
 
 class PathConfigParserProperty(SubscriptableConfigParserProperty[Path | None]):

@@ -6,12 +6,6 @@ import os
 from ctypes.wintypes import LPARAM, RECT as RECT_BASE
 from ctypes import Structure, c_longlong
 
-"""
-Common definitions for a Windows provider
-=========================================
-
-This file provides common definitions for constants used by WM_Touch / WM_Pen.
-"""
 WM_MOUSEFIRST = ...
 WM_MOUSEMOVE = ...
 WM_LBUTTONDOWN = ...
