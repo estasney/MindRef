@@ -4,6 +4,6 @@ from mindref.lib.widgets.settings.settings_android_path import SettingsAndroidPa
 
 
 class MindrefSettings(SettingsWithSpinner):
-    def __init__(self, *args, **kwargs: object):
+    def __init__(self, *args: object, **kwargs: object):
         super().__init__(*args, **kwargs)
         self.register_type("android_path", SettingsAndroidPath)
