@@ -10,6 +10,7 @@ from kivy.app import App
 from kivy.clock import Clock, mainthread
 from kivy.config import ConfigParser
 from kivy.core.window import Window, WindowBase
+from kivy.event import EventDispatcher
 from kivy.logger import Logger
 from kivy.properties import (
     BooleanProperty,
@@ -30,6 +31,7 @@ from mindref.app_theme import THEME_COLORS
 from mindref.lib.adapters import FileManager
 from mindref.lib.adapters.atlas.fs.fs_atlas_repository import AtlasService
 from mindref.lib.adapters.base import FileSystemBase
+from mindref.lib.models import KeyCode
 from mindref.lib.utils import get_app, required
 from mindref.lib.widgets.settings.settings_mindref import MindrefSettings
 from mindref.screens import NoteAppScreenManager
@@ -181,22 +183,30 @@ class MindRefApp(App):
 
     def key_input(
         self,
-        _window: WindowBase,
+        window: WindowBase,
         key: int,
         _scancode: int,
         _codepoint: str,
         _modifier: list[str],
     ) -> bool:
-        if key == 27:
-            # TODO - Close nav drawer? Something else?
+        match key:
+            case KeyCode.escape:
+                return self.handle_back(window)
+            case _:
+                return False
+
+    def handle_back(self, source: EventDispatcher) -> bool:
+        """Offer the back action to the screens, and exit when none consumes it"""
+        if self.screen_manager.dispatch("on_back", source):
             return True
-        return False
+        self.stop()
+        return True
 
     def build(self):
         self.platform_android = platform == "android"
         Logger.info(f"Platform: {platform}, Android: {self.platform_android}")
 
-        # Window.bind(on_keyboard=self.key_input)
+        Window.bind(on_keyboard=self.key_input)
         self.screen_manager = NoteAppScreenManager()
         self.bind(storage_path=lambda *_: self.refresh_note_files())
         Clock.schedule_once(lambda _: self.refresh_note_files())

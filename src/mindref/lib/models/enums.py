@@ -1,5 +1,11 @@
-from enum import StrEnum
+from enum import IntEnum, StrEnum
 from typing import Literal
+
+
+class KeyCode(IntEnum):
+    """Window keyboard codes that the application acts on"""
+
+    escape = 27
 
 
 class AnimationTiming(StrEnum):

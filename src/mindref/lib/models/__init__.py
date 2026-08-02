@@ -1,6 +1,7 @@
 from mindref.lib.models.enums import (
     AnimationTiming,
     TAnimationTiming,
+    KeyCode,
     MutationStatus,
     TMutationStatus,
     TMutationStatusLit,
@@ -10,6 +11,7 @@ from mindref.lib.models.enums import (
 
 __all__ = [
     "AnimationTiming",
+    "KeyCode",
     "MutationStatus",
     "OpenState",
     "TAnimationTiming",

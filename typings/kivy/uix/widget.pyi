@@ -177,7 +177,7 @@ class Widget(WidgetBase):
         """
         ...
 
-    def on_motion(self, etype, me) -> Literal[True] | None:
+    def on_motion(self, etype, me) -> bool | None:
         """Called when a motion event is received.
 
         :Parameters:

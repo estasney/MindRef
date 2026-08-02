@@ -14,10 +14,13 @@ from mindref.app_notes import NoteFile
 from mindref.lib import get_app
 from mindref.lib.domain.parser.kbd_plugin import plugin_kbd
 from mindref.lib.domain.protocols import AppRegistryProtocol
+from mindref.lib.models import OpenState
+from mindref.lib.widgets.behavior import BackBehavior
 from mindref.lib.widgets.markdown.markdown_document_v2 import MarkdownDocumentLayout
 from mindref.lib.widgets.refreshable import V2RefreshBehavior
 
 if TYPE_CHECKING:
+    from kivy.event import EventDispatcher
     from kivy.uix.scrollview import ScrollView
     from kivy.uix.widget import Widget
 
@@ -82,7 +85,7 @@ class V2NoteListViewScreenIds(NamedTuple):
     nav_drawer: NavDrawer
 
 
-class MainScreen(Screen, V2RefreshBehavior):
+class MainScreen(Screen, V2RefreshBehavior, BackBehavior):
     app: ObjectProperty[AppRegistryProtocol] = ObjectProperty()
     ids: V2NoteListViewScreenIds
     selected_note = StringProperty(None, allownone=True)
@@ -116,6 +119,16 @@ class MainScreen(Screen, V2RefreshBehavior):
         note_content = self.app.read_note(note_id)
         Clock.schedule_once(lambda _: self.render_note(note_content), 0)
         return True
+
+    def on_back(self, source: EventDispatcher) -> bool:
+        """A closed drawer opens; an open drawer leaves the action to the app"""
+        nav_drawer = self.ids.nav_drawer
+        match nav_drawer.open_state:
+            case OpenState.closed | OpenState.closing:
+                nav_drawer.toggle(None)
+                return True
+            case _:
+                return False
 
     def handle_nav_click(self, _dt: NavDrawer, instance: NavItem) -> bool:
         nav_id = instance.nav_id
