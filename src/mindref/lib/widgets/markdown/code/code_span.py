@@ -1,9 +1,13 @@
+from __future__ import annotations
+
 from kivy.lang import Builder
 from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.gridlayout import GridLayout
+from pygments.style import Style
 from pygments.token import Token
 
 from mindref.lib.widgets.markdown.code.jetbrains_dark import JetBrainsDark
+from mindref.lib.widgets.style import BaseLabel
 
 Builder.load_string("""
 #:import parse_color kivy.parser.parse_color
@@ -39,18 +43,24 @@ Builder.load_string("""
 
 
 class MarkdownCodeSpan(GridLayout):
-    content = ObjectProperty()
+    content: ObjectProperty[BaseLabel] = ObjectProperty()
+    styler: ObjectProperty[type[Style]] = ObjectProperty(JetBrainsDark)
     raw_text = StringProperty()
     text = StringProperty()
     background_color = StringProperty()
 
-    def __init__(self, text, **kwargs: object):
+    def __init__(self, text: str, **kwargs: object):
         super().__init__(**kwargs)
-        self.styler = JetBrainsDark
         self.background_color = self.styler.background_color
         self.raw_text = text
 
-    def on_raw_text(self, _, new):
-        # Wrap in BBCode
-        bb_text = f"[color={self.styler.styles[Token.Text]}]{new}[/color]"
-        self.text = bb_text
+    def on_styler(self, _instance: object, new: type[Style]) -> None:
+        self.background_color = new.background_color
+        self.render_text()
+
+    def on_raw_text(self, _instance: object, new: str) -> None:
+        self.render_text()
+
+    def render_text(self) -> None:
+        """Wrap the raw text in a BBCode colour tag taken from the styler."""
+        self.text = f"[color={self.styler.styles[Token.Text]}]{self.raw_text}[/color]"
