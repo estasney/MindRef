@@ -1,5 +1,3 @@
-from mindref.lib.widgets.effects.pulsing import PulsingEffect
-from mindref.lib.widgets.effects.spinning import SpinningEffect
-from mindref.lib.widgets.effects.scrolling import RefreshState
+from mindref.lib.widgets.effects.scrolling import RefreshState, RefreshSymbol
 
-__all__ = ["PulsingEffect", "RefreshState", "SpinningEffect"]
+__all__ = ["RefreshState", "RefreshSymbol"]

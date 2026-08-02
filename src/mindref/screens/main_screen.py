@@ -28,7 +28,6 @@ Builder.load_string(
     """
 #:import V2RefreshContainer mindref.lib.widgets.refreshable.refresh_container
 #:import NavDrawer mindref.lib.widgets.nav_drawer
-#:import AnimatedHSeparator mindref.lib.widgets.separator
 
 
 <MainScreen>:
