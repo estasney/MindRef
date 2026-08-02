@@ -1,6 +1,5 @@
 # Standalone
 from mindref.lib.widgets.behavior import (
-    InteractBehavior,
     LabelHighlightInline,
     RefreshBehavior,
 )
@@ -19,7 +18,6 @@ from mindref.lib.widgets.separator import (
 __all__ = [
     "AnimatedHSeparator",
     "HSeparator",
-    "InteractBehavior",
     "LabelHighlightInline",
     "PulsingEffect",
     "RefreshBehavior",
