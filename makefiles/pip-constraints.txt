@@ -1,0 +1,2 @@
+# pip 26.2 breaks p4a's per-arch venv reuse
+pip<26.2

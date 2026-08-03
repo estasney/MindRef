@@ -25,6 +25,7 @@ Builder.load_string("""
 #:import LinearProgress mindref.lib.widgets.progress.LinearProgress
 
 <NoteTitleInput@TextInput>
+    input_type: 'text'
     size_hint_x: 1
     size_hint_y: None
     multiline: False
@@ -87,6 +88,7 @@ Builder.load_string("""
             height: dp(1)        
         CodeInput:
             id: code_input
+            input_type: 'text'
             pos_hint: {"top": 1}
             size_hint_x: 1
             size_hint_y: .9

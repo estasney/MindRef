@@ -5,6 +5,7 @@ BUILD_DIR:=$(ROOT_DIR)/build_p4a
 SCRIPT_DIR:=$(ROOT_DIR)/scripts
 P4A_HOOKS_DIR:=$(SCRIPT_DIR)/p4a
 P4A_HOOKS_FILE:=$(P4A_HOOKS_DIR)/hook.py
+PIP_CONSTRAINTS_FILE:=$(ROOT_DIR)/makefiles/pip-constraints.txt
 
 UTIL_ROOT:=$(HOME)/AndroidStudioProjects/MindRefUtils
 UTIL_OUTPUT:=$(UTIL_ROOT)/mindrefutils/build/outputs/aar
@@ -15,7 +16,7 @@ PROJECT_NAME:=mindref
 PROJECT_NAME_READABLE:=MindRef
 PROJECT_JAVA_PACKAGE:=org.test.mindref
 PROJECT_JAVA_HOME:=/usr/lib/jvm/java-17-openjdk-amd64
-PROJECT_REQUIREMENTS='kivy==2.3.1',python-dotenv,pygments,pillow,mistune==2.1.0,mindref_android,filetype
+PROJECT_REQUIREMENTS=kivy==2.3.1,python-dotenv,pygments,pillow,mistune==2.1.0,mindref_android,filetype
 PROJECT_ROOT:=$(ROOT_DIR)/src/mindref
 PROJECT_VERSION ?= $(shell python3.12 -c "import tomllib;fp=open('pyproject.toml', 'rb');d=tomllib.load(fp);print(d['project']['version']);fp.close()" )
 
