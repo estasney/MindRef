@@ -21,7 +21,7 @@ clean-dists:
 .PHONY : clean-dists
 
 
-build-apk :  $(MINDREF_UTILS_DEBUG) clean-bytecode prebuild
+build-apk :  $(MINDREF_UTILS_DEBUG) clean-bytecode prebuild clean-dists
 	JAVA_HOME=$(PROJECT_JAVA_HOME) PIP_CONSTRAINT=$(PIP_CONSTRAINTS_FILE) uv run --group android p4a apk --private $(BUILD_DIR) \
   	--package=$(PROJECT_JAVA_PACKAGE) \
   	--name $(PROJECT_NAME_READABLE) \
@@ -55,7 +55,7 @@ build-apk :  $(MINDREF_UTILS_DEBUG) clean-bytecode prebuild
 
 
 
-$(MINDREF_RELEASE_UNSIGNED_APK) : $(MINDREF_UTILS_RELEASE) clean-bytecode prebuild
+$(MINDREF_RELEASE_UNSIGNED_APK) : $(MINDREF_UTILS_RELEASE) clean-bytecode prebuild clean-dists
 	JAVA_HOME=$(PROJECT_JAVA_HOME) \
  	PIP_CONSTRAINT=$(PIP_CONSTRAINTS_FILE) \
  	uv run --group android p4a apk --private $(BUILD_DIR) \
