@@ -56,13 +56,13 @@ Builder.load_string("""
             readonly: True
             style: JetBrainsDark
             lexer: root.lexer
-            use_bubble: False
-            use_handles: False
+            use_bubble: True
+            use_handles: True
             font_name: "JetBrainsMono"
             mipmap: True
             font_size: sp(app.base_font_size - 4)
             cursor_color: 0, 0, 0, 0
-            is_focusable: False
+            is_focusable: True
             keyboard_mode: "managed"
 """)
 
