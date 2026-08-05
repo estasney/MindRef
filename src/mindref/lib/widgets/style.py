@@ -22,6 +22,7 @@ Builder.load_string("""
     icon_code: "\\ue408"
 
 <StyledTextInput@TextInput>:
+    input_type: 'text'
     size_hint_y: None
     height: self.minimum_height
     background_normal: ''

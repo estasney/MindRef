@@ -64,6 +64,7 @@ Builder.load_string("""
             height: dp(1)        
         CodeInput:
             id: code_input
+            input_type: 'text'
             pos_hint: {"top": 1}
             size_hint_x: 1
             size_hint_y: .9
