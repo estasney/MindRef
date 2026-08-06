@@ -17,6 +17,7 @@ from mindref.lib.widgets.markdown.code.jetbrains_dark import JetBrainsDark
 
 Builder.load_string("""
 #:import parse_color kivy.parser.parse_color
+#:import platform kivy.utils.platform
 #:import JetBrainsDark mindref.lib.widgets.markdown.code.jetbrains_dark.JetBrainsDark
 <MarkdownCode>:
     cols: 1
@@ -56,23 +57,27 @@ Builder.load_string("""
             readonly: True
             style: JetBrainsDark
             lexer: root.lexer
-            use_bubble: True
-            use_handles: True
             font_name: "JetBrainsMono"
             mipmap: True
             font_size: sp(app.base_font_size - 4)
             cursor_color: 0, 0, 0, 0
             is_focusable: True
-            keyboard_mode: "managed"
+            keyboard_mode: "managed" if platform == "android" else "auto"
 """)
 
 
 class HorizontalWheelScrollView(ScrollView):
-    """ScrollView that declines vertical mouse wheel events.
+    """ScrollView that declines vertical mouse wheel events and mouse drags.
 
     ScrollView consumes wheel events even on axes it cannot scroll, which
     blocks the enclosing document's vertical scroll while the cursor is
     over this widget. Declining them lets the parent handle the event.
+
+    ScrollView also holds every touch to test for a scroll gesture, which
+    keeps mouse drags from reaching the code widget as text selection.
+    Mouse drags go straight to the child; horizontal scrolling stays
+    available through the wheel and the scrollbar. Finger touches keep the
+    scroll-first behavior.
     """
 
     def on_scroll_start(
@@ -82,6 +87,26 @@ class HorizontalWheelScrollView(ScrollView):
             return False
         return super().on_scroll_start(touch, check_children)
 
+    def on_touch_down(self, touch: MotionEvent) -> bool | None:
+        if (
+            self.collide_point(*touch.pos)
+            and "button" in touch.profile
+            and not touch.button.startswith("scroll")
+            and not self.touch_in_horizontal_bar(touch)
+        ):
+            return self.simulate_touch_down(touch)
+        return super().on_touch_down(touch)
+
+    def touch_in_horizontal_bar(self, touch: MotionEvent) -> bool:
+        if "bars" not in self.scroll_type or self.hbar[1] >= 1.0:
+            return False
+        distance = (
+            touch.y - self.y - self.bar_margin
+            if self.bar_pos_x == "bottom"
+            else self.top - touch.y - self.bar_margin
+        )
+        return 0 <= distance <= self.bar_width
+
 
 class NoWrapCodeInput(CodeInput):
     """CodeInput that reports the width of its widest line as ``minimum_width``.
@@ -90,6 +115,16 @@ class NoWrapCodeInput(CodeInput):
     to size against; this measures it with the widget's own font settings.
     Pair with ``do_wrap: False``.
     """
+
+    def long_touch(self, dt: float) -> None:
+        """Select the word under a long press.
+
+        The base implementation shows the paste bubble, which has no use
+        in a readonly widget.
+        """
+        self.cancel_long_touch_event()
+        if self.use_handles and not self.selection_text:
+            self.dispatch("on_double_tap")
 
     def get_minimum_width(self) -> float:
         label = CoreLabel(font_name=self.font_name, font_size=self.font_size)
