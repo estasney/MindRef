@@ -33,7 +33,7 @@ build-apk :  $(MINDREF_UTILS_DEBUG) clean-bytecode prebuild clean-dists
   	--ndk-dir $(NDK_DIR) \
   	--ndk-api $(NDK_API) \
   	--android-api $(SDK_VERSION) \
-  	$(DEBUG_ARCHS) \
+  	$(RELEASE_ARCHS) \
   	--requirements=$(PROJECT_REQUIREMENTS) \
   	--enable-androidx \
   	--presplash $(PROJECT_ROOT)/assets/presplash.png \
