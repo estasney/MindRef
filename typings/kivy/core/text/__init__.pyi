@@ -228,7 +228,7 @@ class LabelBase:
         """Return the directories used by the system for fonts."""
         ...
 
-    def get_extents(self, text) -> tuple[Literal[0], Literal[0]]:
+    def get_extents(self, text) -> tuple[float, float]:
         """Return a tuple (width, height) indicating the size of the specified
         text"""
         ...
