@@ -23,4 +23,6 @@ THEME_COLORS: dict[str, Sequence[float]] = {
     "Accent-One": parse_color("#388fe5"),
     "Accent-Two": parse_color("#56e39f"),
     "Warn": parse_color("#fa1919"),
+    "SelectionGrip": parse_color("#3574F0"),
+    "CodeToolbar": parse_color("#2B2D30"),
 }

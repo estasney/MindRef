@@ -6,6 +6,9 @@ from mindref.lib.widgets.behavior import (
 
 
 # Standalone
+from mindref.lib.widgets.flash_pill import FlashPill
+
+# Standalone
 from mindref.lib.widgets.separator import (
     HSeparator,
     Separator,
@@ -13,6 +16,7 @@ from mindref.lib.widgets.separator import (
 )
 
 __all__ = [
+    "FlashPill",
     "HSeparator",
     "LabelHighlightInline",
     "RefreshBehavior",

@@ -6,7 +6,7 @@ from kivy.uix.gridlayout import GridLayout
 from pygments.style import Style
 from pygments.token import Token
 
-from mindref.lib.widgets.markdown.code.jetbrains_dark import JetBrainsDark
+from mindref.lib.widgets.markdown.code.code_display.jetbrains_dark import JetBrainsDark
 from mindref.lib.widgets.style import BaseLabel
 
 Builder.load_string("""

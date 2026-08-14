@@ -47,7 +47,8 @@ android = [
 
 [tool.setuptools]
 ext-modules = [
-    { name = "mindref.lib.ext.ext", sources = ["src/mindref/lib/ext/ext.c"] }
+    { name = "mindref.lib.ext.ext", sources = ["src/mindref/lib/ext/ext.c"] },
+    { name = "mindref.lib.ext.geometry", sources = ["src/mindref/lib/ext/geometry.c"] }
 ]
 include-package-data = true
 package-dir = { "" = "src" }

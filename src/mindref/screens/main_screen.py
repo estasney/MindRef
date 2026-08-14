@@ -21,16 +21,17 @@ from mindref.lib.widgets.refreshable import V2RefreshBehavior
 
 if TYPE_CHECKING:
     from kivy.event import EventDispatcher
-    from kivy.uix.scrollview import ScrollView
     from kivy.uix.widget import Widget
 
     from mindref.lib.domain.md_parser_types import TMdDocument
     from mindref.lib.widgets.nav_drawer import NavDrawer, NavItem
+    from mindref.lib.widgets.select_through_scroll_view import SelectThroughScrollView
 
 Builder.load_string(
     """
 #:import V2RefreshContainer mindref.lib.widgets.refreshable.refresh_container
 #:import NavDrawer mindref.lib.widgets.nav_drawer
+#:import SelectThroughScrollView mindref.lib.widgets.select_through_scroll_view.SelectThroughScrollView
 
 
 <MainScreen>:
@@ -49,7 +50,7 @@ Builder.load_string(
             size: (self.width, self.top_strip_height)
             pos: (self.x, self.top - self.top_strip_height)
     RelativeLayout:
-        ScrollView:
+        SelectThroughScrollView:
             id: content
             size_hint: 1, None
             height: root.height - menu_button.height
@@ -81,7 +82,7 @@ Builder.load_string(
 
 
 class V2NoteListViewScreenIds(NamedTuple):
-    content: ScrollView
+    content: SelectThroughScrollView
     nav_drawer: NavDrawer
 
 

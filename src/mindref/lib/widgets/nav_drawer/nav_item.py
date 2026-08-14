@@ -52,11 +52,11 @@ class SelectableAnimation(Widget):
     selected_inset_x = NumericProperty(dp(12))
     animation_select_duration = NumericProperty(0.1)
     animation_select_timing: OptionProperty[AnimationTiming] = OptionProperty(
-        AnimationTiming.in_quad, options=list(AnimationTiming)
+        AnimationTiming.in_quad, options=tuple(AnimationTiming)
     )
     animation_deselect_duration = NumericProperty(0.2)
     animation_deselect_timing: OptionProperty[AnimationTiming] = OptionProperty(
-        AnimationTiming.in_out_quad, options=list(AnimationTiming)
+        AnimationTiming.in_out_quad, options=tuple(AnimationTiming)
     )
 
     def __init__(self, **kwargs: object):

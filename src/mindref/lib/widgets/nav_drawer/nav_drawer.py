@@ -81,13 +81,13 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
     top_bar_height = NumericProperty(0)
     animation_open_duration = NumericProperty(0.2)
     animation_open_timing = OptionProperty(
-        AnimationTiming.in_out_quad, options=list(AnimationTiming)
+        AnimationTiming.in_out_quad, options=tuple(AnimationTiming)
     )
     animation_closed_duration = NumericProperty(0.2)
     animation_closed_timing = OptionProperty(
-        AnimationTiming.in_out_quad, options=list(AnimationTiming)
+        AnimationTiming.in_out_quad, options=tuple(AnimationTiming)
     )
-    open_state = OptionProperty(OpenState.closed, options=list(OpenState))
+    open_state = OptionProperty(OpenState.closed, options=tuple(OpenState))
 
     clear_search_button: ClearSearchButton | None
     settings_button: ThemedIconButton | None

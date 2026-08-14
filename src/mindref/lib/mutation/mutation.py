@@ -75,7 +75,7 @@ class Mutation[**P, R](EventDispatcher):
     """
 
     status: OptionProperty[MutationStatus] = OptionProperty(
-        MutationStatus.idle, options=list(MutationStatus)
+        MutationStatus.idle, options=tuple(MutationStatus)
     )
     exception: ObjectProperty[Exception | None] = ObjectProperty(allownone=True)
     operation: Callable[P, R]
