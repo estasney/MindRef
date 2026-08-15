@@ -1,6 +1,6 @@
 [project]
 name = "MindRef"
-version = "0.7.1"
+version = "0.7.2"
 description = "Cross-Platform Application for maintaining Markdown formatted notes"
 readme = "README.md"
 requires-python = ">=3.12"
