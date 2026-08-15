@@ -1,19 +1,26 @@
 from __future__ import annotations
 
+from typing import Literal, NotRequired, TypedDict
+
 from kivy.input.motionevent import MotionEvent
 from kivy.uix.scrollview import ScrollView
+
+
+class ScrollGesture(TypedDict):
+    mode: Literal["unknown", "scroll"]
+    dx: float
+    dy: float
+    user_stopped: bool
+    frames: int
+    time: float
+    dt: NotRequired[float]
 
 
 class SelectThroughScrollView(ScrollView):
     """ScrollView that passes mouse presses through to its children.
 
-    ScrollView holds every touch to test for a scroll gesture, which keeps
-    mouse drags from reaching children as text selection. Mouse presses go
-    straight to the children; pointer scrolling stays available through the
-    wheel and the scrollbars. Finger touches keep the scroll-first behavior.
-
-    ScrollView also consumes wheel events on axes it cannot scroll, which
-    blocks an enclosing ScrollView from acting on them. Those are declined.
+    It deviates from ScrollView behavior in that it does not claim exclusive
+    judgment on whether a touch is a scroll based solely on it's own do_scroll_x/y.
     """
 
     def on_scroll_start(
@@ -25,6 +32,28 @@ class SelectThroughScrollView(ScrollView):
             if touch.button in ("scrollleft", "scrollright") and not self.do_scroll_x:
                 return False
         return super().on_scroll_start(touch, check_children)
+
+    def on_scroll_move(self, touch: MotionEvent) -> bool | None:
+        handled = super().on_scroll_move(touch)
+        uid = self._get_uid()
+        gesture: ScrollGesture | None = touch.ud.get(uid)
+        vertical = (
+            gesture is not None
+            and gesture["mode"] == "unknown"
+            and "button" not in touch.profile
+            and gesture["dy"] > self.scroll_distance
+            and gesture["dy"] > gesture["dx"]
+        )
+        if not vertical:
+            return handled
+        if self.effect_x is not None:
+            self.effect_x.cancel()
+        del touch.ud[uid]
+        # svavoid blocks re-claiming on later moves. A cleared _touch
+        # disarms the pending timeout.
+        touch.ud[self._get_uid("svavoid")] = True
+        self._touch = None
+        return False
 
     def on_touch_down(self, touch: MotionEvent) -> bool | None:
         if (
