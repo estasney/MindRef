@@ -26,8 +26,9 @@ def setup_desktop() -> MindRefApp:
     else:
         Config.remove_option("modules", "monitor")
         Config.remove_option("modules", "inspector")
-
-    Config.set("input", "mouse", "mouse,disable_multitouch")
+    # https://kivy.org/doc/stable/api-kivy.input.providers.mouse.html#module-kivy.input.providers.mouse
+    # if any touches are created by another provider, the mouse event will be discarded.
+    Config.set("input", "mouse", "mouse,disable_multitouch,disable_on_activity")
 
     from mindref.app import MindRefApp
 
