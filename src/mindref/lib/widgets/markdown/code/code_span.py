@@ -38,7 +38,7 @@ Builder.load_string("""
         text_size: self.size[0], None
         font_name: "JetBrainsMono"
         font_hinting: 'mono'
-        padding_x: min(sp(self.size[1] / 2), sp(16))
+        padding_x: min(self.size[1] / 2), sp(16)
 """)
 
 

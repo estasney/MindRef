@@ -19,7 +19,7 @@ Builder.load_string("""
     height: self.minimum_height
     size_hint_x: 1
     label: label
-    padding: (0, 0, 0, dp(2))
+    padding: (0, label.font_size * 0.5, 0, label.font_size * 0.3 + dp(6))
     canvas:
         Color:
             rgba: app.colors['Dark']
@@ -33,7 +33,7 @@ Builder.load_string("""
         highlight_color: app.colors['Codespan']
         valign: 'top'
         halign: 'left'
-        height: self.texture_size[1] + dp(20)
+        height: self.texture_size[1]
         size_hint_y: None
         font_size: sp(app.base_font_size + 5 - root.level)
         padding: (0, 0)

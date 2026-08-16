@@ -6,7 +6,6 @@ from typing import Literal, NamedTuple
 from kivy.clock import Clock
 from kivy.graphics import Color, RoundedRectangle
 from kivy.lang import Builder
-from kivy.metrics import sp
 from kivy.properties import (
     BooleanProperty,
     ColorProperty,
@@ -31,10 +30,12 @@ Builder.load_string("""
     height: self.texture_size[1]
     text_size: self.width, None
     font_size: sp(app.base_font_size)
+    font_name: app.fonts['mono']
     markup: True
-    font_family_normal: app.fonts['default']
+    font_family_normal: app.fonts['mono']
     font_family_mono: app.fonts['mono']
-    highlight_padding: (dp(3), 0)
+    highlight_padding: (self.font_size * 0.19, 0)
+    highlight_radius: [self.font_size * 0.06]
     kbd_color: app.colors['Keyboard']
     kbd_shadow_color: app.colors['KeyboardShadow']
 """)
@@ -91,7 +92,7 @@ class LabelHighlightInline(Label):
     highlight_padding_x = NumericProperty(defaultvalue=0)
     highlight_padding_y = NumericProperty(defaultvalue=0)
     highlight_padding = ReferenceListProperty(highlight_padding_x, highlight_padding_y)
-    highlight_radius = VariableListProperty([sp(1)])
+    highlight_radius = VariableListProperty([1])
 
     def __init__(self, **kwargs: object):
         super().__init__(**kwargs)
@@ -241,8 +242,8 @@ class LabelHighlightInline(Label):
                     pos=(x1, y1), size=(w, h), radius=self.highlight_radius
                 )
 
-            kbd_inset_x = sp(1.75)
-            kbd_inset_y = sp(1.75)
+            kbd_inset_x = self.font_size * 0.11
+            kbd_inset_y = self.font_size * 0.11
             for span in self.refs.get("kbd", []):
                 x1, y1, x2, y2 = self.compute_ref_coords(span)
                 w = x2 - x1
