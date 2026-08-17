@@ -17,7 +17,8 @@ Builder.load_string("""
     id: parent
     cols: 1
     size_hint_y: None
-    height: content.texture_size[1] + dp(20)
+    height: self.minimun_height
+    padding: (0, 0, 0, label.texture_size[1] * .1)
     canvas.before:
         Color:
             rgba: app.colors['Dark']

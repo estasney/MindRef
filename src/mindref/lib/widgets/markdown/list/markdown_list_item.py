@@ -12,8 +12,8 @@ Builder.load_string("""
     label: label
     cols: 1
     size_hint_y: None
-    height: label.texture_size[1] + dp(20)
-    x: 0
+    height: self.minimum_height
+    padding: (0, 0, 0, label.texture_size[1] * .1) 
     LabelHighlightInline:
         id: label
         snippets: root.snippets
