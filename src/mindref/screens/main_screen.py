@@ -15,6 +15,7 @@ from mindref.lib import get_app
 from mindref.lib.domain.parser.kbd_plugin import plugin_kbd
 from mindref.lib.domain.protocols import AppRegistryProtocol
 from mindref.lib.models import OpenState
+from mindref.lib.mutation import DisplacingMutation
 from mindref.lib.widgets.behavior import BackBehavior
 from mindref.lib.widgets.markdown.markdown_document_v2 import MarkdownDocumentLayout
 from mindref.lib.widgets.refreshable import V2RefreshBehavior
@@ -62,6 +63,7 @@ Builder.load_string(
             top_bar_height: menu_button.height
             nav_link_padding: [0, dp(16), 0, dp(16)]
             nav_id_selected: root.selected_note
+            close_on_nav: False
             open_state: 'closed'
             canvas.before:
                 Color:
@@ -98,6 +100,10 @@ class MainScreen(Screen, V2RefreshBehavior, BackBehavior):
         Clock.schedule_once(self._bind_nav_drawer, 0)
         self.app = get_app()
         self.app.bind(note_files=self.handle_note_files)
+        self.read_note_mutation = DisplacingMutation(
+            self.app.read_note, executor=self.app.pool
+        )
+        self.read_note_mutation.bind(on_success=self.handle_read_note_success)
         self._markdown_parser = mistune.create_markdown(
             escape=False, renderer=mistune.AstRenderer(), plugins=["table", plugin_kbd]
         )
@@ -105,6 +111,12 @@ class MainScreen(Screen, V2RefreshBehavior, BackBehavior):
     def _bind_nav_drawer(self, _dt: float) -> None:
         nav_drawer = self.ids.nav_drawer
         nav_drawer.fbind("on_nav_selected", self.handle_nav_click)
+        self.read_note_mutation.fbind("is_mutating", self.handle_read_note_mutating)
+
+    def handle_read_note_mutating(
+        self, _mutation: DisplacingMutation[[str], str], is_mutating: bool
+    ) -> None:
+        self.ids.nav_drawer.nav_loading = is_mutating
 
     def on_refresh(self, widget: Widget, state: bool, to_children: bool) -> bool:
         if not to_children:
@@ -117,9 +129,18 @@ class MainScreen(Screen, V2RefreshBehavior, BackBehavior):
         if not note_id:
             self.ids.content.clear_widgets()
             return True
-        note_content = self.app.read_note(note_id)
-        Clock.schedule_once(lambda _: self.render_note(note_content), 0)
+        self.read_note_mutation(note_id)
         return True
+
+    def handle_read_note_success(
+        self, _mutation: DisplacingMutation[[str], str], *, result: str
+    ) -> None:
+        if self.selected_note is None:
+            return
+        self.render_note(result)
+        nav_drawer = self.ids.nav_drawer
+        if nav_drawer.open_state in (OpenState.open, OpenState.opening):
+            nav_drawer.toggle(None)
 
     def on_back(self, source: EventDispatcher) -> bool:
         """A closed drawer opens; an open drawer leaves the action to the app"""

@@ -1,3 +1,3 @@
-from mindref.lib.mutation.mutation import Mutation
+from mindref.lib.mutation.mutation import DisplacingMutation, Mutation
 
-__all__ = ["Mutation"]
+__all__ = ["DisplacingMutation", "Mutation"]

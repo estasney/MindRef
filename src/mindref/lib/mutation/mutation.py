@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from functools import partial
+from typing import TYPE_CHECKING
 
 from kivy.clock import Clock
 from kivy.event import EventDispatcher
@@ -14,6 +15,9 @@ from kivy.properties import (
 
 from mindref.lib.models import MutationStatus
 from mindref.lib.utils import schedulable
+
+if TYPE_CHECKING:
+    from concurrent.futures import Executor, Future
 
 
 class Mutation[**P, R](EventDispatcher):
@@ -159,3 +163,52 @@ class Mutation[**P, R](EventDispatcher):
             Clock.schedule_once(partial(self.dispatch_on_success, result))
         finally:
             Clock.schedule_once(self.dispatch_on_resolved)
+
+
+class DisplacingMutation[**P, R](Mutation[P, R]):
+    """
+    Runs the operation on an executor thread. If `is_mutating`, a new
+    `__call__` waits, and each later `__call__` replaces it. Displaced
+    calls are discarded. The final run dispatches events, on the main
+    thread.
+    """
+
+    def __init__(self, operation: Callable[P, R], executor: Executor) -> None:
+        super().__init__(operation)
+        self.executor = executor
+        self.displaceable_call: partial[None] | None = None
+
+    def __call__(self, *args: P.args, **kwargs: P.kwargs) -> None:
+        if self.is_mutating:
+            self.displaceable_call = partial(self.submit, *args, **kwargs)
+            return
+        self.reset()
+        self.dispatch("on_mutate")
+        self.submit(*args, **kwargs)
+
+    def submit(self, *args: P.args, **kwargs: P.kwargs) -> None:
+        future = self.executor.submit(self.operation, *args, **kwargs)
+        future.add_done_callback(self.schedule_resolve)
+
+    def schedule_resolve(self, future: Future[R]) -> None:
+        """Runs on the executor thread; moves resolution to the main thread."""
+        Clock.schedule_once(partial(self.resolve, future))
+
+    def resolve(self, future: Future[R], _dt: float) -> None:
+        if self.displaceable_call is not None:
+            waiting_call = self.displaceable_call
+            self.displaceable_call = None
+            waiting_call()
+            return
+        try:
+            result: R = future.result()
+        except Exception as e:
+            Logger.exception(
+                f"{type(self).__name__}: resolve - mutation failed with error"
+            )
+            self.exception = e
+            self.dispatch("on_error", error=e)
+        else:
+            self.dispatch("on_success", result=result)
+        finally:
+            self.dispatch("on_resolved")

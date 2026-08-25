@@ -4,6 +4,7 @@ import json
 from collections.abc import Sequence
 from concurrent.futures import Future
 from pathlib import Path
+from time import sleep
 from typing import TypedDict, Unpack
 
 from kivy.app import App

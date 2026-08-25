@@ -107,6 +107,7 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
     nav_link_padding = VariableListProperty([0, 0, 0, 0], length=4)
     nav_data_items: ListProperty[NavItemData] = ListProperty([], force_dispatch=True)
     nav_id_selected = StringProperty(None, allownone=True)
+    nav_loading = BooleanProperty(False)
     close_on_nav = BooleanProperty(True)
 
     _search_filter_sch_event: ClockEvent | None
@@ -379,6 +380,10 @@ class NavDrawer(DebugFloatLayout, V2RefreshBehavior):
     def update_nav_selection(self, _dt: float) -> None:
         for widget in self.ids.nav_items.main_children():
             widget.selected = self.nav_id_selected == widget.nav_id
+            widget.shimmering = widget.selected and self.nav_loading
+
+    def on_nav_loading(self, _instance: object, _value: bool) -> None:
+        self.update_nav_selection(0)
 
     def add_widget_to_drawer(self, widget: NavItem) -> None:
         widget.bind(on_release=self.handle_nav_selected)
